@@ -22,6 +22,7 @@ const Index = () => {
   const [selectedChannelType, setSelectedChannelType] = useState('');
   const [channelValue, setChannelValue] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
+  const [websiteName, setWebsiteName] = useState('');
   const [formData, setFormData] = useState({
     video: null as File | null,
     buttonColor: '#25d366',
@@ -83,6 +84,7 @@ const Index = () => {
       if (data) {
         setEditingWidget(data);
         setWebsiteUrl(data.website_url);
+        setWebsiteName(data.name);
         setChannels(data.channels || []);
         setFormData({
           video: null,
@@ -175,20 +177,28 @@ const Index = () => {
       return;
     }
 
+    // Website name validation
+    if (!websiteName.trim()) {
+      toast.error("Website adı tələb olunur");
+      return;
+    }
+
+    // Website URL validation
     if (!websiteUrl.trim()) {
       toast.error("Website URL-i daxil edin");
       return;
     }
 
+    // Minimum 1 channel validation
     if (channels.length === 0) {
-      toast.error("Ən azı bir kanal əlavə edin");
+      toast.error("Minimum 1 ədəd contact channel əlavə edilməlidir");
       return;
     }
 
     setSaving(true);
     try {
       const widgetData = {
-        name: `${websiteUrl} Widget`,
+        name: websiteName.trim(),
         website_url: websiteUrl,
         button_color: formData.buttonColor,
         position: formData.position,
@@ -218,7 +228,7 @@ const Index = () => {
           .insert([widgetData]);
 
         if (error) throw error;
-        toast.success('Widget yaradıldı!');
+        toast.success('Widget yaradıldı və dashboardda görünəcək!');
       }
 
     } catch (error) {
@@ -369,25 +379,38 @@ const Index = () => {
                 {editingWidget ? 'Edit Your Widget' : 'Customize Your Widget'}
               </CardTitle>
               <CardDescription>
-                {editingWidget ? 'Update your contact channels and appearance' : 'Add your contact channels and customize the appearance'}
+                {editingWidget ? 'Update your website details and contact channels' : 'Add your website details and contact channels'}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Website URL */}
-              <div className="space-y-2">
-                <Label htmlFor="website">Website URL</Label>
-                <Input
-                  id="website"
-                  placeholder="https://example.com"
-                  value={websiteUrl}
-                  onChange={(e) => setWebsiteUrl(e.target.value)}
-                  className="w-full"
-                />
+              {/* Website Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="websiteName">Website Adı <span className="text-red-500">*</span></Label>
+                  <Input
+                    id="websiteName"
+                    placeholder="Məsələn: Ana Səhifə"
+                    value={websiteName}
+                    onChange={(e) => setWebsiteName(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="website">Website URL <span className="text-red-500">*</span></Label>
+                  <Input
+                    id="website"
+                    placeholder="https://example.com"
+                    value={websiteUrl}
+                    onChange={(e) => setWebsiteUrl(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
               </div>
 
               {/* Add Channel Section */}
               <div className="space-y-4">
-                <Label className="text-lg font-semibold">Contact Channels</Label>
+                <Label className="text-lg font-semibold">Contact Channels <span className="text-red-500">*</span></Label>
+                <p className="text-sm text-gray-600">Minimum 1 ədəd contact channel əlavə edilməlidir</p>
                 
                 {/* Add New Channel */}
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 space-y-3">
