@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Upload, Copy, Check, MessageCircle, Send, Instagram, Mail, Link, Video, Crown, Play, X, Phone, MessageSquare, Music, Plus, Trash2 } from 'lucide-react';
+import { Switch } from "@/components/ui/switch";
+import { Upload, Copy, Check, MessageCircle, Send, Instagram, Mail, Link, Video, Crown, Play, X, Phone, MessageSquare, Music, Plus, Trash2, Github, Twitter, Linkedin, ExternalLink } from 'lucide-react';
 import { toast } from "sonner";
 
 const Index = () => {
@@ -18,7 +18,8 @@ const Index = () => {
     video: null as File | null,
     buttonColor: '#25d366',
     position: 'right',
-    tooltip: ''
+    tooltip: '',
+    useVideoPreview: false
   });
 
   const [generatedCode, setGeneratedCode] = useState('');
@@ -39,7 +40,7 @@ const Index = () => {
     { value: 'custom', label: 'Custom Link', icon: Link, color: '#6b7280' }
   ];
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -99,6 +100,10 @@ const Index = () => {
     if (formData.tooltip) {
       scriptCode += `\n  data-tooltip="${formData.tooltip}"`;
     }
+
+    if (formData.useVideoPreview) {
+      scriptCode += `\n  data-video-preview="true"`;
+    }
     
     scriptCode += `>\n</script>`;
 
@@ -151,6 +156,28 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <MessageCircle className="w-5 h-5 text-white" />
+              </div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                FloatWidget
+              </h1>
+            </div>
+            <nav className="hidden md:flex items-center space-x-6">
+              <a href="#features" className="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
+              <a href="#pricing" className="text-gray-600 hover:text-blue-600 transition-colors">Pricing</a>
+              <a href="#support" className="text-gray-600 hover:text-blue-600 transition-colors">Support</a>
+              <Button variant="outline" size="sm">Login</Button>
+            </nav>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
@@ -254,7 +281,7 @@ const Index = () => {
               </div>
 
               {/* Pro Video Upload */}
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <Label className="flex items-center gap-2 text-purple-600">
                   <Crown className="w-4 h-4" />
                   Upload Video - PRO Feature
@@ -280,6 +307,20 @@ const Index = () => {
                     </p>
                   </label>
                 </div>
+
+                {/* Video Preview Option */}
+                {formData.video && (
+                  <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
+                    <div className="flex items-center gap-2">
+                      <Play className="w-4 h-4 text-purple-600" />
+                      <Label className="text-sm text-purple-700">Use video as button preview (first 3 seconds)</Label>
+                    </div>
+                    <Switch
+                      checked={formData.useVideoPreview}
+                      onCheckedChange={(checked) => handleInputChange('useVideoPreview', checked)}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Customization Options */}
@@ -368,11 +409,23 @@ const Index = () => {
                     <Dialog open={videoModalOpen} onOpenChange={setVideoModalOpen}>
                       <DialogTrigger asChild>
                         <button
-                          className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 relative group"
+                          className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 relative group overflow-hidden"
                           style={{ backgroundColor: formData.buttonColor }}
                           title={formData.tooltip || 'Contact us'}
                         >
-                          <MessageCircle className="w-6 h-6 text-white" />
+                          {formData.video && formData.useVideoPreview ? (
+                            <video
+                              className="w-full h-full object-cover rounded-full"
+                              autoPlay
+                              muted
+                              loop
+                              playsInline
+                            >
+                              <source src={URL.createObjectURL(formData.video)} type={formData.video.type} />
+                            </video>
+                          ) : (
+                            <MessageCircle className="w-6 h-6 text-white" />
+                          )}
                           {formData.tooltip && (
                             <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                               {formData.tooltip}
@@ -380,19 +433,18 @@ const Index = () => {
                           )}
                         </button>
                       </DialogTrigger>
-                      <DialogContent className="sm:max-w-md">
+                      <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>Contact Us</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-3">
-                          {/* Video Section - Shows first and auto-plays */}
+                          {/* Video Section - Shows first and auto-plays with sound */}
                           {formData.video && (
                             <div className="mb-4">
                               <video
                                 className="w-full rounded-lg"
                                 controls
                                 autoPlay
-                                muted
                                 playsInline
                               >
                                 <source src={URL.createObjectURL(formData.video)} type={formData.video.type} />
@@ -401,23 +453,29 @@ const Index = () => {
                             </div>
                           )}
                           
-                          {channels.map((channel) => {
-                            const IconComponent = getChannelIcon(channel.type);
-                            return (
-                              <div key={channel.id} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer">
-                                <div 
-                                  className="w-10 h-10 rounded-full flex items-center justify-center text-white"
-                                  style={{ backgroundColor: getChannelColor(channel.type) }}
-                                >
-                                  <IconComponent className="w-5 h-5" />
-                                </div>
-                                <div className="flex-1">
-                                  <p className="font-medium">{channel.label}</p>
-                                  <p className="text-sm text-gray-600 truncate">{channel.value}</p>
-                                </div>
-                              </div>
-                            );
-                          })}
+                          {/* Channels Grid Layout */}
+                          {channels.length > 0 && (
+                            <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
+                              {channels.map((channel) => {
+                                const IconComponent = getChannelIcon(channel.type);
+                                return (
+                                  <div key={channel.id} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors">
+                                    <div 
+                                      className="w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0"
+                                      style={{ backgroundColor: getChannelColor(channel.type) }}
+                                    >
+                                      <IconComponent className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-medium text-sm">{channel.label}</p>
+                                      <p className="text-xs text-gray-600 truncate">{channel.value}</p>
+                                    </div>
+                                    <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
                           
                           {channels.length === 0 && !formData.video && (
                             <div className="text-center py-8 text-gray-500">
@@ -480,6 +538,64 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12 mt-16">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                  <MessageCircle className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-xl font-bold">FloatWidget</h3>
+              </div>
+              <p className="text-gray-400 text-sm">
+                Create beautiful floating contact widgets for your website in minutes.
+              </p>
+              <div className="flex space-x-4">
+                <Twitter className="w-5 h-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
+                <Github className="w-5 h-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
+                <Linkedin className="w-5 h-5 text-gray-400 hover:text-white cursor-pointer transition-colors" />
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Product</h4>
+              <ul className="space-y-2 text-gray-400 text-sm">
+                <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Templates</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Integrations</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Support</h4>
+              <ul className="space-y-2 text-gray-400 text-sm">
+                <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Status</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Company</h4>
+              <ul className="space-y-2 text-gray-400 text-sm">
+                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Privacy</a></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
+            <p>&copy; 2024 FloatWidget. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
