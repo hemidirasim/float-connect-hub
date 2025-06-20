@@ -7,21 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Upload, Copy, Check, MessageCircle, Send, Instagram, Mail, Link, Video, Crown, Play, X, Phone, MessageSquare, Music } from 'lucide-react';
+import { Upload, Copy, Check, MessageCircle, Send, Instagram, Mail, Link, Video, Crown, Play, X, Phone, MessageSquare, Music, Plus, Trash2 } from 'lucide-react';
 import { toast } from "sonner";
 
 const Index = () => {
+  const [channels, setChannels] = useState<Array<{id: string, type: string, value: string, label: string}>>([]);
+  const [selectedChannelType, setSelectedChannelType] = useState('');
+  const [channelValue, setChannelValue] = useState('');
   const [formData, setFormData] = useState({
-    whatsapp: '',
-    telegram: '',
-    instagram: '',
-    messenger: '',
-    email: '',
-    customLink: '',
-    viber: '',
-    skype: '',
-    discord: '',
-    tiktok: '',
     video: null as File | null,
     buttonColor: '#25d366',
     position: 'right',
@@ -33,44 +26,18 @@ const Index = () => {
   const [showWidget, setShowWidget] = useState(true);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
 
-  const platforms = {
-    whatsapp: { label: 'WhatsApp', icon: MessageCircle, color: 'text-green-600', options: [
-      { value: '+994501234567', label: '+994 50 123 45 67' },
-      { value: '+994551234567', label: '+994 55 123 45 67' },
-      { value: '+994701234567', label: '+994 70 123 45 67' },
-    ]},
-    telegram: { label: 'Telegram', icon: Send, color: 'text-blue-500', options: [
-      { value: '@example_user', label: '@example_user' },
-      { value: '@company_support', label: '@company_support' },
-      { value: '@business_account', label: '@business_account' },
-    ]},
-    instagram: { label: 'Instagram', icon: Instagram, color: 'text-pink-600', options: [
-      { value: 'https://instagram.com/example', label: '@example' },
-      { value: 'https://instagram.com/business', label: '@business' },
-      { value: 'https://instagram.com/company', label: '@company' },
-    ]},
-    messenger: { label: 'Messenger', icon: MessageSquare, color: 'text-blue-600', options: [
-      { value: 'https://m.me/example', label: 'Example Page' },
-      { value: 'https://m.me/business', label: 'Business Page' },
-      { value: 'https://m.me/support', label: 'Support Page' },
-    ]},
-    viber: { label: 'Viber', icon: Phone, color: 'text-purple-600', options: [
-      { value: 'viber://chat?number=+994501234567', label: '+994 50 123 45 67' },
-      { value: 'viber://chat?number=+994551234567', label: '+994 55 123 45 67' },
-    ]},
-    skype: { label: 'Skype', icon: Video, color: 'text-blue-500', options: [
-      { value: 'skype:example.user?chat', label: 'example.user' },
-      { value: 'skype:business.support?chat', label: 'business.support' },
-    ]},
-    discord: { label: 'Discord', icon: MessageCircle, color: 'text-indigo-600', options: [
-      { value: 'https://discord.gg/example', label: 'Example Server' },
-      { value: 'https://discord.gg/support', label: 'Support Server' },
-    ]},
-    tiktok: { label: 'TikTok', icon: Music, color: 'text-pink-500', options: [
-      { value: 'https://tiktok.com/@example', label: '@example' },
-      { value: 'https://tiktok.com/@business', label: '@business' },
-    ]}
-  };
+  const platformOptions = [
+    { value: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: '#25d366' },
+    { value: 'telegram', label: 'Telegram', icon: Send, color: '#0088cc' },
+    { value: 'instagram', label: 'Instagram', icon: Instagram, color: '#e4405f' },
+    { value: 'messenger', label: 'Messenger', icon: MessageSquare, color: '#0084ff' },
+    { value: 'viber', label: 'Viber', icon: Phone, color: '#665cac' },
+    { value: 'skype', label: 'Skype', icon: Video, color: '#00aff0' },
+    { value: 'discord', label: 'Discord', icon: MessageCircle, color: '#5865f2' },
+    { value: 'tiktok', label: 'TikTok', icon: Music, color: '#ff0050' },
+    { value: 'email', label: 'Email', icon: Mail, color: '#ea4335' },
+    { value: 'custom', label: 'Custom Link', icon: Link, color: '#6b7280' }
+  ];
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -92,26 +59,48 @@ const Index = () => {
     }
   };
 
+  const addChannel = () => {
+    if (selectedChannelType && channelValue.trim()) {
+      const platform = platformOptions.find(p => p.value === selectedChannelType);
+      const newChannel = {
+        id: Date.now().toString(),
+        type: selectedChannelType,
+        value: channelValue.trim(),
+        label: platform?.label || 'Custom'
+      };
+      setChannels(prev => [...prev, newChannel]);
+      setChannelValue('');
+      setSelectedChannelType('');
+      toast.success(`${platform?.label || 'Channel'} added successfully!`);
+    }
+  };
+
+  const removeChannel = (id: string) => {
+    setChannels(prev => prev.filter(channel => channel.id !== id));
+    toast.success("Channel removed");
+  };
+
   const generateCode = () => {
     const videoUrl = formData.video ? `https://yourdomain.com/uploads/${formData.video.name}` : '';
     
-    const scriptCode = `<script 
-  src="https://yourdomain.com/floating.js" 
-  ${formData.whatsapp ? `data-whatsapp="${formData.whatsapp}"` : ''}
-  ${formData.telegram ? `data-telegram="${formData.telegram}"` : ''}
-  ${formData.instagram ? `data-instagram="${formData.instagram}"` : ''}
-  ${formData.messenger ? `data-messenger="${formData.messenger}"` : ''}
-  ${formData.email ? `data-email="${formData.email}"` : ''}
-  ${formData.customLink ? `data-custom="${formData.customLink}"` : ''}
-  ${formData.viber ? `data-viber="${formData.viber}"` : ''}
-  ${formData.skype ? `data-skype="${formData.skype}"` : ''}
-  ${formData.discord ? `data-discord="${formData.discord}"` : ''}
-  ${formData.tiktok ? `data-tiktok="${formData.tiktok}"` : ''}
-  ${videoUrl ? `data-video="${videoUrl}"` : ''}
-  data-position="${formData.position}"
-  data-color="${formData.buttonColor}"
-  ${formData.tooltip ? `data-tooltip="${formData.tooltip}"` : ''}>
-</script>`;
+    let scriptCode = `<script src="https://yourdomain.com/floating.js"`;
+    
+    channels.forEach(channel => {
+      scriptCode += `\n  data-${channel.type}="${channel.value}"`;
+    });
+    
+    if (videoUrl) {
+      scriptCode += `\n  data-video="${videoUrl}"`;
+    }
+    
+    scriptCode += `\n  data-position="${formData.position}"`;
+    scriptCode += `\n  data-color="${formData.buttonColor}"`;
+    
+    if (formData.tooltip) {
+      scriptCode += `\n  data-tooltip="${formData.tooltip}"`;
+    }
+    
+    scriptCode += `>\n</script>`;
 
     setGeneratedCode(scriptCode);
     toast.success("Code generated successfully!");
@@ -124,19 +113,40 @@ const Index = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const getActiveChannels = () => {
-    const channels = [];
-    if (formData.whatsapp) channels.push({ type: 'whatsapp', value: formData.whatsapp, icon: MessageCircle, color: '#25d366' });
-    if (formData.telegram) channels.push({ type: 'telegram', value: formData.telegram, icon: Send, color: '#0088cc' });
-    if (formData.instagram) channels.push({ type: 'instagram', value: formData.instagram, icon: Instagram, color: '#e4405f' });
-    if (formData.messenger) channels.push({ type: 'messenger', value: formData.messenger, icon: MessageSquare, color: '#0084ff' });
-    if (formData.email) channels.push({ type: 'email', value: formData.email, icon: Mail, color: '#ea4335' });
-    if (formData.customLink) channels.push({ type: 'custom', value: formData.customLink, icon: Link, color: '#6b7280' });
-    if (formData.viber) channels.push({ type: 'viber', value: formData.viber, icon: Phone, color: '#665cac' });
-    if (formData.skype) channels.push({ type: 'skype', value: formData.skype, icon: Video, color: '#00aff0' });
-    if (formData.discord) channels.push({ type: 'discord', value: formData.discord, icon: MessageCircle, color: '#5865f2' });
-    if (formData.tiktok) channels.push({ type: 'tiktok', value: formData.tiktok, icon: Music, color: '#ff0050' });
-    return channels;
+  const getChannelIcon = (type: string) => {
+    const platform = platformOptions.find(p => p.value === type);
+    return platform?.icon || Link;
+  };
+
+  const getChannelColor = (type: string) => {
+    const platform = platformOptions.find(p => p.value === type);
+    return platform?.color || '#6b7280';
+  };
+
+  const getPlaceholderText = () => {
+    switch (selectedChannelType) {
+      case 'whatsapp':
+      case 'viber':
+        return '+994501234567';
+      case 'telegram':
+        return '@username';
+      case 'instagram':
+        return 'https://instagram.com/username';
+      case 'messenger':
+        return 'https://m.me/pagename';
+      case 'skype':
+        return 'username';
+      case 'discord':
+        return 'https://discord.gg/invite';
+      case 'tiktok':
+        return 'https://tiktok.com/@username';
+      case 'email':
+        return 'contact@example.com';
+      case 'custom':
+        return 'https://example.com';
+      default:
+        return 'Enter contact info...';
+    }
   };
 
   return (
@@ -163,62 +173,84 @@ const Index = () => {
                 Customize Your Widget
               </CardTitle>
               <CardDescription>
-                Select your contact channels and customize the appearance
+                Add your contact channels and customize the appearance
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Contact Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(platforms).map(([key, platform]) => (
-                  <div key={key} className="space-y-2">
-                    <Label className={`flex items-center gap-2 ${platform.color}`}>
-                      <platform.icon className="w-4 h-4" />
-                      {platform.label}
-                    </Label>
-                    <Select
-                      value={formData[key as keyof typeof formData] as string}
-                      onValueChange={(value) => handleInputChange(key, value)}
-                    >
+              {/* Add Channel Section */}
+              <div className="space-y-4">
+                <Label className="text-lg font-semibold">Contact Channels</Label>
+                
+                {/* Add New Channel */}
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <Select value={selectedChannelType} onValueChange={setSelectedChannelType}>
                       <SelectTrigger>
-                        <SelectValue placeholder={`Select ${platform.label}`} />
+                        <SelectValue placeholder="Select platform" />
                       </SelectTrigger>
                       <SelectContent className="bg-white">
-                        {platform.options.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
+                        {platformOptions.map((platform) => (
+                          <SelectItem key={platform.value} value={platform.value}>
+                            <div className="flex items-center gap-2">
+                              <platform.icon className="w-4 h-4" style={{ color: platform.color }} />
+                              {platform.label}
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    
+                    <Input
+                      placeholder={getPlaceholderText()}
+                      value={channelValue}
+                      onChange={(e) => setChannelValue(e.target.value)}
+                      className="md:col-span-1"
+                    />
+                    
+                    <Button 
+                      onClick={addChannel}
+                      disabled={!selectedChannelType || !channelValue.trim()}
+                      className="flex items-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add
+                    </Button>
                   </div>
-                ))}
-
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="flex items-center gap-2 text-red-600">
-                    <Mail className="w-4 h-4" />
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="contact@example.com"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                  />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="customLink" className="flex items-center gap-2 text-gray-600">
-                    <Link className="w-4 h-4" />
-                    Custom Link
-                  </Label>
-                  <Input
-                    id="customLink"
-                    placeholder="https://example.com"
-                    value={formData.customLink}
-                    onChange={(e) => handleInputChange('customLink', e.target.value)}
-                  />
-                </div>
+                {/* Added Channels List */}
+                {channels.length > 0 && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">Added Channels:</Label>
+                    {channels.map((channel) => {
+                      const IconComponent = getChannelIcon(channel.type);
+                      return (
+                        <div key={channel.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-8 h-8 rounded-full flex items-center justify-center text-white"
+                              style={{ backgroundColor: getChannelColor(channel.type) }}
+                            >
+                              <IconComponent className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-sm">{channel.label}</p>
+                              <p className="text-xs text-gray-600 truncate max-w-[200px]">{channel.value}</p>
+                            </div>
+                          </div>
+                          <Button
+                            onClick={() => removeChannel(channel.id)}
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Pro Video Upload */}
@@ -333,7 +365,7 @@ const Index = () => {
                   <div 
                     className={`absolute bottom-6 ${formData.position === 'left' ? 'left-6' : 'right-6'} z-10`}
                   >
-                    <Dialog>
+                    <Dialog open={videoModalOpen} onOpenChange={setVideoModalOpen}>
                       <DialogTrigger asChild>
                         <button
                           className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 relative group"
@@ -353,40 +385,44 @@ const Index = () => {
                           <DialogTitle>Contact Us</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-3">
-                          {getActiveChannels().map((channel, index) => {
-                            const IconComponent = channel.icon;
+                          {/* Video Section - Shows first and auto-plays */}
+                          {formData.video && (
+                            <div className="mb-4">
+                              <video
+                                className="w-full rounded-lg"
+                                controls
+                                autoPlay
+                                muted
+                                playsInline
+                              >
+                                <source src={URL.createObjectURL(formData.video)} type={formData.video.type} />
+                                Your browser does not support the video tag.
+                              </video>
+                            </div>
+                          )}
+                          
+                          {channels.map((channel) => {
+                            const IconComponent = getChannelIcon(channel.type);
                             return (
-                              <div key={index} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer">
+                              <div key={channel.id} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer">
                                 <div 
                                   className="w-10 h-10 rounded-full flex items-center justify-center text-white"
-                                  style={{ backgroundColor: channel.color }}
+                                  style={{ backgroundColor: getChannelColor(channel.type) }}
                                 >
                                   <IconComponent className="w-5 h-5" />
                                 </div>
                                 <div className="flex-1">
-                                  <p className="font-medium capitalize">{channel.type}</p>
+                                  <p className="font-medium">{channel.label}</p>
                                   <p className="text-sm text-gray-600 truncate">{channel.value}</p>
                                 </div>
                               </div>
                             );
                           })}
                           
-                          {formData.video && (
-                            <div className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer bg-purple-50">
-                              <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white">
-                                <Play className="w-5 h-5" />
-                              </div>
-                              <div className="flex-1">
-                                <p className="font-medium text-purple-700">Watch Video</p>
-                                <p className="text-sm text-purple-600">{formData.video.name}</p>
-                              </div>
-                            </div>
-                          )}
-                          
-                          {getActiveChannels().length === 0 && !formData.video && (
+                          {channels.length === 0 && !formData.video && (
                             <div className="text-center py-8 text-gray-500">
                               <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                              <p className="text-sm">No contact channels selected</p>
+                              <p className="text-sm">No contact channels added yet</p>
                             </div>
                           )}
                         </div>
