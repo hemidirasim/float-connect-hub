@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -170,28 +171,28 @@ const Index = () => {
     }
   };
 
-  const saveWidget = async () => {
-    if (!user) {
-      toast.error("Kod yaratmaq üçün hesabınıza giriş edin");
-      setAuthModalOpen(true);
-      return;
-    }
-
-    // Website name validation
-    if (!websiteName.trim()) {
+  const createWidget = async () => {
+    // Website name validation - must be filled
+    if (!websiteName || !websiteName.trim()) {
       toast.error("Website adı tələb olunur");
       return;
     }
 
-    // Website URL validation
-    if (!websiteUrl.trim()) {
+    // Website URL validation - must be filled
+    if (!websiteUrl || !websiteUrl.trim()) {
       toast.error("Website URL-i daxil edin");
       return;
     }
 
-    // Minimum 1 channel validation
-    if (channels.length === 0) {
+    // Minimum 1 channel validation - array must have at least 1 item
+    if (!channels || channels.length === 0) {
       toast.error("Minimum 1 ədəd contact channel əlavə edilməlidir");
+      return;
+    }
+
+    if (!user) {
+      toast.error("Widget yaratmaq üçün hesabınıza giriş edin");
+      setAuthModalOpen(true);
       return;
     }
 
@@ -199,7 +200,7 @@ const Index = () => {
     try {
       const widgetData = {
         name: websiteName.trim(),
-        website_url: websiteUrl,
+        website_url: websiteUrl.trim(),
         button_color: formData.buttonColor,
         position: formData.position,
         tooltip: formData.tooltip,
@@ -220,7 +221,7 @@ const Index = () => {
           .eq('id', editingWidget.id);
 
         if (error) throw error;
-        toast.success('Widget yeniləndi!');
+        toast.success('Widget yeniləndi və dashboardda görünəcək!');
       } else {
         // Create new widget
         const { error } = await supabase
@@ -231,6 +232,9 @@ const Index = () => {
         toast.success('Widget yaradıldı və dashboardda görünəcək!');
       }
 
+      // Generate code after successful save
+      generateCode();
+
     } catch (error) {
       console.error('Error saving widget:', error);
       toast.error('Widget saxlanılarkən xəta baş verdi');
@@ -239,9 +243,7 @@ const Index = () => {
     }
   };
 
-  const generateCode = async () => {
-    await saveWidget();
-    
+  const generateCode = () => {
     const videoUrl = formData.video ? `https://yourdomain.com/uploads/${formData.video.name}` : '';
     
     let scriptCode = `<script src="https://yourdomain.com/floating.js"`;
@@ -268,7 +270,6 @@ const Index = () => {
     scriptCode += `>\n</script>`;
 
     setGeneratedCode(scriptCode);
-    toast.success("Code generated successfully!");
   };
 
   const copyToClipboard = () => {
@@ -393,6 +394,7 @@ const Index = () => {
                     value={websiteName}
                     onChange={(e) => setWebsiteName(e.target.value)}
                     className="w-full"
+                    required
                   />
                 </div>
                 <div className="space-y-2">
@@ -403,6 +405,7 @@ const Index = () => {
                     value={websiteUrl}
                     onChange={(e) => setWebsiteUrl(e.target.value)}
                     className="w-full"
+                    required
                   />
                 </div>
               </div>
@@ -567,12 +570,12 @@ const Index = () => {
               </div>
 
               <Button 
-                onClick={generateCode} 
+                onClick={createWidget} 
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 size="lg"
                 disabled={saving}
               >
-                {saving ? 'Saving...' : (editingWidget ? 'Update & Generate Code' : 'Generate Code')}
+                {saving ? 'Saving...' : (editingWidget ? 'Update Widget' : 'Create Widget')}
               </Button>
             </CardContent>
           </Card>
@@ -727,7 +730,7 @@ const Index = () => {
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <Copy className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">Generate code to see script</p>
+                    <p className="text-sm">Create widget to see script</p>
                   </div>
                 )}
               </CardContent>
