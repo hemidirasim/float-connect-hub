@@ -27,6 +27,7 @@ interface WidgetFormProps {
   onRemoveChannel: (id: string) => void;
   onEditChannel: (id: string, newValue: string) => void;
   onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onVideoRemove: () => void;
   onFormDataChange: (field: string, value: string | boolean) => void;
   onCreateWidget: () => void;
 }
@@ -49,6 +50,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
   onRemoveChannel,
   onEditChannel,
   onVideoUpload,
+  onVideoRemove,
   onFormDataChange,
   onCreateWidget
 }) => {
@@ -88,8 +90,10 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
         {/* Video Upload */}
         <VideoUpload
           video={formData.video}
+          videoUrl={editingWidget?.video_url}
           useVideoPreview={formData.useVideoPreview}
           onVideoUpload={onVideoUpload}
+          onVideoRemove={onVideoRemove}
           onVideoPreviewChange={(checked) => onFormDataChange('useVideoPreview', checked)}
         />
 

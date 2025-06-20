@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Eye, Settings, CreditCard, MessageSquare, BarChart3, Coins, Globe, Smartphone, Monitor, Code, DollarSign } from 'lucide-react';
+import { Edit, Trash2, Eye, Settings, CreditCard, MessageSquare, BarChart3, Coins, Globe, Smartphone, Monitor, Code, DollarSign, Home } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SupportTickets } from "@/components/SupportTickets";
@@ -20,6 +21,7 @@ interface Widget {
   position: string;
   tooltip: string;
   video_enabled: boolean;
+  video_url: string;
   button_style: string;
   custom_icon_url: string;
   show_on_mobile: boolean;
@@ -160,11 +162,20 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            Dashboard
-          </h1>
-          <p className="text-gray-600">Widget-lərinizi idarə edin və statistikalarınızı izləyin</p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+              Dashboard
+            </h1>
+            <p className="text-gray-600">Widget-lərinizi idarə edin və statistikalarınızı izləyin</p>
+          </div>
+          <Button 
+            onClick={() => navigate('/')}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          >
+            <Home className="w-4 h-4 mr-2" />
+            Ana səhifə
+          </Button>
         </div>
 
         {/* Stats Cards */}
@@ -288,6 +299,12 @@ const Dashboard = () => {
                           <span className="text-gray-600">Kanallar:</span>
                           <span className="font-medium">{widget.channels?.length || 0}</span>
                         </div>
+                        {widget.video_url && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Video:</span>
+                            <span className="font-medium text-green-600">✓</span>
+                          </div>
+                        )}
                         
                         <div className="flex gap-2 pt-3">
                           <Button

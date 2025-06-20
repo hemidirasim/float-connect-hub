@@ -12,6 +12,7 @@ interface LivePreviewProps {
   channels: Channel[];
   videoModalOpen: boolean;
   onVideoModalOpenChange: (open: boolean) => void;
+  editingWidget?: any;
 }
 
 export const LivePreview: React.FC<LivePreviewProps> = ({
@@ -19,7 +20,8 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
   formData,
   channels,
   videoModalOpen,
-  onVideoModalOpenChange
+  onVideoModalOpenChange,
+  editingWidget
 }) => {
   const getChannelIcon = (type: string) => {
     const platform = platformOptions.find(p => p.value === type);
@@ -30,6 +32,18 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
     const platform = platformOptions.find(p => p.value === type);
     return platform?.color || '#6b7280';
   };
+
+  const getVideoSource = () => {
+    if (formData.video) {
+      return URL.createObjectURL(formData.video);
+    }
+    if (editingWidget?.video_url) {
+      return editingWidget.video_url;
+    }
+    return null;
+  };
+
+  const hasVideo = formData.video || editingWidget?.video_url;
 
   return (
     <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
@@ -63,7 +77,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
                   style={{ backgroundColor: formData.buttonColor }}
                   title={formData.tooltip || 'Contact us'}
                 >
-                  {formData.video && formData.useVideoPreview ? (
+                  {hasVideo && formData.useVideoPreview ? (
                     <video
                       className="w-full h-full object-cover rounded-full"
                       autoPlay
@@ -71,7 +85,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
                       loop
                       playsInline
                     >
-                      <source src={URL.createObjectURL(formData.video)} type={formData.video.type} />
+                      <source src={getVideoSource()} type="video/mp4" />
                     </video>
                   ) : (
                     <MessageCircle className="w-6 h-6 text-white" />
@@ -89,7 +103,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
                 </DialogHeader>
                 <div className="space-y-3">
                   {/* Video Section - Shows first and auto-plays with sound */}
-                  {formData.video && (
+                  {hasVideo && (
                     <div className="mb-4">
                       <video
                         className="w-full rounded-lg"
@@ -97,7 +111,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
                         autoPlay
                         playsInline
                       >
-                        <source src={URL.createObjectURL(formData.video)} type={formData.video.type} />
+                        <source src={getVideoSource()} type="video/mp4" />
                         Your browser does not support the video tag.
                       </video>
                     </div>
@@ -127,7 +141,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
                     </div>
                   )}
                   
-                  {channels.length === 0 && !formData.video && (
+                  {channels.length === 0 && !hasVideo && (
                     <div className="text-center py-8 text-gray-500">
                       <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
                       <p className="text-sm">No contact channels added yet</p>

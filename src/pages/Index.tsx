@@ -105,6 +105,23 @@ const Index = () => {
     }
   };
 
+  const handleVideoRemove = () => {
+    setFormData(prev => ({
+      ...prev,
+      video: null,
+      useVideoPreview: false
+    }));
+    // If editing widget, also mark that video should be removed from database
+    if (editingWidget) {
+      setEditingWidget(prev => ({
+        ...prev,
+        video_url: null,
+        video_enabled: false
+      }));
+    }
+    toast.success("Video removed");
+  };
+
   const addChannel = () => {
     if (selectedChannelType && channelValue.trim()) {
       const platform = platformOptions.find(p => p.value === selectedChannelType);
@@ -131,6 +148,31 @@ const Index = () => {
       channel.id === id ? { ...channel, value: newValue } : channel
     ));
     toast.success("Channel updated");
+  };
+
+  const uploadVideoToStorage = async (videoFile: File): Promise<string | null> => {
+    try {
+      const fileExt = videoFile.name.split('.').pop();
+      const fileName = `${user?.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('videos')
+        .upload(fileName, videoFile);
+
+      if (uploadError) {
+        console.error('Video upload error:', uploadError);
+        return null;
+      }
+
+      const { data } = supabase.storage
+        .from('videos')
+        .getPublicUrl(fileName);
+
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      return null;
+    }
   };
 
   const createWidget = async () => {
@@ -160,6 +202,25 @@ const Index = () => {
 
     setSaving(true);
     try {
+      let videoUrl = editingWidget?.video_url || null;
+
+      // Upload new video if selected
+      if (formData.video) {
+        const uploadedVideoUrl = await uploadVideoToStorage(formData.video);
+        if (uploadedVideoUrl) {
+          videoUrl = uploadedVideoUrl;
+        } else {
+          toast.error('Video yükləmə xətası');
+          setSaving(false);
+          return;
+        }
+      }
+
+      // If video was removed, set to null
+      if (editingWidget && editingWidget.video_url && !formData.video && !videoUrl) {
+        videoUrl = null;
+      }
+
       const widgetData = {
         user_id: user.id, // Explicitly set user_id for RLS
         name: websiteName.trim(),
@@ -168,6 +229,7 @@ const Index = () => {
         position: formData.position,
         tooltip: formData.tooltip,
         video_enabled: formData.useVideoPreview,
+        video_url: videoUrl,
         button_style: 'circle',
         custom_icon_url: '',
         show_on_mobile: true,
@@ -276,6 +338,7 @@ const Index = () => {
             onRemoveChannel={removeChannel}
             onEditChannel={editChannel}
             onVideoUpload={handleVideoUpload}
+            onVideoRemove={handleVideoRemove}
             onFormDataChange={handleInputChange}
             onCreateWidget={createWidget}
           />
@@ -288,6 +351,7 @@ const Index = () => {
               channels={channels}
               videoModalOpen={videoModalOpen}
               onVideoModalOpenChange={setVideoModalOpen}
+              editingWidget={editingWidget}
             />
 
             {/* Code Preview Section */}

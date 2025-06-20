@@ -2,21 +2,28 @@
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Crown, Upload, Play } from 'lucide-react';
+import { Crown, Upload, Play, X } from 'lucide-react';
 
 interface VideoUploadProps {
   video: File | null;
+  videoUrl?: string; // Existing video URL from database
   useVideoPreview: boolean;
   onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onVideoPreviewChange: (checked: boolean) => void;
+  onVideoRemove?: () => void;
 }
 
 export const VideoUpload: React.FC<VideoUploadProps> = ({
   video,
+  videoUrl,
   useVideoPreview,
   onVideoUpload,
-  onVideoPreviewChange
+  onVideoPreviewChange,
+  onVideoRemove
 }) => {
+  const hasVideo = video || videoUrl;
+  const displayName = video ? video.name : (videoUrl ? 'Mövcud video' : null);
+
   return (
     <div className="space-y-4">
       <Label className="flex items-center gap-2 text-purple-600">
@@ -36,9 +43,29 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
             <Crown className="w-6 h-6 text-purple-600" />
             <Upload className="w-6 h-6 text-purple-600" />
           </div>
-          <p className="text-sm text-purple-700 font-medium">
-            {video ? video.name : 'Upload promotional video (max 10MB)'}
-          </p>
+          {hasVideo ? (
+            <div className="flex items-center justify-center gap-2">
+              <p className="text-sm text-purple-700 font-medium">
+                {displayName}
+              </p>
+              {onVideoRemove && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onVideoRemove();
+                  }}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-purple-700 font-medium">
+              Upload promotional video (max 10MB)
+            </p>
+          )}
           <p className="text-xs text-purple-600 mt-1">
             PRO feature - Upgrade to add video content
           </p>
@@ -46,7 +73,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
       </div>
 
       {/* Video Preview Option */}
-      {video && (
+      {hasVideo && (
         <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
           <div className="flex items-center gap-2">
             <Play className="w-4 h-4 text-purple-600" />
