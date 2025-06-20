@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -99,9 +98,9 @@ const Index = () => {
         ...prev,
         video: file
       }));
-      toast.success("Video uploaded successfully!");
+      toast.success("Video yükləndi!");
     } else if (file) {
-      toast.error("Video file must be 10MB or less");
+      toast.error("Video faylının ölçüsü 10MB-dan az olmalıdır");
     }
   };
 
@@ -119,7 +118,7 @@ const Index = () => {
         video_enabled: false
       }));
     }
-    toast.success("Video removed");
+    toast.success("Video silindi");
   };
 
   const addChannel = () => {
@@ -134,43 +133,63 @@ const Index = () => {
       setChannels(prev => [...prev, newChannel]);
       setChannelValue('');
       setSelectedChannelType('');
-      toast.success(`${platform?.label || 'Channel'} added successfully!`);
+      toast.success(`${platform?.label || 'Channel'} uğurla əlavə edildi!`);
     }
   };
 
   const removeChannel = (id: string) => {
     setChannels(prev => prev.filter(channel => channel.id !== id));
-    toast.success("Channel removed");
+    toast.success("Kanal silindi");
   };
 
   const editChannel = (id: string, newValue: string) => {
     setChannels(prev => prev.map(channel => 
       channel.id === id ? { ...channel, value: newValue } : channel
     ));
-    toast.success("Channel updated");
+    toast.success("Kanal yeniləndi");
   };
 
   const uploadVideoToStorage = async (videoFile: File): Promise<string | null> => {
     try {
-      const fileExt = videoFile.name.split('.').pop();
-      const fileName = `${user?.id}/${Date.now()}.${fileExt}`;
+      console.log('Starting video upload process...');
       
-      const { error: uploadError } = await supabase.storage
-        .from('videos')
-        .upload(fileName, videoFile);
-
-      if (uploadError) {
-        console.error('Video upload error:', uploadError);
+      if (!user?.id) {
+        console.error('No user ID available');
+        toast.error('İstifadəçi giriş etməyib');
         return null;
       }
 
-      const { data } = supabase.storage
+      const fileExt = videoFile.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      console.log('Uploading to path:', fileName);
+      
+      const { data, error: uploadError } = await supabase.storage
+        .from('videos')
+        .upload(fileName, videoFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Video upload error:', uploadError);
+        toast.error(`Video yükləmə xətası: ${uploadError.message}`);
+        return null;
+      }
+
+      console.log('Upload successful:', data);
+
+      const { data: urlData } = supabase.storage
         .from('videos')
         .getPublicUrl(fileName);
 
-      return data.publicUrl;
+      console.log('Public URL:', urlData.publicUrl);
+      toast.success('Video uğurla yükləndi!');
+      
+      return urlData.publicUrl;
     } catch (error) {
       console.error('Error uploading video:', error);
+      toast.error('Video yükləməkdə xəta baş verdi');
       return null;
     }
   };
@@ -206,9 +225,11 @@ const Index = () => {
 
       // Upload new video if selected
       if (formData.video) {
+        console.log('Uploading new video...');
         const uploadedVideoUrl = await uploadVideoToStorage(formData.video);
         if (uploadedVideoUrl) {
           videoUrl = uploadedVideoUrl;
+          console.log('Video uploaded successfully:', videoUrl);
         } else {
           toast.error('Video yükləmə xətası');
           setSaving(false);
@@ -216,13 +237,24 @@ const Index = () => {
         }
       }
 
-      // If video was removed, set to null
+      // If video was removed and we're editing, delete old video and set to null
       if (editingWidget && editingWidget.video_url && !formData.video && !videoUrl) {
+        // Delete old video from storage
+        try {
+          const oldVideoPath = editingWidget.video_url.split('/').pop();
+          if (oldVideoPath) {
+            await supabase.storage
+              .from('videos')
+              .remove([`${user.id}/${oldVideoPath}`]);
+          }
+        } catch (error) {
+          console.log('Error deleting old video:', error);
+        }
         videoUrl = null;
       }
 
       const widgetData = {
-        user_id: user.id, // Explicitly set user_id for RLS
+        user_id: user.id,
         name: websiteName.trim(),
         website_url: websiteUrl.trim(),
         button_color: formData.buttonColor,
@@ -300,7 +332,7 @@ const Index = () => {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedCode);
     setCopied(true);
-    toast.success("Code copied to clipboard!");
+    toast.success("Kod kopyalandı!");
     setTimeout(() => setCopied(false), 2000);
   };
 
