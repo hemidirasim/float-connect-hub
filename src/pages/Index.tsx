@@ -23,7 +23,9 @@ const Index = () => {
     buttonColor: '#25d366',
     position: 'right',
     tooltip: '',
-    useVideoPreview: false
+    useVideoPreview: false,
+    videoHeight: 200,
+    videoAlignment: 'center'
   });
 
   const [generatedCode, setGeneratedCode] = useState('');
@@ -65,7 +67,9 @@ const Index = () => {
           buttonColor: data.button_color,
           position: data.position,
           tooltip: data.tooltip || '',
-          useVideoPreview: data.video_enabled
+          useVideoPreview: data.video_enabled,
+          videoHeight: data.video_height || 200,
+          videoAlignment: data.video_alignment || 'center'
         });
         toast.success('Widget yükləndi - redaktə edə bilərsiniz');
       }
@@ -84,7 +88,7 @@ const Index = () => {
     }
   };
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleInputChange = (field: string, value: string | boolean | number) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -239,7 +243,6 @@ const Index = () => {
 
       // If video was removed and we're editing, delete old video and set to null
       if (editingWidget && editingWidget.video_url && !formData.video && !videoUrl) {
-        // Delete old video from storage
         try {
           const oldVideoPath = editingWidget.video_url.split('/').pop();
           if (oldVideoPath) {
@@ -262,6 +265,8 @@ const Index = () => {
         tooltip: formData.tooltip,
         video_enabled: formData.useVideoPreview,
         video_url: videoUrl,
+        video_height: formData.videoHeight || 200,
+        video_alignment: formData.videoAlignment || 'center',
         button_style: 'circle',
         custom_icon_url: '',
         show_on_mobile: true,

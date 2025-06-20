@@ -8,18 +8,28 @@ interface CustomizationOptionsProps {
   buttonColor: string;
   position: string;
   tooltip: string;
+  videoHeight?: number;
+  videoAlignment?: string;
+  hasVideo?: boolean;
   onButtonColorChange: (color: string) => void;
   onPositionChange: (position: string) => void;
   onTooltipChange: (tooltip: string) => void;
+  onVideoHeightChange?: (height: number) => void;
+  onVideoAlignmentChange?: (alignment: string) => void;
 }
 
 export const CustomizationOptions: React.FC<CustomizationOptionsProps> = ({
   buttonColor,
   position,
   tooltip,
+  videoHeight = 200,
+  videoAlignment = 'center',
+  hasVideo = false,
   onButtonColorChange,
   onPositionChange,
-  onTooltipChange
+  onTooltipChange,
+  onVideoHeightChange,
+  onVideoAlignmentChange
 }) => {
   return (
     <>
@@ -65,6 +75,42 @@ export const CustomizationOptions: React.FC<CustomizationOptionsProps> = ({
           onChange={(e) => onTooltipChange(e.target.value)}
         />
       </div>
+
+      {/* Video Display Settings */}
+      {hasVideo && (
+        <div className="space-y-4 p-4 border rounded-lg bg-purple-50">
+          <Label className="text-base font-medium text-purple-700">Video Display Settings</Label>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="videoHeight">Video Height (px)</Label>
+              <Input
+                id="videoHeight"
+                type="number"
+                min="100"
+                max="500"
+                value={videoHeight}
+                onChange={(e) => onVideoHeightChange?.(parseInt(e.target.value) || 200)}
+                placeholder="200"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Video Alignment</Label>
+              <Select value={videoAlignment} onValueChange={onVideoAlignmentChange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="top">Yuxarı (Top)</SelectItem>
+                  <SelectItem value="center">Mərkəz (Center)</SelectItem>
+                  <SelectItem value="bottom">Aşağı (Bottom)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

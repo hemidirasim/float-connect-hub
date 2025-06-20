@@ -43,6 +43,18 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
     return null;
   };
 
+  const getVideoObjectPosition = () => {
+    switch (formData.videoAlignment) {
+      case 'top':
+        return 'top';
+      case 'bottom':
+        return 'bottom';
+      case 'center':
+      default:
+        return 'center';
+    }
+  };
+
   const hasVideo = formData.video || editingWidget?.video_url;
 
   return (
@@ -80,6 +92,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
                   {hasVideo && formData.useVideoPreview ? (
                     <video
                       className="w-full h-full object-cover rounded-full"
+                      style={{ objectPosition: getVideoObjectPosition() }}
                       autoPlay
                       muted
                       loop
@@ -102,11 +115,15 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
                   <DialogTitle>Contact Us</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-3">
-                  {/* Video Section - Shows first and auto-plays with sound */}
+                  {/* Video Section - Shows first with custom height and alignment */}
                   {hasVideo && (
                     <div className="mb-4">
                       <video
-                        className="w-full rounded-lg"
+                        className="w-full rounded-lg object-cover"
+                        style={{ 
+                          height: `${formData.videoHeight || 200}px`,
+                          objectPosition: getVideoObjectPosition()
+                        }}
                         controls
                         autoPlay
                         playsInline

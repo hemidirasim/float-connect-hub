@@ -28,7 +28,7 @@ interface WidgetFormProps {
   onEditChannel: (id: string, newValue: string) => void;
   onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onVideoRemove: () => void;
-  onFormDataChange: (field: string, value: string | boolean) => void;
+  onFormDataChange: (field: string, value: string | boolean | number) => void;
   onCreateWidget: () => void;
 }
 
@@ -54,6 +54,8 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
   onFormDataChange,
   onCreateWidget
 }) => {
+  const hasVideo = formData.video || editingWidget?.video_url;
+
   return (
     <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm lg:col-span-2">
       <CardHeader>
@@ -102,9 +104,14 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           buttonColor={formData.buttonColor}
           position={formData.position}
           tooltip={formData.tooltip}
+          videoHeight={formData.videoHeight}
+          videoAlignment={formData.videoAlignment}
+          hasVideo={hasVideo}
           onButtonColorChange={(color) => onFormDataChange('buttonColor', color)}
           onPositionChange={(position) => onFormDataChange('position', position)}
           onTooltipChange={(tooltip) => onFormDataChange('tooltip', tooltip)}
+          onVideoHeightChange={(height) => onFormDataChange('videoHeight', height)}
+          onVideoAlignmentChange={(alignment) => onFormDataChange('videoAlignment', alignment)}
         />
 
         <Button 
