@@ -1,22 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Eye, Settings, CreditCard, MessageSquare, BarChart3, Coins, Globe, Smartphone, Monitor } from 'lucide-react';
+import { Edit, Trash2, Eye, Settings, CreditCard, MessageSquare, BarChart3, Coins, Globe, Smartphone, Monitor, Code, DollarSign } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { WidgetCreator } from "@/components/WidgetCreator";
 import { SupportTickets } from "@/components/SupportTickets";
 import { ProfileSettings } from "@/components/ProfileSettings";
 import { BillingSection } from "@/components/BillingSection";
+import { useNavigate } from "react-router-dom";
 
 interface Widget {
   id: string;
@@ -43,10 +37,9 @@ interface UserCredits {
 
 const Dashboard = () => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [widgets, setWidgets] = useState<Widget[]>([]);
   const [userCredits, setUserCredits] = useState<UserCredits>({ balance: 0, total_spent: 0 });
-  const [widgetModalOpen, setWidgetModalOpen] = useState(false);
-  const [editingWidget, setEditingWidget] = useState<Widget | null>(null);
   const [loadingWidgets, setLoadingWidgets] = useState(true);
 
   useEffect(() => {
@@ -87,8 +80,8 @@ const Dashboard = () => {
     }
   };
 
-  const handleDeleteWidget = async (widgetId: string) => {
-    if (!confirm('Bu widget-i silmək istədiyinizə əminsiniz?')) return;
+  const handleDeleteWidget = async (widgetId: string, widgetName: string) => {
+    if (!confirm(`"${widgetName}" widget-ini silmək istədiyinizə əminsiniz?`)) return;
 
     try {
       const { error } = await supabase
@@ -105,20 +98,38 @@ const Dashboard = () => {
     }
   };
 
-  const handleToggleWidget = async (widgetId: string, isActive: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('widgets')
-        .update({ is_active: !isActive })
-        .eq('id', widgetId);
+  const handleCustomize = (widgetId: string) => {
+    // Store widget ID in localStorage to edit on main page
+    localStorage.setItem('editWidgetId', widgetId);
+    navigate('/');
+  };
 
-      if (error) throw error;
-      toast.success(isActive ? 'Widget dayandırıldı' : 'Widget aktivləşdirildi');
-      fetchWidgets();
-    } catch (error) {
-      console.error('Error toggling widget:', error);
-      toast.error('Widget vəziyyəti dəyişdirilməkdə xəta');
+  const generateWidgetCode = (widget: Widget) => {
+    let scriptCode = `<script src="https://yourdomain.com/floating.js"`;
+    
+    widget.channels?.forEach((channel: any) => {
+      scriptCode += `\n  data-${channel.type}="${channel.value}"`;
+    });
+    
+    scriptCode += `\n  data-position="${widget.position}"`;
+    scriptCode += `\n  data-color="${widget.button_color}"`;
+    
+    if (widget.tooltip) {
+      scriptCode += `\n  data-tooltip="${widget.tooltip}"`;
     }
+
+    if (widget.video_enabled) {
+      scriptCode += `\n  data-video-enabled="true"`;
+    }
+    
+    scriptCode += `>\n</script>`;
+    return scriptCode;
+  };
+
+  const copyCode = (widget: Widget) => {
+    const code = generateWidgetCode(widget);
+    navigator.clipboard.writeText(code);
+    toast.success('Kod kopyalandı!');
   };
 
   if (loading || loadingWidgets) {
@@ -216,7 +227,7 @@ const Dashboard = () => {
         {/* Main Content */}
         <Tabs defaultValue="widgets" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="widgets">Widget-lər</TabsTrigger>
+            <TabsTrigger value="widgets">Saytlarım</TabsTrigger>
             <TabsTrigger value="billing">Billing</TabsTrigger>
             <TabsTrigger value="profile">Profil</TabsTrigger>
             <TabsTrigger value="support">Dəstək</TabsTrigger>
@@ -224,45 +235,22 @@ const Dashboard = () => {
 
           <TabsContent value="widgets" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Widget-lərim</h2>
-              <Dialog open={widgetModalOpen} onOpenChange={setWidgetModalOpen}>
-                <DialogTrigger asChild>
-                  <Button onClick={() => setEditingWidget(null)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Yeni Widget
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingWidget ? 'Widget-i redaktə et' : 'Yeni Widget yarat'}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <WidgetCreator
-                    widget={editingWidget}
-                    onSave={() => {
-                      setWidgetModalOpen(false);
-                      setEditingWidget(null);
-                      fetchWidgets();
-                    }}
-                    onCancel={() => {
-                      setWidgetModalOpen(false);
-                      setEditingWidget(null);
-                    }}
-                  />
-                </DialogContent>
-              </Dialog>
+              <h2 className="text-xl font-semibold">Saytlarım</h2>
+              <Button onClick={() => navigate('/')}>
+                <Globe className="w-4 h-4 mr-2" />
+                Yeni sayt əlavə et
+              </Button>
             </div>
 
             {widgets.length === 0 ? (
               <Card>
                 <CardContent className="p-12 text-center">
                   <Globe className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-semibold mb-2">Hələ widget-iniz yoxdur</h3>
-                  <p className="text-gray-600 mb-4">İlk widget-inizi yaradın və saytınıza əlavə edin</p>
-                  <Button onClick={() => setWidgetModalOpen(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    İlk Widget-i yarat
+                  <h3 className="text-lg font-semibold mb-2">Hələ saytınız yoxdur</h3>
+                  <p className="text-gray-600 mb-4">İlk saytınızı əlavə edin və widget yaradın</p>
+                  <Button onClick={() => navigate('/')}>
+                    <Globe className="w-4 h-4 mr-2" />
+                    İlk saytı əlavə et
                   </Button>
                 </CardContent>
               </Card>
@@ -270,59 +258,69 @@ const Dashboard = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {widgets.map((widget) => (
                   <Card key={widget.id} className={`relative ${widget.is_active ? 'border-green-200' : 'border-gray-200'}`}>
-                    <CardHeader>
+                    <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{widget.name}</CardTitle>
                         <div className="flex items-center gap-2">
-                          <Badge variant={widget.is_active ? "default" : "secondary"}>
-                            {widget.is_active ? 'Aktiv' : 'Passiv'}
-                          </Badge>
-                          {widget.video_enabled && (
-                            <Badge variant="outline" className="text-purple-600">Video</Badge>
-                          )}
+                          <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <Globe className="w-4 h-4 text-gray-600" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-base">{widget.website_url}</CardTitle>
+                            <p className="text-xs text-gray-500">
+                              {widget.is_active ? 'Aktiv' : 'Passiv'}
+                            </p>
+                          </div>
                         </div>
+                        {!widget.is_active && (
+                          <Badge variant="secondary" className="text-xs">
+                            Upgrade to unlock
+                          </Badge>
+                        )}
                       </div>
-                      <CardDescription>{widget.website_url}</CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="pt-0">
                       <div className="space-y-3">
-                        <div className="flex items-center justify-between text-sm">
+                        <div className="flex justify-between text-sm">
                           <span className="text-gray-600">Görüntülənmə:</span>
                           <span className="font-medium">{widget.total_views}</span>
                         </div>
-                        <div className="flex items-center justify-between text-sm">
+                        <div className="flex justify-between text-sm">
                           <span className="text-gray-600">Kanallar:</span>
                           <span className="font-medium">{widget.channels?.length || 0}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <span className="text-gray-600">Cihazlar:</span>
-                          <div className="flex gap-1">
-                            {widget.show_on_mobile && <Smartphone className="w-4 h-4 text-blue-600" />}
-                            {widget.show_on_desktop && <Monitor className="w-4 h-4 text-green-600" />}
-                          </div>
+                        
+                        <div className="flex gap-2 pt-3">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleCustomize(widget.id)}
+                            className="flex-1"
+                          >
+                            <Settings className="w-4 h-4 mr-1" />
+                            Customize
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => copyCode(widget)}
+                          >
+                            <Code className="w-4 h-4" />
+                          </Button>
                         </div>
-                        <div className="flex gap-2 pt-2">
+                        
+                        <div className="flex gap-2">
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => {
-                              setEditingWidget(widget);
-                              setWidgetModalOpen(true);
-                            }}
+                            className="flex-1 text-green-600 hover:text-green-700"
                           >
-                            <Edit className="w-4 h-4" />
+                            <DollarSign className="w-4 h-4 mr-1" />
+                            Upgrade
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleToggleWidget(widget.id, widget.is_active)}
-                          >
-                            <Settings className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteWidget(widget.id)}
+                            onClick={() => handleDeleteWidget(widget.id, widget.website_url)}
                             className="text-red-600 hover:text-red-700"
                           >
                             <Trash2 className="w-4 h-4" />
