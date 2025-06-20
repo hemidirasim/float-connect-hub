@@ -148,7 +148,9 @@ export type Database = {
           total_views: number | null
           updated_at: string | null
           user_id: string
+          video_alignment: string | null
           video_enabled: boolean | null
+          video_height: number | null
           video_url: string | null
           website_url: string
         }
@@ -168,7 +170,9 @@ export type Database = {
           total_views?: number | null
           updated_at?: string | null
           user_id: string
+          video_alignment?: string | null
           video_enabled?: boolean | null
+          video_height?: number | null
           video_url?: string | null
           website_url: string
         }
@@ -188,7 +192,9 @@ export type Database = {
           total_views?: number | null
           updated_at?: string | null
           user_id?: string
+          video_alignment?: string | null
           video_enabled?: boolean | null
+          video_height?: number | null
           video_url?: string | null
           website_url?: string
         }
