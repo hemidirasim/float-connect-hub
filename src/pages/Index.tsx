@@ -161,6 +161,7 @@ const Index = () => {
     setSaving(true);
     try {
       const widgetData = {
+        user_id: user.id, // Explicitly set user_id for RLS
         name: websiteName.trim(),
         website_url: websiteUrl.trim(),
         button_color: formData.buttonColor,
