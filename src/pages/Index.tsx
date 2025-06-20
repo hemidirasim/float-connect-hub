@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,16 +7,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Upload, Copy, Check, MessageCircle, Send, Instagram, Mail, Link, Video, Crown, Play, X, Phone, MessageSquare, Music, Plus, Trash2, Github, Twitter, Linkedin, ExternalLink, User, LogOut, Settings } from 'lucide-react';
+import { Upload, Copy, Check, MessageCircle, Send, Instagram, Mail, Link, Video, Crown, Play, X, Phone, MessageSquare, Music, Plus, Trash2, Github, Twitter, Linkedin, ExternalLink, User, LogOut, Settings, GripVertical, Edit } from 'lucide-react';
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthModal } from "@/components/AuthModal";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { SortableChannelItem } from "@/components/SortableChannelItem";
 
 const Index = () => {
   const [channels, setChannels] = useState<Array<{id: string, type: string, value: string, label: string}>>([]);
   const [selectedChannelType, setSelectedChannelType] = useState('');
   const [channelValue, setChannelValue] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState('');
   const [formData, setFormData] = useState({
     video: null as File | null,
     buttonColor: '#25d366',
@@ -30,9 +35,18 @@ const Index = () => {
   const [showWidget, setShowWidget] = useState(true);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [editingWidget, setEditingWidget] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
 
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const platformOptions = [
     { value: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: '#25d366' },
@@ -46,6 +60,44 @@ const Index = () => {
     { value: 'email', label: 'Email', icon: Mail, color: '#ea4335' },
     { value: 'custom', label: 'Custom Link', icon: Link, color: '#6b7280' }
   ];
+
+  // Check for widget to edit on component mount
+  useEffect(() => {
+    const editWidgetId = localStorage.getItem('editWidgetId');
+    if (editWidgetId && user) {
+      loadWidgetForEditing(editWidgetId);
+      localStorage.removeItem('editWidgetId');
+    }
+  }, [user]);
+
+  const loadWidgetForEditing = async (widgetId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('widgets')
+        .select('*')
+        .eq('id', widgetId)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setEditingWidget(data);
+        setWebsiteUrl(data.website_url);
+        setChannels(data.channels || []);
+        setFormData({
+          video: null,
+          buttonColor: data.button_color,
+          position: data.position,
+          tooltip: data.tooltip || '',
+          useVideoPreview: data.video_enabled
+        });
+        toast.success('Widget yükləndi - redaktə edə bilərsiniz');
+      }
+    } catch (error) {
+      console.error('Error loading widget:', error);
+      toast.error('Widget yüklənməkdə xəta');
+    }
+  };
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -97,13 +149,89 @@ const Index = () => {
     toast.success("Channel removed");
   };
 
-  const generateCode = () => {
+  const editChannel = (id: string, newValue: string) => {
+    setChannels(prev => prev.map(channel => 
+      channel.id === id ? { ...channel, value: newValue } : channel
+    ));
+    toast.success("Channel updated");
+  };
+
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      setChannels((items) => {
+        const oldIndex = items.findIndex(item => item.id === active.id);
+        const newIndex = items.findIndex(item => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
+  const saveWidget = async () => {
     if (!user) {
       toast.error("Kod yaratmaq üçün hesabınıza giriş edin");
       setAuthModalOpen(true);
       return;
     }
 
+    if (!websiteUrl.trim()) {
+      toast.error("Website URL-i daxil edin");
+      return;
+    }
+
+    if (channels.length === 0) {
+      toast.error("Ən azı bir kanal əlavə edin");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const widgetData = {
+        name: `${websiteUrl} Widget`,
+        website_url: websiteUrl,
+        button_color: formData.buttonColor,
+        position: formData.position,
+        tooltip: formData.tooltip,
+        video_enabled: formData.useVideoPreview,
+        button_style: 'circle',
+        custom_icon_url: '',
+        show_on_mobile: true,
+        show_on_desktop: true,
+        channels: channels,
+        updated_at: new Date().toISOString()
+      };
+
+      if (editingWidget) {
+        // Update existing widget
+        const { error } = await supabase
+          .from('widgets')
+          .update(widgetData)
+          .eq('id', editingWidget.id);
+
+        if (error) throw error;
+        toast.success('Widget yeniləndi!');
+      } else {
+        // Create new widget
+        const { error } = await supabase
+          .from('widgets')
+          .insert([widgetData]);
+
+        if (error) throw error;
+        toast.success('Widget yaradıldı!');
+      }
+
+    } catch (error) {
+      console.error('Error saving widget:', error);
+      toast.error('Widget saxlanılarkən xəta baş verdi');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const generateCode = async () => {
+    await saveWidget();
+    
     const videoUrl = formData.video ? `https://yourdomain.com/uploads/${formData.video.name}` : '';
     
     let scriptCode = `<script src="https://yourdomain.com/floating.js"`;
@@ -238,13 +366,25 @@ const Index = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-blue-600" />
-                Customize Your Widget
+                {editingWidget ? 'Edit Your Widget' : 'Customize Your Widget'}
               </CardTitle>
               <CardDescription>
-                Add your contact channels and customize the appearance
+                {editingWidget ? 'Update your contact channels and appearance' : 'Add your contact channels and customize the appearance'}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Website URL */}
+              <div className="space-y-2">
+                <Label htmlFor="website">Website URL</Label>
+                <Input
+                  id="website"
+                  placeholder="https://example.com"
+                  value={websiteUrl}
+                  onChange={(e) => setWebsiteUrl(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+
               {/* Add Channel Section */}
               <div className="space-y-4">
                 <Label className="text-lg font-semibold">Contact Channels</Label>
@@ -286,37 +426,29 @@ const Index = () => {
                   </div>
                 </div>
 
-                {/* Added Channels List */}
+                {/* Added Channels List with Drag and Drop */}
                 {channels.length > 0 && (
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Added Channels:</Label>
-                    {channels.map((channel) => {
-                      const IconComponent = getChannelIcon(channel.type);
-                      return (
-                        <div key={channel.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
-                          <div className="flex items-center gap-3">
-                            <div 
-                              className="w-8 h-8 rounded-full flex items-center justify-center text-white"
-                              style={{ backgroundColor: getChannelColor(channel.type) }}
-                            >
-                              <IconComponent className="w-4 h-4" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-sm">{channel.label}</p>
-                              <p className="text-xs text-gray-600 truncate max-w-[200px]">{channel.value}</p>
-                            </div>
-                          </div>
-                          <Button
-                            onClick={() => removeChannel(channel.id)}
-                            size="sm"
-                            variant="ghost"
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                    <Label className="text-sm font-medium text-gray-700">Added Channels (drag to reorder):</Label>
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <SortableContext items={channels.map(c => c.id)} strategy={verticalListSortingStrategy}>
+                        <div className="space-y-2">
+                          {channels.map((channel) => (
+                            <SortableChannelItem
+                              key={channel.id}
+                              channel={channel}
+                              onEdit={editChannel}
+                              onRemove={removeChannel}
+                              platformOptions={platformOptions}
+                            />
+                          ))}
                         </div>
-                      );
-                    })}
+                      </SortableContext>
+                    </DndContext>
                   </div>
                 )}
               </div>
@@ -415,8 +547,9 @@ const Index = () => {
                 onClick={generateCode} 
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 size="lg"
+                disabled={saving}
               >
-                Generate Code
+                {saving ? 'Saving...' : (editingWidget ? 'Update & Generate Code' : 'Generate Code')}
               </Button>
             </CardContent>
           </Card>
