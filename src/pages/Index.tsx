@@ -7,8 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Upload, Copy, Check, MessageCircle, Send, Instagram, Mail, Link, Video, Crown, Play, X, Phone, MessageSquare, Music, Plus, Trash2, Github, Twitter, Linkedin, ExternalLink } from 'lucide-react';
+import { Upload, Copy, Check, MessageCircle, Send, Instagram, Mail, Link, Video, Crown, Play, X, Phone, MessageSquare, Music, Plus, Trash2, Github, Twitter, Linkedin, ExternalLink, User, LogOut } from 'lucide-react';
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { AuthModal } from "@/components/AuthModal";
 
 const Index = () => {
   const [channels, setChannels] = useState<Array<{id: string, type: string, value: string, label: string}>>([]);
@@ -26,6 +28,9 @@ const Index = () => {
   const [copied, setCopied] = useState(false);
   const [showWidget, setShowWidget] = useState(true);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  const { user, loading, signOut } = useAuth();
 
   const platformOptions = [
     { value: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: '#25d366' },
@@ -39,6 +44,15 @@ const Index = () => {
     { value: 'email', label: 'Email', icon: Mail, color: '#ea4335' },
     { value: 'custom', label: 'Custom Link', icon: Link, color: '#6b7280' }
   ];
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast.error("Çıxış xətası: " + error.message);
+    } else {
+      toast.success("Uğurla çıxdınız!");
+    }
+  };
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
@@ -172,7 +186,22 @@ const Index = () => {
               <a href="#features" className="text-gray-600 hover:text-blue-600 transition-colors">Features</a>
               <a href="#pricing" className="text-gray-600 hover:text-blue-600 transition-colors">Pricing</a>
               <a href="#support" className="text-gray-600 hover:text-blue-600 transition-colors">Support</a>
-              <Button variant="outline" size="sm">Login</Button>
+              {!loading && (
+                user ? (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-600">{user.email}</span>
+                    <Button variant="outline" size="sm" onClick={handleSignOut}>
+                      <LogOut className="w-4 h-4 mr-1" />
+                      Çıxış
+                    </Button>
+                  </div>
+                ) : (
+                  <Button variant="outline" size="sm" onClick={() => setAuthModalOpen(true)}>
+                    <User className="w-4 h-4 mr-1" />
+                    Giriş
+                  </Button>
+                )
+              )}
             </nav>
           </div>
         </div>
@@ -575,7 +604,7 @@ const Index = () => {
               <ul className="space-y-2 text-gray-400 text-sm">
                 <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
+                <li><a href="#" className="hover:text-black transition-colors">Contact Us</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Status</a></li>
               </ul>
             </div>
@@ -596,6 +625,9 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      {/* Auth Modal */}
+      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </div>
   );
 };
