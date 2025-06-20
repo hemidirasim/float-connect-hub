@@ -33,12 +33,177 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          priority: string | null
+          status: string | null
+          subject: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          priority?: string | null
+          status?: string | null
+          subject: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          priority?: string | null
+          status?: string | null
+          subject?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_credits: {
+        Row: {
+          balance: number | null
+          created_at: string | null
+          id: string
+          total_spent: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          balance?: number | null
+          created_at?: string | null
+          id?: string
+          total_spent?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          balance?: number | null
+          created_at?: string | null
+          id?: string
+          total_spent?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      widget_views: {
+        Row: {
+          credits_used: number
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string
+          view_date: string | null
+          widget_id: string
+        }
+        Insert: {
+          credits_used?: number
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id: string
+          view_date?: string | null
+          widget_id: string
+        }
+        Update: {
+          credits_used?: number
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string
+          view_date?: string | null
+          widget_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "widget_views_widget_id_fkey"
+            columns: ["widget_id"]
+            isOneToOne: false
+            referencedRelation: "widgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      widgets: {
+        Row: {
+          button_color: string
+          button_style: string | null
+          channels: Json | null
+          created_at: string | null
+          custom_icon_url: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          position: string
+          show_on_desktop: boolean | null
+          show_on_mobile: boolean | null
+          tooltip: string | null
+          total_views: number | null
+          updated_at: string | null
+          user_id: string
+          video_enabled: boolean | null
+          website_url: string
+        }
+        Insert: {
+          button_color?: string
+          button_style?: string | null
+          channels?: Json | null
+          created_at?: string | null
+          custom_icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          position?: string
+          show_on_desktop?: boolean | null
+          show_on_mobile?: boolean | null
+          tooltip?: string | null
+          total_views?: number | null
+          updated_at?: string | null
+          user_id: string
+          video_enabled?: boolean | null
+          website_url: string
+        }
+        Update: {
+          button_color?: string
+          button_style?: string | null
+          channels?: Json | null
+          created_at?: string | null
+          custom_icon_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          position?: string
+          show_on_desktop?: boolean | null
+          show_on_mobile?: boolean | null
+          tooltip?: string | null
+          total_views?: number | null
+          updated_at?: string | null
+          user_id?: string
+          video_enabled?: boolean | null
+          website_url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      record_widget_view: {
+        Args: {
+          p_widget_id: string
+          p_ip_address?: string
+          p_user_agent?: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

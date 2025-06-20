@@ -7,10 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Upload, Copy, Check, MessageCircle, Send, Instagram, Mail, Link, Video, Crown, Play, X, Phone, MessageSquare, Music, Plus, Trash2, Github, Twitter, Linkedin, ExternalLink, User, LogOut } from 'lucide-react';
+import { Upload, Copy, Check, MessageCircle, Send, Instagram, Mail, Link, Video, Crown, Play, X, Phone, MessageSquare, Music, Plus, Trash2, Github, Twitter, Linkedin, ExternalLink, User, LogOut, Settings } from 'lucide-react';
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthModal } from "@/components/AuthModal";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [channels, setChannels] = useState<Array<{id: string, type: string, value: string, label: string}>>([]);
@@ -31,6 +32,7 @@ const Index = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const { user, loading, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const platformOptions = [
     { value: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: '#25d366' },
@@ -96,6 +98,12 @@ const Index = () => {
   };
 
   const generateCode = () => {
+    if (!user) {
+      toast.error("Kod yaratmaq üçün hesabınıza giriş edin");
+      setAuthModalOpen(true);
+      return;
+    }
+
     const videoUrl = formData.video ? `https://yourdomain.com/uploads/${formData.video.name}` : '';
     
     let scriptCode = `<script src="https://yourdomain.com/floating.js"`;
@@ -189,6 +197,10 @@ const Index = () => {
               {!loading && (
                 user ? (
                   <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
+                      <Settings className="w-4 h-4 mr-1" />
+                      Dashboard
+                    </Button>
                     <span className="text-sm text-gray-600">{user.email}</span>
                     <Button variant="outline" size="sm" onClick={handleSignOut}>
                       <LogOut className="w-4 h-4 mr-1" />
@@ -604,7 +616,7 @@ const Index = () => {
               <ul className="space-y-2 text-gray-400 text-sm">
                 <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-black transition-colors">Contact Us</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Status</a></li>
               </ul>
             </div>
