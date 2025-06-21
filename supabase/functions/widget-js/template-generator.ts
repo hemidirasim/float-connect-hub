@@ -108,11 +108,11 @@ export class WidgetTemplateRenderer {
       : '<svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
     result = result.replace(/\{\{button_icon\}\}/g, buttonIcon);
 
-    // Replace video section
+    // Replace video section - no controls, no autoplay, muted by default
     if (hasVideo) {
       const videoSection = `
         <div class="hiclient-video-container">
-          <video class="hiclient-video-player" style="height:${this.config.videoHeight}px;object-position:${this.getVideoObjectPosition()};" controls autoplay>
+          <video class="hiclient-video-player" style="height:${this.config.videoHeight}px;object-position:${this.getVideoObjectPosition()};" muted preload="metadata">
             <source src="${this.config.videoUrl}" type="video/mp4">
             Your browser does not support the video tag.
           </video>

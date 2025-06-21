@@ -16,7 +16,8 @@ export const getDefaultTemplate = (): WidgetTemplate => ({
 
 <div class="hiclient-modal-backdrop">
   <div class="hiclient-modal-content">
-    <div class="hiclient-modal-header">Contact Us</div>
+    <div class="hiclient-modal-header">Bizimlə əlaqə saxlayın</div>
+    <div class="hiclient-modal-close">×</div>
     {{video_section}}
     {{channels_section}}
     {{empty_state}}
@@ -119,10 +120,33 @@ export const getDefaultTemplate = (): WidgetTemplate => ({
   transform: scale(0.95);
   transition: transform 0.3s ease;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
 }
 
 .hiclient-modal-backdrop.show .hiclient-modal-content {
   transform: scale(1);
+}
+
+.hiclient-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 24px;
+  color: #9ca3af;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  font-weight: 300;
+}
+
+.hiclient-modal-close:hover {
+  background: #f3f4f6;
+  color: #374151;
 }
 
 .hiclient-modal-header {
@@ -132,6 +156,7 @@ export const getDefaultTemplate = (): WidgetTemplate => ({
   color: #111827;
   text-align: center;
   line-height: 1.4;
+  padding-right: 40px;
 }
 
 .hiclient-video-container {
@@ -224,7 +249,104 @@ export const getDefaultTemplate = (): WidgetTemplate => ({
   opacity: 0.5;
 }`,
   
-  js_template: '',
+  js_template: `/* Default JS Template - Fixed JavaScript functionality with video control */
+console.log("Widget JavaScript loaded");
+
+function initializeWidget() {
+  console.log("Initializing widget...");
+  
+  var button = document.querySelector(".hiclient-widget-button");
+  var modal = document.querySelector(".hiclient-modal-backdrop");
+  var tooltip = document.querySelector(".hiclient-tooltip");
+  var closeBtn = document.querySelector(".hiclient-modal-close");
+  var video = document.querySelector(".hiclient-video-player");
+  
+  console.log("Found elements:", { button: !!button, modal: !!modal, tooltip: !!tooltip, closeBtn: !!closeBtn, video: !!video });
+  
+  if (button && modal) {
+    // Button click handler
+    button.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log("Widget button clicked, showing modal");
+      modal.classList.add("show");
+      
+      // Start video when modal opens
+      if (video) {
+        console.log("Starting video playback");
+        video.currentTime = 0;
+        video.play().catch(function(error) {
+          console.log("Video autoplay prevented:", error);
+        });
+      }
+    });
+    
+    // Close button handler
+    if (closeBtn) {
+      closeBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("Close button clicked");
+        closeModal();
+      });
+    }
+    
+    // Backdrop click handler
+    modal.addEventListener("click", function(e) {
+      if (e.target === modal) {
+        console.log("Backdrop clicked, closing modal");
+        closeModal();
+      }
+    });
+    
+    // ESC key handler
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape" && modal.classList.contains("show")) {
+        console.log("ESC pressed, closing modal");
+        closeModal();
+      }
+    });
+    
+    // Function to close modal and pause video
+    function closeModal() {
+      modal.classList.remove("show");
+      if (video) {
+        console.log("Pausing video");
+        video.pause();
+      }
+    }
+  }
+  
+  // Tooltip hover effects
+  if (tooltip && button) {
+    button.addEventListener("mouseenter", function() {
+      console.log("Button hover - showing tooltip");
+      tooltip.classList.remove("hide");
+      tooltip.classList.add("show");
+    });
+    
+    button.addEventListener("mouseleave", function() {
+      console.log("Button leave - hiding tooltip");
+      tooltip.classList.remove("show");
+      tooltip.classList.add("hide");
+    });
+  }
+  
+  // Global channel opener
+  window.openChannel = function(url) {
+    console.log("Opening channel:", url);
+    window.open(url, "_blank");
+  };
+  
+  console.log("Widget initialization complete");
+}
+
+// Initialize when DOM is ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeWidget);
+} else {
+  initializeWidget();
+}`,
   is_active: true,
   is_default: true
 });
