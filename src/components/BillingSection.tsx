@@ -2,8 +2,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, Plus, History } from 'lucide-react';
 import { toast } from "sonner";
@@ -20,33 +18,60 @@ interface BillingSectionProps {
 }
 
 const creditPackages = [
-  { credits: 100, price: 5, popular: false },
-  { credits: 500, price: 20, popular: true },
-  { credits: 1000, price: 35, popular: false },
-  { credits: 2500, price: 80, popular: false },
+  { 
+    credits: 200, 
+    price: 10, 
+    productId: 'pri_01jrmk0bq3y6cfd8w2gsbh9fax',
+    popular: false 
+  },
+  { 
+    credits: 500, 
+    price: 20, 
+    productId: 'pri_01js1kfkamvrte2kdppgch8fyd',
+    popular: true 
+  },
+  { 
+    credits: 1000, 
+    price: 30, 
+    productId: 'pri_01js1kg2d3q6cf947hz5v6eqjy',
+    popular: false 
+  },
 ];
 
 export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onCreditsUpdate }) => {
   const [loading, setLoading] = useState(false);
 
-  const handlePurchaseCredits = async (credits: number, price: number) => {
+  const handlePurchaseCredits = async (credits: number, price: number, productId: string) => {
     setLoading(true);
     try {
-      // Simulate payment process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const { error } = await supabase
-        .from('user_credits')
-        .update({ 
-          balance: userCredits.balance + credits,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        toast.error('Giriş etməlisiniz');
+        return;
+      }
 
-      if (error) throw error;
+      // Create Paddle checkout
+      const { data, error } = await supabase.functions.invoke('paddle-checkout', {
+        body: {
+          productId,
+          credits
+        }
+      });
 
-      toast.success(`${credits} kredit uğurla əlavə edildi!`);
-      onCreditsUpdate();
+      if (error) {
+        console.error('Checkout error:', error);
+        throw new Error(error.message);
+      }
+
+      if (data.success) {
+        // Open Paddle checkout in a new tab
+        window.open(data.checkout_url, '_blank');
+        toast.success('Ödəniş səhifəsi açıldı');
+      } else {
+        throw new Error(data.error || 'Checkout yaradılmadı');
+      }
+
     } catch (error) {
       console.error('Error purchasing credits:', error);
       toast.error('Kredit alınması zamanı xəta baş verdi');
@@ -84,7 +109,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
           <CardDescription>Widget görüntülənmələri üçün kredit satın alın</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {creditPackages.map((pkg, index) => (
               <Card key={index} className={`relative ${pkg.popular ? 'border-blue-500 shadow-lg' : 'border-gray-200'}`}>
                 {pkg.popular && (
@@ -96,7 +121,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
                   <div className="text-xl font-semibold mb-4">${pkg.price}</div>
                   <Button 
                     className="w-full" 
-                    onClick={() => handlePurchaseCredits(pkg.credits, pkg.price)}
+                    onClick={() => handlePurchaseCredits(pkg.credits, pkg.price, pkg.productId)}
                     disabled={loading}
                   >
                     <Plus className="w-4 h-4 mr-2" />
