@@ -4,12 +4,19 @@ import { Channel, FormData } from "@/components/FloatingWidgetBuilder/types";
 export const generateWidgetCode = (
   websiteUrl: string,
   channels: Channel[],
-  formData: FormData
+  formData: FormData,
+  widgetId?: string
 ): string => {
   if (!websiteUrl || channels.length === 0) {
     return '';
   }
 
+  // If widget has an ID (saved to database), generate clean script tag
+  if (widgetId) {
+    return `<script src="https://hiclient.co/widget-js/${widgetId}"></script>`;
+  }
+
+  // Fallback to inline script for preview (not saved yet)
   // Simple single WhatsApp button
   if (channels.length === 1 && channels[0].type === 'whatsapp') {
     const whatsappNumber = channels[0].value.replace(/[^0-9]/g, '');
@@ -22,7 +29,7 @@ export const generateWidgetCode = (
 </div>`;
   }
 
-  // Multi-channel widget
+  // Multi-channel widget (preview only)
   return `<script>
 (function() {
   const config = {
@@ -45,7 +52,7 @@ export const generateWidgetCode = (
   
   document.getElementById('floating-widget').addEventListener('click', function() {
     const modal = document.createElement('div');
-    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
     
     const content = document.createElement('div');
     content.style.cssText = 'background:white;padding:20px;border-radius:10px;max-width:400px;width:90%;';

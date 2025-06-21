@@ -133,9 +133,14 @@ const Index = () => {
 
   // Generate widget code
   useEffect(() => {
-    const code = generateWidgetCode(websiteUrl, channels, formData);
+    const code = generateWidgetCode(
+      websiteUrl, 
+      channels, 
+      formData, 
+      editingWidget?.id // Pass widget ID if editing existing widget
+    );
     setGeneratedCode(code);
-  }, [websiteUrl, channels, formData, setGeneratedCode]);
+  }, [websiteUrl, channels, formData, editingWidget, setGeneratedCode]);
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(generatedCode);
