@@ -19,10 +19,10 @@ export const WebsiteInfoForm: React.FC<WebsiteInfoFormProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
-        <Label htmlFor="websiteName">Website Adı <span className="text-red-500">*</span></Label>
+        <Label htmlFor="websiteName">Website name <span className="text-red-500">*</span></Label>
         <Input
           id="websiteName"
-          placeholder="Məsələn: Ana Səhifə"
+          placeholder="Example: Home Page"
           value={websiteName}
           onChange={(e) => onWebsiteNameChange(e.target.value)}
           className="w-full"
