@@ -108,7 +108,7 @@ export class TemplateRenderer {
       : '<svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
     result = result.replace(/\{\{button_icon\}\}/g, buttonIcon);
 
-    // Replace video section
+    // Replace video section - FIXED
     if (hasVideo) {
       const videoSection = `
         <div class="hiclient-video-container">
@@ -122,7 +122,7 @@ export class TemplateRenderer {
       result = result.replace(/\{\{video_section\}\}/g, '');
     }
 
-    // Replace channels section
+    // Replace channels section - FIXED
     if (this.config.channels && this.config.channels.length > 0) {
       const channelsHtml = this.config.channels.map(channel => {
         const channelUrl = this.getChannelUrl(channel);
@@ -145,7 +145,7 @@ export class TemplateRenderer {
       result = result.replace(/\{\{channels_section\}\}/g, '');
     }
 
-    // Replace empty state
+    // Replace empty state - FIXED
     if ((!this.config.channels || this.config.channels.length === 0) && !hasVideo) {
       const emptyState = `
         <div class="hiclient-empty-state">
