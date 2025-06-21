@@ -1,9 +1,8 @@
-
 import { getDefaultTemplate } from './default-template.ts'
 import { getDarkTemplate } from './templates/dark-template.ts'
 import { getMinimalTemplate } from './templates/minimal-template.ts'
 import { getModernTemplate } from './templates/modern-template.ts'
-import type { WidgetTemplate } from './template-generator.ts'
+import type { WidgetTemplate } from './template-types.ts'
 
 // Available templates registry
 export const TEMPLATE_REGISTRY = {

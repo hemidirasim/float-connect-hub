@@ -1,5 +1,7 @@
 
-export const defaultTemplate = {
+import type { WidgetTemplate } from './template-registry.ts'
+
+export const defaultTemplate: WidgetTemplate = {
   id: 'default',
   name: 'Default Template', 
   description: 'Clean and modern floating widget',
@@ -188,3 +190,5 @@ export const defaultTemplate = {
     }
   `
 };
+
+export const getDefaultTemplate = () => defaultTemplate;

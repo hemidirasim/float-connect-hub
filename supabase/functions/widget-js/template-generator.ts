@@ -1,4 +1,5 @@
-import type { WidgetTemplate } from './template-registry.ts'
+
+import type { WidgetTemplate } from './template-types.ts'
 import type { Channel } from './types.ts'
 
 export interface TemplateConfig {

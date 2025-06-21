@@ -1,5 +1,5 @@
 
-import type { WidgetTemplate } from '../template-generator.ts'
+import type { WidgetTemplate } from '../template-types.ts'
 
 export const getMinimalTemplate = (): WidgetTemplate => ({
   id: 'minimal',
@@ -301,6 +301,7 @@ if (document.readyState === "loading") {
 } else {
   initializeWidget();
 }`,
-  is_active: true,
-  is_default: false
+  html: `<!-- Minimal Template -->`,
+  css: `/* Minimal CSS */`,
+  js: `/* Minimal JS */`
 });
