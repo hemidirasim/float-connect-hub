@@ -1,4 +1,3 @@
-
 import type { WidgetTemplate } from './template-generator.ts'
 
 export const getDefaultTemplate = (): WidgetTemplate => ({
@@ -249,7 +248,7 @@ export const getDefaultTemplate = (): WidgetTemplate => ({
   opacity: 0.5;
 }`,
   
-  js_template: `/* Default JS Template - Fixed JavaScript functionality with video control */
+  js_template: `/* Default JS Template - Video without autoplay sound, controls hidden */
 console.log("Widget JavaScript loaded");
 
 function initializeWidget() {
@@ -263,6 +262,14 @@ function initializeWidget() {
   
   console.log("Found elements:", { button: !!button, modal: !!modal, tooltip: !!tooltip, closeBtn: !!closeBtn, video: !!video });
   
+  // Ensure video is muted and paused initially
+  if (video) {
+    video.muted = true;
+    video.pause();
+    video.currentTime = 0;
+    console.log("Video muted and paused on load");
+  }
+  
   if (button && modal) {
     // Button click handler
     button.addEventListener("click", function(e) {
@@ -271,12 +278,13 @@ function initializeWidget() {
       console.log("Widget button clicked, showing modal");
       modal.classList.add("show");
       
-      // Start video when modal opens
+      // Start video with sound when modal opens
       if (video) {
-        console.log("Starting video playback");
+        console.log("Starting video with sound");
+        video.muted = false;
         video.currentTime = 0;
         video.play().catch(function(error) {
-          console.log("Video autoplay prevented:", error);
+          console.log("Video play error:", error);
         });
       }
     });
@@ -307,11 +315,12 @@ function initializeWidget() {
       }
     });
     
-    // Function to close modal and pause video
+    // Function to close modal and mute/pause video
     function closeModal() {
       modal.classList.remove("show");
       if (video) {
-        console.log("Pausing video");
+        console.log("Muting and pausing video");
+        video.muted = true;
         video.pause();
       }
     }

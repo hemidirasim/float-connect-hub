@@ -1,4 +1,3 @@
-
 export interface WidgetTemplate {
   id: string;
   name: string;
@@ -108,7 +107,7 @@ export class WidgetTemplateRenderer {
       : '<svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
     result = result.replace(/\{\{button_icon\}\}/g, buttonIcon);
 
-    // Replace video section - no controls, no autoplay, muted by default
+    // Replace video section - muted, no controls, no autoplay
     if (hasVideo) {
       const videoSection = `
         <div class="hiclient-video-container">
@@ -195,22 +194,47 @@ export class WidgetTemplateRenderer {
   var button = document.querySelector('.hiclient-widget-button');
   var modal = document.querySelector('.hiclient-modal-backdrop');
   var tooltip = document.querySelector('.hiclient-tooltip');
+  var video = document.querySelector('.hiclient-video-player');
+  
+  // Ensure video is muted initially
+  if (video) {
+    video.muted = true;
+    video.pause();
+    console.log('Video muted and paused on initialization');
+  }
   
   if (button && modal) {
     button.addEventListener('click', function() {
       modal.classList.add('show');
+      
+      // Unmute and play video when modal opens
+      if (video)         video.muted = false;
+        video.currentTime = 0;
+        video.play().catch(function(error) {
+          console.log('Video play error:', error);
+        });
+      }
     });
+    
+    var closeModal = function() {
+      modal.classList.remove('show');
+      // Mute and pause video when modal closes
+      if (video) {
+        video.muted = true;
+        video.pause();
+      }
+    };
     
     modal.addEventListener('click', function(e) {
       if (e.target === modal) {
-        modal.classList.remove('show');
+        closeModal();
       }
     });
     
     // ESC key handler
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && modal.classList.contains('show')) {
-        modal.classList.remove('show');
+        closeModal();
       }
     });
   }
