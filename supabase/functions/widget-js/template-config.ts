@@ -35,7 +35,7 @@ export function createWidgetConfig(widget: any): WidgetConfig {
     tooltip: widget.tooltip || defaultWidgetConfig.tooltip,
     tooltipDisplay: widget.tooltip_display || defaultWidgetConfig.tooltipDisplay,
     tooltipPosition: widget.tooltip_position || 'top',
-    greetingMessage: widget.greeting_message || 'Hello! How can we help you today?',
+    greetingMessage: widget.greeting_message || 'Hello! How can we help you todayy?',
     customIconUrl: widget.custom_icon_url || defaultWidgetConfig.customIconUrl,
     videoEnabled: widget.video_enabled || defaultWidgetConfig.videoEnabled,
     videoUrl: widget.video_url || defaultWidgetConfig.videoUrl,
