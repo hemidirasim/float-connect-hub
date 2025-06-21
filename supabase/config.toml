@@ -20,6 +20,9 @@ security_update_password_require_reauthentication = true
 [functions.paddle-webhook]
 verify_jwt = false
 
+[functions.widget-js]
+verify_jwt = false
+
 [edge-runtime]
 enabled = true
 port = 54322
