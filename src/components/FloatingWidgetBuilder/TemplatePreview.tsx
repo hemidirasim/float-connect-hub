@@ -83,25 +83,47 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     const renderer = new WidgetTemplateRenderer(template, templateConfig);
     const completeScript = renderer.generateWidgetScript();
     
-    // Extract the actual widget content (remove the wrapper function)
-    const scriptMatch = completeScript.match(/innerHTML = `([^`]+)`/);
-    const styleMatch = completeScript.match(/textContent = `([^`]+)`/);
-    const jsMatch = completeScript.match(/\/\/ Execute JavaScript\s*([^}]+)(?=\}\)\(\);)/);
+    // Parse and clean the generated script to extract HTML, CSS, and JS
+    const htmlMatch = completeScript.match(/widgetDiv\.innerHTML = `([^`]+)`/);
+    const cssMatch = completeScript.match(/style\.textContent = `([^`]+)`/);
+    const jsMatch = completeScript.match(/\/\/ Execute JavaScript\s*([\s\S]*?)(?=\}\)\(\);)/);
     
     let finalHtml = '';
     
-    if (styleMatch && scriptMatch) {
-      const css = styleMatch[1];
-      const html = scriptMatch[1];
-      const js = jsMatch ? jsMatch[1] : '';
+    if (htmlMatch && cssMatch) {
+      const html = htmlMatch[1]
+        .replace(/\\n/g, '\n')
+        .replace(/\\t/g, '\t')
+        .replace(/\\'/g, "'")
+        .replace(/\\"/g, '"');
+      
+      const css = cssMatch[1]
+        .replace(/\\n/g, '\n')
+        .replace(/\\t/g, '\t')
+        .replace(/\\'/g, "'")
+        .replace(/\\"/g, '"');
+      
+      let js = '';
+      if (jsMatch) {
+        js = jsMatch[1]
+          .replace(/\\n/g, '\n')
+          .replace(/\\t/g, '\t')
+          .replace(/\\'/g, "'")
+          .replace(/\\"/g, '"')
+          .trim();
+      }
       
       finalHtml = `
         <style>${css}</style>
         ${html}
-        <script>${js}</script>
+        <script>
+          (function() {
+            ${js}
+          })();
+        </script>
       `;
     } else {
-      // Fallback - use the complete script as is
+      // Fallback - use the complete script
       finalHtml = `<div id="temp-container"></div><script>${completeScript}</script>`;
     }
     
@@ -141,35 +163,29 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
           const tempDiv = document.createElement('div');
           tempDiv.innerHTML = previewHtml;
           
-          // Add the HTML elements directly to document body
+          // Add all elements to the body
           const elements = Array.from(tempDiv.children);
           elements.forEach(element => {
-            // Mark as preview widget for cleanup
             element.setAttribute('data-widget-preview', 'true');
             document.body.appendChild(element);
           });
 
-          // Wait for DOM to be ready, then execute scripts
+          // Wait a bit for DOM to be ready, then execute any inline scripts
           setTimeout(() => {
-            // Extract and execute scripts from the original HTML
-            const scriptMatches = previewHtml.match(/<script[^>]*>([\s\S]*?)<\/script>/gi);
-            
-            if (scriptMatches) {
-              scriptMatches.forEach(scriptTag => {
-                const scriptContent = scriptTag.replace(/<\/?script[^>]*>/gi, '');
-                if (scriptContent.trim()) {
-                  console.log('Executing floating widget script using SAME system...');
-                  try {
-                    // Create a safer execution context
-                    const scriptFunction = new Function(scriptContent);
-                    scriptFunction();
-                  } catch (e) {
-                    console.error('Script execution error:', e);
-                  }
+            // Find and execute script tags
+            const scripts = document.querySelectorAll('script[data-widget-preview]');
+            scripts.forEach(script => {
+              if (script.textContent && script.textContent.trim()) {
+                console.log('Executing widget script for preview...');
+                try {
+                  const scriptFunction = new Function(script.textContent);
+                  scriptFunction();
+                } catch (e) {
+                  console.error('Script execution error:', e);
                 }
-              });
-            }
-          }, 200);
+              }
+            });
+          }, 100);
 
         } catch (error) {
           console.error('Error rendering floating widget:', error);
