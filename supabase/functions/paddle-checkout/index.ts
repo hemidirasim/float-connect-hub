@@ -52,10 +52,10 @@ serve(async (req) => {
       throw new Error('Paddle API token not configured');
     }
 
-    // Use appropriate Paddle API URL based on environment
+    // Use correct Paddle API URL - v1 API
     const paddleApiUrl = paddleEnvironment === 'production' 
-      ? 'https://api.paddle.com/checkout-sessions'
-      : 'https://sandbox-api.paddle.com/checkout-sessions';
+      ? 'https://api.paddle.com/transactions'
+      : 'https://sandbox-api.paddle.com/transactions';
 
     console.log('Using Paddle API URL:', paddleApiUrl);
     console.log('Creating checkout with data:', {
@@ -65,19 +65,22 @@ serve(async (req) => {
       userId: user.id
     });
 
-    // Create Paddle checkout
+    // Create Paddle transaction using v1 API format
     const requestBody = {
       items: [{
-        product_id: productId,
+        price_id: productId,
         quantity: 1
       }],
-      customer_email: user.email,
+      customer: {
+        email: user.email
+      },
       custom_data: {
         user_id: user.id,
         credits: credits.toString()
       },
-      success_url: `https://hiclient.co/dashboard?success=true`,
-      cancel_url: `https://hiclient.co/dashboard?cancelled=true`
+      checkout: {
+        url: `https://hiclient.co/dashboard?success=true`
+      }
     };
 
     console.log('Paddle request body:', JSON.stringify(requestBody, null, 2));
@@ -113,13 +116,13 @@ serve(async (req) => {
       throw new Error('Invalid response from Paddle API');
     }
     
-    console.log('Paddle checkout created successfully:', paddleData);
+    console.log('Paddle transaction created successfully:', paddleData);
     
     return new Response(
       JSON.stringify({ 
         success: true, 
-        checkout_url: paddleData.data.url,
-        checkout_id: paddleData.data.id
+        checkout_url: paddleData.data.checkout?.url || paddleData.data.url,
+        transaction_id: paddleData.data.id
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -128,7 +131,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error creating Paddle checkout:', error);
+    console.error('Error creating Paddle transaction:', error);
     console.error('Error stack:', error.stack);
     return new Response(
       JSON.stringify({ 
