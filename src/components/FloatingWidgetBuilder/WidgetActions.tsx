@@ -71,28 +71,37 @@ export const useWidgetActions = (
         updated_at: new Date().toISOString()
       };
 
+      let savedWidget;
+
       if (editingWidget) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('widgets')
           .update(widgetData)
-          .eq('id', editingWidget.id);
+          .eq('id', editingWidget.id)
+          .select()
+          .single();
 
         if (error) throw error;
+        savedWidget = data;
         toast.success('Widget updated!');
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('widgets')
-          .insert([widgetData]);
+          .insert([widgetData])
+          .select()
+          .single();
 
         if (error) throw error;
+        savedWidget = data;
         toast.success('Widget created!');
-        // Don't reset form after creation - user requested to keep data
       }
-      return true;
+      
+      // Return the widget data including ID so the code generator can use it
+      return { success: true, widget: savedWidget };
     } catch (error) {
       console.error('Error saving widget:', error);
       toast.error('Error saving widget');
-      return false;
+      return { success: false };
     }
   };
 

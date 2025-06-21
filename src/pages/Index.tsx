@@ -33,6 +33,7 @@ const Index = () => {
     channelValue,
     setChannelValue,
     editingWidget,
+    setEditingWidget,
     generatedCode,
     setGeneratedCode,
     copied,
@@ -127,11 +128,17 @@ const Index = () => {
 
   const handleCreateWidgetWrapper = async () => {
     setSaving(true);
-    const success = await createWidget();
+    const result = await createWidget();
+    
+    if (result?.success && result?.widget) {
+      // Update the editing widget state with the newly created/updated widget
+      setEditingWidget(result.widget);
+    }
+    
     setSaving(false);
   };
 
-  // Generate widget code
+  // Generate widget code - now includes the widget ID from editingWidget
   useEffect(() => {
     const code = generateWidgetCode(
       websiteUrl, 

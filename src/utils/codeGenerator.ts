@@ -16,7 +16,7 @@ export const generateWidgetCode = (
     return `<script src="https://hiclient.co/widget-js/${widgetId}"></script>`;
   }
 
-  // Fallback to inline script for preview (not saved yet)
+  // For preview only (before saving) - generate inline preview
   // Simple single WhatsApp button
   if (channels.length === 1 && channels[0].type === 'whatsapp') {
     const whatsappNumber = channels[0].value.replace(/[^0-9]/g, '');
@@ -29,7 +29,7 @@ export const generateWidgetCode = (
 </div>`;
   }
 
-  // Multi-channel widget (preview only)
+  // Multi-channel widget (preview only - before saving)
   return `<script>
 (function() {
   const config = {
