@@ -61,9 +61,9 @@ export const useWidgetActions = (
     }
 
     try {
-      console.log('Saving widget to database (template will be handled separately)');
+      console.log('Saving widget to database - template handled separately');
       
-      // Create widget data - NEVER include template_id field
+      // Create widget data - only database fields, NO template references
       const widgetData = {
         name: websiteName,
         website_url: websiteUrl,
@@ -79,11 +79,10 @@ export const useWidgetActions = (
         button_size: formData.buttonSize,
         preview_video_height: formData.previewVideoHeight,
         channels: channels,
-        user_id: user?.id,
-        updated_at: new Date().toISOString()
+        user_id: user?.id
       };
 
-      console.log('Widget data being saved:', widgetData);
+      console.log('Clean widget data for database:', widgetData);
 
       let savedWidget;
 
@@ -118,16 +117,16 @@ export const useWidgetActions = (
         toast.success('Widget created!');
       }
       
-      console.log('Widget saved successfully:', savedWidget);
+      console.log('Widget saved to database successfully:', savedWidget);
       
-      // Add template info to returned data for code generation ONLY
-      // This is NOT saved to database, only used for generating embed code
-      savedWidget.templateId = formData.templateId || 'default';
-      console.log('Template ID for code generation:', savedWidget.templateId);
+      // Template info is added ONLY for code generation, never saved to DB
+      const templateId = formData.templateId || 'default';
+      savedWidget.templateId = templateId;
+      console.log('Template ID added for code generation only:', templateId);
       
       return { success: true, widget: savedWidget };
     } catch (error) {
-      console.error('Error saving widget:', error);
+      console.error('Database error:', error);
       
       // More specific error messages
       if (error.message?.includes('duplicate key')) {
