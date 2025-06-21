@@ -63,6 +63,8 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       position: formData.position,
       tooltip: formData.tooltip,
       tooltipDisplay: formData.tooltipDisplay,
+      tooltipPosition: formData.tooltipPosition,
+      greetingMessage: formData.greetingMessage,
       customIconUrl: formData.customIconUrl,
       videoEnabled: Boolean(formData.videoUrl),
       videoUrl: formData.videoUrl || editingWidget?.video_url,
@@ -84,6 +86,8 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     formData.position,
     formData.tooltip,
     formData.tooltipDisplay,
+    formData.tooltipPosition,
+    formData.greetingMessage,
     formData.customIconUrl,
     formData.videoUrl,
     formData.videoHeight,
@@ -120,29 +124,23 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
           // Wait for DOM to be ready, then execute scripts
           setTimeout(() => {
             // Extract and execute scripts from the original HTML
-            const tempDiv2 = document.createElement('div');
-            tempDiv2.innerHTML = previewHtml;
-            const scripts = tempDiv2.querySelectorAll('script');
+            const scriptMatches = previewHtml.match(/<script[^>]*>([\s\S]*?)<\/script>/gi);
             
-            scripts.forEach(script => {
-              if (script.textContent) {
-                console.log('Executing floating widget script...');
-                try {
-                  // Create a new script element for proper execution
-                  const newScript = document.createElement('script');
-                  newScript.textContent = script.textContent;
-                  newScript.setAttribute('data-widget-preview', 'true');
-                  document.head.appendChild(newScript);
-                  
-                  // Clean up the script element after execution
-                  setTimeout(() => {
-                    newScript.remove();
-                  }, 100);
-                } catch (e) {
-                  console.error('Script execution error:', e);
+            if (scriptMatches) {
+              scriptMatches.forEach(scriptTag => {
+                const scriptContent = scriptTag.replace(/<\/?script[^>]*>/gi, '');
+                if (scriptContent.trim()) {
+                  console.log('Executing floating widget script...');
+                  try {
+                    // Create a safer execution context
+                    const scriptFunction = new Function(scriptContent);
+                    scriptFunction();
+                  } catch (e) {
+                    console.error('Script execution error:', e);
+                  }
                 }
-              }
-            });
+              });
+            }
           }, 200);
 
         } catch (error) {
