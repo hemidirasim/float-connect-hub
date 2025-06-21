@@ -2,8 +2,8 @@ import type { WidgetTemplate } from '../template-types.ts'
 
 export const getModernTemplate = (): WidgetTemplate => ({
   id: 'modern',
-  name: 'Minimal Contact Modal',
-  description: 'Minimal floating contact modal with video support',
+  name: 'Minimal Contact Modal with Video',
+  description: 'Minimal floating contact modal with active video support',
   html: `
 <div class="hiclient-widget" style="position: fixed; {{POSITION_STYLE}} bottom: 24px; z-index: 99999;">
   <div class="hiclient-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
@@ -21,7 +21,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
     </div>
     
     <div class="hiclient-video-container">
-      <video class="hiclient-video-player" controls>
+      <video class="hiclient-video-player" controls autoplay muted playsinline>
         <source src="{{VIDEO_URL}}" type="video/mp4">
         Your browser does not support the video tag.
       </video>
@@ -306,7 +306,7 @@ function initWidget() {
   const widget = document.querySelector('.hiclient-widget');
   
   if (video) {
-    video.muted = true;
+    video.muted = true; // Başlanğıcda səs səng
     video.pause();
   }
   
@@ -322,7 +322,7 @@ function initWidget() {
         widget.style.visibility = 'hidden';
       }
       if (video) {
-        video.muted = false;
+        video.muted = false; // Modal açılanda səs açılır
         video.currentTime = 0;
         video.play().catch(() => {
           video.muted = true;
