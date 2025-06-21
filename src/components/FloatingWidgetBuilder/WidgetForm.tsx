@@ -7,6 +7,7 @@ import { ChannelManager } from './ChannelManager';
 import { VideoUpload } from './VideoUpload';
 import { CustomizationOptions } from './CustomizationOptions';
 import { Channel, FormData } from './types';
+import { TemplateSelector } from './TemplateSelector';
 
 interface WidgetFormProps {
   websiteName: string;
@@ -69,6 +70,12 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Template Selector - New section */}
+        <TemplateSelector
+          selectedTemplateId={formData.templateId || ''}
+          onTemplateChange={(templateId) => onFormDataChange('templateId', templateId)}
+        />
+
         {/* Website Info */}
         <WebsiteInfoForm
           websiteName={websiteName}

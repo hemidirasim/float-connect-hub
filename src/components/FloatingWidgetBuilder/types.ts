@@ -18,6 +18,7 @@ export interface FormData {
   videoAlignment: string;
   customIcon: string | null;
   customIconUrl: string;
-  buttonSize: number; // Add button size control
-  previewVideoHeight: number; // Add preview video height control
+  buttonSize: number;
+  previewVideoHeight: number;
+  templateId?: string; // Add template ID to form data
 }

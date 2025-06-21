@@ -68,8 +68,9 @@ export const useWidgetActions = (
         video_height: formData.videoHeight,
         video_alignment: formData.videoAlignment,
         custom_icon_url: formData.customIconUrl,
-        button_size: formData.buttonSize, // Save button size
-        preview_video_height: formData.previewVideoHeight, // Save preview video height
+        button_size: formData.buttonSize,
+        preview_video_height: formData.previewVideoHeight,
+        template_id: formData.templateId || null, // Save template ID
         channels: channels,
         user_id: user?.id,
         updated_at: new Date().toISOString()

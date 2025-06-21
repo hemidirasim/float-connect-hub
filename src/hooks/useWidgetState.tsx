@@ -26,8 +26,9 @@ export const useWidgetState = (user: any) => {
     videoAlignment: 'center',
     customIcon: null,
     customIconUrl: '',
-    buttonSize: 60, // Add default button size
-    previewVideoHeight: 120 // Add default preview video height
+    buttonSize: 60,
+    previewVideoHeight: 120,
+    templateId: undefined // Add template ID to initial state
   });
 
   // Check for editing widget on load
@@ -66,8 +67,9 @@ export const useWidgetState = (user: any) => {
           videoAlignment: data.video_alignment || 'center',
           customIcon: data.custom_icon_url ? 'custom' : null,
           customIconUrl: data.custom_icon_url || '',
-          buttonSize: data.button_size || 60, // Load button size
-          previewVideoHeight: data.preview_video_height || 120 // Load preview video height
+          buttonSize: data.button_size || 60,
+          previewVideoHeight: data.preview_video_height || 120,
+          templateId: data.template_id || undefined // Load template ID
         });
 
         // Scroll to widget form
@@ -101,8 +103,9 @@ export const useWidgetState = (user: any) => {
       videoAlignment: 'center',
       customIcon: null,
       customIconUrl: '',
-      buttonSize: 60, // Reset button size
-      previewVideoHeight: 120 // Reset preview video height
+      buttonSize: 60,
+      previewVideoHeight: 120,
+      templateId: undefined // Reset template ID
     });
   };
 

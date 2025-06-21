@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { Channel, FormData } from './types';
@@ -19,31 +18,57 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 }) => {
   const [template, setTemplate] = useState<WidgetTemplate | null>(null);
   const [previewHtml, setPreviewHtml] = useState<string>('');
+  const [loading, setLoading] = useState(true);
 
-  // Fetch default template
+  // Fetch selected template or default template
   useEffect(() => {
     const fetchTemplate = async () => {
-      const { data, error } = await supabase
-        .from('widget_templates')
-        .select('*')
-        .eq('is_default', true)
-        .eq('is_active', true)
-        .single();
+      setLoading(true);
+      try {
+        let templateQuery = supabase.from('widget_templates').select('*');
+        
+        // If a specific template is selected, fetch it
+        if (formData.templateId) {
+          templateQuery = templateQuery.eq('id', formData.templateId);
+        } else {
+          // Otherwise fetch default template
+          templateQuery = templateQuery.eq('is_default', true).eq('is_active', true);
+        }
 
-      if (error) {
+        const { data, error } = await templateQuery.single();
+
+        if (error) {
+          console.error('Error fetching template:', error);
+          // Fallback to default template if specific template fails
+          if (formData.templateId) {
+            const { data: defaultData, error: defaultError } = await supabase
+              .from('widget_templates')
+              .select('*')
+              .eq('is_default', true)
+              .eq('is_active', true)
+              .single();
+            
+            if (!defaultError && defaultData) {
+              setTemplate(defaultData);
+            }
+          }
+          return;
+        }
+
+        setTemplate(data);
+      } catch (error) {
         console.error('Error fetching template:', error);
-        return;
+      } finally {
+        setLoading(false);
       }
-
-      setTemplate(data);
     };
 
     fetchTemplate();
-  }, []);
+  }, [formData.templateId]);
 
   // Generate preview HTML when template or config changes
   useEffect(() => {
-    if (!template || !showWidget) {
+    if (!template || !showWidget || loading) {
       setPreviewHtml('');
       return;
     }
@@ -67,7 +92,18 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     const renderer = new TemplateRenderer(template, config);
     const html = renderer.renderComplete();
     setPreviewHtml(html);
-  }, [template, formData, channels, showWidget, editingWidget]);
+  }, [template, formData, channels, showWidget, editingWidget, loading]);
+
+  if (loading) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <div className="w-16 h-16 mx-auto mb-4 opacity-50 bg-gray-200 rounded-full flex items-center justify-center animate-pulse">
+          <span className="text-2xl">⏳</span>
+        </div>
+        <p>Loading template...</p>
+      </div>
+    );
+  }
 
   if (!showWidget || !template) {
     return (
@@ -77,6 +113,11 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
         </div>
         <p>Your website preview</p>
         <p className="text-sm">Widget appears below</p>
+        {formData.templateId && (
+          <p className="text-xs mt-2 text-purple-600">
+            Using template: {template?.name || 'Loading...'}
+          </p>
+        )}
       </div>
     );
   }
@@ -89,6 +130,11 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
             <span className="text-2xl">🌐</span>
           </div>
           <p>Your website preview</p>
+          {template && (
+            <p className="text-xs mt-2 text-purple-600">
+              Template: {template.name}
+            </p>
+          )}
         </div>
       </div>
       
