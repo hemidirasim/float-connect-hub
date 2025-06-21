@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Channel, FormData } from "@/components/FloatingWidgetBuilder/types";
+import { platformOptions } from "@/components/FloatingWidgetBuilder/constants";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -23,6 +24,9 @@ const Index = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingWidget, setEditingWidget] = useState<any>(null);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     buttonColor: '#25d366',
@@ -112,10 +116,13 @@ const Index = () => {
 
   const handleAddChannel = () => {
     if (selectedChannelType && channelValue.trim()) {
+      // Find the platform to get the label
+      const platform = platformOptions.find(p => p.value === selectedChannelType);
       const newChannel = {
         id: Date.now().toString(),
         type: selectedChannelType,
-        value: channelValue.trim()
+        value: channelValue.trim(),
+        label: platform?.label || selectedChannelType
       };
       setChannels(prev => [...prev, newChannel]);
       setChannelValue('');
@@ -244,6 +251,48 @@ const Index = () => {
     }
   };
 
+  // Generate widget code
+  useEffect(() => {
+    if (websiteUrl && channels.length > 0) {
+      const code = `<script>
+(function() {
+  // Widget configuration
+  const config = {
+    channels: ${JSON.stringify(channels)},
+    buttonColor: "${formData.buttonColor}",
+    position: "${formData.position}",
+    tooltip: "${formData.tooltip}",
+    useVideo: ${formData.useVideoPreview}
+  };
+  
+  // Create widget HTML
+  const widgetHTML = \`
+    <div id="floating-widget" style="position:fixed;${formData.position}:20px;bottom:20px;z-index:9999;">
+      <button style="width:60px;height:60px;border-radius:50%;background:\${config.buttonColor};border:none;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+        <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+          <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+        </svg>
+      </button>
+    </div>
+  \`;
+  
+  // Insert widget into page
+  document.body.insertAdjacentHTML('beforeend', widgetHTML);
+})();
+</script>`;
+      setGeneratedCode(code);
+    } else {
+      setGeneratedCode('');
+    }
+  }, [websiteUrl, channels, formData]);
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(generatedCode);
+    setCopied(true);
+    toast.success('Code copied to clipboard!');
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Header 
@@ -285,26 +334,18 @@ const Index = () => {
               
               <div className="space-y-6">
                 <LivePreview
+                  showWidget={channels.length > 0}
+                  formData={formData}
                   channels={channels}
-                  buttonColor={formData.buttonColor}
-                  position={formData.position}
-                  tooltip={formData.tooltip}
-                  tooltipDisplay={formData.tooltipDisplay}
-                  video={formData.video}
-                  useVideoPreview={formData.useVideoPreview}
-                  videoHeight={formData.videoHeight}
-                  videoAlignment={formData.videoAlignment}
-                  customIcon={formData.customIcon}
-                  customIconUrl={formData.customIconUrl}
+                  videoModalOpen={videoModalOpen}
+                  onVideoModalOpenChange={setVideoModalOpen}
+                  editingWidget={editingWidget}
                 />
                 
                 <CodePreview
-                  websiteUrl={websiteUrl}
-                  channels={channels}
-                  buttonColor={formData.buttonColor}
-                  position={formData.position}
-                  tooltip={formData.tooltip}
-                  useVideoPreview={formData.useVideoPreview}
+                  generatedCode={generatedCode}
+                  copied={copied}
+                  onCopy={handleCopyCode}
                 />
               </div>
             </div>
@@ -318,8 +359,8 @@ const Index = () => {
       <Footer />
       
       <AuthModal 
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
+        open={authModalOpen}
+        onOpenChange={setAuthModalOpen}
       />
     </div>
   );
