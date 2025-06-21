@@ -5,12 +5,9 @@ export interface WidgetTemplate {
   id: string;
   name: string;
   description: string;
-  html_template: string;
-  css_template: string;
-  js_template: string;
-  preview_image_url?: string;
-  is_active: boolean;
-  is_default: boolean;
+  html: string;
+  css: string;
+  js: string;
 }
 
 export interface TemplateConfig {
@@ -176,18 +173,18 @@ export class TemplateRenderer {
   }
 
   public renderHTML(): string {
-    return this.replacePlaceholders(this.template.html_template);
+    return this.replacePlaceholders(this.template.html);
   }
 
   public renderCSS(): string {
-    return this.replacePlaceholders(this.template.css_template);
+    return this.replacePlaceholders(this.template.css);
   }
 
   public renderJS(): string {
     // Always use the template's JS if available
-    if (this.template.js_template && this.template.js_template.trim()) {
+    if (this.template.js && this.template.js.trim()) {
       console.log('Using template JavaScript');
-      return this.replacePlaceholders(this.template.js_template);
+      return this.replacePlaceholders(this.template.js);
     }
     
     console.log('Using fallback JavaScript');
