@@ -145,6 +145,7 @@ export type Database = {
           show_on_desktop: boolean | null
           show_on_mobile: boolean | null
           tooltip: string | null
+          tooltip_display: string | null
           total_views: number | null
           updated_at: string | null
           user_id: string
@@ -167,6 +168,7 @@ export type Database = {
           show_on_desktop?: boolean | null
           show_on_mobile?: boolean | null
           tooltip?: string | null
+          tooltip_display?: string | null
           total_views?: number | null
           updated_at?: string | null
           user_id: string
@@ -189,6 +191,7 @@ export type Database = {
           show_on_desktop?: boolean | null
           show_on_mobile?: boolean | null
           tooltip?: string | null
+          tooltip_display?: string | null
           total_views?: number | null
           updated_at?: string | null
           user_id?: string

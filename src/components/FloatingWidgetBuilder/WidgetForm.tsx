@@ -107,14 +107,16 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           onCustomIconUpload={onCustomIconUpload}
         />
 
-        {/* Customization Options - Simplified, Video Display Settings moved to VideoUpload */}
+        {/* Customization Options - Now includes tooltip display option */}
         <CustomizationOptions
           buttonColor={formData.buttonColor}
           position={formData.position}
           tooltip={formData.tooltip}
+          tooltipDisplay={formData.tooltipDisplay}
           onButtonColorChange={(color) => onFormDataChange('buttonColor', color)}
           onPositionChange={(position) => onFormDataChange('position', position)}
           onTooltipChange={(tooltip) => onFormDataChange('tooltip', tooltip)}
+          onTooltipDisplayChange={(display) => onFormDataChange('tooltipDisplay', display)}
         />
 
         <Button 

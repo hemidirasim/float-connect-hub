@@ -8,18 +8,22 @@ interface CustomizationOptionsProps {
   buttonColor: string;
   position: string;
   tooltip: string;
+  tooltipDisplay: string;
   onButtonColorChange: (color: string) => void;
   onPositionChange: (position: string) => void;
   onTooltipChange: (tooltip: string) => void;
+  onTooltipDisplayChange: (display: string) => void;
 }
 
 export const CustomizationOptions: React.FC<CustomizationOptionsProps> = ({
   buttonColor,
   position,
   tooltip,
+  tooltipDisplay,
   onButtonColorChange,
   onPositionChange,
-  onTooltipChange
+  onTooltipChange,
+  onTooltipDisplayChange
 }) => {
   return (
     <>
@@ -57,13 +61,27 @@ export const CustomizationOptions: React.FC<CustomizationOptionsProps> = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="tooltip">Call-to-Action Tooltip</Label>
+        <Label htmlFor="tooltip">Call-to-Action Message</Label>
         <Input
           id="tooltip"
           placeholder="Get in touch with us!"
           value={tooltip}
           onChange={(e) => onTooltipChange(e.target.value)}
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Message Display</Label>
+        <Select value={tooltipDisplay} onValueChange={onTooltipDisplayChange}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-white">
+            <SelectItem value="hover">Show on hover</SelectItem>
+            <SelectItem value="always">Always show</SelectItem>
+            <SelectItem value="never">Never show</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </>
   );

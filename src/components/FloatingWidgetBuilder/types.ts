@@ -11,6 +11,7 @@ export interface FormData {
   buttonColor: string;
   position: 'left' | 'right';
   tooltip: string;
+  tooltipDisplay: 'hover' | 'always' | 'never';
   useVideoPreview: boolean;
   videoHeight?: number;
   videoAlignment?: 'top' | 'center' | 'bottom';

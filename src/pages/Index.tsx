@@ -23,6 +23,7 @@ const Index = () => {
     buttonColor: '#25d366',
     position: 'right',
     tooltip: '',
+    tooltipDisplay: 'hover',
     useVideoPreview: false,
     videoHeight: 200,
     videoAlignment: 'center',
@@ -69,9 +70,12 @@ const Index = () => {
           buttonColor: data.button_color,
           position: data.position,
           tooltip: data.tooltip || '',
+          tooltipDisplay: data.tooltip_display || 'hover',
           useVideoPreview: data.video_enabled,
           videoHeight: data.video_height || 200,
-          videoAlignment: data.video_alignment || 'center'
+          videoAlignment: data.video_alignment || 'center',
+          customIcon: data.custom_icon_url ? 'custom' : 'message-circle',
+          customIconUrl: data.custom_icon_url || ''
         });
         toast.success('Widget yükləndi - redaktə edə bilərsiniz');
       }
@@ -295,6 +299,7 @@ const Index = () => {
         button_color: formData.buttonColor,
         position: formData.position,
         tooltip: formData.tooltip,
+        tooltip_display: formData.tooltipDisplay,
         video_enabled: formData.useVideoPreview,
         video_url: videoUrl,
         video_height: formData.videoHeight || 200,
