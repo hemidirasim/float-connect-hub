@@ -7,11 +7,11 @@ export const generateWidgetCode = (
   formData: FormData,
   widgetId?: string
 ): string => {
-  // If we have a widget ID, use the simple script tag
+  // If we have a widget ID, use the simple script tag without template parameter
+  // Template is now stored in database and will be automatically used
   if (widgetId) {
-    const templateId = formData.templateId || 'default';
     return `<!-- Add this script to your website's HTML -->
-<script src="https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/widget-js/${widgetId}?template=${templateId}"></script>`;
+<script src="https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/widget-js/${widgetId}"></script>`;
   }
 
   // Fallback to basic static code (for preview)

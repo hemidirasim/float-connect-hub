@@ -28,7 +28,7 @@ export const useWidgetState = (user: any) => {
     customIconUrl: '',
     buttonSize: 60,
     previewVideoHeight: 120,
-    templateId: '' // Initialize as empty string instead of undefined
+    templateId: 'default' // Set default template
   });
 
   // Check for editing widget on load
@@ -70,7 +70,7 @@ export const useWidgetState = (user: any) => {
           customIconUrl: data.custom_icon_url || '',
           buttonSize: data.button_size || 60,
           previewVideoHeight: data.preview_video_height || 120,
-          templateId: data.template_id || '' // Load template ID, default to empty string
+          templateId: data.template_id || 'default' // Load template_id from database
         });
 
         // Scroll to widget form
@@ -106,7 +106,7 @@ export const useWidgetState = (user: any) => {
       customIconUrl: '',
       buttonSize: 60,
       previewVideoHeight: 120,
-      templateId: '' // Reset to empty string
+      templateId: 'default' // Reset to default template
     });
   };
 

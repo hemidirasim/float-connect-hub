@@ -61,9 +61,9 @@ export const useWidgetActions = (
     }
 
     try {
-      console.log('Saving widget to database - template handled separately');
+      console.log('Saving widget to database with template_id:', formData.templateId || 'default');
       
-      // Create widget data - only database fields, NO template references
+      // Create widget data including template_id in the database
       const widgetData = {
         name: websiteName,
         website_url: websiteUrl,
@@ -78,11 +78,12 @@ export const useWidgetActions = (
         custom_icon_url: formData.customIconUrl,
         button_size: formData.buttonSize,
         preview_video_height: formData.previewVideoHeight,
+        template_id: formData.templateId || 'default', // Save template_id to database
         channels: channels,
         user_id: user?.id
       };
 
-      console.log('Clean widget data for database:', widgetData);
+      console.log('Widget data for database:', widgetData);
 
       let savedWidget;
 
@@ -118,11 +119,6 @@ export const useWidgetActions = (
       }
       
       console.log('Widget saved to database successfully:', savedWidget);
-      
-      // Template info is added ONLY for code generation, never saved to DB
-      const templateId = formData.templateId || 'default';
-      savedWidget.templateId = templateId;
-      console.log('Template ID added for code generation only:', templateId);
       
       return { success: true, widget: savedWidget };
     } catch (error) {

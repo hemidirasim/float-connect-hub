@@ -22,10 +22,6 @@ serve(async (req) => {
     const widgetId = extractWidgetId(url)
     console.log('Extracted widget ID:', widgetId)
 
-    // Extract template ID from query parameters
-    const templateId = url.searchParams.get('template') || 'default'
-    console.log('Template ID from URL:', templateId)
-
     if (!widgetId || widgetId === 'widget-js') {
       console.log('Invalid or missing widget ID')
       return new Response('Widget ID required', { 
@@ -40,7 +36,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Fetch widget data
+    // Fetch widget data (template_id now comes from database)
     const widget = await getWidget(widgetId)
 
     if (!widget) {
@@ -51,7 +47,7 @@ serve(async (req) => {
       })
     }
 
-    console.log('Widget loaded from database for template processing:', {
+    console.log('Widget loaded from database:', {
       name: widget.name,
       id: widget.id,
       template_id: widget.template_id,
@@ -63,7 +59,7 @@ serve(async (req) => {
 
     // Add cache busting based on widget update time
     const lastModified = new Date(widget.updated_at).toUTCString()
-    const etag = `"${widgetId}-${widget.updated_at}-${templateId}"`
+    const etag = `"${widgetId}-${widget.updated_at}"`
 
     // Handle HEAD requests for update checking
     if (req.method === 'HEAD') {
@@ -75,7 +71,7 @@ serve(async (req) => {
           'ETag': etag,
           'Cache-Control': 'no-cache',
           'X-Widget-Version': widget.updated_at,
-          'X-Widget-Template': templateId
+          'X-Widget-Template': widget.template_id || 'default'
         }
       })
     }
@@ -95,15 +91,11 @@ serve(async (req) => {
       })
     }
 
-    // Override template ID from URL parameter if provided
-    widget.template_id = templateId
-    console.log('Using template ID for generation:', templateId)
-
-    // Generate widget JavaScript with proper template
+    // Generate widget JavaScript using template_id from database
     const widgetScript = await generateWidgetScriptWithTemplate(widget, supabaseClient)
     
     console.log('Widget script generation completed:', {
-      templateUsed: templateId,
+      templateUsed: widget.template_id || 'default',
       scriptLength: widgetScript.length,
       widgetName: widget.name
     })
@@ -117,9 +109,8 @@ serve(async (req) => {
         'ETag': etag,
         // Add debug headers for troubleshooting
         'X-Widget-Version': widget.updated_at,
-        'X-Widget-Template': templateId,
-        'X-Widget-Name': widget.name,
-        'X-Debug-TemplateId': templateId
+        'X-Widget-Template': widget.template_id || 'default',
+        'X-Widget-Name': widget.name
       }
     })
 
