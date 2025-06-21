@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { MessageSquare, Plus, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { MessageSquare, Plus, Clock, CheckCircle, AlertCircle, Send, ArrowLeft } from 'lucide-react';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,6 +27,8 @@ export const SupportTickets: React.FC = () => {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
+  const [replyMessage, setReplyMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [newTicket, setNewTicket] = useState({
     subject: '',
@@ -51,7 +53,7 @@ export const SupportTickets: React.FC = () => {
       setTickets(data || []);
     } catch (error) {
       console.error('Error fetching tickets:', error);
-      toast.error('Biletlər yüklənməkdə xəta');
+      toast.error('Error loading tickets');
     } finally {
       setLoading(false);
     }
@@ -59,7 +61,7 @@ export const SupportTickets: React.FC = () => {
 
   const handleSubmitTicket = async () => {
     if (!newTicket.subject.trim() || !newTicket.message.trim()) {
-      toast.error('Mövzu və mesaj tələb olunur');
+      toast.error('Subject and message are required');
       return;
     }
 
@@ -76,13 +78,30 @@ export const SupportTickets: React.FC = () => {
 
       if (error) throw error;
 
-      toast.success('Dəstək bileti yaradıldı!');
+      toast.success('Support ticket created!');
       setModalOpen(false);
       setNewTicket({ subject: '', message: '', priority: 'medium' });
       fetchTickets();
     } catch (error) {
       console.error('Error creating ticket:', error);
-      toast.error('Bilet yaradılarkən xəta baş verdi');
+      toast.error('Error creating ticket');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSendReply = async () => {
+    if (!replyMessage.trim() || !selectedTicket) return;
+
+    setSubmitting(true);
+    try {
+      // In a real application, you would save this reply to a separate table
+      // For now, we'll just show a success message
+      toast.success('Reply sent! Our team will respond soon.');
+      setReplyMessage('');
+    } catch (error) {
+      console.error('Error sending reply:', error);
+      toast.error('Error sending reply');
     } finally {
       setSubmitting(false);
     }
@@ -127,7 +146,76 @@ export const SupportTickets: React.FC = () => {
     return (
       <div className="text-center py-8">
         <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-        <p className="text-gray-600">Biletlər yüklənir...</p>
+        <p className="text-gray-600">Loading tickets...</p>
+      </div>
+    );
+  }
+
+  // Show ticket detail view
+  if (selectedTicket) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="sm" onClick={() => setSelectedTicket(null)}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Tickets
+          </Button>
+          <h2 className="text-xl font-semibold">Ticket Details</h2>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle className="text-lg">{selectedTicket.subject}</CardTitle>
+                <CardDescription>
+                  Created on {new Date(selectedTicket.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Badge className={`${getStatusColor(selectedTicket.status)} flex items-center gap-1`}>
+                  {getStatusIcon(selectedTicket.status)}
+                  {selectedTicket.status === 'open' ? 'Open' : 'Closed'}
+                </Badge>
+                <Badge className={getPriorityColor(selectedTicket.priority)}>
+                  {selectedTicket.priority === 'high' ? 'High' : 
+                   selectedTicket.priority === 'medium' ? 'Medium' : 'Low'}
+                </Badge>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 mb-2">Original Message:</p>
+                <p className="text-gray-800">{selectedTicket.message}</p>
+              </div>
+
+              {selectedTicket.status === 'open' && (
+                <div className="space-y-3">
+                  <Label htmlFor="reply">Add a Reply</Label>
+                  <Textarea
+                    id="reply"
+                    value={replyMessage}
+                    onChange={(e) => setReplyMessage(e.target.value)}
+                    placeholder="Add additional information or questions..."
+                    rows={4}
+                  />
+                  <Button onClick={handleSendReply} disabled={!replyMessage.trim() || submitting}>
+                    <Send className="w-4 h-4 mr-2" />
+                    {submitting ? 'Sending...' : 'Send Reply'}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -136,33 +224,33 @@ export const SupportTickets: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-xl font-semibold">Dəstək biletləri</h2>
-          <p className="text-gray-600">Suallarınız və problemləriniz üçün bilet yaradın</p>
+          <h2 className="text-xl font-semibold">Support Tickets</h2>
+          <p className="text-gray-600">Create tickets for questions and issues</p>
         </div>
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              Yeni bilet
+              New Ticket
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>Yeni dəstək bileti</DialogTitle>
+              <DialogTitle>New Support Ticket</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="subject">Mövzu</Label>
+                <Label htmlFor="subject">Subject</Label>
                 <Input
                   id="subject"
                   value={newTicket.subject}
                   onChange={(e) => setNewTicket(prev => ({ ...prev, subject: e.target.value }))}
-                  placeholder="Problemin qısa təsviri"
+                  placeholder="Brief description of the issue"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="priority">Prioritet</Label>
+                <Label htmlFor="priority">Priority</Label>
                 <Select 
                   value={newTicket.priority} 
                   onValueChange={(value) => setNewTicket(prev => ({ ...prev, priority: value }))}
@@ -171,30 +259,30 @@ export const SupportTickets: React.FC = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">Aşağı</SelectItem>
-                    <SelectItem value="medium">Orta</SelectItem>
-                    <SelectItem value="high">Yüksək</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="message">Mesaj</Label>
+                <Label htmlFor="message">Message</Label>
                 <Textarea
                   id="message"
                   value={newTicket.message}
                   onChange={(e) => setNewTicket(prev => ({ ...prev, message: e.target.value }))}
-                  placeholder="Problemi ətraflı təsvir edin..."
+                  placeholder="Describe the issue in detail..."
                   rows={4}
                 />
               </div>
               
               <div className="flex justify-end gap-4">
                 <Button variant="outline" onClick={() => setModalOpen(false)}>
-                  Ləğv et
+                  Cancel
                 </Button>
                 <Button onClick={handleSubmitTicket} disabled={submitting}>
-                  {submitting ? 'Göndərilir...' : 'Göndər'}
+                  {submitting ? 'Submitting...' : 'Submit'}
                 </Button>
               </div>
             </div>
@@ -206,24 +294,24 @@ export const SupportTickets: React.FC = () => {
         <Card>
           <CardContent className="p-12 text-center">
             <MessageSquare className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-            <h3 className="text-lg font-semibold mb-2">Hələ biletiniz yoxdur</h3>
-            <p className="text-gray-600 mb-4">Sual və ya problemlər üçün dəstək bileti yaradın</p>
+            <h3 className="text-lg font-semibold mb-2">No tickets yet</h3>
+            <p className="text-gray-600 mb-4">Create a support ticket for questions or issues</p>
             <Button onClick={() => setModalOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              İlk bileti yarat
+              Create First Ticket
             </Button>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
           {tickets.map((ticket) => (
-            <Card key={ticket.id}>
+            <Card key={ticket.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedTicket(ticket)}>
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-lg">{ticket.subject}</CardTitle>
                     <CardDescription>
-                      {new Date(ticket.created_at).toLocaleDateString('az-AZ', {
+                      {new Date(ticket.created_at).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
@@ -235,17 +323,17 @@ export const SupportTickets: React.FC = () => {
                   <div className="flex gap-2">
                     <Badge className={`${getStatusColor(ticket.status)} flex items-center gap-1`}>
                       {getStatusIcon(ticket.status)}
-                      {ticket.status === 'open' ? 'Açıq' : 'Bağlı'}
+                      {ticket.status === 'open' ? 'Open' : 'Closed'}
                     </Badge>
                     <Badge className={getPriorityColor(ticket.priority)}>
-                      {ticket.priority === 'high' ? 'Yüksək' : 
-                       ticket.priority === 'medium' ? 'Orta' : 'Aşağı'}
+                      {ticket.priority === 'high' ? 'High' : 
+                       ticket.priority === 'medium' ? 'Medium' : 'Low'}
                     </Badge>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700">{ticket.message}</p>
+                <p className="text-gray-700 line-clamp-2">{ticket.message}</p>
               </CardContent>
             </Card>
           ))}

@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Eye, Settings, CreditCard, MessageSquare, BarChart3, Coins, Globe, Smartphone, Monitor, Code, DollarSign, Home } from 'lucide-react';
+import { Switch } from "@/components/ui/switch";
+import { Edit, Trash2, Eye, Settings, CreditCard, MessageSquare, BarChart3, Coins, Globe, Smartphone, Monitor, Code, Home } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SupportTickets } from "@/components/SupportTickets";
@@ -62,7 +63,7 @@ const Dashboard = () => {
       setWidgets(data || []);
     } catch (error) {
       console.error('Error fetching widgets:', error);
-      toast.error('Widget-ləri yükləməkdə xəta');
+      toast.error('Error loading widgets');
     } finally {
       setLoadingWidgets(false);
     }
@@ -82,8 +83,24 @@ const Dashboard = () => {
     }
   };
 
+  const handleToggleActive = async (widgetId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('widgets')
+        .update({ is_active: !currentStatus })
+        .eq('id', widgetId);
+
+      if (error) throw error;
+      toast.success(`Widget ${!currentStatus ? 'activated' : 'deactivated'}`);
+      fetchWidgets();
+    } catch (error) {
+      console.error('Error updating widget status:', error);
+      toast.error('Error updating widget status');
+    }
+  };
+
   const handleDeleteWidget = async (widgetId: string, widgetName: string) => {
-    if (!confirm(`"${widgetName}" widget-ini silmək istədiyinizə əminsiniz?`)) return;
+    if (!confirm(`Are you sure you want to delete "${widgetName}" widget?`)) return;
 
     try {
       const { error } = await supabase
@@ -92,18 +109,19 @@ const Dashboard = () => {
         .eq('id', widgetId);
 
       if (error) throw error;
-      toast.success('Widget silindi');
+      toast.success('Widget deleted');
       fetchWidgets();
     } catch (error) {
       console.error('Error deleting widget:', error);
-      toast.error('Widget silinməkdə xəta');
+      toast.error('Error deleting widget');
     }
   };
 
   const handleCustomize = (widgetId: string) => {
     // Store widget ID in localStorage to edit on main page
     localStorage.setItem('editWidgetId', widgetId);
-    navigate('/');
+    // Navigate to main page with a hash to scroll to the widget form
+    navigate('/#widget-form');
   };
 
   const generateWidgetCode = (widget: Widget) => {
@@ -131,7 +149,7 @@ const Dashboard = () => {
   const copyCode = (widget: Widget) => {
     const code = generateWidgetCode(widget);
     navigator.clipboard.writeText(code);
-    toast.success('Kod kopyalandı!');
+    toast.success('Code copied!');
   };
 
   if (loading || loadingWidgets) {
@@ -139,7 +157,7 @@ const Dashboard = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-600">Yüklənir...</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -150,8 +168,8 @@ const Dashboard = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Giriş tələb olunur</CardTitle>
-            <CardDescription>Dashboard-a daxil olmaq üçün hesabınıza giriş edin</CardDescription>
+            <CardTitle>Login Required</CardTitle>
+            <CardDescription>Please sign in to access the dashboard</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -167,14 +185,14 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
               Dashboard
             </h1>
-            <p className="text-gray-600">Widget-lərinizi idarə edin və statistikalarınızı izləyin</p>
+            <p className="text-gray-600">Manage your widgets and track your statistics</p>
           </div>
           <Button 
             onClick={() => navigate('/')}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >
             <Home className="w-4 h-4 mr-2" />
-            Ana səhifə
+            Home
           </Button>
         </div>
 
@@ -184,9 +202,9 @@ const Dashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Balans</p>
+                  <p className="text-sm font-medium text-gray-600">Balance</p>
                   <p className="text-2xl font-bold text-green-600">{userCredits.balance}</p>
-                  <p className="text-xs text-gray-500">kredit</p>
+                  <p className="text-xs text-gray-500">credits</p>
                 </div>
                 <Coins className="w-8 h-8 text-green-600" />
               </div>
@@ -197,9 +215,9 @@ const Dashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Widget sayı</p>
+                  <p className="text-sm font-medium text-gray-600">Widgets</p>
                   <p className="text-2xl font-bold text-blue-600">{widgets.length}</p>
-                  <p className="text-xs text-gray-500">aktiv: {widgets.filter(w => w.is_active).length}</p>
+                  <p className="text-xs text-gray-500">active: {widgets.filter(w => w.is_active).length}</p>
                 </div>
                 <Globe className="w-8 h-8 text-blue-600" />
               </div>
@@ -210,11 +228,11 @@ const Dashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Ümumi görüntülənmə</p>
+                  <p className="text-sm font-medium text-gray-600">Total Views</p>
                   <p className="text-2xl font-bold text-purple-600">
                     {widgets.reduce((sum, w) => sum + w.total_views, 0)}
                   </p>
-                  <p className="text-xs text-gray-500">bütün widget-lər</p>
+                  <p className="text-xs text-gray-500">all widgets</p>
                 </div>
                 <Eye className="w-8 h-8 text-purple-600" />
               </div>
@@ -225,9 +243,9 @@ const Dashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Xərclənmiş</p>
+                  <p className="text-sm font-medium text-gray-600">Spent</p>
                   <p className="text-2xl font-bold text-orange-600">{userCredits.total_spent}</p>
-                  <p className="text-xs text-gray-500">kredit</p>
+                  <p className="text-xs text-gray-500">credits</p>
                 </div>
                 <BarChart3 className="w-8 h-8 text-orange-600" />
               </div>
@@ -238,18 +256,18 @@ const Dashboard = () => {
         {/* Main Content */}
         <Tabs defaultValue="widgets" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="widgets">Saytlarım</TabsTrigger>
+            <TabsTrigger value="widgets">My Websites</TabsTrigger>
             <TabsTrigger value="billing">Billing</TabsTrigger>
-            <TabsTrigger value="profile">Profil</TabsTrigger>
-            <TabsTrigger value="support">Dəstək</TabsTrigger>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="support">Support</TabsTrigger>
           </TabsList>
 
           <TabsContent value="widgets" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Saytlarım</h2>
+              <h2 className="text-xl font-semibold">My Websites</h2>
               <Button onClick={() => navigate('/')}>
                 <Globe className="w-4 h-4 mr-2" />
-                Yeni sayt əlavə et
+                Add New Website
               </Button>
             </div>
 
@@ -257,11 +275,11 @@ const Dashboard = () => {
               <Card>
                 <CardContent className="p-12 text-center">
                   <Globe className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-semibold mb-2">Hələ saytınız yoxdur</h3>
-                  <p className="text-gray-600 mb-4">İlk saytınızı əlavə edin və widget yaradın</p>
+                  <h3 className="text-lg font-semibold mb-2">No websites yet</h3>
+                  <p className="text-gray-600 mb-4">Add your first website and create a widget</p>
                   <Button onClick={() => navigate('/')}>
                     <Globe className="w-4 h-4 mr-2" />
-                    İlk saytı əlavə et
+                    Add First Website
                   </Button>
                 </CardContent>
               </Card>
@@ -278,25 +296,24 @@ const Dashboard = () => {
                           <div>
                             <CardTitle className="text-base">{widget.website_url}</CardTitle>
                             <p className="text-xs text-gray-500">
-                              {widget.is_active ? 'Aktiv' : 'Passiv'}
+                              {widget.is_active ? 'Active' : 'Inactive'}
                             </p>
                           </div>
                         </div>
-                        {!widget.is_active && (
-                          <Badge variant="secondary" className="text-xs">
-                            Upgrade to unlock
-                          </Badge>
-                        )}
+                        <Switch
+                          checked={widget.is_active}
+                          onCheckedChange={() => handleToggleActive(widget.id, widget.is_active)}
+                        />
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0">
                       <div className="space-y-3">
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Görüntülənmə:</span>
+                          <span className="text-gray-600">Views:</span>
                           <span className="font-medium">{widget.total_views}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Kanallar:</span>
+                          <span className="text-gray-600">Channels:</span>
                           <span className="font-medium">{widget.channels?.length || 0}</span>
                         </div>
                         {widget.video_url && (
@@ -329,18 +346,11 @@ const Dashboard = () => {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="flex-1 text-green-600 hover:text-green-700"
-                          >
-                            <DollarSign className="w-4 h-4 mr-1" />
-                            Upgrade
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
                             onClick={() => handleDeleteWidget(widget.id, widget.website_url)}
-                            className="text-red-600 hover:text-red-700"
+                            className="flex-1 text-red-600 hover:text-red-700"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Delete
                           </Button>
                         </div>
                       </div>
