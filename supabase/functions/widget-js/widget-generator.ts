@@ -14,7 +14,10 @@ export function createWidgetConfig(widget: any): WidgetConfig {
     videoEnabled: widget.video_enabled || defaultWidgetConfig.videoEnabled,
     videoUrl: widget.video_url || defaultWidgetConfig.videoUrl,
     videoHeight: widget.video_height || defaultWidgetConfig.videoHeight,
-    videoAlignment: widget.video_alignment || defaultWidgetConfig.videoAlignment
+    videoAlignment: widget.video_alignment || defaultWidgetConfig.videoAlignment,
+    useVideoPreview: widget.use_video_preview || false,
+    buttonSize: widget.button_size || 60,
+    previewVideoHeight: widget.preview_video_height || 120
   }
 }
 
@@ -39,8 +42,8 @@ export function generateWidgetScript(widget: any): string {
     }
     
     .widget-button {
-      width: 60px;
-      height: 60px;
+      width: \${config.buttonSize}px;
+      height: \${config.buttonSize}px;
       border-radius: 50%;
       background: \${config.buttonColor};
       border: none;
@@ -59,9 +62,16 @@ export function generateWidgetScript(widget: any): string {
       box-shadow: 0 6px 20px rgba(0,0,0,0.4);
     }
     
+    .widget-button video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    
     .tooltip {
       position: absolute;
-      \${config.position === 'left' ? 'left: 70px;' : 'right: 70px;'}
+      \${config.position === 'left' ? 'left: ' + (config.buttonSize + 10) + 'px;' : 'right: ' + (config.buttonSize + 10) + 'px;'}
       bottom: 50%;
       transform: translateY(50%);
       background: rgba(0,0,0,0.8);
@@ -246,14 +256,30 @@ export function generateWidgetScript(widget: any): string {
   var btn = document.createElement('button');
   btn.className = 'widget-button';
   
-  // Button icon
-  var iconHtml = '';
-  if (config.customIconUrl) {
-    iconHtml = '<img src="' + config.customIconUrl + '" alt="Contact" style="width:24px;height:24px;border-radius:50%;">';
+  // Button content - video preview or icon
+  var hasVideo = config.videoEnabled && config.videoUrl;
+  var useVideoPreview = config.useVideoPreview;
+  
+  if (hasVideo && useVideoPreview) {
+    // Show video preview in button
+    var video = document.createElement('video');
+    video.src = config.videoUrl;
+    video.autoplay = true;
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.style.objectPosition = config.videoAlignment;
+    btn.appendChild(video);
   } else {
-    iconHtml = '<svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>';
+    // Show icon
+    var iconHtml = '';
+    if (config.customIconUrl) {
+      iconHtml = '<img src="' + config.customIconUrl + '" alt="Contact" style="width:24px;height:24px;border-radius:50%;">';
+    } else {
+      iconHtml = '<svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>';
+    }
+    btn.innerHTML = iconHtml;
   }
-  btn.innerHTML = iconHtml;
   
   // Tooltip
   var tooltip = null;
