@@ -169,7 +169,7 @@ const Index = () => {
       const url = URL.createObjectURL(file);
       setFormData(prev => ({
         ...prev,
-        customIcon: file,
+        customIcon: 'custom',
         customIconUrl: url
       }));
       toast.success('Custom icon uploaded!');
