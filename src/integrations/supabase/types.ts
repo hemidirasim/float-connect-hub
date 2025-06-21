@@ -251,6 +251,7 @@ export type Database = {
       widgets: {
         Row: {
           button_color: string
+          button_size: number | null
           button_style: string | null
           channels: Json | null
           created_at: string | null
@@ -259,6 +260,7 @@ export type Database = {
           is_active: boolean | null
           name: string
           position: string
+          preview_video_height: number | null
           show_on_desktop: boolean | null
           show_on_mobile: boolean | null
           tooltip: string | null
@@ -274,6 +276,7 @@ export type Database = {
         }
         Insert: {
           button_color?: string
+          button_size?: number | null
           button_style?: string | null
           channels?: Json | null
           created_at?: string | null
@@ -282,6 +285,7 @@ export type Database = {
           is_active?: boolean | null
           name?: string
           position?: string
+          preview_video_height?: number | null
           show_on_desktop?: boolean | null
           show_on_mobile?: boolean | null
           tooltip?: string | null
@@ -297,6 +301,7 @@ export type Database = {
         }
         Update: {
           button_color?: string
+          button_size?: number | null
           button_style?: string | null
           channels?: Json | null
           created_at?: string | null
@@ -305,6 +310,7 @@ export type Database = {
           is_active?: boolean | null
           name?: string
           position?: string
+          preview_video_height?: number | null
           show_on_desktop?: boolean | null
           show_on_mobile?: boolean | null
           tooltip?: string | null
