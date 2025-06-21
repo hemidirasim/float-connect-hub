@@ -12,6 +12,8 @@ export interface WidgetConfig {
   position: string;
   tooltip: string;
   tooltipDisplay: string;
+  tooltipPosition?: string;
+  greetingMessage?: string;
   customIconUrl?: string;
   videoEnabled: boolean;
   videoUrl?: string;
@@ -20,5 +22,5 @@ export interface WidgetConfig {
   useVideoPreview: boolean;
   buttonSize: number;
   previewVideoHeight: number;
-  templateId?: string; // Add template ID support
+  templateId?: string;
 }

@@ -11,6 +11,8 @@ export interface FormData {
   position: string;
   tooltip: string;
   tooltipDisplay: string;
+  tooltipPosition: string; // Add tooltip position
+  greetingMessage: string; // Add greeting message
   video: File | null;
   videoUrl?: string;
   useVideoPreview: boolean;
@@ -20,5 +22,5 @@ export interface FormData {
   customIconUrl: string;
   buttonSize: number;
   previewVideoHeight: number;
-  templateId?: string; // Add template ID to form data
+  templateId?: string;
 }

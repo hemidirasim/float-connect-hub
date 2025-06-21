@@ -7,6 +7,8 @@ export function createWidgetConfig(widget: any): WidgetConfig {
     template_id: widget.template_id,
     templateId: widget.templateId,
     name: widget.name,
+    greeting_message: widget.greeting_message,
+    tooltip_position: widget.tooltip_position,
     raw_template_fields: {
       template_id: widget.template_id,
       templateId: widget.templateId
@@ -32,6 +34,8 @@ export function createWidgetConfig(widget: any): WidgetConfig {
     position: widget.position || defaultWidgetConfig.position,
     tooltip: widget.tooltip || defaultWidgetConfig.tooltip,
     tooltipDisplay: widget.tooltip_display || defaultWidgetConfig.tooltipDisplay,
+    tooltipPosition: widget.tooltip_position || 'top',
+    greetingMessage: widget.greeting_message || 'Hello! How can we help you today?',
     customIconUrl: widget.custom_icon_url || defaultWidgetConfig.customIconUrl,
     videoEnabled: widget.video_enabled || defaultWidgetConfig.videoEnabled,
     videoUrl: widget.video_url || defaultWidgetConfig.videoUrl,
@@ -40,11 +44,14 @@ export function createWidgetConfig(widget: any): WidgetConfig {
     useVideoPreview: widget.use_video_preview || false,
     buttonSize: widget.button_size || 60,
     previewVideoHeight: widget.preview_video_height || 120,
-    // Use the determined template ID
     templateId: finalTemplateId
   }
   
-  console.log('Widget config created with final templateId:', config.templateId)
+  console.log('Widget config created with final templateId and greeting message:', {
+    templateId: config.templateId,
+    greetingMessage: config.greetingMessage,
+    tooltipPosition: config.tooltipPosition
+  })
   
   return config
 }

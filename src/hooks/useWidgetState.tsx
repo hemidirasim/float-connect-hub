@@ -19,16 +19,18 @@ export const useWidgetState = (user: any) => {
     position: 'right',
     tooltip: 'Contact us!',
     tooltipDisplay: 'hover',
+    tooltipPosition: 'top',
+    greetingMessage: 'Hello! How can we help you today?',
     video: null,
     videoUrl: undefined,
     useVideoPreview: false,
     videoHeight: 200,
     videoAlignment: 'center',
-    customIcon: null,
+    customIcon: 'message',
     customIconUrl: '',
     buttonSize: 60,
     previewVideoHeight: 120,
-    templateId: 'default' // Set default template
+    templateId: 'default'
   });
 
   // Check for editing widget on load
@@ -61,16 +63,18 @@ export const useWidgetState = (user: any) => {
           position: data.position || 'right',
           tooltip: data.tooltip || 'Contact us!',
           tooltipDisplay: data.tooltip_display || 'hover',
+          tooltipPosition: data.tooltip_position || 'top',
+          greetingMessage: data.greeting_message || 'Hello! How can we help you today?',
           video: null,
           videoUrl: data.video_url || undefined,
           useVideoPreview: data.video_enabled || false,
           videoHeight: data.video_height || 200,
           videoAlignment: data.video_alignment || 'center',
-          customIcon: data.custom_icon_url ? 'custom' : null,
+          customIcon: data.custom_icon_url ? 'custom' : 'message',
           customIconUrl: data.custom_icon_url || '',
           buttonSize: data.button_size || 60,
           previewVideoHeight: data.preview_video_height || 120,
-          templateId: data.template_id || 'default' // Load template_id from database
+          templateId: data.template_id || 'default'
         });
 
         // Scroll to widget form
@@ -97,16 +101,18 @@ export const useWidgetState = (user: any) => {
       position: 'right',
       tooltip: 'Contact us!',
       tooltipDisplay: 'hover',
+      tooltipPosition: 'top',
+      greetingMessage: 'Hello! How can we help you today?',
       video: null,
       videoUrl: undefined,
       useVideoPreview: false,
       videoHeight: 200,
       videoAlignment: 'center',
-      customIcon: null,
+      customIcon: 'message',
       customIconUrl: '',
       buttonSize: 60,
       previewVideoHeight: 120,
-      templateId: 'default' // Reset to default template
+      templateId: 'default'
     });
   };
 

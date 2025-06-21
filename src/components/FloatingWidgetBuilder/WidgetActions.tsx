@@ -63,7 +63,7 @@ export const useWidgetActions = (
     try {
       console.log('Saving widget to database with template_id:', formData.templateId || 'default');
       
-      // Create widget data including template_id in the database
+      // Create widget data including new fields
       const widgetData = {
         name: websiteName,
         website_url: websiteUrl,
@@ -71,14 +71,16 @@ export const useWidgetActions = (
         position: formData.position,
         tooltip: formData.tooltip,
         tooltip_display: formData.tooltipDisplay,
+        tooltip_position: formData.tooltipPosition || 'top',
+        greeting_message: formData.greetingMessage || 'Hello! How can we help you today?',
         video_enabled: formData.useVideoPreview,
         video_url: formData.videoUrl || null,
         video_height: formData.videoHeight,
         video_alignment: formData.videoAlignment,
-        custom_icon_url: formData.customIconUrl,
+        custom_icon_url: formData.customIcon === 'custom' ? formData.customIconUrl : null,
         button_size: formData.buttonSize,
-        preview_video_height: formData.previewVideoHeight,
-        template_id: formData.templateId || 'default', // Save template_id to database
+        preview_video_height: formData.pre‌viewVideoHeight,
+        template_id: formData.templateId || 'default',
         channels: channels,
         user_id: user?.id
       };

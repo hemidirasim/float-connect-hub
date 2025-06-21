@@ -1,3 +1,4 @@
+
 import type { WidgetTemplate } from './template-generator.ts'
 
 export const getDefaultTemplate = (): WidgetTemplate => ({
@@ -15,7 +16,7 @@ export const getDefaultTemplate = (): WidgetTemplate => ({
 
 <div class="hiclient-modal-backdrop">
   <div class="hiclient-modal-content">
-    <div class="hiclient-modal-header">Bizimlə əlsaqə saxlayın</div>
+    <div class="hiclient-modal-header">{{greeting_message}}</div>
     <div class="hiclient-modal-close">×</div>
     {{video_section}}
     {{channels_section}}
@@ -52,8 +53,7 @@ export const getDefaultTemplate = (): WidgetTemplate => ({
 
 .hiclient-tooltip {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+  {{tooltip_position_style}};
   background: rgba(0, 0, 0, 0.9);
   color: white;
   padding: 8px 12px;
@@ -78,13 +78,9 @@ export const getDefaultTemplate = (): WidgetTemplate => ({
 .hiclient-tooltip::before {
   content: "";
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
   width: 0;
   height: 0;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  {{position}} === 'left' ? 'border-left: 5px solid rgba(0, 0, 0, 0.9); right: -5px;' : 'border-right: 5px solid rgba(0, 0, 0, 0.9); left: -5px;'
+  {{tooltip_arrow_style}}
 }
 
 .hiclient-modal-backdrop {

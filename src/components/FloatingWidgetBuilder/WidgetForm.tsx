@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Palette } from 'lucide-react';
 import { WebsiteInfoForm } from './WebsiteInfoForm';
 import { ChannelManager } from './ChannelManager';
 import { VideoUpload } from './VideoUpload';
@@ -73,12 +73,6 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Template Selector */}
-          <TemplateSelector
-            selectedTemplateId={formData.templateId || ''}
-            onTemplateChange={(templateId) => onFormDataChange('templateId', templateId)}
-          />
-
           {/* Website Info */}
           <WebsiteInfoForm
             websiteName={websiteName}
@@ -99,8 +93,31 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             onRemoveChannel={onRemoveChannel}
             onEditChannel={onEditChannel}
           />
+        </CardContent>
+      </Card>
 
-          {/* Video Upload */}
+      {/* Design & Appearance Section */}
+      <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette className="w-5 h-5 text-purple-600" />
+            Design & Appearance
+          </CardTitle>
+          <CardDescription>
+            Customize the look and feel of your widget
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Template Selector */}
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium">Choose Template</h3>
+            <TemplateSelector
+              selectedTemplateId={formData.templateId || ''}
+              onTemplateChange={(templateId) => onFormDataChange('templateId', templateId)}
+            />
+          </div>
+
+          {/* Video Upload & Icon Settings */}
           <VideoUpload
             video={formData.video}
             videoUrl={formData.videoUrl || editingWidget?.video_url}
@@ -124,16 +141,27 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           />
 
           {/* Customization Options */}
-          <CustomizationOptions
-            buttonColor={formData.buttonColor}
-            position={formData.position}
-            tooltip={formData.tooltip}
-            tooltipDisplay={formData.tooltipDisplay}
-            onButtonColorChange={(color) => onFormDataChange('buttonColor', color)}
-            onPositionChange={(position) => onFormDataChange('position', position)}
-            onTooltipChange={(tooltip) => onFormDataChange('tooltip', tooltip)}
-            onTooltipDisplayChange={(display) => onFormDataChange('tooltipDisplay', display)}
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Position & Messages</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CustomizationOptions
+                buttonColor={formData.buttonColor}
+                position={formData.position}
+                tooltip={formData.tooltip}
+                tooltipDisplay={formData.tooltipDisplay}
+                tooltipPosition={formData.tooltipPosition || 'top'}
+                greetingMessage={formData.greetingMessage || 'Hello! How can we help you today?'}
+                onButtonColorChange={(color) => onFormDataChange('buttonColor', color)}
+                onPositionChange={(position) => onFormDataChange('position', position)}
+                onTooltipChange={(tooltip) => onFormDataChange('tooltip', tooltip)}
+                onTooltipDisplayChange={(display) => onFormDataChange('tooltipDisplay', display)}
+                onTooltipPositionChange={(position) => onFormDataChange('tooltipPosition', position)}
+                onGreetingMessageChange={(message) => onFormDataChange('greetingMessage', message)}
+              />
+            </CardContent>
+          </Card>
 
           <Button 
             onClick={onCreateWidget} 

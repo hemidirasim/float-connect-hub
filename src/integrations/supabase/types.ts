@@ -298,6 +298,7 @@ export type Database = {
           channels: Json | null
           created_at: string | null
           custom_icon_url: string | null
+          greeting_message: string | null
           id: string
           is_active: boolean | null
           name: string
@@ -308,6 +309,7 @@ export type Database = {
           template_id: string | null
           tooltip: string | null
           tooltip_display: string | null
+          tooltip_position: string | null
           total_views: number | null
           updated_at: string | null
           user_id: string
@@ -324,6 +326,7 @@ export type Database = {
           channels?: Json | null
           created_at?: string | null
           custom_icon_url?: string | null
+          greeting_message?: string | null
           id?: string
           is_active?: boolean | null
           name?: string
@@ -334,6 +337,7 @@ export type Database = {
           template_id?: string | null
           tooltip?: string | null
           tooltip_display?: string | null
+          tooltip_position?: string | null
           total_views?: number | null
           updated_at?: string | null
           user_id: string
@@ -350,6 +354,7 @@ export type Database = {
           channels?: Json | null
           created_at?: string | null
           custom_icon_url?: string | null
+          greeting_message?: string | null
           id?: string
           is_active?: boolean | null
           name?: string
@@ -360,6 +365,7 @@ export type Database = {
           template_id?: string | null
           tooltip?: string | null
           tooltip_display?: string | null
+          tooltip_position?: string | null
           total_views?: number | null
           updated_at?: string | null
           user_id?: string
