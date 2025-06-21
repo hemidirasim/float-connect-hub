@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,48 +38,133 @@ const creditPackages = [
   },
 ];
 
+declare global {
+  interface Window {
+    Paddle: any;
+  }
+}
+
 export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onCreditsUpdate }) => {
   const [loading, setLoading] = useState(false);
+  const [paddleLoaded, setPaddleLoaded] = useState(false);
+
+  useEffect(() => {
+    // Load Paddle script
+    const script = document.createElement('script');
+    script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js';
+    script.async = true;
+    script.onload = () => {
+      console.log('Paddle script loaded');
+      initializePaddle();
+    };
+    script.onerror = () => {
+      console.error('Failed to load Paddle script');
+      toast.error('Ödəniş sistemi yüklənmədi');
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+    };
+  }, []);
+
+  const initializePaddle = async () => {
+    try {
+      if (window.Paddle) {
+        // Set environment to production
+        window.Paddle.Environment.set("production");
+        
+        // Get current user for customer email
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        window.Paddle.Initialize({
+          token: "live_4c7a652ca35ad9a6b1c1fc3c33c", // Replace with your client-side token
+          eventCallback: function(event: any) {
+            console.log('Paddle event:', event);
+            
+            if (event.name === "checkout.completed") {
+              handleCheckoutCompleted(event.data);
+            }
+            
+            if (event.name === "checkout.closed") {
+              setLoading(false);
+            }
+          }
+        });
+        
+        setPaddleLoaded(true);
+        console.log('Paddle initialized successfully');
+      }
+    } catch (error) {
+      console.error('Paddle initialization error:', error);
+      toast.error('Ödəniş sistemi quraşdırılmadı');
+    }
+  };
+
+  const handleCheckoutCompleted = async (data: any) => {
+    try {
+      console.log('Checkout completed:', data);
+      
+      // The webhook will handle adding credits, but we can show success message
+      toast.success('Ödəniş uğurla tamamlandı! Kredit balansınız yenilənəcək.');
+      
+      // Refresh credits after a short delay
+      setTimeout(() => {
+        onCreditsUpdate();
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Error handling checkout completion:', error);
+      toast.error('Ödəniş tamamlandı, lakin kredit əlavə edilmədi. Dəstəklə əlaqə saxlayın.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePurchaseCredits = async (credits: number, price: number, productId: string) => {
+    if (!paddleLoaded || !window.Paddle) {
+      toast.error('Ödəniş sistemi hələ yüklənməyib, xahiş edirik gözləyin');
+      return;
+    }
+
     setLoading(true);
+    
     try {
       // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) {
         toast.error('Giriş etməlisiniz');
+        setLoading(false);
         return;
       }
 
-      console.log('Creating checkout for:', { credits, price, productId });
+      console.log('Opening Paddle checkout for:', { credits, price, productId });
 
-      // Create Paddle checkout
-      const { data, error } = await supabase.functions.invoke('paddle-checkout', {
-        body: {
-          productId,
-          credits
+      // Open Paddle checkout popup
+      window.Paddle.Checkout.open({
+        items: [{
+          priceId: productId,
+          quantity: 1
+        }],
+        settings: {
+          theme: "light",
+          displayMode: "overlay",
+          allowLogout: false
+        },
+        customer: {
+          email: user.email
+        },
+        customData: {
+          user_id: user.id,
+          credits: credits.toString()
         }
       });
 
-      console.log('Checkout response:', data, error);
-
-      if (error) {
-        console.error('Checkout error:', error);
-        throw new Error(error.message);
-      }
-
-      if (data.success) {
-        // Open Paddle checkout in a new tab
-        window.open(data.checkout_url, '_blank');
-        toast.success('Ödəniş səhifəsi açıldı');
-      } else {
-        throw new Error(data.error || 'Checkout yaradılmadı');
-      }
-
     } catch (error) {
-      console.error('Error purchasing credits:', error);
-      toast.error('Kredit alınması zamanı xəta baş verdi: ' + error.message);
-    } finally {
+      console.error('Error opening Paddle checkout:', error);
+      toast.error('Ödəniş səhifəsi açılmadı: ' + error.message);
       setLoading(false);
     }
   };
@@ -126,15 +211,21 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
                   <Button 
                     className="w-full" 
                     onClick={() => handlePurchaseCredits(pkg.credits, pkg.price, pkg.productId)}
-                    disabled={loading}
+                    disabled={loading || !paddleLoaded}
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Satın al
+                    {loading ? 'Yüklənir...' : 'Satın al'}
                   </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
+          
+          {!paddleLoaded && (
+            <div className="text-center mt-4 text-sm text-gray-500">
+              Ödəniş sistemi yüklənir...
+            </div>
+          )}
         </CardContent>
       </Card>
 
