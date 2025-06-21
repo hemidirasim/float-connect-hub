@@ -1,19 +1,44 @@
 
-import React, { useEffect, useState } from 'react';
-import { supabase } from "@/integrations/supabase/client";
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Palette } from 'lucide-react';
 
-interface WidgetTemplate {
+interface TemplateOption {
   id: string;
   name: string;
   description: string;
-  preview_image_url?: string;
-  is_active: boolean;
   is_default: boolean;
 }
+
+// Static template list - no database needed
+const AVAILABLE_TEMPLATES: TemplateOption[] = [
+  {
+    id: 'default',
+    name: 'Default Template',
+    description: 'Standard floating widget with modal popup',
+    is_default: true
+  },
+  {
+    id: 'dark',
+    name: 'Dark Theme',
+    description: 'Modern dark-themed widget with sleek design',
+    is_default: false
+  },
+  {
+    id: 'minimal',
+    name: 'Minimal Clean',
+    description: 'Clean and minimal design with subtle animations',
+    is_default: false
+  },
+  {
+    id: 'modern',
+    name: 'Modern Gradient',
+    description: 'Modern template with gradient effects and smooth animations',
+    is_default: false
+  }
+];
 
 interface TemplateSelectorProps {
   selectedTemplateId: string;
@@ -24,37 +49,15 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   selectedTemplateId,
   onTemplateChange
 }) => {
-  const [templates, setTemplates] = useState<WidgetTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchTemplates();
-  }, []);
-
-  const fetchTemplates = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('widget_templates')
-        .select('*')
-        .eq('is_active', true)
-        .order('is_default', { ascending: false })
-        .order('name');
-
-      if (error) throw error;
-      
-      setTemplates(data || []);
-      
-      // If no template is selected and we have templates, select the default one
-      if (!selectedTemplateId && data && data.length > 0) {
-        const defaultTemplate = data.find(t => t.is_default) || data[0];
-        onTemplateChange(defaultTemplate.id);
-      }
-    } catch (error) {
-      console.error('Error fetching templates:', error);
-    } finally {
-      setLoading(false);
+  // Auto-select default template if none selected
+  React.useEffect(() => {
+    if (!selectedTemplateId) {
+      const defaultTemplate = AVAILABLE_TEMPLATES.find(t => t.is_default) || AVAILABLE_TEMPLATES[0];
+      onTemplateChange(defaultTemplate.id);
     }
-  };
+  }, [selectedTemplateId, onTemplateChange]);
+
+  const selectedTemplate = AVAILABLE_TEMPLATES.find(t => t.id === selectedTemplateId);
 
   return (
     <Card>
@@ -73,13 +76,12 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
           <Select 
             value={selectedTemplateId} 
             onValueChange={onTemplateChange}
-            disabled={loading}
           >
             <SelectTrigger id="template-select">
-              <SelectValue placeholder={loading ? "Loading templates..." : "Select a template"} />
+              <SelectValue placeholder="Select a template" />
             </SelectTrigger>
             <SelectContent>
-              {templates.map((template) => (
+              {AVAILABLE_TEMPLATES.map((template) => (
                 <SelectItem key={template.id} value={template.id}>
                   <div className="flex items-center gap-2">
                     <span>{template.name}</span>
@@ -94,9 +96,9 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
             </SelectContent>
           </Select>
           
-          {templates.length > 0 && selectedTemplateId && (
+          {selectedTemplate && (
             <div className="mt-2 text-sm text-gray-600">
-              {templates.find(t => t.id === selectedTemplateId)?.description}
+              {selectedTemplate.description}
             </div>
           )}
         </div>
