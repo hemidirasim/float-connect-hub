@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { HeroSection } from "@/components/FloatingWidgetBuilder/HeroSection";
 import { WidgetForm } from "@/components/FloatingWidgetBuilder/WidgetForm";
@@ -86,7 +87,7 @@ const Index = () => {
           useVideoPreview: data.video_enabled || false,
           videoHeight: data.video_height || 200,
           videoAlignment: data.video_alignment || 'center',
-          customIcon: null,
+          customIcon: data.custom_icon_url ? 'custom' : null,
           customIconUrl: data.custom_icon_url || ''
         });
 
@@ -216,6 +217,9 @@ const Index = () => {
 
         if (error) throw error;
         toast.success('Widget updated!');
+        
+        // Don't clear the form after update, just update the editingWidget state
+        setEditingWidget({ ...editingWidget, ...widgetData });
       } else {
         // Create new widget
         const { error } = await supabase
@@ -224,25 +228,25 @@ const Index = () => {
 
         if (error) throw error;
         toast.success('Widget created!');
-      }
 
-      // Clear editing widget and form
-      setEditingWidget(null);
-      setWebsiteName('');
-      setWebsiteUrl('');
-      setChannels([]);
-      setFormData({
-        buttonColor: '#25d366',
-        position: 'right',
-        tooltip: 'Contact us!',
-        tooltipDisplay: 'hover',
-        video: null,
-        useVideoPreview: false,
-        videoHeight: 200,
-        videoAlignment: 'center',
-        customIcon: null,
-        customIconUrl: ''
-      });
+        // Clear form only after creating new widget
+        setEditingWidget(null);
+        setWebsiteName('');
+        setWebsiteUrl('');
+        setChannels([]);
+        setFormData({
+          buttonColor: '#25d366',
+          position: 'right',
+          tooltip: 'Contact us!',
+          tooltipDisplay: 'hover',
+          video: null,
+          useVideoPreview: false,
+          videoHeight: 200,
+          videoAlignment: 'center',
+          customIcon: null,
+          customIconUrl: ''
+        });
+      }
     } catch (error) {
       console.error('Error saving widget:', error);
       toast.error('Error saving widget');
@@ -376,7 +380,7 @@ const Index = () => {
                 onCustomIconUpload={handleCustomIconUpload}
               />
               
-              <div className="space-y-6">
+              <div className="space-y-6 lg:sticky lg:top-8 lg:h-fit">
                 <LivePreview
                   showWidget={channels.length > 0}
                   formData={formData}
@@ -386,11 +390,13 @@ const Index = () => {
                   editingWidget={editingWidget}
                 />
                 
-                <CodePreview
-                  generatedCode={generatedCode}
-                  copied={copied}
-                  onCopy={handleCopyCode}
-                />
+                {generatedCode && (
+                  <CodePreview
+                    generatedCode={generatedCode}
+                    copied={copied}
+                    onCopy={handleCopyCode}
+                  />
+                )}
               </div>
             </div>
           </div>
