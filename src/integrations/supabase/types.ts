@@ -369,15 +369,7 @@ export type Database = {
           video_url?: string | null
           website_url?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "widgets_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "widget_templates"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
