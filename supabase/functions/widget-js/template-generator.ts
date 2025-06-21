@@ -1,3 +1,4 @@
+
 export interface WidgetTemplate {
   id: string;
   name: string;
@@ -94,7 +95,7 @@ export class WidgetTemplateRenderer {
       result = result.replace(/\{\{tooltip_class\}\}/g, 'hide');
     }
 
-    const tooltipPosition = this.config.position === 'left' ? 'left: 70px;' : 'right: 70px;';
+    const tooltipPosition = this.config.position === 'left' ? 'right: 70px;' : 'left: 70px;';
     result = result.replace(/\{\{tooltip_style\}\}/g, tooltipPosition);
 
     // Replace button style
@@ -172,8 +173,6 @@ export class WidgetTemplateRenderer {
   }
 
   public generateWidgetScript(): string {
-    const hasVideo = this.config.videoUrl && this.config.videoUrl.trim() !== '';
-    
     const html = this.replacePlaceholders(this.template.html_template);
     const css = this.replacePlaceholders(this.template.css_template);
 
@@ -195,6 +194,7 @@ export class WidgetTemplateRenderer {
   var modal = document.querySelector('.hiclient-modal-backdrop');
   var tooltip = document.querySelector('.hiclient-tooltip');
   var video = document.querySelector('.hiclient-video-player');
+  var closeBtn = document.querySelector('.hiclient-modal-close');
   
   // Ensure video is muted initially
   if (video) {
@@ -208,7 +208,8 @@ export class WidgetTemplateRenderer {
       modal.classList.add('show');
       
       // Unmute and play video when modal opens
-      if (video)         video.muted = false;
+      if (video) {
+        video.muted = false;
         video.currentTime = 0;
         video.play().catch(function(error) {
           console.log('Video play error:', error);
@@ -224,6 +225,15 @@ export class WidgetTemplateRenderer {
         video.pause();
       }
     };
+    
+    // Close button handler
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeModal();
+      });
+    }
     
     modal.addEventListener('click', function(e) {
       if (e.target === modal) {
