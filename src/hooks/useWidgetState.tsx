@@ -28,7 +28,7 @@ export const useWidgetState = (user: any) => {
     customIconUrl: '',
     buttonSize: 60,
     previewVideoHeight: 120,
-    templateId: undefined // Add template ID to initial state
+    templateId: '' // Initialize as empty string instead of undefined
   });
 
   // Check for editing widget on load
@@ -51,6 +51,7 @@ export const useWidgetState = (user: any) => {
       if (error) throw error;
 
       if (data) {
+        console.log('Loading widget for edit:', data);
         setEditingWidget(data);
         setWebsiteName(data.name || '');
         setWebsiteUrl(data.website_url || '');
@@ -69,7 +70,7 @@ export const useWidgetState = (user: any) => {
           customIconUrl: data.custom_icon_url || '',
           buttonSize: data.button_size || 60,
           previewVideoHeight: data.preview_video_height || 120,
-          templateId: data.template_id || undefined // Load template ID
+          templateId: data.template_id || '' // Load template ID, default to empty string
         });
 
         // Scroll to widget form
@@ -105,7 +106,7 @@ export const useWidgetState = (user: any) => {
       customIconUrl: '',
       buttonSize: 60,
       previewVideoHeight: 120,
-      templateId: undefined // Reset template ID
+      templateId: '' // Reset to empty string
     });
   };
 

@@ -45,6 +45,11 @@ export const useWidgetActions = (
   };
 
   const handleCreateWidget = async () => {
+    if (!user) {
+      toast.error('You must be logged in to create a widget');
+      return { success: false };
+    }
+
     if (!websiteName.trim() || !websiteUrl.trim()) {
       toast.error('Website name and URL are required');
       return { success: false };
@@ -56,6 +61,8 @@ export const useWidgetActions = (
     }
 
     try {
+      console.log('Saving widget with template ID:', formData.templateId);
+      
       const widgetData = {
         name: websiteName,
         website_url: websiteUrl,
@@ -70,15 +77,18 @@ export const useWidgetActions = (
         custom_icon_url: formData.customIconUrl,
         button_size: formData.buttonSize,
         preview_video_height: formData.previewVideoHeight,
-        template_id: formData.templateId || 'default', // Save the template ID
+        template_id: formData.templateId || null, // Ensure it's null if empty/undefined
         channels: channels,
         user_id: user?.id,
         updated_at: new Date().toISOString()
       };
 
+      console.log('Widget data to save:', widgetData);
+
       let savedWidget;
 
       if (editingWidget) {
+        console.log('Updating existing widget:', editingWidget.id);
         const { data, error } = await supabase
           .from('widgets')
           .update({ ...widgetData, updated_at: new Date().toISOString() })
@@ -86,27 +96,47 @@ export const useWidgetActions = (
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error updating widget:', error);
+          throw error;
+        }
         savedWidget = data;
         toast.success('Widget updated! Changes will appear on your website within 1 minute.');
       } else {
+        console.log('Creating new widget');
         const { data, error } = await supabase
           .from('widgets')
           .insert([widgetData])
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error creating widget:', error);
+          throw error;
+        }
         savedWidget = data;
         toast.success('Widget created!');
       }
+      
+      console.log('Widget saved successfully:', savedWidget);
       
       // Return the widget data including ID so the code generator can use it
       return { success: true, widget: savedWidget };
     } catch (error) {
       console.error('Error saving widget:', error);
-      toast.error('Error saving widget');
-      return { success: false };
+      
+      // More specific error messages
+      if (error.message?.includes('duplicate key')) {
+        toast.error('A widget with this name already exists');
+      } else if (error.message?.includes('invalid input')) {
+        toast.error('Please check your input data');
+      } else if (error.message?.includes('permission')) {
+        toast.error('You do not have permission to perform this action');
+      } else {
+        toast.error(`Error saving widget: ${error.message || 'Unknown error'}`);
+      }
+      
+      return { success: false, error: error.message };
     }
   };
 
