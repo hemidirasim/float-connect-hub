@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { MessageCircle, User } from 'lucide-react';
+import { MessageCircle, User, LayoutDashboard } from 'lucide-react';
 import { useNavigate, Link } from "react-router-dom";
 
 interface HeaderProps {
@@ -26,17 +26,22 @@ export const Header: React.FC<HeaderProps> = ({ user, loading, onSignOut, onOpen
               Hiclient
             </h1>
           </Link>
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/faq" className="text-gray-600 hover:text-blue-600 transition-colors">FAQ</Link>
-            <Link to="/blogs" className="text-gray-600 hover:text-blue-600 transition-colors">Blog</Link>
-            <Link to="/" className="text-gray-600 hover:text-blue-600 transition-colors">Create Widget</Link>
+          
+          <nav className="hidden md:flex items-center space-x-8">
+            <Link to="/faq" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">FAQ</Link>
+            <Link to="/blogs" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Blog</Link>
+            <Link to="/" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Create Widget</Link>
+          </nav>
+
+          <div className="flex items-center">
             {!loading && (
               user ? (
                 <Link 
                   to="/dashboard"
-                  className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
+                  className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors font-medium"
                 >
-                  Dashboard
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>Dashboard</span>
                 </Link>
               ) : (
                 <Button variant="outline" size="sm" onClick={onOpenAuth}>
@@ -45,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({ user, loading, onSignOut, onOpen
                 </Button>
               )
             )}
-          </nav>
+          </div>
         </div>
       </div>
     </header>

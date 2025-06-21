@@ -342,7 +342,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       <Header 
         user={user} 
         loading={loading} 
@@ -350,10 +350,10 @@ const Index = () => {
         onOpenAuth={() => setAuthModalOpen(true)}
       />
       
-      <main className="pt-8">
+      <main>
         <HeroSection />
         
-        <section className="py-16 bg-white/50" id="widget-form">
+        <section className="py-20 bg-white/30 backdrop-blur-sm" id="widget-form">
           <div className="container mx-auto px-4">
             <div className="grid lg:grid-cols-2 gap-12 max-w-7xl mx-auto">
               <div className="space-y-6">
