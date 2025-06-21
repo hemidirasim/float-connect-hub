@@ -35,16 +35,21 @@ serve(async (req) => {
       throw new Error('Authentication failed');
     }
 
-    const paddleApiKey = Deno.env.get('PADDLE_API_KEY');
-    if (!paddleApiKey) {
-      throw new Error('Paddle API key not configured');
+    const paddleApiToken = Deno.env.get('PADDLE_API_TOKEN');
+    const paddleEnvironment = Deno.env.get('PADDLE_ENVIRONMENT') || 'production';
+    
+    if (!paddleApiToken) {
+      throw new Error('Paddle API token not configured');
     }
+
+    console.log('Creating checkout with environment:', paddleEnvironment);
+    console.log('Product ID:', productId);
 
     // Create Paddle checkout
     const paddleResponse = await fetch('https://api.paddle.com/checkout-sessions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${paddleApiKey}`,
+        'Authorization': `Bearer ${paddleApiToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -62,13 +67,16 @@ serve(async (req) => {
       })
     });
 
+    const responseText = await paddleResponse.text();
+    console.log('Paddle API response status:', paddleResponse.status);
+    console.log('Paddle API response:', responseText);
+
     if (!paddleResponse.ok) {
-      const errorText = await paddleResponse.text();
-      console.error('Paddle API error:', errorText);
-      throw new Error(`Paddle API error: ${paddleResponse.status}`);
+      console.error('Paddle API error:', responseText);
+      throw new Error(`Paddle API error: ${paddleResponse.status} - ${responseText}`);
     }
 
-    const paddleData = await paddleResponse.json();
+    const paddleData = JSON.parse(responseText);
     
     return new Response(
       JSON.stringify({ 

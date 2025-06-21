@@ -19,21 +19,21 @@ interface BillingSectionProps {
 
 const creditPackages = [
   { 
-    credits: 200, 
-    price: 10, 
-    productId: 'pri_01jrmk0bq3y6cfd8w2gsbh9fax',
+    credits: 100, 
+    price: 5, 
+    productId: 'pro_01jrmjz5k9h45bvk503becan3p',
     popular: false 
+  },
+  { 
+    credits: 300, 
+    price: 12, 
+    productId: 'pro_01jrmjz5k9h45bvk503becan3p',
+    popular: true 
   },
   { 
     credits: 500, 
     price: 20, 
-    productId: 'pri_01js1kfkamvrte2kdppgch8fyd',
-    popular: true 
-  },
-  { 
-    credits: 1000, 
-    price: 30, 
-    productId: 'pri_01js1kg2d3q6cf947hz5v6eqjy',
+    productId: 'pro_01jrmjz5k9h45bvk503becan3p',
     popular: false 
   },
 ];
@@ -51,6 +51,8 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
         return;
       }
 
+      console.log('Creating checkout for:', { credits, price, productId });
+
       // Create Paddle checkout
       const { data, error } = await supabase.functions.invoke('paddle-checkout', {
         body: {
@@ -58,6 +60,8 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
           credits
         }
       });
+
+      console.log('Checkout response:', data, error);
 
       if (error) {
         console.error('Checkout error:', error);
@@ -74,7 +78,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
 
     } catch (error) {
       console.error('Error purchasing credits:', error);
-      toast.error('Kredit alınması zamanı xəta baş verdi');
+      toast.error('Kredit alınması zamanı xəta baş verdi: ' + error.message);
     } finally {
       setLoading(false);
     }

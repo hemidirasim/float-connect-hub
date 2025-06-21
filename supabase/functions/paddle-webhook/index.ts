@@ -18,6 +18,7 @@ serve(async (req) => {
     const body = await req.text();
     
     console.log('Webhook received:', body);
+    console.log('Paddle signature:', signature);
 
     // Parse the webhook data
     const webhookData = JSON.parse(body);
@@ -26,6 +27,9 @@ serve(async (req) => {
     if (webhookData.event_type === 'transaction.completed') {
       const transaction = webhookData.data;
       const customData = transaction.custom_data || {};
+      
+      console.log('Transaction data:', transaction);
+      console.log('Custom data:', customData);
       
       if (!customData.user_id || !customData.credits) {
         console.error('Missing custom data in webhook');
@@ -57,18 +61,34 @@ serve(async (req) => {
         return new Response('Database error', { status: 500 });
       }
 
+      // Get current user credits
+      const { data: currentCredits, error: fetchError } = await supabase
+        .from('user_credits')
+        .select('balance')
+        .eq('user_id', customData.user_id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching current credits:', fetchError);
+        return new Response('Error fetching credits', { status: 500 });
+      }
+
       // Update user credits
-      const { error: creditsError } = await supabase.rpc('add_user_credits', {
-        p_user_id: customData.user_id,
-        p_credits: parseInt(customData.credits)
-      });
+      const { error: creditsError } = await supabase
+        .from('user_credits')
+        .update({ 
+          balance: currentCredits.balance + parseInt(customData.credits),
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', customData.user_id);
 
       if (creditsError) {
         console.error('Error updating credits:', creditsError);
-        // Still return success since transaction was recorded
+        return new Response('Error updating credits', { status: 500 });
       }
 
       console.log(`Added ${customData.credits} credits to user ${customData.user_id}`);
+      console.log(`New balance: ${currentCredits.balance + parseInt(customData.credits)}`);
     }
 
     return new Response('OK', { 
