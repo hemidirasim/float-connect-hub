@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,21 +19,21 @@ interface BillingSectionProps {
 
 const creditPackages = [
   { 
-    credits: 100, 
-    price: 5, 
-    productId: 'pri_01jrmjy9fqpzgj5y0pjnky8jf1',
+    credits: 200, 
+    price: 10, 
+    productId: 'pri_01jrmk0bq3y6cfd8w2gsbh9fax',
     popular: false 
-  },
-  { 
-    credits: 300, 
-    price: 12, 
-    productId: 'pri_01jrmjyj6mxeq0j5qcfz5n8rr6',
-    popular: true 
   },
   { 
     credits: 500, 
     price: 20, 
-    productId: 'pri_01jrmjz28bv3f72rhec8xdpyq5',
+    productId: 'pri_01js1kfkamvrte2kdppgch8fyd',
+    popular: true 
+  },
+  { 
+    credits: 800, 
+    price: 30, 
+    productId: 'pri_01js1kg2d3q6cf947hz5v6eqjy',
     popular: false 
   },
 ];
