@@ -264,26 +264,34 @@ export function generateWidgetScript(widget: any): string {
   
   if (hasVideo && useVideoPreview && config.videoUrl) {
     // Show video preview in button
-    console.log('Creating video element for button');
+    console.log('Creating video element for button preview');
     var video = document.createElement('video');
     video.src = config.videoUrl;
     video.autoplay = true;
     video.muted = true;
     video.loop = true;
     video.playsInline = true;
-    video.style.objectPosition = config.videoAlignment;
+    video.style.objectPosition = config.videoAlignment === 'top' ? 'top' : 
+                                config.videoAlignment === 'bottom' ? 'bottom' : 'center';
     video.addEventListener('loadstart', function() {
-      console.log('Video started loading');
+      console.log('Video preview started loading');
     });
     video.addEventListener('canplay', function() {
-      console.log('Video can play');
+      console.log('Video preview can play');
     });
     video.addEventListener('error', function(e) {
-      console.error('Video error:', e);
+      console.error('Video preview error:', e);
+      // Fallback to icon if video fails
+      showIconFallback();
     });
     btn.appendChild(video);
   } else {
     // Show icon
+    showIconFallback();
+  }
+  
+  function showIconFallback() {
+    btn.innerHTML = '';
     var iconHtml = '';
     if (config.customIconUrl) {
       iconHtml = '<img src="' + config.customIconUrl + '" alt="Contact" style="width:24px;height:24px;border-radius:50%;">';
@@ -309,7 +317,7 @@ export function generateWidgetScript(widget: any): string {
   
   widget.appendChild(btn);
   document.body.appendChild(widget);
-  console.log('Widget button added to page');
+  console.log('Widget button added to page with video preview:', hasVideo && useVideoPreview);
   
   // Tooltip hover effects
   if (tooltip && config.tooltipDisplay === 'hover') {
@@ -338,7 +346,7 @@ export function generateWidgetScript(widget: any): string {
     
     var html = '<div class="modal-header">Contact Us</div>';
     
-    // Video section (if enabled)
+    // Video section (if enabled) - always show full video in modal
     if (config.videoEnabled && config.videoUrl) {
       html += '<div class="video-container">';
       html += '<video class="video-player" style="height:' + config.videoHeight + 'px;object-position:' + config.videoAlignment + ';" controls autoplay muted>';
@@ -423,7 +431,7 @@ export function generateWidgetScript(widget: any): string {
     ${generateChannelColorFunction()}
   }
   
-  console.log('Widget loaded successfully');
+  console.log('Widget loaded successfully with video preview support');
 })();`
 }
 
