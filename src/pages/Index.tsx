@@ -174,10 +174,20 @@ const Index = () => {
   };
 
   const handleFormDataChange = (field: string, value: string | boolean | number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => {
+      // When changing customIcon to a preset icon, clear the custom icon URL
+      if (field === 'customIcon' && value !== 'custom') {
+        return {
+          ...prev,
+          [field]: value,
+          customIconUrl: '' // Clear custom icon URL when switching to preset icons
+        };
+      }
+      return {
+        ...prev,
+        [field]: value
+      };
+    });
   };
 
   const handleCreateWidgetWrapper = async () => {

@@ -241,59 +241,61 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
         </div>
       )}
 
-      {/* Button Icon Settings */}
-      <div className="space-y-4">
-        <div>
-          <Label className="text-base font-medium">Button icon</Label>
-          <p className="text-sm text-gray-600">Choose widget icon</p>
-        </div>
+      {/* Button Icon Settings - Only show when no video preview is enabled OR no video at all */}
+      {(!hasVideo || !useVideoPreview) && (
+        <div className="space-y-4">
+          <div>
+            <Label className="text-base font-medium">Button icon</Label>
+            <p className="text-sm text-gray-600">Choose widget icon</p>
+          </div>
 
-        <div className="space-y-3">
-          <Select value={customIcon || 'message-circle'} onValueChange={onCustomIconChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="İkon seçin" />
-            </SelectTrigger>
-            <SelectContent>
-              {iconOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  <div className="flex items-center gap-2">
-                    <option.icon className="w-4 h-4" />
-                    {option.label}
+          <div className="space-y-3">
+            <Select value={customIcon || 'message-circle'} onValueChange={onCustomIconChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="İkon seçin" />
+              </SelectTrigger>
+              <SelectContent>
+                {iconOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    <div className="flex items-center gap-2">
+                      <option.icon className="w-4 h-4" />
+                      {option.label}
+                    </div>
+                  </SelectItem>
+                ))}
+                <SelectItem value="custom">Custom Icon</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {customIcon === 'custom' && (
+              <div className="border-2 border-dashed border-purple-300 rounded-lg p-4 text-center bg-purple-50/50">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={onCustomIconUpload}
+                  className="hidden"
+                  id="icon-upload"
+                />
+                <label htmlFor="icon-upload" className="cursor-pointer">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Upload className="w-5 h-5 text-purple-600" />
                   </div>
-                </SelectItem>
-              ))}
-              <SelectItem value="custom">Custom Icon</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {customIcon === 'custom' && (
-            <div className="border-2 border-dashed border-purple-300 rounded-lg p-4 text-center bg-purple-50/50">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={onCustomIconUpload}
-                className="hidden"
-                id="icon-upload"
-              />
-              <label htmlFor="icon-upload" className="cursor-pointer">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Upload className="w-5 h-5 text-purple-600" />
-                </div>
-                <p className="text-sm text-purple-700 font-medium">
-                  {customIconUrl ? 'Icon uploaded - Choose new' : 'Upload custom icon'}
-                </p>
-                <p className="text-xs text-purple-600">PNG, JPG, SVG (max 2MB)</p>
-              </label>
-              
-              {customIconUrl && (
-                <div className="mt-3 flex justify-center">
-                  <img src={customIconUrl} alt="Custom icon" className="w-8 h-8 rounded" />
-                </div>
-              )}
-            </div>
-          )}
+                  <p className="text-sm text-purple-700 font-medium">
+                    {customIconUrl ? 'Icon uploaded - Choose new' : 'Upload custom icon'}
+                  </p>
+                  <p className="text-xs text-purple-600">PNG, JPG, SVG (max 2MB)</p>
+                </label>
+                
+                {customIconUrl && (
+                  <div className="mt-3 flex justify-center">
+                    <img src={customIconUrl} alt="Custom icon" className="w-8 h-8 rounded" />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
