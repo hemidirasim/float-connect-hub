@@ -79,8 +79,8 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <Label className="text-base font-medium">Video yükləmə</Label>
-            <p className="text-sm text-gray-600">Promosyon videosu əlavə edin (max 10MB)</p>
+            <Label className="text-base font-medium">Video upload</Label>
+            <p className="text-sm text-gray-600">Add a promo video (max 10MB)</p>
           </div>
         </div>
 
@@ -97,7 +97,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-2 text-green-600">
                 <Play className="w-6 h-6" />
-                <span className="font-medium">Video yükləndi</span>
+                <span className="font-medium">Video has been uploaded</span>
               </div>
               
               <div className="bg-white rounded-lg p-4 border">
@@ -108,7 +108,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-sm text-gray-900 truncate" title={video?.name}>
-                        {displayFileName || 'Video fayl'}
+                        {displayFileName || 'Video file'}
                       </p>
                       <p className="text-xs text-gray-500">
                         {video && `${(video.size / 1024 / 1024).toFixed(1)} MB`}
@@ -130,7 +130,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                 <Button variant="outline" size="sm" asChild>
                   <span>
                     <Upload className="w-4 h-4 mr-2" />
-                    Başqa video seçin
+                    Choose another video
                   </span>
                 </Button>
               </label>
@@ -164,7 +164,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
           {useVideoPreview && (
             <div className="space-y-4 pl-4 border-l-2 border-blue-300">
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Video hündürlüyü: {videoHeight}px</Label>
+                <Label className="text-sm font-medium">Video height: {videoHeight}px</Label>
                 <Slider
                   value={[videoHeight]}
                   onValueChange={(value) => onVideoHeightChange(value[0])}
@@ -182,9 +182,9 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="top">Yuxarı</SelectItem>
-                    <SelectItem value="center">Mərkəz</SelectItem>
-                    <SelectItem value="bottom">Aşağı</SelectItem>
+                    <SelectItem value="top">Top</SelectItem>
+                    <SelectItem value="center">Center</SelectItem>
+                    <SelectItem value="bottom">Bottom</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -196,8 +196,8 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
       {/* Button Icon Settings */}
       <div className="space-y-4">
         <div>
-          <Label className="text-base font-medium">Düymə ikonu</Label>
-          <p className="text-sm text-gray-600">Widget düyməsinin ikonunu seçin</p>
+          <Label className="text-base font-medium">Button icon</Label>
+          <p className="text-sm text-gray-600">Choose widget icon</p>
         </div>
 
         <div className="space-y-3">
@@ -232,7 +232,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                   <Upload className="w-5 h-5 text-purple-600" />
                 </div>
                 <p className="text-sm text-purple-700 font-medium">
-                  {customIconUrl ? 'İkon yükləndi - Yenisini seçin' : 'Custom ikon yükləyin'}
+                  {customIconUrl ? 'Icon  uploaded - Choose new' : 'Upload custom icon'}
                 </p>
                 <p className="text-xs text-purple-600">PNG, JPG, SVG (max 2MB)</p>
               </label>
