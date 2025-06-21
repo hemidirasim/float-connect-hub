@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,19 +20,19 @@ const creditPackages = [
   { 
     credits: 100, 
     price: 5, 
-    productId: 'pro_01jrmjz5k9h45bvk503becan3p',
+    productId: 'pri_01jrmjy9fqpzgj5y0pjnky8jf1',
     popular: false 
   },
   { 
     credits: 300, 
     price: 12, 
-    productId: 'pro_01jrmjz5k9h45bvk503becan3p',
+    productId: 'pri_01jrmjyj6mxeq0j5qcfz5n8rr6',
     popular: true 
   },
   { 
     credits: 500, 
     price: 20, 
-    productId: 'pro_01jrmjz5k9h45bvk503becan3p',
+    productId: 'pri_01jrmjz28bv3f72rhec8xdpyq5',
     popular: false 
   },
 ];
