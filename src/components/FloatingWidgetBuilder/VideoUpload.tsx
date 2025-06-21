@@ -65,32 +65,38 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
   const IconComponent = selectedIconOption?.icon || MessageCircle;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Video & Icon Settings</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Button Icon Selection */}
-        <div className="space-y-4">
-          <Label className="text-base font-medium">Button Icon</Label>
-          
-          {/* Default Icons Grid */}
-          <div className="grid grid-cols-4 gap-3">
-            {iconOptions.map((option) => {
-              const Icon = option.icon;
-              return (
-                <Button
-                  key={option.value}
-                  type="button"
-                  variant={customIcon === option.value ? "default" : "outline"}
-                  className="h-16 flex flex-col items-center gap-1"
-                  onClick={() => onCustomIconChange(option.value)}
-                >
-                  <Icon className="w-6 h-6" />
-                  <span className="text-xs">{option.label}</span>
-                </Button>
-              );
-            })}
+    <div className="space-y-6">
+      {/* Button Icon Selection - Now with Select */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Button Icon</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Choose Icon</Label>
+            <Select value={customIcon || 'message'} onValueChange={onCustomIconChange}>
+              <SelectTrigger>
+                <SelectValue>
+                  <div className="flex items-center gap-2">
+                    <IconComponent className="w-4 h-4" />
+                    <span>{selectedIconOption?.label || 'Message'}</span>
+                  </div>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                {iconOptions.map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <SelectItem key={option.value} value={option.value}>
+                      <div className="flex items-center gap-2">
+                        <Icon className="w-4 h-4" />
+                        <span>{option.label}</span>
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Custom Icon Upload */}
@@ -130,23 +136,28 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
               </div>
             )}
           </div>
-        </div>
 
-        {/* Button Size */}
-        <div className="space-y-2">
-          <Label>Button Size: {buttonSize}px</Label>
-          <Input
-            type="range"
-            min="40"
-            max="80"
-            value={buttonSize}
-            onChange={(e) => onButtonSizeChange(Number(e.target.value))}
-            className="w-full"
-          />
-        </div>
+          {/* Button Size */}
+          <div className="space-y-2">
+            <Label>Button Size: {buttonSize}px</Label>
+            <Input
+              type="range"
+              min="40"
+              max="80"
+              value={buttonSize}
+              onChange={(e) => onButtonSizeChange(Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Video Settings */}
-        <div className="space-y-4">
+      {/* Video Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Video Settings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <Label className="text-base font-medium">Enable Video Preview</Label>
@@ -220,22 +231,10 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-
-              {/* Preview Video Height */}
-              <div className="space-y-2">
-                <Label>Preview Height: {previewVideoHeight}px</Label>
-                <Input
-                  type="range"
-                  min="80"
-                  max="200"
-                  value={previewVideoHeight}
-                  onChange={(e) => onPreviewVideoHeightChange(Number(e.target.value))}
-                />
-              </div>
             </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
