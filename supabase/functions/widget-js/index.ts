@@ -3,7 +3,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { corsHeaders, WIDGET_CACHE_TIME } from './config.ts'
 import { extractWidgetId } from './utils.ts'
 import { getWidget, recordWidgetView } from './database.ts'
-import { generateWidgetScript } from './widget-generator.ts'
+import { generateWidgetScriptWithTemplate } from './widget-generator.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 serve(async (req) => {
   console.log('Widget-js function called:', req.method, req.url)
@@ -29,6 +30,12 @@ serve(async (req) => {
       })
     }
 
+    // Create Supabase client for template fetching
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
     // Fetch widget data
     const widget = await getWidget(widgetId)
 
@@ -40,7 +47,7 @@ serve(async (req) => {
       })
     }
 
-    console.log('Widget found:', widget.name, 'Channels:', widget.channels?.length || 0)
+    console.log('Widget found:', widget.name, 'Channels:', widget.channels?.length || 0, 'Template ID:', widget.template_id)
 
     // Record widget view and check credits
     const viewResult = await recordWidgetView(
@@ -57,10 +64,10 @@ serve(async (req) => {
       })
     }
 
-    console.log('Credits check passed, generating widget script...')
+    console.log('Credits check passed, generating widget script with template...')
 
-    // Generate widget JavaScript
-    const widgetScript = generateWidgetScript(widget)
+    // Generate widget JavaScript with proper template
+    const widgetScript = await generateWidgetScriptWithTemplate(widget, supabaseClient)
     
     console.log('Widget script generated, length:', widgetScript.length)
 
@@ -76,7 +83,8 @@ serve(async (req) => {
         'Last-Modified': lastModified,
         'ETag': etag,
         // Add version header for debugging
-        'X-Widget-Version': widget.updated_at
+        'X-Widget-Version': widget.updated_at,
+        'X-Widget-Template': widget.template_id || 'default'
       }
     })
 
