@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -46,9 +47,15 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
   };
 
   const getVideoSource = () => {
+    // First check if we have a saved video URL from the database
+    if (formData.videoUrl) {
+      return formData.videoUrl;
+    }
+    // Fallback to local file if exists
     if (formData.video) {
       return URL.createObjectURL(formData.video);
     }
+    // Check editingWidget for existing video
     if (editingWidget?.video_url) {
       return editingWidget.video_url;
     }
@@ -76,7 +83,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
     return <IconComponent className="w-6 h-6 text-white" />;
   };
 
-  const hasVideo = formData.video || editingWidget?.video_url;
+  const hasVideo = getVideoSource() !== null;
 
   const renderTooltipMessage = () => {
     if (!formData.tooltip || formData.tooltipDisplay === 'never') return null;

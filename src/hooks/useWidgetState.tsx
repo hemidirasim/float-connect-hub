@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ export const useWidgetState = (user: any) => {
     tooltip: 'Contact us!',
     tooltipDisplay: 'hover',
     video: null,
+    videoUrl: undefined, // Add videoUrl to track uploaded video URL
     useVideoPreview: false,
     videoHeight: 200,
     videoAlignment: 'center',
@@ -56,6 +58,7 @@ export const useWidgetState = (user: any) => {
           tooltip: data.tooltip || 'Contact us!',
           tooltipDisplay: data.tooltip_display || 'hover',
           video: null,
+          videoUrl: data.video_url || undefined, // Load existing video URL
           useVideoPreview: data.video_enabled || false,
           videoHeight: data.video_height || 200,
           videoAlignment: data.video_alignment || 'center',
@@ -88,6 +91,7 @@ export const useWidgetState = (user: any) => {
       tooltip: 'Contact us!',
       tooltipDisplay: 'hover',
       video: null,
+      videoUrl: undefined,
       useVideoPreview: false,
       videoHeight: 200,
       videoAlignment: 'center',

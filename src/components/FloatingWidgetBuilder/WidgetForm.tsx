@@ -18,6 +18,7 @@ interface WidgetFormProps {
   formData: FormData;
   editingWidget: any;
   saving: boolean;
+  uploading?: boolean;
   onWebsiteNameChange: (value: string) => void;
   onWebsiteUrlChange: (value: string) => void;
   onChannelsChange: (channels: Channel[]) => void;
@@ -42,6 +43,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
   formData,
   editingWidget,
   saving,
+  uploading = false,
   onWebsiteNameChange,
   onWebsiteUrlChange,
   onChannelsChange,
@@ -92,12 +94,13 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
         {/* Video Upload - Now includes Video Display Settings and Button Icon Settings */}
         <VideoUpload
           video={formData.video}
-          videoUrl={editingWidget?.video_url}
+          videoUrl={formData.videoUrl || editingWidget?.video_url}
           useVideoPreview={formData.useVideoPreview}
           videoHeight={formData.videoHeight}
           videoAlignment={formData.videoAlignment}
           customIcon={formData.customIcon}
           customIconUrl={formData.customIconUrl}
+          uploading={uploading}
           onVideoUpload={onVideoUpload}
           onVideoRemove={onVideoRemove}
           onVideoPreviewChange={(checked) => onFormDataChange('useVideoPreview', checked)}
@@ -123,9 +126,9 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           onClick={onCreateWidget} 
           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           size="lg"
-          disabled={saving}
+          disabled={saving || uploading}
         >
-          {saving ? 'Saving...' : (editingWidget ? 'Update Widget' : 'Create Widget')}
+          {saving ? 'Saving...' : uploading ? 'Uploading...' : (editingWidget ? 'Update Widget' : 'Create Widget')}
         </Button>
       </CardContent>
     </Card>

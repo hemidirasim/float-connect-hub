@@ -64,6 +64,7 @@ export const useWidgetActions = (
         tooltip: formData.tooltip,
         tooltip_display: formData.tooltipDisplay,
         video_enabled: formData.useVideoPreview,
+        video_url: formData.videoUrl || null, // Save video URL from uploaded file
         video_height: formData.videoHeight,
         video_alignment: formData.videoAlignment,
         custom_icon_url: formData.customIconUrl,

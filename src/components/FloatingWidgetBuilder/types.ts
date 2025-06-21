@@ -7,14 +7,15 @@ export interface Channel {
 }
 
 export interface FormData {
-  video: File | null;
   buttonColor: string;
-  position: 'left' | 'right';
+  position: string;
   tooltip: string;
-  tooltipDisplay: 'hover' | 'always' | 'never';
+  tooltipDisplay: string;
+  video: File | null;
+  videoUrl?: string; // Add videoUrl to track uploaded video URL
   useVideoPreview: boolean;
-  videoHeight?: number;
-  videoAlignment?: 'top' | 'center' | 'bottom';
-  customIcon?: string;
-  customIconUrl?: string;
+  videoHeight: number;
+  videoAlignment: string;
+  customIcon: string | null;
+  customIconUrl: string;
 }

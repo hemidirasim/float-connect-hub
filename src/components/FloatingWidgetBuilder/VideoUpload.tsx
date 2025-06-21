@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, Play, Trash2, MessageCircle, Phone, Mail, Send, Heart, Star, Camera, Home, User } from 'lucide-react';
+import { Upload, Play, Trash2, MessageCircle, Phone, Mail, Send, Heart, Star, Camera, Home, User, Loader2 } from 'lucide-react';
 
 const iconOptions = [
   { value: 'message-circle', label: 'Message Circle', icon: MessageCircle },
@@ -27,6 +27,7 @@ interface VideoUploadProps {
   videoAlignment: string;
   customIcon: string;
   customIconUrl: string;
+  uploading?: boolean;
   onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onVideoRemove: () => void;
   onVideoPreviewChange: (checked: boolean) => void;
@@ -62,6 +63,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
   videoAlignment,
   customIcon,
   customIconUrl,
+  uploading = false,
   onVideoUpload,
   onVideoRemove,
   onVideoPreviewChange,
@@ -71,7 +73,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
   onCustomIconUpload
 }) => {
   const hasVideo = video || videoUrl;
-  const displayFileName = video ? truncateFilename(video.name) : '';
+  const displayFileName = video ? truncateFilename(video.name) : (videoUrl ? 'Uploaded video' : '');
 
   return (
     <div className="space-y-6">
@@ -91,6 +93,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
             onChange={onVideoUpload}
             className="hidden"
             id="video-upload-main"
+            disabled={uploading}
           />
           
           {hasVideo ? (
@@ -107,8 +110,8 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                       <Play className="w-5 h-5 text-green-600" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-sm text-gray-900 truncate" title={video?.name}>
-                        {displayFileName || 'Video file'}
+                      <p className="font-medium text-sm text-gray-900 truncate" title={video?.name || 'Uploaded video'}>
+                        {displayFileName}
                       </p>
                       <p className="text-xs text-gray-500">
                         {video && `${(video.size / 1024 / 1024).toFixed(1)} MB`}
@@ -120,6 +123,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                     size="sm"
                     variant="outline"
                     className="text-red-600 hover:text-red-700 hover:bg-red-50 flex-shrink-0"
+                    disabled={uploading}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -127,10 +131,19 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
               </div>
               
               <label htmlFor="video-upload-main" className="cursor-pointer">
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="outline" size="sm" asChild disabled={uploading}>
                   <span>
-                    <Upload className="w-4 h-4 mr-2" />
-                    Choose another video
+                    {uploading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Choose another video
+                      </>
+                    )}
                   </span>
                 </Button>
               </label>
@@ -138,9 +151,15 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
           ) : (
             <label htmlFor="video-upload-main" className="cursor-pointer">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <Upload className="w-6 h-6 text-gray-400" />
+                {uploading ? (
+                  <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                ) : (
+                  <Upload className="w-6 h-6 text-gray-400" />
+                )}
               </div>
-              <p className="text-sm text-gray-600 font-medium mb-1">Video yükləyin</p>
+              <p className="text-sm text-gray-600 font-medium mb-1">
+                {uploading ? 'Uploading video...' : 'Video yükləyin'}
+              </p>
               <p className="text-xs text-gray-500">MP4, MOV, AVI (max 10MB)</p>
             </label>
           )}

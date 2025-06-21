@@ -20,6 +20,7 @@ const Index = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const {
     websiteName,
@@ -87,21 +88,74 @@ const Index = () => {
     handleAddChannel(selectedChannelType, channelValue);
   };
 
-  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Video file must be less than 10MB');
+      return;
+    }
+
+    if (!user) {
+      toast.error('You must be logged in to upload videos');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      // Create a unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('videos')
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('videos')
+        .getPublicUrl(fileName);
+
+      // Update form data with the video URL
       setFormData(prev => ({
         ...prev,
-        video: file
+        video: file,
+        videoUrl: publicUrl
       }));
-      toast.success('Video uploaded!');
+
+      toast.success('Video uploaded successfully!');
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      toast.error('Failed to upload video');
+    } finally {
+      setUploading(false);
     }
   };
 
-  const handleVideoRemove = () => {
+  const handleVideoRemove = async () => {
+    if (formData.videoUrl && user) {
+      try {
+        // Extract file path from URL
+        const url = new URL(formData.videoUrl);
+        const filePath = url.pathname.split('/').slice(-2).join('/'); // user_id/filename
+        
+        // Delete from storage
+        await supabase.storage
+          .from('videos')
+          .remove([filePath]);
+      } catch (error) {
+        console.error('Error removing video from storage:', error);
+      }
+    }
+
     setFormData(prev => ({
       ...prev,
-      video: null
+      video: null,
+      videoUrl: undefined
     }));
     toast.success('Video removed!');
   };
@@ -181,6 +235,7 @@ const Index = () => {
                   formData={formData}
                   editingWidget={editingWidget}
                   saving={saving}
+                  uploading={uploading}
                   onWebsiteNameChange={setWebsiteName}
                   onWebsiteUrlChange={setWebsiteUrl}
                   onChannelsChange={setChannels}
