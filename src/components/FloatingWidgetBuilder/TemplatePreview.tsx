@@ -110,28 +110,40 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
           tempDiv.innerHTML = previewHtml;
           
           // Add the HTML elements directly to document body
-          const elements = tempDiv.children;
-          Array.from(elements).forEach(element => {
+          const elements = Array.from(tempDiv.children);
+          elements.forEach(element => {
             // Mark as preview widget for cleanup
             element.setAttribute('data-widget-preview', 'true');
             document.body.appendChild(element);
           });
 
-          // Extract and execute scripts after DOM insertion
-          const scripts = tempDiv.querySelectorAll('script');
-          scripts.forEach(script => {
-            if (script.textContent) {
-              console.log('Executing floating widget script...');
-              try {
-                // Use setTimeout to ensure DOM elements are available
-                setTimeout(() => {
-                  eval(script.textContent);
-                }, 100);
-              } catch (e) {
-                console.error('Script execution error:', e);
+          // Wait for DOM to be ready, then execute scripts
+          setTimeout(() => {
+            // Extract and execute scripts from the original HTML
+            const tempDiv2 = document.createElement('div');
+            tempDiv2.innerHTML = previewHtml;
+            const scripts = tempDiv2.querySelectorAll('script');
+            
+            scripts.forEach(script => {
+              if (script.textContent) {
+                console.log('Executing floating widget script...');
+                try {
+                  // Create a new script element for proper execution
+                  const newScript = document.createElement('script');
+                  newScript.textContent = script.textContent;
+                  newScript.setAttribute('data-widget-preview', 'true');
+                  document.head.appendChild(newScript);
+                  
+                  // Clean up the script element after execution
+                  setTimeout(() => {
+                    newScript.remove();
+                  }, 100);
+                } catch (e) {
+                  console.error('Script execution error:', e);
+                }
               }
-            }
-          });
+            });
+          }, 200);
 
         } catch (error) {
           console.error('Error rendering floating widget:', error);
