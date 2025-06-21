@@ -1,9 +1,8 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MessageCircle, Eye } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { WebsiteInfoForm } from './WebsiteInfoForm';
 import { ChannelManager } from './ChannelManager';
 import { VideoUpload } from './VideoUpload';
@@ -61,27 +60,13 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
   onCreateWidget,
   onCustomIconUpload
 }) => {
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
-
   return (
     <>
       <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 justify-between">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-blue-600" />
-              {editingWidget ? 'Edit Your Widget' : 'Customize Your Widget'}
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPreviewModalOpen(true)}
-              disabled={channels.length === 0}
-              className="bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              Preview
-            </Button>
+          <CardTitle className="flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-blue-600" />
+            {editingWidget ? 'Edit Your Widget' : 'Customize Your Widget'}
           </CardTitle>
           <CardDescription>
             {editingWidget ? 'Update your website details and contact channels' : 'Add your website details and contact channels'}
@@ -161,25 +146,13 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
         </CardContent>
       </Card>
 
-      {/* Preview Modal */}
-      <Dialog open={previewModalOpen} onOpenChange={setPreviewModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Eye className="w-5 h-5 text-purple-600" />
-              Widget Preview - Real-time
-            </DialogTitle>
-          </DialogHeader>
-          <div className="mt-4">
-            <TemplatePreview
-              showWidget={channels.length > 0}
-              formData={formData}
-              channels={channels}
-              editingWidget={editingWidget}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Live widget preview directly on the page */}
+      <TemplatePreview
+        showWidget={channels.length > 0}
+        formData={formData}
+        channels={channels}
+        editingWidget={editingWidget}
+      />
     </>
   );
 };
