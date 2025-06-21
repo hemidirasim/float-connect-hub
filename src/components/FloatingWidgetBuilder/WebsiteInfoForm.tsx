@@ -33,7 +33,7 @@ export const WebsiteInfoForm: React.FC<WebsiteInfoFormProps> = ({
         <Label htmlFor="website">Website URL <span className="text-red-500">*</span></Label>
         <Input
           id="website"
-          placeholder="https://example.com"
+          placeholder="https://hiclient.co"
           value={websiteUrl}
           onChange={(e) => onWebsiteUrlChange(e.target.value)}
           className="w-full"

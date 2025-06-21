@@ -62,8 +62,8 @@ serve(async (req) => {
           user_id: user.id,
           credits: credits.toString()
         },
-        success_url: `${req.headers.get('origin')}/dashboard?success=true`,
-        cancel_url: `${req.headers.get('origin')}/dashboard?cancelled=true`
+        success_url: `https://hiclient.co/dashboard?success=true`,
+        cancel_url: `https://hiclient.co/dashboard?cancelled=true`
       })
     });
 

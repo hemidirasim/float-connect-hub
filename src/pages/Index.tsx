@@ -340,9 +340,9 @@ const Index = () => {
   };
 
   const generateCode = () => {
-    const videoUrl = formData.video ? `https://yourdomain.com/uploads/${formData.video.name}` : '';
+    const videoUrl = formData.video ? `https://hiclient.co/uploads/${formData.video.name}` : '';
     
-    let scriptCode = `<script src="https://yourdomain.com/floating.js"`;
+    let scriptCode = `<script src="https://hiclient.co/floating.js"`;
     
     channels.forEach(channel => {
       scriptCode += `\n  data-${channel.type}="${channel.value}"`;
