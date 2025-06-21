@@ -3,11 +3,28 @@ import type { WidgetConfig } from './types.ts'
 import { defaultWidgetConfig } from './config.ts'
 
 export function createWidgetConfig(widget: any): WidgetConfig {
-  console.log('Creating widget config from:', {
+  console.log('Creating widget config from widget data:', {
     template_id: widget.template_id,
     templateId: widget.templateId,
-    name: widget.name
+    name: widget.name,
+    raw_template_fields: {
+      template_id: widget.template_id,
+      templateId: widget.templateId
+    }
   })
+  
+  // Determine the template ID to use
+  let finalTemplateId = 'default'
+  
+  if (widget.template_id && typeof widget.template_id === 'string' && widget.template_id.trim() !== '') {
+    finalTemplateId = widget.template_id.trim()
+    console.log('Using template_id from widget:', finalTemplateId)
+  } else if (widget.templateId && typeof widget.templateId === 'string' && widget.templateId.trim() !== '') {
+    finalTemplateId = widget.templateId.trim()
+    console.log('Using templateId from widget:', finalTemplateId)
+  } else {
+    console.log('No template ID found, defaulting to:', finalTemplateId)
+  }
   
   const config: WidgetConfig = {
     channels: widget.channels || [],
@@ -23,11 +40,11 @@ export function createWidgetConfig(widget: any): WidgetConfig {
     useVideoPreview: widget.use_video_preview || false,
     buttonSize: widget.button_size || 60,
     previewVideoHeight: widget.preview_video_height || 120,
-    // Template ID - check both possible fields
-    templateId: widget.template_id || widget.templateId || 'default'
+    // Use the determined template ID
+    templateId: finalTemplateId
   }
   
-  console.log('Widget config created with templateId:', config.templateId)
+  console.log('Widget config created with final templateId:', config.templateId)
   
   return config
 }

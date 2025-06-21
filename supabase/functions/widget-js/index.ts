@@ -47,12 +47,14 @@ serve(async (req) => {
       })
     }
 
-    console.log('Widget loaded from database:', {
+    console.log('Widget loaded from database for template processing:', {
       name: widget.name,
+      id: widget.id,
       template_id: widget.template_id,
       channels: widget.channels?.length || 0,
       button_color: widget.button_color,
-      position: widget.position
+      position: widget.position,
+      updated_at: widget.updated_at
     })
 
     // Record widget view and check credits
@@ -70,12 +72,16 @@ serve(async (req) => {
       })
     }
 
-    console.log('Credits check passed, generating widget script with template...')
+    console.log('Credits check passed, generating widget script with template:', widget.template_id || 'default')
 
     // Generate widget JavaScript with proper template
     const widgetScript = await generateWidgetScriptWithTemplate(widget, supabaseClient)
     
-    console.log('Widget script generated, length:', widgetScript.length)
+    console.log('Widget script generation completed:', {
+      templateUsed: widget.template_id || 'default',
+      scriptLength: widgetScript.length,
+      widgetName: widget.name
+    })
 
     // Add cache busting based on widget update time
     const lastModified = new Date(widget.updated_at).toUTCString()
@@ -88,10 +94,11 @@ serve(async (req) => {
         'Cache-Control': `public, max-age=${WIDGET_CACHE_TIME}`,
         'Last-Modified': lastModified,
         'ETag': etag,
-        // Add debug headers
+        // Add debug headers for troubleshooting
         'X-Widget-Version': widget.updated_at,
         'X-Widget-Template': widget.template_id || 'default',
-        'X-Widget-Name': widget.name
+        'X-Widget-Name': widget.name,
+        'X-Debug-TemplateId': widget.template_id || 'null'
       }
     })
 
