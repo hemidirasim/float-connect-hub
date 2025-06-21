@@ -77,14 +77,14 @@ export const useWidgetActions = (
       if (editingWidget) {
         const { data, error } = await supabase
           .from('widgets')
-          .update(widgetData)
+          .update({ ...widgetData, updated_at: new Date().toISOString() })
           .eq('id', editingWidget.id)
           .select()
           .single();
 
         if (error) throw error;
         savedWidget = data;
-        toast.success('Widget updated!');
+        toast.success('Widget updated! Changes will appear on your website within 1 minute.');
       } else {
         const { data, error } = await supabase
           .from('widgets')

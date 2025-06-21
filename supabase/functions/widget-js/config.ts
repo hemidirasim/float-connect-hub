@@ -16,3 +16,6 @@ export const defaultWidgetConfig = {
   videoHeight: 200,
   videoAlignment: 'center'
 }
+
+// Reduced cache time for faster updates
+export const WIDGET_CACHE_TIME = 60 // 1 minute instead of 5 minutes

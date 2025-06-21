@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { corsHeaders } from './config.ts'
+import { corsHeaders, WIDGET_CACHE_TIME } from './config.ts'
 import { extractWidgetId } from './utils.ts'
 import { getWidget, recordWidgetView } from './database.ts'
 import { generateWidgetScript } from './widget-generator.ts'
@@ -64,11 +64,19 @@ serve(async (req) => {
     
     console.log('Widget script generated, length:', widgetScript.length)
 
+    // Add cache busting based on widget update time
+    const lastModified = new Date(widget.updated_at).toUTCString()
+    const etag = `"${widgetId}-${widget.updated_at}"`
+
     return new Response(widgetScript, {
       headers: {
         ...corsHeaders,
         'Content-Type': 'application/javascript',
-        'Cache-Control': 'public, max-age=300' // 5 minutes cache
+        'Cache-Control': `public, max-age=${WIDGET_CACHE_TIME}`,
+        'Last-Modified': lastModified,
+        'ETag': etag,
+        // Add version header for debugging
+        'X-Widget-Version': widget.updated_at
       }
     })
 
