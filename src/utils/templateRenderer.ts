@@ -1,10 +1,9 @@
-
 import { Channel, FormData } from "@/components/FloatingWidgetBuilder/types";
 import { WidgetTemplate, TemplateConfig } from './renderer/types';
 import { PlaceholderReplacer } from './renderer/placeholderReplacer';
 import { WidgetJavaScript } from './renderer/widgetJavaScript';
 
-export { WidgetTemplate, TemplateConfig };
+export type { WidgetTemplate, TemplateConfig };
 
 export class TemplateRenderer {
   private template: WidgetTemplate;
