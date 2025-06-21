@@ -7,10 +7,11 @@ export const generateWidgetCode = (
   formData: FormData,
   widgetId?: string
 ): string => {
-  // If we have a widget ID, use the dynamic script
+  // If we have a widget ID, use the dynamic script with template parameter
   if (widgetId) {
+    const templateId = formData.templateId || 'default';
     return `<!-- Add this script to your website's HTML -->
-<script src="https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/widget-js/${widgetId}?template=${formData.templateId || 'default'}"></script>`;
+<script src="https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/widget-js/${widgetId}?template=${templateId}"></script>`;
   }
 
   // Fallback to basic static code (for preview)
