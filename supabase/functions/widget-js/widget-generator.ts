@@ -1,3 +1,4 @@
+
 import type { WidgetConfig } from './types.ts'
 import { defaultWidgetConfig } from './config.ts'
 import { getChannelUrl, getChannelIcon, getChannelColor } from './utils.ts'
@@ -30,7 +31,10 @@ export function generateWidgetScript(widget: any): string {
   var config = ${JSON.stringify(config)};
   console.log('Widget config:', config);
   
-  // Inject CSS styles
+  // Check if video is available - using same logic as preview
+  var hasVideo = config.videoUrl && config.videoUrl.trim() !== '';
+  
+  // Inject CSS styles - matching preview exactly
   var styles = \`
     .widget-container {
       position: fixed;
@@ -64,8 +68,8 @@ export function generateWidgetScript(widget: any): string {
     .tooltip {
       position: absolute;
       \${config.position === 'left' ? 'left: ' + (config.buttonSize + 10) + 'px;' : 'right: ' + (config.buttonSize + 10) + 'px;'}
-      bottom: 50%;
-      transform: translateY(50%);
+      top: 50%;
+      transform: translateY(-50%);
       background: rgba(0,0,0,0.8);
       color: white;
       padding: 6px 10px;
@@ -248,18 +252,18 @@ export function generateWidgetScript(widget: any): string {
   var btn = document.createElement('button');
   btn.className = 'widget-button';
   
-  // Button content - always show icon (video preview disabled)
+  // Button content - only show icon (no video preview)
   var iconHtml = '';
-  if (config.customIconUrl) {
+  if (config.customIconUrl && config.customIconUrl.trim() !== '') {
     iconHtml = '<img src="' + config.customIconUrl + '" alt="Contact" style="width:24px;height:24px;border-radius:50%;">';
   } else {
     iconHtml = '<svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>';
   }
   btn.innerHTML = iconHtml;
   
-  // Tooltip
+  // Tooltip - matching preview exactly
   var tooltip = null;
-  if (config.tooltip && config.tooltipDisplay !== 'never') {
+  if (config.tooltip && config.tooltip.trim() !== '' && config.tooltipDisplay !== 'never') {
     tooltip = document.createElement('div');
     tooltip.className = 'tooltip';
     tooltip.textContent = config.tooltip;
@@ -275,7 +279,7 @@ export function generateWidgetScript(widget: any): string {
   document.body.appendChild(widget);
   console.log('Widget button added to page');
   
-  // Tooltip hover effects
+  // Tooltip hover effects - matching preview
   if (tooltip && config.tooltipDisplay === 'hover') {
     btn.addEventListener('mouseenter', function() {
       tooltip.classList.add('show');
@@ -285,7 +289,7 @@ export function generateWidgetScript(widget: any): string {
     });
   }
   
-  // Click handler - opens modal
+  // Click handler - opens modal exactly like preview
   btn.addEventListener('click', function() {
     console.log('Widget button clicked');
     openModal();
@@ -302,17 +306,17 @@ export function generateWidgetScript(widget: any): string {
     
     var html = '<div class="modal-header">Contact Us</div>';
     
-    // Video section (if enabled) - no controls, autoplay, loop
-    if (config.videoEnabled && config.videoUrl) {
+    // Video section - matching preview exactly with controls and proper alignment
+    if (hasVideo) {
       html += '<div class="video-container">';
-      html += '<video class="video-player" style="height:' + config.videoHeight + 'px;object-position:' + config.videoAlignment + ';" autoplay muted loop>';
+      html += '<video class="video-player" style="height:' + config.videoHeight + 'px;object-position:' + getVideoObjectPosition() + ';" controls autoplay loop>';
       html += '<source src="' + config.videoUrl + '" type="video/mp4">';
       html += 'Your browser does not support the video tag.';
       html += '</video>';
       html += '</div>';
     }
     
-    // Channels section
+    // Channels section - matching preview layout exactly
     if (config.channels && config.channels.length > 0) {
       html += '<div class="channels-container">';
       config.channels.forEach(function(channel) {
@@ -330,7 +334,10 @@ export function generateWidgetScript(widget: any): string {
         html += '</div>';
       });
       html += '</div>';
-    } else {
+    }
+    
+    // Empty state if no channels and no video
+    if ((!config.channels || config.channels.length === 0) && !hasVideo) {
       html += '<div class="empty-state">';
       html += '<svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>';
       html += '<p>No contact channels available</p>';
@@ -373,6 +380,19 @@ export function generateWidgetScript(widget: any): string {
     }, 10);
     
     console.log('Modal opened');
+  }
+  
+  // Video alignment helper function
+  function getVideoObjectPosition() {
+    switch (config.videoAlignment) {
+      case 'top':
+        return 'top';
+      case 'bottom':
+        return 'bottom';
+      case 'center':
+      default:
+        return 'center';
+    }
   }
   
   function getChannelUrl(channel) {
