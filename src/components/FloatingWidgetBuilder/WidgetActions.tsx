@@ -79,7 +79,7 @@ export const useWidgetActions = (
         video_alignment: formData.videoAlignment,
         custom_icon_url: formData.customIcon === 'custom' ? formData.customIconUrl : null,
         button_size: formData.buttonSize,
-        preview_video_height: formData.pre‌viewVideoHeight,
+        preview_video_height: formData.previewVideoHeight,
         template_id: formData.templateId || 'default',
         channels: channels,
         user_id: user?.id
