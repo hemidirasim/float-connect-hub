@@ -9,6 +9,8 @@ import { WidgetForm } from "@/components/FloatingWidgetBuilder/WidgetForm";
 import { LivePreview } from "@/components/FloatingWidgetBuilder/LivePreview";
 import { CodePreview } from "@/components/FloatingWidgetBuilder/CodePreview";
 import { Footer } from "@/components/FloatingWidgetBuilder/Footer";
+import { HomeBlogs } from "@/components/HomeBlogs";
+import { HomeFAQ } from "@/components/HomeFAQ";
 import { platformOptions } from "@/components/FloatingWidgetBuilder/constants";
 import { Channel, FormData } from "@/components/FloatingWidgetBuilder/types";
 
@@ -77,20 +79,20 @@ const Index = () => {
           customIcon: data.custom_icon_url ? 'custom' : 'message-circle',
           customIconUrl: data.custom_icon_url || ''
         });
-        toast.success('Widget yükləndi - redaktə edə bilərsiniz');
+        toast.success('Widget loaded - you can edit it now');
       }
     } catch (error) {
       console.error('Error loading widget:', error);
-      toast.error('Widget yüklənməkdə xəta');
+      toast.error('Error loading widget');
     }
   };
 
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
-      toast.error("Çıxış xətası: " + error.message);
+      toast.error("Sign out error: " + error.message);
     } else {
-      toast.success("Uğurla çıxdınız!");
+      toast.success("Successfully signed out!");
     }
   };
 
@@ -108,9 +110,9 @@ const Index = () => {
         ...prev,
         video: file
       }));
-      toast.success("Video yükləndi!");
+      toast.success("Video uploaded!");
     } else if (file) {
-      toast.error("Video faylının ölçüsü 10MB-dan az olmalıdır");
+      toast.error("Video file size must be less than 10MB");
     }
   };
 
@@ -119,7 +121,7 @@ const Index = () => {
     if (!file) return;
 
     if (!user) {
-      toast.error("Icon yükləmək üçün hesabınıza giriş edin");
+      toast.error("Please sign in to upload custom icons");
       return;
     }
 
@@ -143,10 +145,10 @@ const Index = () => {
         customIcon: 'custom'
       }));
 
-      toast.success("Icon uğurla yükləndi!");
+      toast.success("Icon uploaded successfully!");
     } catch (error) {
       console.error('Error uploading icon:', error);
-      toast.error('Icon yükləməkdə xəta');
+      toast.error('Error uploading icon');
     }
   };
 
@@ -163,7 +165,7 @@ const Index = () => {
         video_enabled: false
       }));
     }
-    toast.success("Video silindi");
+    toast.success("Video removed");
   };
 
   const addChannel = () => {
@@ -178,20 +180,20 @@ const Index = () => {
       setChannels(prev => [...prev, newChannel]);
       setChannelValue('');
       setSelectedChannelType('');
-      toast.success(`${platform?.label || 'Channel'} uğurla əlavə edildi!`);
+      toast.success(`${platform?.label || 'Channel'} added successfully!`);
     }
   };
 
   const removeChannel = (id: string) => {
     setChannels(prev => prev.filter(channel => channel.id !== id));
-    toast.success("Kanal silindi");
+    toast.success("Channel removed");
   };
 
   const editChannel = (id: string, newValue: string) => {
     setChannels(prev => prev.map(channel => 
       channel.id === id ? { ...channel, value: newValue } : channel
     ));
-    toast.success("Kanal yeniləndi");
+    toast.success("Channel updated");
   };
 
   const uploadVideoToStorage = async (videoFile: File): Promise<string | null> => {
@@ -200,7 +202,7 @@ const Index = () => {
       
       if (!user?.id) {
         console.error('No user ID available');
-        toast.error('İstifadəçi giriş etməyib');
+        toast.error('User not signed in');
         return null;
       }
 
@@ -218,7 +220,7 @@ const Index = () => {
 
       if (uploadError) {
         console.error('Video upload error:', uploadError);
-        toast.error(`Video yükləmə xətası: ${uploadError.message}`);
+        toast.error(`Video upload error: ${uploadError.message}`);
         return null;
       }
 
@@ -229,34 +231,34 @@ const Index = () => {
         .getPublicUrl(fileName);
 
       console.log('Public URL:', urlData.publicUrl);
-      toast.success('Video uğurla yükləndi!');
+      toast.success('Video uploaded successfully!');
       
       return urlData.publicUrl;
     } catch (error) {
       console.error('Error uploading video:', error);
-      toast.error('Video yükləməkdə xəta baş verdi');
+      toast.error('Error uploading video');
       return null;
     }
   };
 
   const createWidget = async () => {
     if (!websiteName || !websiteName.trim()) {
-      toast.error("Website adı tələb olunur");
+      toast.error("Website name is required");
       return;
     }
 
     if (!websiteUrl || !websiteUrl.trim()) {
-      toast.error("Website URL-i daxil edin");
+      toast.error("Please enter website URL");
       return;
     }
 
     if (!channels || channels.length === 0) {
-      toast.error("Minimum 1 ədəd contact channel əlavə edilməlidir");
+      toast.error("At least 1 contact channel must be added");
       return;
     }
 
     if (!user) {
-      toast.error("Widget yaratmaq üçün hesabınıza giriş edin");
+      toast.error("Please sign in to create a widget");
       setAuthModalOpen(true);
       return;
     }
@@ -272,7 +274,7 @@ const Index = () => {
           videoUrl = uploadedVideoUrl;
           console.log('Video uploaded successfully:', videoUrl);
         } else {
-          toast.error('Video yükləmə xətası');
+          toast.error('Video upload error');
           setSaving(false);
           return;
         }
@@ -319,21 +321,21 @@ const Index = () => {
           .eq('id', editingWidget.id);
 
         if (error) throw error;
-        toast.success('Widget yeniləndi və dashboardda görünəcək!');
+        toast.success('Widget updated and will appear in dashboard!');
       } else {
         const { error } = await supabase
           .from('widgets')
           .insert([widgetData]);
 
         if (error) throw error;
-        toast.success('Widget yaradıldı və dashboardda görünəcək!');
+        toast.success('Widget created and will appear in dashboard!');
       }
 
       generateCode();
 
     } catch (error) {
       console.error('Error saving widget:', error);
-      toast.error('Widget saxlanılarkən xəta baş verdi');
+      toast.error('Error saving widget');
     } finally {
       setSaving(false);
     }
@@ -371,7 +373,7 @@ const Index = () => {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedCode);
     setCopied(true);
-    toast.success("Kod kopyalandı!");
+    toast.success("Code copied!");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -387,8 +389,8 @@ const Index = () => {
       <div className="container mx-auto px-4 py-16">
         <HeroSection />
 
-        {/* Main Content - New Layout Structure */}
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-4 gap-8">
+        {/* Main Content - Widget Builder */}
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-4 gap-8 mb-16">
           {/* Left Side - Form and Code (3 columns) */}
           <div className="lg:col-span-3 space-y-8">
             {/* Widget Form */}
@@ -416,7 +418,7 @@ const Index = () => {
               onCustomIconUpload={handleCustomIconUpload}
             />
 
-            {/* Code Preview Section - Now below the form */}
+            {/* Code Preview Section */}
             <CodePreview
               generatedCode={generatedCode}
               copied={copied}
@@ -439,6 +441,10 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Blog and FAQ Sections */}
+      <HomeBlogs />
+      <HomeFAQ />
 
       <Footer />
 
