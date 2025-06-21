@@ -109,25 +109,28 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
           const tempDiv = document.createElement('div');
           tempDiv.innerHTML = previewHtml;
           
-          // Extract and execute scripts
-          const scripts = tempDiv.querySelectorAll('script');
-          scripts.forEach(script => {
-            if (script.textContent) {
-              console.log('Executing floating widget script...');
-              try {
-                eval(script.textContent);
-              } catch (e) {
-                console.error('Script execution error:', e);
-              }
-            }
-          });
-
           // Add the HTML elements directly to document body
           const elements = tempDiv.children;
           Array.from(elements).forEach(element => {
             // Mark as preview widget for cleanup
             element.setAttribute('data-widget-preview', 'true');
             document.body.appendChild(element);
+          });
+
+          // Extract and execute scripts after DOM insertion
+          const scripts = tempDiv.querySelectorAll('script');
+          scripts.forEach(script => {
+            if (script.textContent) {
+              console.log('Executing floating widget script...');
+              try {
+                // Use setTimeout to ensure DOM elements are available
+                setTimeout(() => {
+                  eval(script.textContent);
+                }, 100);
+              } catch (e) {
+                console.error('Script execution error:', e);
+              }
+            }
           });
 
         } catch (error) {
