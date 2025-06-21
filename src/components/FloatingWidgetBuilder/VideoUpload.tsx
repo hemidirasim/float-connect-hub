@@ -174,13 +174,13 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
         </div>
       </div>
 
-      {/* Video Display Settings - Always visible when video exists */}
+      {/* Video Display Settings - Only visible when video exists */}
       {hasVideo && (
         <div className="space-y-4 p-4 bg-blue-50/50 rounded-lg border border-blue-200">
           <div className="flex items-center justify-between">
             <div>
-              <Label className="text-base font-medium text-blue-800">Video Display Settings</Label>
-              <p className="text-sm text-blue-600">Configure how your video appears</p>
+              <Label className="text-base font-medium text-blue-800">Configure how your video appears</Label>
+              <p className="text-sm text-blue-600">Video preview in button vs icon display</p>
             </div>
             <Switch
               checked={useVideoPreview}
@@ -188,7 +188,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
             />
           </div>
 
-          {/* Always show video settings regardless of toggle */}
+          {/* Video settings - always show when video exists */}
           <div className="space-y-4 pl-4 border-l-2 border-blue-300">
             <div className="space-y-2">
               <Label className="text-sm font-medium">Modal video height: {videoHeight}px</Label>
@@ -201,33 +201,6 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                 className="w-full"
               />
             </div>
-
-            {/* Show video size slider when preview is enabled, button size when disabled */}
-            {useVideoPreview ? (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Preview video size: {previewVideoHeight}px</Label>
-                <Slider
-                  value={[previewVideoHeight]}
-                  onValueChange={(value) => onPreviewVideoHeightChange(value[0])}
-                  max={300}
-                  min={50}
-                  step={5}
-                  className="w-full"
-                />
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Button size: {buttonSize}px</Label>
-                <Slider
-                  value={[buttonSize]}
-                  onValueChange={(value) => onButtonSizeChange(value[0])}
-                  max={100}
-                  min={40}
-                  step={5}
-                  className="w-full"
-                />
-              </div>
-            )}
 
             <div className="space-y-2">
               <Label className="text-sm font-medium">Video alignment</Label>
@@ -246,7 +219,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
         </div>
       )}
 
-      {/* Button Size Settings - Only show when no video or video preview is disabled */}
+      {/* Button Size Settings - Only show when no video preview is enabled OR no video at all */}
       {(!hasVideo || !useVideoPreview) && (
         <div className="space-y-4 p-4 bg-green-50/50 rounded-lg border border-green-200">
           <div>

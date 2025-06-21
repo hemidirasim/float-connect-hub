@@ -260,8 +260,11 @@ export function generateWidgetScript(widget: any): string {
   var hasVideo = config.videoEnabled && config.videoUrl;
   var useVideoPreview = config.useVideoPreview;
   
-  if (hasVideo && useVideoPreview) {
+  console.log('Has video:', hasVideo, 'Use video preview:', useVideoPreview, 'Video URL:', config.videoUrl);
+  
+  if (hasVideo && useVideoPreview && config.videoUrl) {
     // Show video preview in button
+    console.log('Creating video element for button');
     var video = document.createElement('video');
     video.src = config.videoUrl;
     video.autoplay = true;
@@ -269,6 +272,15 @@ export function generateWidgetScript(widget: any): string {
     video.loop = true;
     video.playsInline = true;
     video.style.objectPosition = config.videoAlignment;
+    video.addEventListener('loadstart', function() {
+      console.log('Video started loading');
+    });
+    video.addEventListener('canplay', function() {
+      console.log('Video can play');
+    });
+    video.addEventListener('error', function(e) {
+      console.error('Video error:', e);
+    });
     btn.appendChild(video);
   } else {
     // Show icon
