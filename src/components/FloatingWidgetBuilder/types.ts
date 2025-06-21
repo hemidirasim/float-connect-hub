@@ -14,4 +14,6 @@ export interface FormData {
   useVideoPreview: boolean;
   videoHeight?: number;
   videoAlignment?: 'top' | 'center' | 'bottom';
+  customIcon?: string;
+  customIconUrl?: string;
 }

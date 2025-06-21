@@ -30,6 +30,7 @@ interface WidgetFormProps {
   onVideoRemove: () => void;
   onFormDataChange: (field: string, value: string | boolean | number) => void;
   onCreateWidget: () => void;
+  onCustomIconUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const WidgetForm: React.FC<WidgetFormProps> = ({
@@ -52,10 +53,9 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
   onVideoUpload,
   onVideoRemove,
   onFormDataChange,
-  onCreateWidget
+  onCreateWidget,
+  onCustomIconUpload
 }) => {
-  const hasVideo = formData.video || editingWidget?.video_url;
-
   return (
     <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm lg:col-span-2">
       <CardHeader>
@@ -89,29 +89,32 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           onEditChannel={onEditChannel}
         />
 
-        {/* Video Upload */}
+        {/* Video Upload - Now includes Video Display Settings inside */}
         <VideoUpload
           video={formData.video}
           videoUrl={editingWidget?.video_url}
           useVideoPreview={formData.useVideoPreview}
+          videoHeight={formData.videoHeight}
+          videoAlignment={formData.videoAlignment}
+          customIcon={formData.customIcon}
+          customIconUrl={formData.customIconUrl}
           onVideoUpload={onVideoUpload}
           onVideoRemove={onVideoRemove}
           onVideoPreviewChange={(checked) => onFormDataChange('useVideoPreview', checked)}
+          onVideoHeightChange={(height) => onFormDataChange('videoHeight', height)}
+          onVideoAlignmentChange={(alignment) => onFormDataChange('videoAlignment', alignment)}
+          onCustomIconChange={(icon) => onFormDataChange('customIcon', icon)}
+          onCustomIconUpload={onCustomIconUpload}
         />
 
-        {/* Customization Options */}
+        {/* Customization Options - Video Display Settings removed from here */}
         <CustomizationOptions
           buttonColor={formData.buttonColor}
           position={formData.position}
           tooltip={formData.tooltip}
-          videoHeight={formData.videoHeight}
-          videoAlignment={formData.videoAlignment}
-          hasVideo={hasVideo}
           onButtonColorChange={(color) => onFormDataChange('buttonColor', color)}
           onPositionChange={(position) => onFormDataChange('position', position)}
           onTooltipChange={(tooltip) => onFormDataChange('tooltip', tooltip)}
-          onVideoHeightChange={(height) => onFormDataChange('videoHeight', height)}
-          onVideoAlignmentChange={(alignment) => onFormDataChange('videoAlignment', alignment)}
         />
 
         <Button 

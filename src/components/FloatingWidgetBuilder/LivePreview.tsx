@@ -2,9 +2,22 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { MessageCircle, ExternalLink } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { MessageCircle, ExternalLink, Phone, Mail, Send, Heart, Star, Camera, Home, User } from 'lucide-react';
 import { Channel, FormData } from './types';
 import { platformOptions } from './constants';
+
+const iconMap = {
+  'message-circle': MessageCircle,
+  'phone': Phone,
+  'mail': Mail,
+  'send': Send,
+  'heart': Heart,
+  'star': Star,
+  'camera': Camera,
+  'home': Home,
+  'user': User,
+};
 
 interface LivePreviewProps {
   showWidget: boolean;
@@ -55,6 +68,14 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
     }
   };
 
+  const getButtonIcon = () => {
+    if (formData.customIconUrl) {
+      return <img src={formData.customIconUrl} alt="Custom icon" className="w-6 h-6" />;
+    }
+    const IconComponent = iconMap[formData.customIcon || 'message-circle'] || MessageCircle;
+    return <IconComponent className="w-6 h-6 text-white" />;
+  };
+
   const hasVideo = formData.video || editingWidget?.video_url;
 
   return (
@@ -82,91 +103,96 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
           <div 
             className={`absolute bottom-6 ${formData.position === 'left' ? 'left-6' : 'right-6'} z-10`}
           >
-            <Dialog open={videoModalOpen} onOpenChange={onVideoModalOpenChange}>
-              <DialogTrigger asChild>
-                <button
-                  className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 relative group overflow-hidden"
-                  style={{ backgroundColor: formData.buttonColor }}
-                  title={formData.tooltip || 'Contact us'}
-                >
-                  {hasVideo && formData.useVideoPreview ? (
-                    <video
-                      className="w-full h-full object-cover rounded-full"
-                      style={{ objectPosition: getVideoObjectPosition() }}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                    >
-                      <source src={getVideoSource()} type="video/mp4" />
-                    </video>
-                  ) : (
-                    <MessageCircle className="w-6 h-6 text-white" />
-                  )}
-                  {formData.tooltip && (
-                    <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                      {formData.tooltip}
-                    </div>
-                  )}
-                </button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Contact Us</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-3">
-                  {/* Video Section - Shows first with custom height and alignment */}
-                  {hasVideo && (
-                    <div className="mb-4">
-                      <video
-                        className="w-full rounded-lg object-cover"
-                        style={{ 
-                          height: `${formData.videoHeight || 200}px`,
-                          objectPosition: getVideoObjectPosition()
-                        }}
-                        controls
-                        autoPlay
-                        playsInline
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Dialog open={videoModalOpen} onOpenChange={onVideoModalOpenChange}>
+                    <DialogTrigger asChild>
+                      <button
+                        className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 relative overflow-hidden"
+                        style={{ backgroundColor: formData.buttonColor }}
                       >
-                        <source src={getVideoSource()} type="video/mp4" />
-                        Your browser does not support the video tag.
-                      </video>
-                    </div>
-                  )}
-                  
-                  {/* Channels Grid Layout */}
-                  {channels.length > 0 && (
-                    <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
-                      {channels.map((channel) => {
-                        const IconComponent = getChannelIcon(channel.type);
-                        return (
-                          <div key={channel.id} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors">
-                            <div 
-                              className="w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0"
-                              style={{ backgroundColor: getChannelColor(channel.type) }}
+                        {hasVideo && formData.useVideoPreview ? (
+                          <video
+                            className="w-full h-full object-cover rounded-full"
+                            style={{ objectPosition: getVideoObjectPosition() }}
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                          >
+                            <source src={getVideoSource()} type="video/mp4" />
+                          </video>
+                        ) : (
+                          getButtonIcon()
+                        )}
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Contact Us</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-3">
+                        {/* Video Section - Shows first with custom height and alignment */}
+                        {hasVideo && (
+                          <div className="mb-4">
+                            <video
+                              className="w-full rounded-lg object-cover"
+                              style={{ 
+                                height: `${formData.videoHeight || 200}px`,
+                                objectPosition: getVideoObjectPosition()
+                              }}
+                              controls
+                              autoPlay
+                              playsInline
                             >
-                              <IconComponent className="w-5 h-5" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm">{channel.label}</p>
-                              <p className="text-xs text-gray-600 truncate">{channel.value}</p>
-                            </div>
-                            <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                              <source src={getVideoSource()} type="video/mp4" />
+                              Your browser does not support the video tag.
+                            </video>
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  
-                  {channels.length === 0 && !hasVideo && (
-                    <div className="text-center py-8 text-gray-500">
-                      <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">No contact channels added yet</p>
-                    </div>
-                  )}
-                </div>
-              </DialogContent>
-            </Dialog>
+                        )}
+                        
+                        {/* Channels Grid Layout */}
+                        {channels.length > 0 && (
+                          <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
+                            {channels.map((channel) => {
+                              const IconComponent = getChannelIcon(channel.type);
+                              return (
+                                <div key={channel.id} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors">
+                                  <div 
+                                    className="w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0"
+                                    style={{ backgroundColor: getChannelColor(channel.type) }}
+                                  >
+                                    <IconComponent className="w-5 h-5" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-sm">{channel.label}</p>
+                                    <p className="text-xs text-gray-600 truncate">{channel.value}</p>
+                                  </div>
+                                  <ExternalLink className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                        
+                        {channels.length === 0 && !hasVideo && (
+                          <div className="text-center py-8 text-gray-500">
+                            <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                            <p className="text-sm">No contact channels added yet</p>
+                          </div>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </TooltipTrigger>
+                {formData.tooltip && (
+                  <TooltipContent>
+                    <p>{formData.tooltip}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
           </div>
         )}
       </CardContent>

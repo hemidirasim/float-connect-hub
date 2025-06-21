@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -25,7 +26,9 @@ const Index = () => {
     tooltip: '',
     useVideoPreview: false,
     videoHeight: 200,
-    videoAlignment: 'center'
+    videoAlignment: 'center',
+    customIcon: 'message-circle',
+    customIconUrl: ''
   });
 
   const [generatedCode, setGeneratedCode] = useState('');
@@ -105,6 +108,42 @@ const Index = () => {
       toast.success("Video yükləndi!");
     } else if (file) {
       toast.error("Video faylının ölçüsü 10MB-dan az olmalıdır");
+    }
+  };
+
+  const handleCustomIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!user) {
+      toast.error("Icon yükləmək üçün hesabınıza giriş edin");
+      return;
+    }
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/icon-${Date.now()}.${fileExt}`;
+
+      const { data, error } = await supabase.storage
+        .from('icons')
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      const { data: urlData } = supabase.storage
+        .from('icons')
+        .getPublicUrl(fileName);
+
+      setFormData(prev => ({
+        ...prev,
+        customIconUrl: urlData.publicUrl,
+        customIcon: 'custom'
+      }));
+
+      toast.success("Icon uğurla yükləndi!");
+    } catch (error) {
+      console.error('Error uploading icon:', error);
+      toast.error('Icon yükləməkdə xəta');
     }
   };
 
@@ -268,7 +307,7 @@ const Index = () => {
         video_height: formData.videoHeight || 200,
         video_alignment: formData.videoAlignment || 'center',
         button_style: 'circle',
-        custom_icon_url: '',
+        custom_icon_url: formData.customIconUrl || '',
         show_on_mobile: true,
         show_on_desktop: true,
         channels: channels,
@@ -378,6 +417,7 @@ const Index = () => {
             onVideoRemove={handleVideoRemove}
             onFormDataChange={handleInputChange}
             onCreateWidget={createWidget}
+            onCustomIconUpload={handleCustomIconUpload}
           />
 
           {/* Live Preview Section */}
