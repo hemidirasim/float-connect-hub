@@ -26,67 +26,74 @@ export function generateWidgetScript(widget: any): string {
 
   console.log('Generating script for config:', JSON.stringify(config, null, 2))
 
+  // LivePreview.tsx-dəki eyni strukturu və stilləri istifadə edək
   return `console.log('Loading widget...');
 (function() {
   var config = ${JSON.stringify(config)};
   console.log('Widget config:', config);
   
-  // Check if video is available - using same logic as preview
+  // Video mövcudluğunu yoxlayaq - LivePreview.tsx-dəki kimi
   var hasVideo = config.videoUrl && config.videoUrl.trim() !== '';
   
-  // Inject CSS styles - matching preview exactly
+  // TailwindCSS-ə bənzər inline stillər - LivePreview.tsx-dəki Card komponentinin stilləri
   var styles = \`
-    .widget-container {
+    /* Widget Container - LivePreview.tsx-dəki kimi */
+    .hiclient-widget-container {
       position: fixed;
       \${config.position}: 20px;
       bottom: 20px;
       z-index: 99999;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     
-    .widget-button {
+    /* Button - LivePreview.tsx-dəki ButtonComponent kimi */
+    .hiclient-widget-button {
       width: \${config.buttonSize}px;
       height: \${config.buttonSize}px;
       border-radius: 50%;
       background: \${config.buttonColor};
       border: none;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
       overflow: hidden;
     }
     
-    .widget-button:hover {
+    /* Hover effect - LivePreview.tsx-dəki kimi */
+    .hiclient-widget-button:hover {
       transform: scale(1.1);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
     
-    .tooltip {
+    /* Tooltip - LivePreview.tsx-dəki TooltipContent kimi */
+    .hiclient-tooltip {
       position: absolute;
       \${config.position === 'left' ? 'left: ' + (config.buttonSize + 10) + 'px;' : 'right: ' + (config.buttonSize + 10) + 'px;'}
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(0,0,0,0.8);
+      background: rgba(0, 0, 0, 0.9);
       color: white;
-      padding: 6px 10px;
+      padding: 8px 12px;
       border-radius: 6px;
       font-size: 12px;
       white-space: nowrap;
       z-index: 100000;
       opacity: 0;
-      transition: opacity 0.2s ease;
+      visibility: hidden;
+      transition: opacity 0.15s ease, visibility 0.15s ease;
       pointer-events: none;
     }
     
-    .tooltip.show {
+    .hiclient-tooltip.show {
       opacity: 1;
+      visibility: visible;
     }
     
-    .tooltip::before {
+    .hiclient-tooltip::before {
       content: '';
       position: absolute;
       \${config.position === 'left' ? 'right: -5px;' : 'left: -5px;'}
@@ -96,88 +103,100 @@ export function generateWidgetScript(widget: any): string {
       height: 0;
       border-top: 5px solid transparent;
       border-bottom: 5px solid transparent;
-      \${config.position === 'left' ? 'border-left: 5px solid rgba(0,0,0,0.8);' : 'border-right: 5px solid rgba(0,0,0,0.8);'}
+      \${config.position === 'left' ? 'border-left: 5px solid rgba(0, 0, 0, 0.9);' : 'border-right: 5px solid rgba(0, 0, 0, 0.9);'}
     }
     
-    .modal-backdrop {
+    /* Modal - LivePreview.tsx-dəki DialogContent kimi */
+    .hiclient-modal-backdrop {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.8);
       z-index: 100000;
       display: flex;
       align-items: center;
       justify-content: center;
       opacity: 0;
-      transition: opacity 0.3s ease;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
     }
     
-    .modal-backdrop.show {
+    .hiclient-modal-backdrop.show {
       opacity: 1;
+      visibility: visible;
     }
     
-    .modal-content {
+    .hiclient-modal-content {
       background: white;
       padding: 24px;
       border-radius: 12px;
-      max-width: 420px;
+      max-width: 28rem;
       width: 90%;
       max-height: 80vh;
       overflow-y: auto;
-      transform: scale(0.8);
+      transform: scale(0.95);
       transition: transform 0.3s ease;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
     
-    .modal-backdrop.show .modal-content {
+    .hiclient-modal-backdrop.show .hiclient-modal-content {
       transform: scale(1);
     }
     
-    .modal-header {
+    /* Modal Header - LivePreview.tsx-dəki DialogTitle kimi */
+    .hiclient-modal-header {
       margin: 0 0 20px 0;
-      font-size: 20px;
-      font-weight: bold;
-      color: #333;
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
       text-align: center;
+      line-height: 1.4;
     }
     
-    .video-container {
+    /* Video Container - LivePreview.tsx-dəki video section kimi */
+    .hiclient-video-container {
       margin-bottom: 20px;
     }
     
-    .video-player {
+    .hiclient-video-player {
       width: 100%;
       border-radius: 8px;
       object-fit: cover;
     }
     
-    .channels-container {
+    /* Channels Container - LivePreview.tsx-dəki channels grid kimi */
+    .hiclient-channels-container {
       max-height: 300px;
       overflow-y: auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
     }
     
-    .channel-item {
+    /* Channel Item - LivePreview.tsx-dəki channel item kimi */
+    .hiclient-channel-item {
       display: flex;
       align-items: center;
       gap: 12px;
       padding: 12px;
-      margin: 8px 0;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s ease;
       text-decoration: none;
+      background: white;
     }
     
-    .channel-item:hover {
+    .hiclient-channel-item:hover {
       background-color: #f9fafb;
       transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
     
-    .channel-icon {
+    /* Channel Icon - LivePreview.tsx-dəki icon div kimi */
+    .hiclient-channel-icon {
       width: 40px;
       height: 40px;
       border-radius: 50%;
@@ -187,85 +206,100 @@ export function generateWidgetScript(widget: any): string {
       flex-shrink: 0;
     }
     
-    .channel-info {
+    /* Channel Info - LivePreview.tsx-dəki channel info kimi */
+    .hiclient-channel-info {
       flex: 1;
       min-width: 0;
     }
     
-    .channel-label {
-      font-weight: 600;
+    .hiclient-channel-label {
+      font-weight: 500;
       font-size: 14px;
       color: #374151;
-      margin: 0 0 2px 0;
+      margin: 0 0 4px 0;
+      line-height: 1.3;
     }
     
-    .channel-value {
+    .hiclient-channel-value {
       font-size: 12px;
       color: #6b7280;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       margin: 0;
+      line-height: 1.3;
     }
     
-    .close-button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background: #374151;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background-color 0.2s;
-      width: 100%;
+    /* External Link Icon - LivePreview.tsx-dəki ExternalLink icon kimi */
+    .hiclient-external-icon {
+      width: 16px;
+      height: 16px;
+      color: #9ca3af;
+      flex-shrink: 0;
     }
     
-    .close-button:hover {
-      background: #1f2937;
-    }
-    
-    .empty-state {
+    /* Empty State - LivePreview.tsx-dəki empty state kimi */
+    .hiclient-empty-state {
       text-align: center;
       padding: 40px 20px;
       color: #6b7280;
     }
     
-    .empty-icon {
+    .hiclient-empty-icon {
       width: 32px;
       height: 32px;
-      margin: 0 auto 8px;
+      margin: 0 auto 12px;
       opacity: 0.5;
+    }
+    
+    /* Scrollbar Styling */
+    .hiclient-channels-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .hiclient-channels-container::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 3px;
+    }
+    
+    .hiclient-channels-container::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    
+    .hiclient-channels-container::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
     }
   \`;
   
-  // Inject styles
+  // Stilləri inject edək
   var styleSheet = document.createElement('style');
   styleSheet.textContent = styles;
   document.head.appendChild(styleSheet);
   
-  // Create widget container
+  // Widget container yaradaq
   var widget = document.createElement('div');
-  widget.className = 'widget-container';
+  widget.className = 'hiclient-widget-container';
   
-  // Create button
+  // Button yaradaq - LivePreview.tsx-dəki ButtonComponent kimi
   var btn = document.createElement('button');
-  btn.className = 'widget-button';
+  btn.className = 'hiclient-widget-button';
   
-  // Button content - only show icon (no video preview)
+  // Button content - LivePreview.tsx-dəki getButtonIcon kimi
   var iconHtml = '';
   if (config.customIconUrl && config.customIconUrl.trim() !== '') {
-    iconHtml = '<img src="' + config.customIconUrl + '" alt="Contact" style="width:24px;height:24px;border-radius:50%;">';
+    iconHtml = '<img src="' + config.customIconUrl + '" alt="Custom icon" style="width:24px;height:24px;object-fit:cover;">';
   } else {
-    iconHtml = '<svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>';
+    // Default MessageCircle icon - LivePreview.tsx-dəki kimi
+    iconHtml = '<svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
   }
   btn.innerHTML = iconHtml;
   
-  // Tooltip - matching preview exactly
+  // Tooltip - LivePreview.tsx-dəki renderTooltipMessage kimi
   var tooltip = null;
   if (config.tooltip && config.tooltip.trim() !== '' && config.tooltipDisplay !== 'never') {
     tooltip = document.createElement('div');
-    tooltip.className = 'tooltip';
+    tooltip.className = 'hiclient-tooltip';
     tooltip.textContent = config.tooltip;
     
     if (config.tooltipDisplay === 'always') {
@@ -279,7 +313,7 @@ export function generateWidgetScript(widget: any): string {
   document.body.appendChild(widget);
   console.log('Widget button added to page');
   
-  // Tooltip hover effects - matching preview
+  // Tooltip hover effects - LivePreview.tsx-dəki kimi
   if (tooltip && config.tooltipDisplay === 'hover') {
     btn.addEventListener('mouseenter', function() {
       tooltip.classList.add('show');
@@ -289,69 +323,66 @@ export function generateWidgetScript(widget: any): string {
     });
   }
   
-  // Click handler - opens modal exactly like preview
+  // Click handler - LivePreview.tsx-dəki modal açma kimi
   btn.addEventListener('click', function() {
     console.log('Widget button clicked');
     openModal();
   });
   
   function openModal() {
-    // Create modal backdrop
+    // Modal backdrop yaradaq
     var modal = document.createElement('div');
-    modal.className = 'modal-backdrop';
+    modal.className = 'hiclient-modal-backdrop';
     
-    // Create modal content
+    // Modal content yaradaq
     var content = document.createElement('div');
-    content.className = 'modal-content';
+    content.className = 'hiclient-modal-content';
     
-    var html = '<div class="modal-header">Contact Us</div>';
+    var html = '<div class="hiclient-modal-header">Contact Us</div>';
     
-    // Video section - matching preview exactly with controls and proper alignment
+    // Video section - LivePreview.tsx-dəki video section kimi
     if (hasVideo) {
-      html += '<div class="video-container">';
-      html += '<video class="video-player" style="height:' + config.videoHeight + 'px;object-position:' + getVideoObjectPosition() + ';" controls autoplay loop>';
+      html += '<div class="hiclient-video-container">';
+      html += '<video class="hiclient-video-player" style="height:' + config.videoHeight + 'px;object-position:' + getVideoObjectPosition() + ';" controls autoplay>';
       html += '<source src="' + config.videoUrl + '" type="video/mp4">';
       html += 'Your browser does not support the video tag.';
       html += '</video>';
       html += '</div>';
     }
     
-    // Channels section - matching preview layout exactly
+    // Channels section - LivePreview.tsx-dəki channels grid kimi
     if (config.channels && config.channels.length > 0) {
-      html += '<div class="channels-container">';
+      html += '<div class="hiclient-channels-container">';
       config.channels.forEach(function(channel) {
         var channelUrl = getChannelUrl(channel);
         var channelIcon = getChannelIcon(channel.type);
         var channelColor = getChannelColor(channel.type);
         
-        html += '<div class="channel-item" onclick="openChannel(\\'' + channelUrl + '\\');">';
-        html += '<div class="channel-icon" style="background-color:' + channelColor + ';">' + channelIcon + '</div>';
-        html += '<div class="channel-info">';
-        html += '<div class="channel-label">' + channel.label + '</div>';
-        html += '<div class="channel-value">' + channel.value + '</div>';
+        html += '<div class="hiclient-channel-item" onclick="openChannel(\\'' + channelUrl + '\\');">';
+        html += '<div class="hiclient-channel-icon" style="background-color:' + channelColor + ';">' + channelIcon + '</div>';
+        html += '<div class="hiclient-channel-info">';
+        html += '<div class="hiclient-channel-label">' + channel.label + '</div>';
+        html += '<div class="hiclient-channel-value">' + channel.value + '</div>';
         html += '</div>';
-        html += '<svg style="width:16px;height:16px;color:#9ca3af;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>';
+        html += '<svg class="hiclient-external-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>';
         html += '</div>';
       });
       html += '</div>';
     }
     
-    // Empty state if no channels and no video
+    // Empty state - LivePreview.tsx-dəki empty state kimi
     if ((!config.channels || config.channels.length === 0) && !hasVideo) {
-      html += '<div class="empty-state">';
-      html += '<svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>';
-      html += '<p>No contact channels available</p>';
+      html += '<div class="hiclient-empty-state">';
+      html += '<svg class="hiclient-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>';
+      html += '<p style="margin:0;font-size:14px;">No contact channels available</p>';
       html += '</div>';
     }
-    
-    // Close button
-    html += '<button class="close-button" onclick="closeModal()">Close</button>';
     
     content.innerHTML = html;
     modal.appendChild(content);
     document.body.appendChild(modal);
     
-    // Add global functions for channel interaction
+    // Global functions for channel interaction
     window.openChannel = function(url) {
       window.open(url, '_blank');
     };
@@ -374,6 +405,15 @@ export function generateWidgetScript(widget: any): string {
       }
     });
     
+    // ESC key to close
+    var escHandler = function(e) {
+      if (e.key === 'Escape') {
+        window.closeModal();
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
+    
     // Animate in
     setTimeout(function() {
       modal.classList.add('show');
@@ -382,7 +422,7 @@ export function generateWidgetScript(widget: any): string {
     console.log('Modal opened');
   }
   
-  // Video alignment helper function
+  // Video alignment helper function - LivePreview.tsx-dəki getVideoObjectPosition kimi
   function getVideoObjectPosition() {
     switch (config.videoAlignment) {
       case 'top':
