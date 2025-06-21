@@ -16,6 +16,8 @@ export function createWidgetConfig(widget: any): WidgetConfig {
     videoAlignment: widget.video_alignment || defaultWidgetConfig.videoAlignment,
     useVideoPreview: widget.use_video_preview || false,
     buttonSize: widget.button_size || 60,
-    previewVideoHeight: widget.preview_video_height || 120
+    previewVideoHeight: widget.preview_video_height || 120,
+    // Add template ID support
+    templateId: widget.template_id || widget.templateId || 'default'
   }
 }

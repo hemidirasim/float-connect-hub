@@ -1,21 +1,24 @@
 
+export interface Channel {
+  id: string;
+  type: string;
+  value: string;
+  label: string;
+}
+
 export interface WidgetConfig {
-  channels: Array<{
-    id: string
-    type: string
-    value: string
-    label: string
-  }>
-  buttonColor: string
-  position: 'left' | 'right'
-  tooltip: string
-  tooltipDisplay: 'always' | 'hover' | 'never'
-  customIconUrl?: string
-  videoEnabled: boolean
-  videoUrl?: string
-  videoHeight: number
-  videoAlignment: string
-  useVideoPreview?: boolean
-  buttonSize?: number
-  previewVideoHeight?: number
+  channels: Channel[];
+  buttonColor: string;
+  position: string;
+  tooltip: string;
+  tooltipDisplay: string;
+  customIconUrl?: string;
+  videoEnabled: boolean;
+  videoUrl?: string;
+  videoHeight: number;
+  videoAlignment: string;
+  useVideoPreview: boolean;
+  buttonSize: number;
+  previewVideoHeight: number;
+  templateId?: string; // Add template ID support
 }

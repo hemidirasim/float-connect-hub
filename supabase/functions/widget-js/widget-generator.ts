@@ -7,11 +7,23 @@ import { WidgetTemplateRenderer, type TemplateConfig } from './template-generato
 export function generateWidgetScript(widget: any): string {
   const config = createWidgetConfig(widget)
   
-  // Get template by ID (falls back to default if not found)
-  const templateId = widget.template_id || 'default'
+  // Get template by ID - use the actual template_id from widget, fallback to 'default'
+  // For now, we'll determine template from form data or use default
+  let templateId = 'default'
+  
+  // Try different sources for template ID
+  if (widget.template_id) {
+    templateId = widget.template_id
+  } else if (widget.templateId) {
+    templateId = widget.templateId
+  } else if (config.templateId) {
+    templateId = config.templateId
+  }
+  
+  console.log('Using template ID:', templateId, 'for widget:', widget.name)
+  
   const template = getTemplateById(templateId)
-
-  console.log('Generating script with template:', template.name, 'for widget:', widget.name)
+  console.log('Selected template:', template.name)
 
   const templateConfig: TemplateConfig = {
     channels: config.channels,

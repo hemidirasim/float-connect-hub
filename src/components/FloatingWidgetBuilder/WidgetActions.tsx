@@ -70,7 +70,7 @@ export const useWidgetActions = (
         custom_icon_url: formData.customIconUrl,
         button_size: formData.buttonSize,
         preview_video_height: formData.previewVideoHeight,
-        // Don't save template_id at all for now since we're using client-side templates
+        template_id: formData.templateId || 'default', // Save the template ID
         channels: channels,
         user_id: user?.id,
         updated_at: new Date().toISOString()
