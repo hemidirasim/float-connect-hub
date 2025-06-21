@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { Channel, FormData } from './types';
@@ -19,6 +20,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
   const [template, setTemplate] = useState<WidgetTemplate | null>(null);
   const [previewHtml, setPreviewHtml] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   // Fetch selected template or default template
   useEffect(() => {
@@ -39,6 +41,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 
         if (error) {
           console.error('Error fetching template:', error);
+          setDebugInfo(`Template fetch error: ${error.message}`);
           // Fallback to default template if specific template fails
           if (formData.templateId) {
             const { data: defaultData, error: defaultError } = await supabase
@@ -50,14 +53,18 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
             
             if (!defaultError && defaultData) {
               setTemplate(defaultData);
+              setDebugInfo('Using default template as fallback');
             }
           }
           return;
         }
 
         setTemplate(data);
+        setDebugInfo(`Template loaded: ${data.name}`);
+        console.log('Template loaded:', data);
       } catch (error) {
         console.error('Error fetching template:', error);
+        setDebugInfo(`Fetch error: ${error}`);
       } finally {
         setLoading(false);
       }
@@ -72,6 +79,13 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       setPreviewHtml('');
       return;
     }
+
+    console.log('Generating preview with:', {
+      channels: channels.length,
+      buttonColor: formData.buttonColor,
+      position: formData.position,
+      tooltip: formData.tooltip
+    });
 
     const config: TemplateConfig = {
       channels,
@@ -92,6 +106,8 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     const renderer = new TemplateRenderer(template, config);
     const html = renderer.renderComplete();
     setPreviewHtml(html);
+    setDebugInfo(`Preview generated with ${channels.length} channels`);
+    console.log('Preview HTML generated:', html.length, 'characters');
   }, [template, formData, channels, showWidget, editingWidget, loading]);
 
   if (loading) {
@@ -101,6 +117,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
           <span className="text-2xl">⏳</span>
         </div>
         <p>Loading template...</p>
+        <p className="text-xs mt-2 text-blue-600">{debugInfo}</p>
       </div>
     );
   }
@@ -118,6 +135,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
             Using template: {template?.name || 'Loading...'}
           </p>
         )}
+        <p className="text-xs mt-2 text-blue-600">{debugInfo}</p>
       </div>
     );
   }
@@ -135,12 +153,13 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
               Template: {template.name}
             </p>
           )}
+          <p className="text-xs mt-1 text-blue-600">{debugInfo}</p>
         </div>
       </div>
       
       {/* Template rendered widget */}
       <div 
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0"
         dangerouslySetInnerHTML={{ __html: previewHtml }}
         style={{ pointerEvents: 'auto' }}
       />
