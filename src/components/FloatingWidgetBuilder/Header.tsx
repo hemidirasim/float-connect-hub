@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Settings, LogOut, User } from 'lucide-react';
+import { MessageCircle, User } from 'lucide-react';
 import { useNavigate, Link } from "react-router-dom";
 
 interface HeaderProps {
@@ -32,17 +32,12 @@ export const Header: React.FC<HeaderProps> = ({ user, loading, onSignOut, onOpen
             <Link to="/" className="text-gray-600 hover:text-blue-600 transition-colors">Create Widget</Link>
             {!loading && (
               user ? (
-                <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
-                    <Settings className="w-4 h-4 mr-1" />
-                    Dashboard
-                  </Button>
-                  <span className="text-sm text-gray-600">{user.email}</span>
-                  <Button variant="outline" size="sm" onClick={onSignOut}>
-                    <LogOut className="w-4 h-4 mr-1" />
-                    Sign Out
-                  </Button>
-                </div>
+                <Link 
+                  to="/dashboard"
+                  className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
+                >
+                  Dashboard
+                </Link>
               ) : (
                 <Button variant="outline" size="sm" onClick={onOpenAuth}>
                   <User className="w-4 h-4 mr-1" />

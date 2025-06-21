@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Edit, Trash2, Eye, Settings, CreditCard, MessageSquare, BarChart3, Coins, Globe, Smartphone, Monitor, Code, Home } from 'lucide-react';
+import { Edit, Trash2, Eye, Settings, CreditCard, MessageSquare, BarChart3, Coins, Globe, Smartphone, Monitor, Code, Home, LogOut, User } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SupportTickets } from "@/components/SupportTickets";
@@ -152,6 +151,17 @@ const Dashboard = () => {
     toast.success('Code copied!');
   };
 
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success('Signed out successfully!');
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast.error('Failed to sign out');
+    }
+  };
+
   if (loading || loadingWidgets) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
@@ -187,13 +197,26 @@ const Dashboard = () => {
             </h1>
             <p className="text-gray-600">Manage your widgets and track your statistics</p>
           </div>
-          <Button 
-            onClick={() => navigate('/')}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-          >
-            <Home className="w-4 h-4 mr-2" />
-            Home
-          </Button>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <User className="w-4 h-4" />
+              <span>{user?.email}</span>
+            </div>
+            <Button 
+              onClick={() => navigate('/')}
+              variant="outline"
+            >
+              <Home className="w-4 h-4 mr-2" />
+              Home
+            </Button>
+            <Button 
+              onClick={handleSignOut}
+              variant="outline"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -215,7 +238,7 @@ const Dashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Widgets</p>
+                  <p className="text-sm font-medium text-gray-600">Websites</p>
                   <p className="text-2xl font-bold text-blue-600">{widgets.length}</p>
                   <p className="text-xs text-gray-500">active: {widgets.filter(w => w.is_active).length}</p>
                 </div>
@@ -232,7 +255,7 @@ const Dashboard = () => {
                   <p className="text-2xl font-bold text-purple-600">
                     {widgets.reduce((sum, w) => sum + w.total_views, 0)}
                   </p>
-                  <p className="text-xs text-gray-500">all widgets</p>
+                  <p className="text-xs text-gray-500">all websites</p>
                 </div>
                 <Eye className="w-8 h-8 text-purple-600" />
               </div>

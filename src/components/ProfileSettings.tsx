@@ -72,10 +72,10 @@ export const ProfileSettings: React.FC = () => {
         });
 
       if (error) throw error;
-      toast.success('Profil yeniləndi!');
+      toast.success('Profile updated!');
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error('Profil yenilənməkdə xəta');
+      toast.error('Error updating profile');
     } finally {
       setLoading(false);
     }
@@ -85,7 +85,7 @@ export const ProfileSettings: React.FC = () => {
     return (
       <div className="text-center py-8">
         <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-        <p className="text-gray-600">Profile yüklənir...</p>
+        <p className="text-gray-600">Loading profile...</p>
       </div>
     );
   }
@@ -96,19 +96,19 @@ export const ProfileSettings: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="w-5 h-5 text-blue-600" />
-            Profil məlumatları
+            Profile Information
           </CardTitle>
-          <CardDescription>Hesab məlumatlarınızı yeniləyin</CardDescription>
+          <CardDescription>Update your account information</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="full_name">Tam ad</Label>
+              <Label htmlFor="full_name">Full Name</Label>
               <Input
                 id="full_name"
                 value={profile.full_name}
                 onChange={(e) => handleInputChange('full_name', e.target.value)}
-                placeholder="Adınızı daxil edin"
+                placeholder="Enter your name"
               />
             </div>
             
@@ -126,14 +126,14 @@ export const ProfileSettings: React.FC = () => {
                   disabled
                 />
               </div>
-              <p className="text-xs text-gray-500">Email dəyişdirmək üçün dəstəyə müraciət edin</p>
+              <p className="text-xs text-gray-500">Contact support to change your email</p>
             </div>
           </div>
           
           <div className="flex justify-end">
             <Button onClick={handleSave} disabled={loading}>
               <Save className="w-4 h-4 mr-2" />
-              {loading ? 'Saxlanılır...' : 'Saxla'}
+              {loading ? 'Saving...' : 'Save'}
             </Button>
           </div>
         </CardContent>
@@ -141,7 +141,7 @@ export const ProfileSettings: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Hesab məlumatları</CardTitle>
+          <CardTitle>Account Information</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -150,8 +150,8 @@ export const ProfileSettings: React.FC = () => {
               <code className="text-sm bg-white px-2 py-1 rounded">{user?.id}</code>
             </div>
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <span className="font-medium">Qeydiyyat tarixi</span>
-              <span className="text-sm">{user?.created_at ? new Date(user.created_at).toLocaleDateString('az-AZ') : 'N/A'}</span>
+              <span className="font-medium">Registration Date</span>
+              <span className="text-sm">{user?.created_at ? new Date(user.created_at).toLocaleDateString('en-US') : 'N/A'}</span>
             </div>
           </div>
         </CardContent>
