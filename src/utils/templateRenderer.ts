@@ -1,4 +1,3 @@
-
 import { Channel, FormData } from "@/components/FloatingWidgetBuilder/types";
 
 export interface WidgetTemplate {
@@ -98,7 +97,7 @@ export class TemplateRenderer {
       result = result.replace(/\{\{tooltip_class\}\}/g, 'hide');
     }
 
-    const tooltipPosition = this.config.position === 'left' ? 'left: 70px;' : 'right: 70px;';
+    const tooltipPosition = this.config.position === 'left' ? 'right: 70px;' : 'left: 70px;';
     result = result.replace(/\{\{tooltip_style\}\}/g, tooltipPosition);
 
     // Replace button style
@@ -184,6 +183,10 @@ export class TemplateRenderer {
   }
 
   public renderJS(): string {
+    // Use the template's JS if available, otherwise use default
+    if (this.template.js_template && this.template.js_template.trim()) {
+      return this.replacePlaceholders(this.template.js_template);
+    }
     return this.getWidgetJavaScript();
   }
 
