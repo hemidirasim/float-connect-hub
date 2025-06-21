@@ -20,12 +20,14 @@ export const useWidgetState = (user: any) => {
     tooltip: 'Contact us!',
     tooltipDisplay: 'hover',
     video: null,
-    videoUrl: undefined, // Add videoUrl to track uploaded video URL
+    videoUrl: undefined,
     useVideoPreview: false,
     videoHeight: 200,
     videoAlignment: 'center',
     customIcon: null,
-    customIconUrl: ''
+    customIconUrl: '',
+    buttonSize: 60, // Add default button size
+    previewVideoHeight: 120 // Add default preview video height
   });
 
   // Check for editing widget on load
@@ -58,12 +60,14 @@ export const useWidgetState = (user: any) => {
           tooltip: data.tooltip || 'Contact us!',
           tooltipDisplay: data.tooltip_display || 'hover',
           video: null,
-          videoUrl: data.video_url || undefined, // Load existing video URL
+          videoUrl: data.video_url || undefined,
           useVideoPreview: data.video_enabled || false,
           videoHeight: data.video_height || 200,
           videoAlignment: data.video_alignment || 'center',
           customIcon: data.custom_icon_url ? 'custom' : null,
-          customIconUrl: data.custom_icon_url || ''
+          customIconUrl: data.custom_icon_url || '',
+          buttonSize: data.button_size || 60, // Load button size
+          previewVideoHeight: data.preview_video_height || 120 // Load preview video height
         });
 
         // Scroll to widget form
@@ -96,7 +100,9 @@ export const useWidgetState = (user: any) => {
       videoHeight: 200,
       videoAlignment: 'center',
       customIcon: null,
-      customIconUrl: ''
+      customIconUrl: '',
+      buttonSize: 60, // Reset button size
+      previewVideoHeight: 120 // Reset preview video height
     });
   };
 

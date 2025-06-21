@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -91,7 +90,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           onEditChannel={onEditChannel}
         />
 
-        {/* Video Upload - Now includes Video Display Settings and Button Icon Settings */}
+        {/* Video Upload - Now includes all new controls */}
         <VideoUpload
           video={formData.video}
           videoUrl={formData.videoUrl || editingWidget?.video_url}
@@ -100,6 +99,8 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           videoAlignment={formData.videoAlignment}
           customIcon={formData.customIcon}
           customIconUrl={formData.customIconUrl}
+          buttonSize={formData.buttonSize}
+          previewVideoHeight={formData.previewVideoHeight}
           uploading={uploading}
           onVideoUpload={onVideoUpload}
           onVideoRemove={onVideoRemove}
@@ -108,6 +109,8 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           onVideoAlignmentChange={(alignment) => onFormDataChange('videoAlignment', alignment)}
           onCustomIconChange={(icon) => onFormDataChange('customIcon', icon)}
           onCustomIconUpload={onCustomIconUpload}
+          onButtonSizeChange={(size) => onFormDataChange('buttonSize', size)}
+          onPreviewVideoHeightChange={(height) => onFormDataChange('previewVideoHeight', height)}
         />
 
         {/* Customization Options - Now includes tooltip display option */}

@@ -102,14 +102,21 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
   const ButtonComponent = React.forwardRef<HTMLButtonElement>((props, ref) => (
     <button
       ref={ref}
-      className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 relative overflow-hidden"
-      style={{ backgroundColor: formData.buttonColor }}
+      className="rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 relative overflow-hidden"
+      style={{ 
+        backgroundColor: formData.buttonColor,
+        width: `${formData.buttonSize || 60}px`,
+        height: `${formData.buttonSize || 60}px`
+      }}
       {...props}
     >
       {hasVideo && formData.useVideoPreview ? (
         <video
           className="w-full h-full object-cover rounded-full"
-          style={{ objectPosition: getVideoObjectPosition() }}
+          style={{ 
+            objectPosition: getVideoObjectPosition(),
+            height: `${formData.previewVideoHeight || 120}px`
+          }}
           autoPlay
           muted
           loop
@@ -125,6 +132,33 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
   ));
 
   ButtonComponent.displayName = 'ButtonComponent';
+
+  const handleChannelClick = (channel: Channel) => {
+    let url = '';
+    
+    switch (channel.type) {
+      case 'whatsapp':
+        url = `https://wa.me/${channel.value.replace(/[^0-9]/g, '')}`;
+        break;
+      case 'telegram':
+        url = `https://t.me/${channel.value.replace('@', '')}`;
+        break;
+      case 'email':
+        url = `mailto:${channel.value}`;
+        break;
+      case 'phone':
+        url = `tel:${channel.value}`;
+        break;
+      case 'instagram':
+        url = channel.value.startsWith('http') ? channel.value : `https://instagram.com/${channel.value.replace('@', '')}`;
+        break;
+      default:
+        url = channel.value;
+    }
+    
+    window.open(url, '_blank');
+    onVideoModalOpenChange(false); // Close modal after click
+  };
 
   return (
     <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
@@ -164,7 +198,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
                           <DialogTitle>Contact Us</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-3">
-                          {/* Video Section - Shows first with custom height and alignment */}
+                          {/* Video Section */}
                           {hasVideo && (
                             <div className="mb-4">
                               <video
@@ -183,13 +217,17 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
                             </div>
                           )}
                           
-                          {/* Channels Grid Layout */}
+                          {/* Channels Grid Layout with working click handlers */}
                           {channels.length > 0 && (
                             <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
                               {channels.map((channel) => {
                                 const IconComponent = getChannelIcon(channel.type);
                                 return (
-                                  <div key={channel.id} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors">
+                                  <div 
+                                    key={channel.id} 
+                                    className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors"
+                                    onClick={() => handleChannelClick(channel)}
+                                  >
                                     <div 
                                       className="w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0"
                                       style={{ backgroundColor: getChannelColor(channel.type) }}
@@ -232,7 +270,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
                     <DialogTitle>Contact Us</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-3">
-                    {/* Video Section - Shows first with custom height and alignment */}
+                    {/* Video Section */}
                     {hasVideo && (
                       <div className="mb-4">
                         <video
@@ -251,13 +289,17 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
                       </div>
                     )}
                     
-                    {/* Channels Grid Layout */}
+                    {/* Channels Grid Layout with working click handlers */}
                     {channels.length > 0 && (
                       <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
                         {channels.map((channel) => {
                           const IconComponent = getChannelIcon(channel.type);
                           return (
-                            <div key={channel.id} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors">
+                            <div 
+                              key={channel.id} 
+                              className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors"
+                              onClick={() => handleChannelClick(channel)}
+                            >
                               <div 
                                 className="w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0"
                                 style={{ backgroundColor: getChannelColor(channel.type) }}

@@ -27,6 +27,8 @@ interface VideoUploadProps {
   videoAlignment: string;
   customIcon: string;
   customIconUrl: string;
+  buttonSize: number;
+  previewVideoHeight: number;
   uploading?: boolean;
   onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onVideoRemove: () => void;
@@ -35,6 +37,8 @@ interface VideoUploadProps {
   onVideoAlignmentChange: (alignment: string) => void;
   onCustomIconChange: (icon: string) => void;
   onCustomIconUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onButtonSizeChange: (size: number) => void;
+  onPreviewVideoHeightChange: (height: number) => void;
 }
 
 // Function to truncate filename with extension
@@ -63,6 +67,8 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
   videoAlignment,
   customIcon,
   customIconUrl,
+  buttonSize,
+  previewVideoHeight,
   uploading = false,
   onVideoUpload,
   onVideoRemove,
@@ -70,7 +76,9 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
   onVideoHeightChange,
   onVideoAlignmentChange,
   onCustomIconChange,
-  onCustomIconUpload
+  onCustomIconUpload,
+  onButtonSizeChange,
+  onPreviewVideoHeightChange
 }) => {
   const hasVideo = video || videoUrl;
   const displayFileName = video ? truncateFilename(video.name) : (videoUrl ? 'Uploaded video' : '');
@@ -166,7 +174,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
         </div>
       </div>
 
-      {/* Video Display Settings - Shows when video is uploaded */}
+      {/* Video Display Settings - Always visible when video exists */}
       {hasVideo && (
         <div className="space-y-4 p-4 bg-blue-50/50 rounded-lg border border-blue-200">
           <div className="flex items-center justify-between">
@@ -180,37 +188,68 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
             />
           </div>
 
-          {useVideoPreview && (
-            <div className="space-y-4 pl-4 border-l-2 border-blue-300">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Video height: {videoHeight}px</Label>
-                <Slider
-                  value={[videoHeight]}
-                  onValueChange={(value) => onVideoHeightChange(value[0])}
-                  max={500}
-                  min={100}
-                  step={10}
-                  className="w-full"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Video hizalanması</Label>
-                <Select value={videoAlignment} onValueChange={onVideoAlignmentChange}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="top">Top</SelectItem>
-                    <SelectItem value="center">Center</SelectItem>
-                    <SelectItem value="bottom">Bottom</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          {/* Always show video settings regardless of toggle */}
+          <div className="space-y-4 pl-4 border-l-2 border-blue-300">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Modal video height: {videoHeight}px</Label>
+              <Slider
+                value={[videoHeight]}
+                onValueChange={(value) => onVideoHeightChange(value[0])}
+                max={500}
+                min={100}
+                step={10}
+                className="w-full"
+              />
             </div>
-          )}
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Preview video height: {previewVideoHeight}px</Label>
+              <Slider
+                value={[previewVideoHeight]}
+                onValueChange={(value) => onPreviewVideoHeightChange(value[0])}
+                max={300}
+                min={50}
+                step={5}
+                className="w-full"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Video alignment</Label>
+              <Select value={videoAlignment} onValueChange={onVideoAlignmentChange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="top">Top</SelectItem>
+                  <SelectItem value="center">Center</SelectItem>
+                  <SelectItem value="bottom">Bottom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
       )}
+
+      {/* Button Size Settings */}
+      <div className="space-y-4 p-4 bg-green-50/50 rounded-lg border border-green-200">
+        <div>
+          <Label className="text-base font-medium text-green-800">Button Size Settings</Label>
+          <p className="text-sm text-green-600">Adjust the size of your floating button</p>
+        </div>
+        
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Button size: {buttonSize}px</Label>
+          <Slider
+            value={[buttonSize]}
+            onValueChange={(value) => onButtonSizeChange(value[0])}
+            max={100}
+            min={40}
+            step={5}
+            className="w-full"
+          />
+        </div>
+      </div>
 
       {/* Button Icon Settings */}
       <div className="space-y-4">
@@ -251,7 +290,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                   <Upload className="w-5 h-5 text-purple-600" />
                 </div>
                 <p className="text-sm text-purple-700 font-medium">
-                  {customIconUrl ? 'Icon  uploaded - Choose new' : 'Upload custom icon'}
+                  {customIconUrl ? 'Icon uploaded - Choose new' : 'Upload custom icon'}
                 </p>
                 <p className="text-xs text-purple-600">PNG, JPG, SVG (max 2MB)</p>
               </label>

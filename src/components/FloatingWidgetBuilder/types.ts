@@ -12,10 +12,12 @@ export interface FormData {
   tooltip: string;
   tooltipDisplay: string;
   video: File | null;
-  videoUrl?: string; // Add videoUrl to track uploaded video URL
+  videoUrl?: string;
   useVideoPreview: boolean;
   videoHeight: number;
   videoAlignment: string;
   customIcon: string | null;
   customIconUrl: string;
+  buttonSize: number; // Add button size control
+  previewVideoHeight: number; // Add preview video height control
 }

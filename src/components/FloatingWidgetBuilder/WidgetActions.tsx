@@ -64,10 +64,12 @@ export const useWidgetActions = (
         tooltip: formData.tooltip,
         tooltip_display: formData.tooltipDisplay,
         video_enabled: formData.useVideoPreview,
-        video_url: formData.videoUrl || null, // Save video URL from uploaded file
+        video_url: formData.videoUrl || null,
         video_height: formData.videoHeight,
         video_alignment: formData.videoAlignment,
         custom_icon_url: formData.customIconUrl,
+        button_size: formData.buttonSize, // Save button size
+        preview_video_height: formData.previewVideoHeight, // Save preview video height
         channels: channels,
         user_id: user?.id,
         updated_at: new Date().toISOString()
