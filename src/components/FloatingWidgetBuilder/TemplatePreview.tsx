@@ -31,7 +31,6 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
   editingWidget
 }) => {
   const [previewHtml, setPreviewHtml] = useState<string>('');
-  const [debugInfo, setDebugInfo] = useState<string>('');
 
   // Memoize template getter to prevent infinite re-renders
   const getTemplate = useCallback((templateId: string): WidgetTemplate => {
@@ -44,14 +43,13 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
   useEffect(() => {
     if (!showWidget) {
       setPreviewHtml('');
-      setDebugInfo('');
       return;
     }
 
     const templateId = formData.templateId || 'default';
     const template = getTemplate(templateId);
 
-    console.log('Generating preview with synchronized template:', {
+    console.log('Generating floating widget preview:', {
       templateId,
       templateName: template.name,
       channels: channels.length,
@@ -78,8 +76,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     const renderer = new TemplateRenderer(template, config);
     const html = renderer.renderComplete();
     setPreviewHtml(html);
-    setDebugInfo(`Preview generated: ${template.name} (synchronized with edge function)`);
-    console.log('Preview HTML generated with synchronized template:', html.length, 'characters');
+    console.log('Floating widget preview generated:', html.length, 'characters');
   }, [
     showWidget,
     formData.templateId,
@@ -104,22 +101,37 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     if (previewHtml) {
       const timer = setTimeout(() => {
         try {
-          const previewContainer = document.querySelector('[data-preview-container]');
-          if (previewContainer) {
-            const scripts = previewContainer.querySelectorAll('script');
-            scripts.forEach(script => {
-              if (script.textContent) {
-                console.log('Executing synchronized preview script...');
-                try {
-                  eval(script.textContent);
-                } catch (e) {
-                  console.error('Script execution error:', e);
-                }
+          // Remove any existing preview widgets first
+          const existingWidgets = document.querySelectorAll('[data-widget-preview]');
+          existingWidgets.forEach(widget => widget.remove());
+
+          // Create a temporary container to parse the HTML
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = previewHtml;
+          
+          // Extract and execute scripts
+          const scripts = tempDiv.querySelectorAll('script');
+          scripts.forEach(script => {
+            if (script.textContent) {
+              console.log('Executing floating widget script...');
+              try {
+                eval(script.textContent);
+              } catch (e) {
+                console.error('Script execution error:', e);
               }
-            });
-          }
+            }
+          });
+
+          // Add the HTML elements directly to document body
+          const elements = tempDiv.children;
+          Array.from(elements).forEach(element => {
+            // Mark as preview widget for cleanup
+            element.setAttribute('data-widget-preview', 'true');
+            document.body.appendChild(element);
+          });
+
         } catch (error) {
-          console.error('Error executing preview scripts:', error);
+          console.error('Error rendering floating widget:', error);
         }
       }, 100);
 
@@ -127,50 +139,14 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     }
   }, [previewHtml]);
 
-  if (!showWidget) {
-    const templateId = formData.templateId || 'default';
-    const template = getTemplate(templateId);
-    
-    return (
-      <div className="text-center py-8 text-gray-500">
-        <div className="w-16 h-16 mx-auto mb-4 opacity-50 bg-gray-200 rounded-full flex items-center justify-center">
-          <span className="text-2xl">💬</span>
-        </div>
-        <p>Your website preview</p>
-        <p className="text-sm">Widget appears below</p>
-        <p className="text-xs mt-2 text-purple-600">
-          Template: {template.name}
-        </p>
-        <p className="text-xs mt-2 text-blue-600">{debugInfo}</p>
-      </div>
-    );
-  }
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      const existingWidgets = document.querySelectorAll('[data-widget-preview]');
+      existingWidgets.forEach(widget => widget.remove());
+    };
+  }, []);
 
-  const templateId = formData.templateId || 'default';
-  const template = getTemplate(templateId);
-
-  return (
-    <div className="relative min-h-[400px] bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border-2 border-dashed border-gray-300">
-      <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 opacity-50 bg-gray-200 rounded-full flex items-center justify-center">
-            <span className="text-2xl">🌐</span>
-          </div>
-          <p>Your website preview</p>
-          <p className="text-xs mt-2 text-purple-600">
-            Template: {template.name}
-          </p>
-          <p className="text-xs mt-1 text-blue-600">{debugInfo}</p>
-        </div>
-      </div>
-      
-      {/* Template rendered widget */}
-      <div 
-        className="absolute inset-0"
-        data-preview-container
-        dangerouslySetInnerHTML={{ __html: previewHtml }}
-        style={{ pointerEvents: 'auto' }}
-      />
-    </div>
-  );
+  // Don't render any visible component - the widget is injected directly into the page
+  return null;
 };
