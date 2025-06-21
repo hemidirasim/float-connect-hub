@@ -48,7 +48,6 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
   const [paddleLoaded, setPaddleLoaded] = useState(false);
 
   useEffect(() => {
-    // Load Paddle script
     const script = document.createElement('script');
     script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js';
     script.async = true;
@@ -58,7 +57,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
     };
     script.onerror = () => {
       console.error('Failed to load Paddle script');
-      toast.error('Ödəniş sistemi yüklənmədi');
+      toast.error('Payment system failed to load');
     };
     document.head.appendChild(script);
 
@@ -72,14 +71,11 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
   const initializePaddle = async () => {
     try {
       if (window.Paddle) {
-        // Set environment to production
         window.Paddle.Environment.set("production");
-        
-        // Get current user for customer email
         const { data: { user } } = await supabase.auth.getUser();
-        
+
         window.Paddle.Initialize({
-          token: "live_c780f029236977ad3ae72c25114", // Updated with your correct token
+          token: "live_c780f029236977ad3ae72c25114",
           eventCallback: function(event: any) {
             console.log('Paddle event:', event);
             
@@ -92,31 +88,26 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
             }
           }
         });
-        
+
         setPaddleLoaded(true);
         console.log('Paddle initialized successfully');
       }
     } catch (error) {
       console.error('Paddle initialization error:', error);
-      toast.error('Ödəniş sistemi quraşdırılmadı');
+      toast.error('Failed to initialize the payment system');
     }
   };
 
   const handleCheckoutCompleted = async (data: any) => {
     try {
       console.log('Checkout completed:', data);
-      
-      // The webhook will handle adding credits, but we can show success message
-      toast.success('Ödəniş uğurla tamamlandı! Kredit balansınız yenilənəcək.');
-      
-      // Refresh credits after a short delay
+      toast.success('Payment completed successfully! Your credit balance will be updated.');
       setTimeout(() => {
         onCreditsUpdate();
       }, 2000);
-      
     } catch (error) {
       console.error('Error handling checkout completion:', error);
-      toast.error('Ödəniş tamamlandı, lakin kredit əlavə edilmədi. Dəstəklə əlaqə saxlayın.');
+      toast.error('Payment was completed, but credits were not added. Please contact support.');
     } finally {
       setLoading(false);
     }
@@ -124,24 +115,22 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
 
   const handlePurchaseCredits = async (credits: number, price: number, productId: string) => {
     if (!paddleLoaded || !window.Paddle) {
-      toast.error('Ödəniş sistemi hələ yüklənməyib, xahiş edirik gözləyin');
+      toast.error('The payment system has not loaded yet, please wait');
       return;
     }
 
     setLoading(true);
-    
+
     try {
-      // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) {
-        toast.error('Giriş etməlisiniz');
+        toast.error('You have to login');
         setLoading(false);
         return;
       }
 
       console.log('Opening Paddle checkout for:', { credits, price, productId });
 
-      // Open Paddle checkout popup
       window.Paddle.Checkout.open({
         items: [{
           priceId: productId,
@@ -161,9 +150,9 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error opening Paddle checkout:', error);
-      toast.error('Ödəniş səhifəsi açılmadı: ' + error.message);
+      toast.error('Failed to open the payment page: ' + error.message);
       setLoading(false);
     }
   };
@@ -174,18 +163,18 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CreditCard className="w-5 h-5 text-blue-600" />
-            Mövcud balans
+            Balance
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
               <div className="text-3xl font-bold text-blue-600 mb-2">{userCredits.balance}</div>
-              <div className="text-sm text-gray-600">Mövcud kredit</div>
+              <div className="text-sm text-gray-600">Current credit</div>
             </div>
             <div className="text-center p-6 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg">
               <div className="text-3xl font-bold text-orange-600 mb-2">{userCredits.total_spent}</div>
-              <div className="text-sm text-gray-600">Xərclənmiş kredit</div>
+              <div className="text-sm text-gray-600">Spent credit</div>
             </div>
           </div>
         </CardContent>
@@ -193,19 +182,19 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
 
       <Card>
         <CardHeader>
-          <CardTitle>Kredit paketləri</CardTitle>
-          <CardDescription>Widget görüntülənmələri üçün kredit satın alın</CardDescription>
+          <CardTitle>Credit packages</CardTitle>
+          <CardDescription>Buy credits for widget views</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {creditPackages.map((pkg, index) => (
               <Card key={index} className={`relative ${pkg.popular ? 'border-blue-500 shadow-lg' : 'border-gray-200'}`}>
                 {pkg.popular && (
-                  <Badge className="absolute -top-2 left-4 bg-blue-600">Populyar</Badge>
+                  <Badge className="absolute -top-2 left-4 bg-blue-600">Popular</Badge>
                 )}
                 <CardContent className="p-6 text-center">
                   <div className="text-2xl font-bold text-blue-600 mb-2">{pkg.credits}</div>
-                  <div className="text-sm text-gray-600 mb-4">kredit</div>
+                  <div className="text-sm text-gray-600 mb-4">credits</div>
                   <div className="text-xl font-semibold mb-4">${pkg.price}</div>
                   <Button 
                     className="w-full" 
@@ -213,16 +202,16 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
                     disabled={loading || !paddleLoaded}
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    {loading ? 'Yüklənir...' : 'Satın al'}
+                    {loading ? 'Loading...' : 'Buy'}
                   </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
-          
+
           {!paddleLoaded && (
             <div className="text-center mt-4 text-sm text-gray-500">
-              Ödəniş sistemi yüklənir...
+              Payment system loading...
             </div>
           )}
         </CardContent>
@@ -232,24 +221,24 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <History className="w-5 h-5 text-gray-600" />
-            Kredit qiyməti
+            Credit cost
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
               <div>
-                <div className="font-medium">Standart widget görüntülənmə</div>
-                <div className="text-sm text-gray-600">Video olmayan widget-lər</div>
+                <div className="font-medium">Standard widget display</div>
+                <div className="text-sm text-gray-600">Non-video widgets</div>
               </div>
-              <Badge variant="outline">1 kredit</Badge>
+              <Badge variant="outline">1 credit</Badge>
             </div>
             <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
               <div>
-                <div className="font-medium">Video widget görüntülənmə</div>
-                <div className="text-sm text-gray-600">Video olan widget-lər</div>
+                <div className="font-medium">Video widget display</div>
+                <div className="text-sm text-gray-600">Widgets with video</div>
               </div>
-              <Badge variant="outline" className="text-purple-600">2 kredit</Badge>
+              <Badge variant="outline" className="text-purple-600">2 credits</Badge>
             </div>
           </div>
         </CardContent>

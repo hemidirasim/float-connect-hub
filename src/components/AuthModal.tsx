@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -23,7 +22,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error("Email və şifrə tələb olunur");
+      toast.error("Email and password are required");
       return;
     }
 
@@ -32,9 +31,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
-          toast.error("Giriş xətası: " + error.message);
+          toast.error("Login error: " + error.message);
         } else {
-          toast.success("Uğurla daxil oldunuz!");
+          toast.success("Successfully logged in!");
           onOpenChange(false);
           setEmail('');
           setPassword('');
@@ -42,16 +41,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
       } else {
         const { error } = await signUp(email, password);
         if (error) {
-          toast.error("Qeydiyyat xətası: " + error.message);
+          toast.error("Registration error: " + error.message);
         } else {
-          toast.success("Qeydiyyat uğurludur! Email-inizi yoxlayın.");
+          toast.success("Registration successful! Check your email.");
           onOpenChange(false);
           setEmail('');
           setPassword('');
         }
       }
     } catch (error) {
-      toast.error("Xəta baş verdi");
+      toast.error("An error occurred");
     } finally {
       setLoading(false);
     }
@@ -63,7 +62,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="w-5 h-5 text-blue-600" />
-            {isLogin ? 'Giriş' : 'Qeydiyyat'}
+            {isLogin ? 'Login' : 'Register'}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -84,7 +83,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
           <div className="space-y-2">
             <Label htmlFor="password" className="flex items-center gap-2">
               <Lock className="w-4 h-4" />
-              Şifrə
+              Password
             </Label>
             <Input
               id="password"
@@ -96,7 +95,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
             />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Gözləyin...' : (isLogin ? 'Daxil ol' : 'Qeydiyyat')}
+            {loading ? 'Please wait...' : (isLogin ? 'Log In' : 'Register')}
           </Button>
           <div className="text-center">
             <button
@@ -104,7 +103,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
               onClick={() => setIsLogin(!isLogin)}
               className="text-sm text-blue-600 hover:underline"
             >
-              {isLogin ? 'Hesabınız yoxdur? Qeydiyyat' : 'Hesabınız var? Giriş'}
+              {isLogin ? "Don't have an account? Register" : "Already have an account? Login"}
             </button>
           </div>
         </form>
