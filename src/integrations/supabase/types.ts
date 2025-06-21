@@ -210,6 +210,48 @@ export type Database = {
         }
         Relationships: []
       }
+      widget_templates: {
+        Row: {
+          created_at: string | null
+          css_template: string
+          description: string | null
+          html_template: string
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          js_template: string
+          name: string
+          preview_image_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          css_template: string
+          description?: string | null
+          html_template: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          js_template: string
+          name: string
+          preview_image_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          css_template?: string
+          description?: string | null
+          html_template?: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          js_template?: string
+          name?: string
+          preview_image_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       widget_views: {
         Row: {
           credits_used: number
@@ -263,6 +305,7 @@ export type Database = {
           preview_video_height: number | null
           show_on_desktop: boolean | null
           show_on_mobile: boolean | null
+          template_id: string | null
           tooltip: string | null
           tooltip_display: string | null
           total_views: number | null
@@ -288,6 +331,7 @@ export type Database = {
           preview_video_height?: number | null
           show_on_desktop?: boolean | null
           show_on_mobile?: boolean | null
+          template_id?: string | null
           tooltip?: string | null
           tooltip_display?: string | null
           total_views?: number | null
@@ -313,6 +357,7 @@ export type Database = {
           preview_video_height?: number | null
           show_on_desktop?: boolean | null
           show_on_mobile?: boolean | null
+          template_id?: string | null
           tooltip?: string | null
           tooltip_display?: string | null
           total_views?: number | null
@@ -324,7 +369,15 @@ export type Database = {
           video_url?: string | null
           website_url?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "widgets_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "widget_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
