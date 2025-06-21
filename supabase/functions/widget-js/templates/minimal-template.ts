@@ -1,11 +1,12 @@
 
+
 import type { WidgetTemplate } from '../template-types.ts'
 
 export const getMinimalTemplate = (): WidgetTemplate => ({
   id: 'minimal',
   name: 'Minimal Clean',
   description: 'Clean and minimal design with subtle animations',
-  html_template: `
+  html: `
 <!-- Minimal Template -->
 <div class="hiclient-widget-container" style="position: fixed; {{position}}: 20px; bottom: 20px; z-index: 99999;">
   <div class="hiclient-tooltip {{tooltip_class}}" style="{{tooltip_style}}">{{tooltip_text}}</div>
@@ -24,7 +25,7 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
   </div>
 </div>`,
   
-  css_template: `
+  css: `
 /* Minimal CSS */
 .hiclient-widget-container {
   font-family: system-ui, -apple-system, sans-serif;
@@ -234,7 +235,7 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
   opacity: 0.5;
 }`,
   
-  js_template: `/* Minimal JS */
+  js: `/* Minimal JS */
 function initializeWidget() {
   var button = document.querySelector(".hiclient-widget-button");
   var modal = document.querySelector(".hiclient-modal-backdrop");
@@ -300,8 +301,6 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initializeWidget);
 } else {
   initializeWidget();
-}`,
-  html: `<!-- Minimal Template -->`,
-  css: `/* Minimal CSS */`,
-  js: `/* Minimal JS */`
+}`
 });
+

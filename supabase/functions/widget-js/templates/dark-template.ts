@@ -1,11 +1,12 @@
 
-import type { WidgetTemplate } from '../template-generator.ts'
+
+import type { WidgetTemplate } from '../template-types.ts'
 
 export const getDarkTemplate = (): WidgetTemplate => ({
   id: 'dark',
   name: 'Dark Theme',
   description: 'Modern dark-themed widget with sleek design',
-  html_template: `
+  html: `
 <!-- Dark Theme Template -->
 <div class="hiclient-widget-container" style="position: fixed; {{position}}: 20px; bottom: 20px; z-index: 99999;">
   <div class="hiclient-tooltip {{tooltip_class}}" style="{{tooltip_style}}">{{tooltip_text}}</div>
@@ -24,7 +25,7 @@ export const getDarkTemplate = (): WidgetTemplate => ({
   </div>
 </div>`,
   
-  css_template: `
+  css: `
 /* Dark Theme CSS */
 .hiclient-widget-container {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -242,7 +243,7 @@ export const getDarkTemplate = (): WidgetTemplate => ({
   opacity: 0.4;
 }`,
   
-  js_template: `/* Dark Theme JS */
+  js: `/* Dark Theme JS */
 console.log("Dark theme widget loaded");
 
 function initializeWidget() {
@@ -323,7 +324,6 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initializeWidget);
 } else {
   initializeWidget();
-}`,
-  is_active: true,
-  is_default: false
+}`
 });
+

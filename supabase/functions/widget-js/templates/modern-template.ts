@@ -1,11 +1,12 @@
 
-import type { WidgetTemplate } from '../template-generator.ts'
+
+import type { WidgetTemplate } from '../template-types.ts'
 
 export const getModernTemplate = (): WidgetTemplate => ({
   id: 'modern',
   name: 'Modern Gradient',
   description: 'Modern template with gradient effects and smooth animations',
-  html_template: `
+  html: `
 <!-- Modern Template -->
 <div class="hiclient-widget-container" style="position: fixed; {{position}}: 20px; bottom: 20px; z-index: 99999;">
   <div class="hiclient-tooltip {{tooltip_class}}" style="{{tooltip_style}}">{{tooltip_text}}</div>
@@ -24,7 +25,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
   </div>
 </div>`,
   
-  css_template: `
+  css: `
 /* Modern Gradient CSS */
 .hiclient-widget-container {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -285,7 +286,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
   opacity: 0.4;
 }`,
   
-  js_template: `/* Modern JS */
+  js: `/* Modern JS */
 function initializeWidget() {
   var button = document.querySelector(".hiclient-widget-button");
   var modal = document.querySelector(".hiclient-modal-backdrop");
@@ -359,7 +360,6 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initializeWidget);
 } else {
   initializeWidget();
-}`,
-  is_active: true,
-  is_default: false
+}`
 });
+

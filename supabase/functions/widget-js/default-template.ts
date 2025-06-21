@@ -1,5 +1,6 @@
 
-import type { WidgetTemplate } from './template-registry.ts'
+
+import type { WidgetTemplate } from './template-types.ts'
 
 export const defaultTemplate: WidgetTemplate = {
   id: 'default',
@@ -192,3 +193,4 @@ export const defaultTemplate: WidgetTemplate = {
 };
 
 export const getDefaultTemplate = () => defaultTemplate;
+
