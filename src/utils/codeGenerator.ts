@@ -11,9 +11,9 @@ export const generateWidgetCode = (
     return '';
   }
 
-  // If widget has an ID (saved to database), generate clean script tag
+  // If widget has an ID (saved to database), generate script tag with WATI-style URL
   if (widgetId) {
-    return `<script src="https://hiclient.co/widget-js/${widgetId}"></script>`;
+    return `<script src="https://wati-integration-prod-service.clare.ai/v2/watiWidget.js?${widgetId}"></script>`;
   }
 
   // For preview only (before saving) - generate inline preview
