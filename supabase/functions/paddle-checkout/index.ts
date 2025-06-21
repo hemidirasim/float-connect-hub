@@ -16,9 +16,12 @@ serve(async (req) => {
   try {
     const { productId, credits } = await req.json();
     
+    console.log('Request received:', { productId, credits });
+    
     // Get user from auth header
     const authHeader = req.headers.get('Authorization')?.replace('Bearer ', '');
     if (!authHeader) {
+      console.error('No authorization header found');
       throw new Error('No authorization header');
     }
 
@@ -32,51 +35,85 @@ serve(async (req) => {
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
+      console.error('Authentication failed:', userError);
       throw new Error('Authentication failed');
     }
 
+    console.log('User authenticated:', user.email);
+
     const paddleApiToken = Deno.env.get('PADDLE_API_TOKEN');
-    const paddleEnvironment = Deno.env.get('PADDLE_ENVIRONMENT') || 'production';
+    const paddleEnvironment = Deno.env.get('PADDLE_ENVIRONMENT') || 'sandbox';
+    
+    console.log('Paddle environment:', paddleEnvironment);
+    console.log('Paddle API token exists:', !!paddleApiToken);
     
     if (!paddleApiToken) {
+      console.error('PADDLE_API_TOKEN environment variable not set');
       throw new Error('Paddle API token not configured');
     }
 
-    console.log('Creating checkout with environment:', paddleEnvironment);
-    console.log('Product ID:', productId);
+    // Use appropriate Paddle API URL based on environment
+    const paddleApiUrl = paddleEnvironment === 'production' 
+      ? 'https://api.paddle.com/checkout-sessions'
+      : 'https://sandbox-api.paddle.com/checkout-sessions';
+
+    console.log('Using Paddle API URL:', paddleApiUrl);
+    console.log('Creating checkout with data:', {
+      productId,
+      credits,
+      userEmail: user.email,
+      userId: user.id
+    });
 
     // Create Paddle checkout
-    const paddleResponse = await fetch('https://api.paddle.com/checkout-sessions', {
+    const requestBody = {
+      items: [{
+        product_id: productId,
+        quantity: 1
+      }],
+      customer_email: user.email,
+      custom_data: {
+        user_id: user.id,
+        credits: credits.toString()
+      },
+      success_url: `https://hiclient.co/dashboard?success=true`,
+      cancel_url: `https://hiclient.co/dashboard?cancelled=true`
+    };
+
+    console.log('Paddle request body:', JSON.stringify(requestBody, null, 2));
+
+    const paddleResponse = await fetch(paddleApiUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${paddleApiToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        items: [{
-          product_id: productId,
-          quantity: 1
-        }],
-        customer_email: user.email,
-        custom_data: {
-          user_id: user.id,
-          credits: credits.toString()
-        },
-        success_url: `https://hiclient.co/dashboard?success=true`,
-        cancel_url: `https://hiclient.co/dashboard?cancelled=true`
-      })
+      body: JSON.stringify(requestBody)
     });
 
     const responseText = await paddleResponse.text();
     console.log('Paddle API response status:', paddleResponse.status);
-    console.log('Paddle API response:', responseText);
+    console.log('Paddle API response headers:', Object.fromEntries(paddleResponse.headers.entries()));
+    console.log('Paddle API response body:', responseText);
 
     if (!paddleResponse.ok) {
-      console.error('Paddle API error:', responseText);
+      console.error('Paddle API error details:', {
+        status: paddleResponse.status,
+        statusText: paddleResponse.statusText,
+        body: responseText
+      });
       throw new Error(`Paddle API error: ${paddleResponse.status} - ${responseText}`);
     }
 
-    const paddleData = JSON.parse(responseText);
+    let paddleData;
+    try {
+      paddleData = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse Paddle response:', parseError);
+      throw new Error('Invalid response from Paddle API');
+    }
+    
+    console.log('Paddle checkout created successfully:', paddleData);
     
     return new Response(
       JSON.stringify({ 
@@ -92,14 +129,16 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error creating Paddle checkout:', error);
+    console.error('Error stack:', error.stack);
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message 
+        error: error.message,
+        details: error.stack
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: 500,
       }
     );
   }
