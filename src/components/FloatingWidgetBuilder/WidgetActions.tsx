@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Channel, FormData } from "./types";
@@ -46,12 +47,12 @@ export const useWidgetActions = (
   const handleCreateWidget = async () => {
     if (!websiteName.trim() || !websiteUrl.trim()) {
       toast.error('Website name and URL are required');
-      return false;
+      return { success: false };
     }
 
     if (channels.length === 0) {
       toast.error('At least 1 contact channel is required');
-      return false;
+      return { success: false };
     }
 
     try {
