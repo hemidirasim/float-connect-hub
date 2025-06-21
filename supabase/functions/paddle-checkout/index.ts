@@ -42,7 +42,7 @@ serve(async (req) => {
     console.log('User authenticated:', user.email);
 
     const paddleApiToken = Deno.env.get('PADDLE_API_TOKEN');
-    const paddleEnvironment = Deno.env.get('PADDLE_ENVIRONMENT') || 'production';
+    const paddleEnvironment = 'production'; // Set to production
     
     console.log('Paddle environment:', paddleEnvironment);
     console.log('Paddle API token exists:', !!paddleApiToken);
@@ -52,10 +52,8 @@ serve(async (req) => {
       throw new Error('Paddle API token not configured');
     }
 
-    // Use Paddle Transactions API (v1)
-    const paddleApiUrl = paddleEnvironment === 'production' 
-      ? 'https://api.paddle.com/transactions'
-      : 'https://sandbox-api.paddle.com/transactions';
+    // Use Paddle Transactions API (v1) for production
+    const paddleApiUrl = 'https://api.paddle.com/transactions';
 
     console.log('Using Paddle API URL:', paddleApiUrl);
     console.log('Creating checkout with data:', {
