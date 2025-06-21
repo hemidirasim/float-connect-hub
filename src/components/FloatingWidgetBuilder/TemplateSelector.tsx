@@ -5,39 +5,18 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Palette } from 'lucide-react';
 
-interface TemplateOption {
-  id: string;
-  name: string;
-  description: string;
-  is_default: boolean;
-}
+// Import templates to get their actual names and descriptions
+import { getDefaultTemplate } from '../../../supabase/functions/widget-js/default-template';
+import { getDarkTemplate } from '../../../supabase/functions/widget-js/templates/dark-template';
+import { getMinimalTemplate } from '../../../supabase/functions/widget-js/templates/minimal-template';
+import { getModernTemplate } from '../../../supabase/functions/widget-js/templates/modern-template';
 
-// Static template list - no database needed
-const AVAILABLE_TEMPLATES: TemplateOption[] = [
-  {
-    id: 'default',
-    name: 'Default Template',
-    description: 'Standard floating widget with modal popup',
-    is_default: true
-  },
-  {
-    id: 'dark',
-    name: 'Dark Theme',
-    description: 'Modern dark-themed widget with sleek design',
-    is_default: false
-  },
-  {
-    id: 'minimal',
-    name: 'Minimal Clean',
-    description: 'Clean and minimal design with subtle animations',
-    is_default: false
-  },
-  {
-    id: 'modern',
-    name: 'Modern Gradient',
-    description: 'Modern template with gradient effects and smooth animations',
-    is_default: false
-  }
+// Get template definitions dynamically
+const AVAILABLE_TEMPLATES = [
+  { ...getDefaultTemplate(), is_default: true },
+  { ...getDarkTemplate(), is_default: false },
+  { ...getMinimalTemplate(), is_default: false },
+  { ...getModernTemplate(), is_default: false }
 ];
 
 interface TemplateSelectorProps {
