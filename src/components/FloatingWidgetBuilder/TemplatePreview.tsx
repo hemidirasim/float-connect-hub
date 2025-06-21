@@ -1,13 +1,15 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { Channel, FormData } from './types';
-import { TemplateRenderer, WidgetTemplate, TemplateConfig } from "@/utils/templateRenderer";
 
 // Import template definitions from the same source as edge function
 import { getDefaultTemplate } from '../../../supabase/functions/widget-js/default-template';
 import { getDarkTemplate } from '../../../supabase/functions/widget-js/templates/dark-template';
 import { getMinimalTemplate } from '../../../supabase/functions/widget-js/templates/minimal-template';
 import { getModernTemplate } from '../../../supabase/functions/widget-js/templates/modern-template';
+
+// Import the SAME template renderer as edge functions
+import { WidgetTemplateRenderer } from '../../../supabase/functions/widget-js/template-generator';
 
 // Use the same template registry as edge functions
 const TEMPLATE_REGISTRY = {
@@ -33,13 +35,13 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
   const [previewHtml, setPreviewHtml] = useState<string>('');
 
   // Memoize template getter to prevent infinite re-renders
-  const getTemplate = useCallback((templateId: string): WidgetTemplate => {
+  const getTemplate = useCallback((templateId: string) => {
     const templateFunction = TEMPLATE_REGISTRY[templateId as keyof typeof TEMPLATE_REGISTRY] || TEMPLATE_REGISTRY['default'];
     const template = templateFunction();
     return template;
   }, []);
 
-  // Generate preview HTML when template or config changes
+  // Generate preview HTML when template or config changes - USE SAME SYSTEM AS EDGE FUNCTION
   useEffect(() => {
     if (!showWidget) {
       setPreviewHtml('');
@@ -49,15 +51,17 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     const templateId = formData.templateId || 'default';
     const template = getTemplate(templateId);
 
-    console.log('Generating floating widget preview:', {
+    console.log('Generating floating widget preview with SAME template system:', {
       templateId,
       templateName: template.name,
       channels: channels.length,
       buttonColor: formData.buttonColor,
-      position: formData.position
+      position: formData.position,
+      greetingMessage: formData.greetingMessage
     });
 
-    const config: TemplateConfig = {
+    // Use EXACT SAME config structure as edge function template-generator.ts
+    const templateConfig = {
       channels,
       buttonColor: formData.buttonColor,
       position: formData.position,
@@ -75,10 +79,34 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       previewVideoHeight: formData.previewVideoHeight
     };
 
-    const renderer = new TemplateRenderer(template, config);
-    const html = renderer.renderComplete();
-    setPreviewHtml(html);
-    console.log('Floating widget preview generated:', html.length, 'characters');
+    // Use SAME renderer as edge function
+    const renderer = new WidgetTemplateRenderer(template, templateConfig);
+    const completeScript = renderer.generateWidgetScript();
+    
+    // Extract the actual widget content (remove the wrapper function)
+    const scriptMatch = completeScript.match(/innerHTML = `([^`]+)`/);
+    const styleMatch = completeScript.match(/textContent = `([^`]+)`/);
+    const jsMatch = completeScript.match(/\/\/ Execute JavaScript\s*([^}]+)(?=\}\)\(\);)/);
+    
+    let finalHtml = '';
+    
+    if (styleMatch && scriptMatch) {
+      const css = styleMatch[1];
+      const html = scriptMatch[1];
+      const js = jsMatch ? jsMatch[1] : '';
+      
+      finalHtml = `
+        <style>${css}</style>
+        ${html}
+        <script>${js}</script>
+      `;
+    } else {
+      // Fallback - use the complete script as is
+      finalHtml = `<div id="temp-container"></div><script>${completeScript}</script>`;
+    }
+    
+    setPreviewHtml(finalHtml);
+    console.log('Floating widget preview generated using SAME system as edge function');
   }, [
     showWidget,
     formData.templateId,
@@ -130,7 +158,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
               scriptMatches.forEach(scriptTag => {
                 const scriptContent = scriptTag.replace(/<\/?script[^>]*>/gi, '');
                 if (scriptContent.trim()) {
-                  console.log('Executing floating widget script...');
+                  console.log('Executing floating widget script using SAME system...');
                   try {
                     // Create a safer execution context
                     const scriptFunction = new Function(scriptContent);
