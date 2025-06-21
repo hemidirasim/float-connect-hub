@@ -356,29 +356,39 @@ const Index = () => {
         <section className="py-16 bg-white/50" id="widget-form">
           <div className="container mx-auto px-4">
             <div className="grid lg:grid-cols-2 gap-12 max-w-7xl mx-auto">
-              <WidgetForm
-                websiteName={websiteName}
-                websiteUrl={websiteUrl}
-                channels={channels}
-                selectedChannelType={selectedChannelType}
-                channelValue={channelValue}
-                formData={formData}
-                editingWidget={editingWidget}
-                saving={saving}
-                onWebsiteNameChange={setWebsiteName}
-                onWebsiteUrlChange={setWebsiteUrl}
-                onChannelsChange={setChannels}
-                onSelectedChannelTypeChange={setSelectedChannelType}
-                onChannelValueChange={setChannelValue}
-                onAddChannel={handleAddChannel}
-                onRemoveChannel={handleRemoveChannel}
-                onEditChannel={handleEditChannel}
-                onVideoUpload={handleVideoUpload}
-                onVideoRemove={handleVideoRemove}
-                onFormDataChange={handleFormDataChange}
-                onCreateWidget={handleCreateWidget}
-                onCustomIconUpload={handleCustomIconUpload}
-              />
+              <div className="space-y-6">
+                <WidgetForm
+                  websiteName={websiteName}
+                  websiteUrl={websiteUrl}
+                  channels={channels}
+                  selectedChannelType={selectedChannelType}
+                  channelValue={channelValue}
+                  formData={formData}
+                  editingWidget={editingWidget}
+                  saving={saving}
+                  onWebsiteNameChange={setWebsiteName}
+                  onWebsiteUrlChange={setWebsiteUrl}
+                  onChannelsChange={setChannels}
+                  onSelectedChannelTypeChange={setSelectedChannelType}
+                  onChannelValueChange={setChannelValue}
+                  onAddChannel={handleAddChannel}
+                  onRemoveChannel={handleRemoveChannel}
+                  onEditChannel={handleEditChannel}
+                  onVideoUpload={handleVideoUpload}
+                  onVideoRemove={handleVideoRemove}
+                  onFormDataChange={handleFormDataChange}
+                  onCreateWidget={handleCreateWidget}
+                  onCustomIconUpload={handleCustomIconUpload}
+                />
+                
+                {generatedCode && (
+                  <CodePreview
+                    generatedCode={generatedCode}
+                    copied={copied}
+                    onCopy={handleCopyCode}
+                  />
+                )}
+              </div>
               
               <div className="space-y-6 lg:sticky lg:top-8 lg:h-fit">
                 <LivePreview
@@ -389,14 +399,6 @@ const Index = () => {
                   onVideoModalOpenChange={setVideoModalOpen}
                   editingWidget={editingWidget}
                 />
-                
-                {generatedCode && (
-                  <CodePreview
-                    generatedCode={generatedCode}
-                    copied={copied}
-                    onCopy={handleCopyCode}
-                  />
-                )}
               </div>
             </div>
           </div>
