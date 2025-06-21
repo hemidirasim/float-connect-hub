@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,7 +79,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
         const { data: { user } } = await supabase.auth.getUser();
         
         window.Paddle.Initialize({
-          token: "live_4c7a652ca35ad9a6b1c1fc3c33c", // Replace with your client-side token
+          token: "live_c780f029236977ad3ae72c25114", // Updated with your correct token
           eventCallback: function(event: any) {
             console.log('Paddle event:', event);
             
