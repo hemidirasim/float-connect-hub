@@ -8,6 +8,7 @@ export function generateWidgetScript(widget: any): string {
   console.log('Widget data received for script generation:', {
     name: widget.name,
     template_id: widget.template_id,
+    greeting_message: widget.greeting_message,
     channels: widget.channels?.length || 0,
     raw_widget_data: JSON.stringify(widget, null, 2)
   })
@@ -48,6 +49,8 @@ export function generateWidgetScript(widget: any): string {
     position: config.position,
     tooltip: config.tooltip,
     tooltipDisplay: config.tooltipDisplay,
+    tooltipPosition: config.tooltipPosition,
+    greetingMessage: config.greetingMessage,
     customIconUrl: config.customIconUrl,
     videoEnabled: config.videoEnabled,
     videoUrl: config.videoUrl,
@@ -58,11 +61,12 @@ export function generateWidgetScript(widget: any): string {
     previewVideoHeight: config.previewVideoHeight
   }
 
-  console.log('Template config created:', {
+  console.log('Template config created with greeting message:', {
     templateId: templateId,
     channels: templateConfig.channels.length,
     buttonColor: templateConfig.buttonColor,
-    position: templateConfig.position
+    position: templateConfig.position,
+    greetingMessage: templateConfig.greetingMessage
   })
 
   const renderer = new WidgetTemplateRenderer(template, templateConfig)
@@ -72,7 +76,8 @@ export function generateWidgetScript(widget: any): string {
     templateUsed: templateId,
     templateName: template.name,
     scriptLength: script.length,
-    hasChannels: templateConfig.channels.length > 0
+    hasChannels: templateConfig.channels.length > 0,
+    greetingMessage: templateConfig.greetingMessage
   })
   
   return script
