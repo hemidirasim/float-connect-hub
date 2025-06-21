@@ -3,7 +3,7 @@ import type { WidgetTemplate } from '../template-types.ts'
 export const getModernTemplate = (): WidgetTemplate => ({
   id: 'modern',
   name: 'Modern Contact Button',
-  description: 'Clean floating contact button with modern modal design',
+  description: 'Clean floating contact button with modern modal design positioned above the button',
   html: `
 <div class="hiclient-widget" style="position: fixed; {{POSITION_STYLE}} bottom: 24px; z-index: 99999;">
   <div class="hiclient-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
@@ -32,11 +32,12 @@ export const getModernTemplate = (): WidgetTemplate => ({
     </div>
   </div>
 </div>`,
-  
+
   css: `
 /* Modern Contact Widget */
 .hiclient-widget {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hiclient-button {
@@ -95,12 +96,14 @@ export const getModernTemplate = (): WidgetTemplate => ({
 
 .hiclient-modal {
   position: fixed;
-  inset: 0;
+  bottom: calc(24px + {{BUTTON_SIZE}}px + 16px); /* Position above button with gap */
+  right: 24px; /* Align with button's right position */
   z-index: 100000;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 0;
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -111,8 +114,13 @@ export const getModernTemplate = (): WidgetTemplate => ({
   visibility: visible;
 }
 
+.hiclient-modal.show ~ .hiclient-widget {
+  opacity: 0;
+  visibility: hidden;
+}
+
 .hiclient-modal-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
@@ -127,12 +135,6 @@ export const getModernTemplate = (): WidgetTemplate => ({
   max-height: 80vh;
   overflow: hidden;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  transform: scale(0.95) translateY(20px);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hiclient-modal.show .hiclient-modal-container {
-  transform: scale(1) translateY(0);
 }
 
 .hiclient-modal-header {
@@ -313,7 +315,8 @@ export const getModernTemplate = (): WidgetTemplate => ({
 /* Mobile */
 @media (max-width: 480px) {
   .hiclient-modal {
-    padding: 8px;
+    bottom: calc(16px + {{BUTTON_SIZE}}px + 8px);
+    right: 16px;
   }
   
   .hiclient-modal-container {
@@ -347,6 +350,7 @@ function initWidget() {
   const video = document.querySelector('.hiclient-video-player');
   const channelsContainer = document.querySelector('.hiclient-channels');
   const emptyState = document.querySelector('.hiclient-empty');
+  const widget = document.querySelector('.hiclient-widget');
   
   // Setup video
   if (video) {
@@ -366,6 +370,10 @@ function initWidget() {
   if (button) {
     button.addEventListener('click', () => {
       modal.classList.add('show');
+      if (widget) {
+        widget.style.opacity = '0';
+        widget.style.visibility = 'hidden';
+      }
       
       if (video) {
         video.muted = false;
@@ -381,6 +389,10 @@ function initWidget() {
   // Close modal
   const closeModal = () => {
     modal.classList.remove('show');
+    if (widget) {
+      widget.style.opacity = '1';
+      widget.style.visibility = 'visible';
+    }
     if (video) {
       video.muted = true;
       video.pause();
