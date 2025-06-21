@@ -16,6 +16,8 @@ export interface TemplateConfig {
   position: string;
   tooltip: string;
   tooltipDisplay: string;
+  tooltipPosition: string;
+  greetingMessage: string;
   customIconUrl?: string;
   videoEnabled: boolean;
   videoUrl?: string;
