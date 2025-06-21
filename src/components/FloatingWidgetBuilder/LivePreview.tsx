@@ -90,7 +90,7 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
     
     if (formData.tooltipDisplay === 'always') {
       return (
-        <div className={`absolute ${formData.position === 'left' ? 'left-16' : 'right-16'} bottom-2 bg-black text-white px-2 py-1 rounded text-sm whitespace-nowrap z-20`}>
+        <div className={`absolute ${formData.position === 'left' ? 'left-16' : 'right-16'} -top-10 bg-black text-white px-2 py-1 rounded text-sm whitespace-nowrap z-20`}>
           {formData.tooltip}
         </div>
       );
@@ -100,35 +100,38 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
   };
 
   const ButtonComponent = React.forwardRef<HTMLButtonElement>((props, ref) => (
-    <button
-      ref={ref}
-      className="rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 relative overflow-hidden"
-      style={{ 
-        backgroundColor: formData.buttonColor,
-        width: `${formData.buttonSize || 60}px`,
-        height: `${formData.buttonSize || 60}px`
-      }}
-      {...props}
-    >
-      {hasVideo && formData.useVideoPreview ? (
-        <video
-          className="w-full h-full object-cover rounded-full"
-          style={{ 
-            objectPosition: getVideoObjectPosition(),
-            height: `${formData.previewVideoHeight || 120}px`
-          }}
-          autoPlay
-          muted
-          loop
-          playsInline
-        >
-          <source src={getVideoSource()} type="video/mp4" />
-        </video>
-      ) : (
-        getButtonIcon()
-      )}
+    <div className="relative">
+      <button
+        ref={ref}
+        className="rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 relative overflow-hidden"
+        style={{ 
+          backgroundColor: formData.buttonColor,
+          width: `${formData.buttonSize || 60}px`,
+          height: `${formData.buttonSize || 60}px`
+        }}
+        {...props}
+      >
+        {hasVideo && formData.useVideoPreview ? (
+          <video
+            className="w-full h-full object-cover rounded-full"
+            style={{ 
+              objectPosition: getVideoObjectPosition(),
+              width: `${formData.previewVideoHeight || 120}px`,
+              height: `${formData.previewVideoHeight || 120}px`
+            }}
+            autoPlay
+            muted
+            loop
+            playsInline
+          >
+            <source src={getVideoSource()} type="video/mp4" />
+          </video>
+        ) : (
+          getButtonIcon()
+        )}
+      </button>
       {renderTooltipMessage()}
-    </button>
+    </div>
   ));
 
   ButtonComponent.displayName = 'ButtonComponent';

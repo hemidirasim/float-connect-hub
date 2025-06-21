@@ -202,17 +202,32 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
               />
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Preview video height: {previewVideoHeight}px</Label>
-              <Slider
-                value={[previewVideoHeight]}
-                onValueChange={(value) => onPreviewVideoHeightChange(value[0])}
-                max={300}
-                min={50}
-                step={5}
-                className="w-full"
-              />
-            </div>
+            {/* Show video size slider when preview is enabled, button size when disabled */}
+            {useVideoPreview ? (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Preview video size: {previewVideoHeight}px</Label>
+                <Slider
+                  value={[previewVideoHeight]}
+                  onValueChange={(value) => onPreviewVideoHeightChange(value[0])}
+                  max={300}
+                  min={50}
+                  step={5}
+                  className="w-full"
+                />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Button size: {buttonSize}px</Label>
+                <Slider
+                  value={[buttonSize]}
+                  onValueChange={(value) => onButtonSizeChange(value[0])}
+                  max={100}
+                  min={40}
+                  step={5}
+                  className="w-full"
+                />
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label className="text-sm font-medium">Video alignment</Label>
@@ -231,25 +246,27 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
         </div>
       )}
 
-      {/* Button Size Settings */}
-      <div className="space-y-4 p-4 bg-green-50/50 rounded-lg border border-green-200">
-        <div>
-          <Label className="text-base font-medium text-green-800">Button Size Settings</Label>
-          <p className="text-sm text-green-600">Adjust the size of your floating button</p>
+      {/* Button Size Settings - Only show when no video or video preview is disabled */}
+      {(!hasVideo || !useVideoPreview) && (
+        <div className="space-y-4 p-4 bg-green-50/50 rounded-lg border border-green-200">
+          <div>
+            <Label className="text-base font-medium text-green-800">Button Size Settings</Label>
+            <p className="text-sm text-green-600">Adjust the size of your floating button</p>
+          </div>
+          
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Button size: {buttonSize}px</Label>
+            <Slider
+              value={[buttonSize]}
+              onValueChange={(value) => onButtonSizeChange(value[0])}
+              max={100}
+              min={40}
+              step={5}
+              className="w-full"
+            />
+          </div>
         </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Button size: {buttonSize}px</Label>
-          <Slider
-            value={[buttonSize]}
-            onValueChange={(value) => onButtonSizeChange(value[0])}
-            max={100}
-            min={40}
-            step={5}
-            className="w-full"
-          />
-        </div>
-      </div>
+      )}
 
       {/* Button Icon Settings */}
       <div className="space-y-4">
