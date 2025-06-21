@@ -135,34 +135,244 @@ function generateWidgetScript(widget: any): string {
   var config = ${JSON.stringify(config)};
   console.log('Widget config:', config);
   
+  // Inject CSS styles
+  var styles = \`
+    .widget-container {
+      position: fixed;
+      ${config.position}: 20px;
+      bottom: 20px;
+      z-index: 99999;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    
+    .widget-button {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: ${config.buttonColor};
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      overflow: hidden;
+    }
+    
+    .widget-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+    
+    .tooltip {
+      position: absolute;
+      ${config.position === 'left' ? 'left: 70px;' : 'right: 70px;'}
+      bottom: 50%;
+      transform: translateY(50%);
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      white-space: nowrap;
+      z-index: 100000;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+    
+    .tooltip.show {
+      opacity: 1;
+    }
+    
+    .tooltip::before {
+      content: '';
+      position: absolute;
+      ${config.position === 'left' ? 'right: -5px;' : 'left: -5px;'}
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      ${config.position === 'left' ? 'border-left: 5px solid rgba(0,0,0,0.8);' : 'border-right: 5px solid rgba(0,0,0,0.8);'}
+    }
+    
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 100000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .modal-backdrop.show {
+      opacity: 1;
+    }
+    
+    .modal-content {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      max-width: 420px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      transform: scale(0.8);
+      transition: transform 0.3s ease;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    
+    .modal-backdrop.show .modal-content {
+      transform: scale(1);
+    }
+    
+    .modal-header {
+      margin: 0 0 20px 0;
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      text-align: center;
+    }
+    
+    .video-container {
+      margin-bottom: 20px;
+    }
+    
+    .video-player {
+      width: 100%;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    
+    .channels-container {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .channel-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    
+    .channel-item:hover {
+      background-color: #f9fafb;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .channel-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .channel-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .channel-label {
+      font-weight: 600;
+      font-size: 14px;
+      color: #374151;
+      margin: 0 0 2px 0;
+    }
+    
+    .channel-value {
+      font-size: 12px;
+      color: #6b7280;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin: 0;
+    }
+    
+    .close-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #374151;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+      width: 100%;
+    }
+    
+    .close-button:hover {
+      background: #1f2937;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6b7280;
+    }
+    
+    .empty-icon {
+      width: 32px;
+      height: 32px;
+      margin: 0 auto 8px;
+      opacity: 0.5;
+    }
+  \`;
+  
+  // Inject styles
+  var styleSheet = document.createElement('style');
+  styleSheet.textContent = styles;
+  document.head.appendChild(styleSheet);
+  
   // Create widget container
   var widget = document.createElement('div');
-  widget.style.cssText = 'position:fixed;' + config.position + ':20px;bottom:20px;z-index:9999;';
+  widget.className = 'widget-container';
   
   // Create button
   var btn = document.createElement('button');
-  btn.style.cssText = 'width:60px;height:60px;border-radius:50%;background:' + config.buttonColor + ';border:none;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);position:relative;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;';
-  
-  // Button hover effect
-  btn.addEventListener('mouseenter', function() {
-    btn.style.transform = 'scale(1.1)';
-  });
-  btn.addEventListener('mouseleave', function() {
-    btn.style.transform = 'scale(1)';
-  });
+  btn.className = 'widget-button';
   
   // Button icon
+  var iconHtml = '';
   if (config.customIconUrl) {
-    btn.innerHTML = '<img src="' + config.customIconUrl + '" alt="Contact" style="width:24px;height:24px;border-radius:50%;">';
+    iconHtml = '<img src="' + config.customIconUrl + '" alt="Contact" style="width:24px;height:24px;border-radius:50%;">';
   } else {
-    btn.innerHTML = '<svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>';
+    iconHtml = '<svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>';
   }
+  btn.innerHTML = iconHtml;
   
   // Tooltip
-  if (config.tooltipDisplay === 'always' && config.tooltip) {
-    var tooltip = document.createElement('div');
-    tooltip.style.cssText = 'position:absolute;' + (config.position === 'left' ? 'left:70px;' : 'right:70px;') + 'bottom:50%;transform:translateY(50%);background:black;color:white;padding:4px 8px;border-radius:4px;font-size:12px;white-space:nowrap;';
+  var tooltip = null;
+  if (config.tooltip && config.tooltipDisplay !== 'never') {
+    tooltip = document.createElement('div');
+    tooltip.className = 'tooltip';
     tooltip.textContent = config.tooltip;
+    
+    if (config.tooltipDisplay === 'always') {
+      tooltip.classList.add('show');
+    }
+    
     btn.appendChild(tooltip);
   }
   
@@ -170,64 +380,70 @@ function generateWidgetScript(widget: any): string {
   document.body.appendChild(widget);
   console.log('Widget button added to page');
   
+  // Tooltip hover effects
+  if (tooltip && config.tooltipDisplay === 'hover') {
+    btn.addEventListener('mouseenter', function() {
+      tooltip.classList.add('show');
+    });
+    btn.addEventListener('mouseleave', function() {
+      tooltip.classList.remove('show');
+    });
+  }
+  
   // Click handler - opens modal
   btn.addEventListener('click', function() {
     console.log('Widget button clicked');
     openModal();
   });
   
-  // Tooltip hover effect
-  if (config.tooltipDisplay === 'hover' && config.tooltip) {
-    var hoverTooltip = null;
-    btn.addEventListener('mouseenter', function() {
-      hoverTooltip = document.createElement('div');
-      hoverTooltip.style.cssText = 'position:absolute;' + (config.position === 'left' ? 'left:70px;' : 'right:70px;') + 'bottom:50%;transform:translateY(50%);background:black;color:white;padding:4px 8px;border-radius:4px;font-size:12px;white-space:nowrap;z-index:10000;';
-      hoverTooltip.textContent = config.tooltip;
-      btn.appendChild(hoverTooltip);
-    });
-    btn.addEventListener('mouseleave', function() {
-      if (hoverTooltip) {
-        hoverTooltip.remove();
-        hoverTooltip = null;
-      }
-    });
-  }
-  
   function openModal() {
     // Create modal backdrop
     var modal = document.createElement('div');
-    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;';
+    modal.className = 'modal-backdrop';
     
     // Create modal content
     var content = document.createElement('div');
-    content.style.cssText = 'background:white;padding:20px;border-radius:10px;max-width:400px;width:90%;max-height:80vh;overflow-y:auto;transform:scale(0.8);transition:transform 0.2s;';
+    content.className = 'modal-content';
     
-    var html = '<div style="margin:0 0 15px 0;"><h3 style="margin:0;font-size:18px;font-weight:bold;color:#333;">Contact Us</h3></div>';
+    var html = '<div class="modal-header">Contact Us</div>';
     
     // Video section (if enabled)
     if (config.videoEnabled && config.videoUrl) {
-      html += '<div style="margin-bottom:15px;"><video style="width:100%;height:' + config.videoHeight + 'px;object-fit:cover;object-position:' + config.videoAlignment + ';border-radius:8px;" controls autoplay muted><source src="' + config.videoUrl + '" type="video/mp4">Your browser does not support the video tag.</video></div>';
+      html += '<div class="video-container">';
+      html += '<video class="video-player" style="height:' + config.videoHeight + 'px;object-position:' + config.videoAlignment + ';" controls autoplay muted>';
+      html += '<source src="' + config.videoUrl + '" type="video/mp4">';
+      html += 'Your browser does not support the video tag.';
+      html += '</video>';
+      html += '</div>';
     }
     
     // Channels section
     if (config.channels && config.channels.length > 0) {
-      html += '<div style="max-height:300px;overflow-y:auto;">';
+      html += '<div class="channels-container">';
       config.channels.forEach(function(channel) {
         var channelUrl = getChannelUrl(channel);
         var channelIcon = getChannelIcon(channel.type);
         var channelColor = getChannelColor(channel.type);
         
-        html += '<div style="display:flex;align-items:center;gap:12px;padding:12px;margin:5px 0;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;transition:background-color 0.2s;text-decoration:none;" onclick="openChannel(\\'' + channelUrl + '\\');" onmouseover="this.style.backgroundColor=\\'#f9fafb\\'" onmouseout="this.style.backgroundColor=\\'white\\'">';
-        html += '<div style="width:40px;height:40px;border-radius:50%;background:' + channelColor + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + channelIcon + '</div>';
-        html += '<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:14px;color:#374151;">' + channel.label + '</div><div style="font-size:12px;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + channel.value + '</div></div>';
+        html += '<div class="channel-item" onclick="openChannel(\\'' + channelUrl + '\\');">';
+        html += '<div class="channel-icon" style="background-color:' + channelColor + ';">' + channelIcon + '</div>';
+        html += '<div class="channel-info">';
+        html += '<div class="channel-label">' + channel.label + '</div>';
+        html += '<div class="channel-value">' + channel.value + '</div>';
+        html += '</div>';
         html += '<svg style="width:16px;height:16px;color:#9ca3af;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>';
         html += '</div>';
       });
       html += '</div>';
+    } else {
+      html += '<div class="empty-state">';
+      html += '<svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>';
+      html += '<p>No contact channels available</p>';
+      html += '</div>';
     }
     
     // Close button
-    html += '<div style="margin-top:15px;text-align:center;"><button onclick="closeModal()" style="padding:8px 16px;background:#374151;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;transition:background-color 0.2s;" onmouseover="this.style.backgroundColor=\\'#1f2937\\'" onmouseout="this.style.backgroundColor=\\'#374151\\'">Close</button></div>';
+    html += '<button class="close-button" onclick="closeModal()">Close</button>';
     
     content.innerHTML = html;
     modal.appendChild(content);
@@ -239,15 +455,14 @@ function generateWidgetScript(widget: any): string {
     };
     
     window.closeModal = function() {
-      modal.style.opacity = '0';
-      content.style.transform = 'scale(0.8)';
+      modal.classList.remove('show');
       setTimeout(function() {
         if (modal.parentNode) {
           modal.remove();
         }
         delete window.openChannel;
         delete window.closeModal;
-      }, 200);
+      }, 300);
     };
     
     // Click outside to close
@@ -259,8 +474,7 @@ function generateWidgetScript(widget: any): string {
     
     // Animate in
     setTimeout(function() {
-      modal.style.opacity = '1';
-      content.style.transform = 'scale(1)';
+      modal.classList.add('show');
     }, 10);
     
     console.log('Modal opened');
