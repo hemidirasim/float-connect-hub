@@ -2,8 +2,8 @@ import type { WidgetTemplate } from '../template-types.ts'
 
 export const getModernTemplate = (): WidgetTemplate => ({
   id: 'modern',
-  name: 'Modern Contact Modal',
-  description: 'Elegant floating contact modal with video support and clean design',
+  name: 'Minimal Contact Modal',
+  description: 'Minimal floating contact modal with video support',
   html: `
 <div class="hiclient-widget" style="position: fixed; {{POSITION_STYLE}} bottom: 24px; z-index: 99999;">
   <div class="hiclient-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
@@ -39,10 +39,10 @@ export const getModernTemplate = (): WidgetTemplate => ({
 </div>`,
 
   css: `
-/* Modern Contact Widget */
+/* Minimal Contact Widget */
 .hiclient-widget {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease;
 }
 
 .hiclient-button {
@@ -52,24 +52,23 @@ export const getModernTemplate = (): WidgetTemplate => ({
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease;
   color: white;
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .hiclient-button:hover {
   transform: scale(1.1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .hiclient-tooltip {
   position: absolute;
   background: #1f2937;
   color: white;
-  padding: 6px 10px;
-  border-radius: 4px;
-  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
   pointer-events: none;
@@ -88,7 +87,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
 
 .hiclient-modal {
   position: fixed;
-  bottom: calc(24px + {{BUTTON_SIZE}}px + 16px);
+  bottom: calc(24px + {{BUTTON_SIZE}}px + 12px);
   right: 24px;
   z-index: 100000;
   display: flex;
@@ -114,18 +113,18 @@ export const getModernTemplate = (): WidgetTemplate => ({
 .hiclient-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(5px);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
 }
 
 .hiclient-modal-container {
   background: #ffffff;
-  border-radius: 12px;
+  border-radius: 10px;
   width: 100%;
-  max-width: 360px;
-  max-height: 75vh;
+  max-width: 320px;
+  max-height: 70vh;
   overflow-y: auto;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   transform: translateY(10px);
   transition: transform 0.3s ease;
 }
@@ -138,20 +137,20 @@ export const getModernTemplate = (): WidgetTemplate => ({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
+  padding: 12px;
   border-bottom: 1px solid #e5e7eb;
 }
 
 .hiclient-modal-header h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: #1f2937;
 }
 
 .hiclient-close {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border: none;
   background: #f3f4f6;
   border-radius: 50%;
@@ -159,7 +158,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   color: #6b7280;
   transition: background 0.2s ease;
 }
@@ -170,30 +169,30 @@ export const getModernTemplate = (): WidgetTemplate => ({
 }
 
 .hiclient-video-container {
-  padding: 16px;
+  padding: 12px;
 }
 
 .hiclient-video-player {
   width: 100%;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #000;
 }
 
 .hiclient-channels {
-  padding: 0 16px 16px;
+  padding: 0 12px 12px;
 }
 
 .hiclient-channel-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
-  margin-bottom: 8px;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 6px;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 6px;
   text-decoration: none;
   color: #1f2937;
-  transition: background 0.2s ease;
+  font-size: 13px;
 }
 
 .hiclient-channel-item:hover {
@@ -201,50 +200,53 @@ export const getModernTemplate = (): WidgetTemplate => ({
 }
 
 .hiclient-channel-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 14px;
   background: #e5e7eb;
 }
 
 .hiclient-channel-info {
   flex: 1;
+  overflow: hidden;
 }
 
 .hiclient-channel-label {
   font-weight: 500;
-  font-size: 14px;
   color: #1f2937;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hiclient-channel-value {
-  font-size: 12px;
   color: #6b7280;
   margin: 0;
+  font-size: 12px;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .hiclient-empty {
   text-align: center;
-  padding: 32px 16px;
+  padding: 24px 12px;
   color: #6b7280;
 }
 
 .hiclient-empty-icon {
-  font-size: 28px;
-  margin-bottom: 8px;
+  font-size: 24px;
+  margin-bottom: 6px;
 }
 
 .hiclient-empty p {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 /* Dark theme */
@@ -287,7 +289,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
     right: 16px;
   }
   .hiclient-modal-container {
-    max-width: 320px;
+    max-width: 280px;
   }
 }`,
 
@@ -303,19 +305,15 @@ function initWidget() {
   const emptyState = document.querySelector('.hiclient-empty');
   const widget = document.querySelector('.hiclient-widget');
   
-  // Setup video
   if (video) {
     video.muted = true;
     video.pause();
   }
   
-  // Show empty state if needed
   if (channelsContainer && emptyState) {
-    const hasChannels = channelsContainer.children.length > 0;
-    emptyState.style.display = hasChannels ? 'none' : 'block';
+    emptyState.style.display = channelsContainer.children.length > 0 ? 'none' : 'block';
   }
   
-  // Open modal
   if (button) {
     button.addEventListener('click', () => {
       modal.classList.add('show');
@@ -334,7 +332,6 @@ function initWidget() {
     });
   }
   
-  // Close modal
   const closeModal = () => {
     modal.classList.remove('show');
     if (widget) {
@@ -354,7 +351,6 @@ function initWidget() {
     if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
   });
   
-  // Tooltip
   if (tooltip && button) {
     if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
       button.addEventListener('mouseenter', () => tooltip.classList.add('show'));
