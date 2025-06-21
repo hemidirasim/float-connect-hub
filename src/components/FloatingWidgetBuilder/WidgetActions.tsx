@@ -61,9 +61,9 @@ export const useWidgetActions = (
     }
 
     try {
-      console.log('Saving widget without template ID to database');
+      console.log('Saving widget to database (template will be handled separately)');
       
-      // Create widget data WITHOUT template_id (this field doesn't exist in database)
+      // Create widget data - NEVER include template_id field
       const widgetData = {
         name: websiteName,
         website_url: websiteUrl,
@@ -83,7 +83,7 @@ export const useWidgetActions = (
         updated_at: new Date().toISOString()
       };
 
-      console.log('Widget data to save (no template_id):', widgetData);
+      console.log('Widget data being saved:', widgetData);
 
       let savedWidget;
 
@@ -120,9 +120,10 @@ export const useWidgetActions = (
       
       console.log('Widget saved successfully:', savedWidget);
       
-      // Add template_id to the returned widget data for code generation only
-      // This is NOT saved to database, only used for generating the embed code
+      // Add template info to returned data for code generation ONLY
+      // This is NOT saved to database, only used for generating embed code
       savedWidget.templateId = formData.templateId || 'default';
+      console.log('Template ID for code generation:', savedWidget.templateId);
       
       return { success: true, widget: savedWidget };
     } catch (error) {
