@@ -1,7 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { HeroSection } from "@/components/FloatingWidgetBuilder/HeroSection";
 import { WidgetForm } from "@/components/FloatingWidgetBuilder/WidgetForm";
-import { LivePreview } from "@/components/FloatingWidgetBuilder/LivePreview";
 import { CodePreview } from "@/components/FloatingWidgetBuilder/CodePreview";
 import { Header } from "@/components/FloatingWidgetBuilder/Header";
 import { Footer } from "@/components/FloatingWidgetBuilder/Footer";
@@ -19,7 +19,6 @@ const Index = () => {
   const { user, loading } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   const {
@@ -234,52 +233,39 @@ const Index = () => {
         
         <section className="py-20 bg-white/30 backdrop-blur-sm" id="widget-form">
           <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-2 gap-12 max-w-7xl mx-auto">
-              <div className="space-y-6">
-                <WidgetForm
-                  websiteName={websiteName}
-                  websiteUrl={websiteUrl}
-                  channels={channels}
-                  selectedChannelType={selectedChannelType}
-                  channelValue={channelValue}
-                  formData={formData}
-                  editingWidget={editingWidget}
-                  saving={saving}
-                  uploading={uploading}
-                  onWebsiteNameChange={setWebsiteName}
-                  onWebsiteUrlChange={setWebsiteUrl}
-                  onChannelsChange={setChannels}
-                  onSelectedChannelTypeChange={setSelectedChannelType}
-                  onChannelValueChange={setChannelValue}
-                  onAddChannel={handleAddChannelWrapper}
-                  onRemoveChannel={handleRemoveChannel}
-                  onEditChannel={handleEditChannel}
-                  onVideoUpload={handleVideoUpload}
-                  onVideoRemove={handleVideoRemove}
-                  onFormDataChange={handleFormDataChange}
-                  onCreateWidget={handleCreateWidgetWrapper}
-                  onCustomIconUpload={handleCustomIconUpload}
-                />
-                
-                {generatedCode && (
-                  <CodePreview
-                    generatedCode={generatedCode}
-                    copied={copied}
-                    onCopy={handleCopyCode}
-                  />
-                )}
-              </div>
+            <div className="max-w-4xl mx-auto space-y-6">
+              <WidgetForm
+                websiteName={websiteName}
+                websiteUrl={websiteUrl}
+                channels={channels}
+                selectedChannelType={selectedChannelType}
+                channelValue={channelValue}
+                formData={formData}
+                editingWidget={editingWidget}
+                saving={saving}
+                uploading={uploading}
+                onWebsiteNameChange={setWebsiteName}
+                onWebsiteUrlChange={setWebsiteUrl}
+                onChannelsChange={setChannels}
+                onSelectedChannelTypeChange={setSelectedChannelType}
+                onChannelValueChange={setChannelValue}
+                onAddChannel={handleAddChannelWrapper}
+                onRemoveChannel={handleRemoveChannel}
+                onEditChannel={handleEditChannel}
+                onVideoUpload={handleVideoUpload}
+                onVideoRemove={handleVideoRemove}
+                onFormDataChange={handleFormDataChange}
+                onCreateWidget={handleCreateWidgetWrapper}
+                onCustomIconUpload={handleCustomIconUpload}
+              />
               
-              <div className="space-y-6 lg:sticky lg:top-8 lg:h-fit">
-                <LivePreview
-                  showWidget={channels.length > 0}
-                  formData={formData}
-                  channels={channels}
-                  videoModalOpen={videoModalOpen}
-                  onVideoModalOpenChange={setVideoModalOpen}
-                  editingWidget={editingWidget}
+              {generatedCode && (
+                <CodePreview
+                  generatedCode={generatedCode}
+                  copied={copied}
+                  onCopy={handleCopyCode}
                 />
-              </div>
+              )}
             </div>
           </div>
         </section>
