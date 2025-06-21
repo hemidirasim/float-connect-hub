@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Channel, FormData } from "./types";
@@ -50,6 +49,11 @@ export const useWidgetActions = (
       return false;
     }
 
+    if (channels.length === 0) {
+      toast.error('At least 1 contact channel is required');
+      return false;
+    }
+
     try {
       const widgetData = {
         name: websiteName,
@@ -82,7 +86,7 @@ export const useWidgetActions = (
 
         if (error) throw error;
         toast.success('Widget created!');
-        resetForm();
+        // Don't reset form after creation - user requested to keep data
       }
       return true;
     } catch (error) {

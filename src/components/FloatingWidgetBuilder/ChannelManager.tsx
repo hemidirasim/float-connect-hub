@@ -80,7 +80,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
   return (
     <div className="space-y-4">
       <Label className="text-lg font-semibold">Contact Channels <span className="text-red-500">*</span></Label>
-      <p className="text-sm text-gray-600">Minimum 1 ədəd contact channel əlavə edilməlidir</p>
+      <p className="text-sm text-gray-600">Minimum 1 contact channel must be added</p>
       
       {/* Add New Channel */}
       <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 space-y-3">
@@ -142,6 +142,13 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
               </div>
             </SortableContext>
           </DndContext>
+        </div>
+      )}
+      
+      {/* Validation message */}
+      {channels.length === 0 && (
+        <div className="text-sm text-red-600 bg-red-50 p-2 rounded-md">
+          Please add at least one contact channel to create your widget.
         </div>
       )}
     </div>
