@@ -201,7 +201,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
         </div>
 
         <div className="space-y-3">
-          <Select value={customIcon} onValueChange={onCustomIconChange}>
+          <Select value={customIcon || 'message-circle'} onValueChange={onCustomIconChange}>
             <SelectTrigger>
               <SelectValue placeholder="İkon seçin" />
             </SelectTrigger>

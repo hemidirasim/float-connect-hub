@@ -15,6 +15,6 @@ export interface FormData {
   useVideoPreview: boolean;
   videoHeight?: number;
   videoAlignment?: 'top' | 'center' | 'bottom';
-  customIcon?: File | null;
+  customIcon?: string;
   customIconUrl?: string;
 }

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -72,7 +71,8 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
     if (formData.customIconUrl) {
       return <img src={formData.customIconUrl} alt="Custom icon" className="w-6 h-6" />;
     }
-    const IconComponent = iconMap[formData.customIcon || 'message-circle'] || MessageCircle;
+    const iconKey = formData.customIcon || 'message-circle';
+    const IconComponent = iconMap[iconKey as keyof typeof iconMap] || MessageCircle;
     return <IconComponent className="w-6 h-6 text-white" />;
   };
 
