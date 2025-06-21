@@ -77,7 +77,7 @@ export const useWidgetActions = (
         custom_icon_url: formData.customIconUrl,
         button_size: formData.buttonSize,
         preview_video_height: formData.previewVideoHeight,
-        template_id: formData.templateId || null, // Ensure it's null if empty/undefined
+        // Don't save template_id to database - use it only for code generation
         channels: channels,
         user_id: user?.id,
         updated_at: new Date().toISOString()
@@ -119,6 +119,9 @@ export const useWidgetActions = (
       }
       
       console.log('Widget saved successfully:', savedWidget);
+      
+      // Add template_id to the returned widget data for code generation
+      savedWidget.template_id = formData.templateId;
       
       // Return the widget data including ID so the code generator can use it
       return { success: true, widget: savedWidget };

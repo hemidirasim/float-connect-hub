@@ -22,6 +22,10 @@ serve(async (req) => {
     const widgetId = extractWidgetId(url)
     console.log('Extracted widget ID:', widgetId)
 
+    // Extract template ID from query parameters
+    const templateId = url.searchParams.get('template') || 'default'
+    console.log('Template ID from URL:', templateId)
+
     if (!widgetId || widgetId === 'widget-js') {
       console.log('Invalid or missing widget ID')
       return new Response('Widget ID required', { 
@@ -72,20 +76,22 @@ serve(async (req) => {
       })
     }
 
-    console.log('Credits check passed, generating widget script with template:', widget.template_id || 'default')
+    // Override template ID from URL parameter if provided
+    widget.template_id = templateId
+    console.log('Using template ID for generation:', templateId)
 
     // Generate widget JavaScript with proper template
     const widgetScript = await generateWidgetScriptWithTemplate(widget, supabaseClient)
     
     console.log('Widget script generation completed:', {
-      templateUsed: widget.template_id || 'default',
+      templateUsed: templateId,
       scriptLength: widgetScript.length,
       widgetName: widget.name
     })
 
     // Add cache busting based on widget update time
     const lastModified = new Date(widget.updated_at).toUTCString()
-    const etag = `"${widgetId}-${widget.updated_at}"`
+    const etag = `"${widgetId}-${widget.updated_at}-${templateId}"`
 
     return new Response(widgetScript, {
       headers: {
@@ -96,9 +102,9 @@ serve(async (req) => {
         'ETag': etag,
         // Add debug headers for troubleshooting
         'X-Widget-Version': widget.updated_at,
-        'X-Widget-Template': widget.template_id || 'default',
+        'X-Widget-Template': templateId,
         'X-Widget-Name': widget.name,
-        'X-Debug-TemplateId': widget.template_id || 'null'
+        'X-Debug-TemplateId': templateId
       }
     })
 
