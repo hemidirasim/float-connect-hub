@@ -92,10 +92,12 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
     return null;
   };
 
-  const ButtonComponent = () => (
+  const ButtonComponent = React.forwardRef<HTMLButtonElement>((props, ref) => (
     <button
+      ref={ref}
       className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110 relative overflow-hidden"
       style={{ backgroundColor: formData.buttonColor }}
+      {...props}
     >
       {hasVideo && formData.useVideoPreview ? (
         <video
@@ -113,7 +115,9 @@ export const LivePreview: React.FC<LivePreviewProps> = ({
       )}
       {renderTooltipMessage()}
     </button>
-  );
+  ));
+
+  ButtonComponent.displayName = 'ButtonComponent';
 
   return (
     <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
