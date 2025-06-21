@@ -1,5 +1,4 @@
 
-
 import type { WidgetTemplate } from '../template-types.ts'
 
 export const getMinimalTemplate = (): WidgetTemplate => ({
@@ -8,20 +7,25 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
   description: 'Clean and minimal design with subtle animations',
   html: `
 <!-- Minimal Template -->
-<div class="hiclient-widget-container" style="position: fixed; {{position}}: 20px; bottom: 20px; z-index: 99999;">
-  <div class="hiclient-tooltip {{tooltip_class}}" style="{{tooltip_style}}">{{tooltip_text}}</div>
-  <button class="hiclient-widget-button" style="{{button_style}}">
-    {{button_icon}}
+<div class="hiclient-widget-container" style="position: fixed; {{POSITION_STYLE}} bottom: 20px; z-index: 99999;">
+  <div class="hiclient-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
+  <button class="hiclient-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background: {{BUTTON_COLOR}};">
+    {{BUTTON_ICON}}
   </button>
 </div>
 
 <div class="hiclient-modal-backdrop">
   <div class="hiclient-modal-content">
-    <div class="hiclient-modal-header">Contact Us</div>
+    <div class="hiclient-modal-header">{{GREETING_MESSAGE}}</div>
     <div class="hiclient-modal-close">×</div>
-    {{video_section}}
-    {{channels_section}}
-    {{empty_state}}
+    {{VIDEO_CONTENT}}
+    <div class="hiclient-channels-container">
+      {{CHANNELS_HTML}}
+    </div>
+    <div class="hiclient-empty-state" style="display: none;">
+      <div class="hiclient-empty-icon">📞</div>
+      <p>No channels configured</p>
+    </div>
   </div>
 </div>`,
   
@@ -32,10 +36,10 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
 }
 
 .hiclient-widget-button {
-  width: {{button_size}}px;
-  height: {{button_size}}px;
+  width: {{BUTTON_SIZE}}px;
+  height: {{BUTTON_SIZE}}px;
   border-radius: 50%;
-  background: {{button_color}};
+  background: {{BUTTON_COLOR}};
   border: 2px solid rgba(255, 255, 255, 0.2);
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -54,8 +58,6 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
 
 .hiclient-tooltip {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
   background: white;
   color: #333;
   padding: 6px 10px;
@@ -242,10 +244,23 @@ function initializeWidget() {
   var tooltip = document.querySelector(".hiclient-tooltip");
   var closeBtn = document.querySelector(".hiclient-modal-close");
   var video = document.querySelector(".hiclient-video-player");
+  var channelsContainer = document.querySelector(".hiclient-channels-container");
+  var emptyState = document.querySelector(".hiclient-empty-state");
+  
+  console.log('Minimal widget initialized with greeting:', '{{GREETING_MESSAGE}}');
+  console.log('Tooltip position:', '{{TOOLTIP_POSITION}}');
   
   if (video) {
     video.muted = true;
     video.pause();
+  }
+  
+  // Show/hide empty state based on channels
+  if (channelsContainer && emptyState) {
+    var hasChannels = channelsContainer.children.length > 0;
+    if (!hasChannels) {
+      emptyState.style.display = 'block';
+    }
   }
   
   if (button && modal) {
@@ -284,12 +299,17 @@ function initializeWidget() {
   }
   
   if (tooltip && button) {
-    button.addEventListener("mouseenter", function() {
+    if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
+      button.addEventListener("mouseenter", function() {
+        tooltip.classList.add("show");
+      });
+      button.addEventListener("mouseleave", function() {
+        tooltip.classList.add("hide");
+      });
+    } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
+      tooltip.style.display = 'block';
       tooltip.classList.add("show");
-    });
-    button.addEventListener("mouseleave", function() {
-      tooltip.classList.add("hide");
-    });
+    }
   }
   
   window.openChannel = function(url) {
@@ -303,4 +323,3 @@ if (document.readyState === "loading") {
   initializeWidget();
 }`
 });
-

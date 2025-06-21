@@ -1,5 +1,4 @@
 
-
 import type { WidgetTemplate } from './template-types.ts'
 
 export const defaultTemplate: WidgetTemplate = {
@@ -79,7 +78,8 @@ export const defaultTemplate: WidgetTemplate = {
       buttonColor: '{{BUTTON_COLOR}}',
       position: '{{POSITION}}',
       tooltip: '{{TOOLTIP_TEXT}}',
-      greetingMessage: '{{GREETING_MESSAGE}}'
+      greetingMessage: '{{GREETING_MESSAGE}}',
+      tooltipPosition: '{{TOOLTIP_POSITION}}'
     });
 
     const widget = {
@@ -193,4 +193,3 @@ export const defaultTemplate: WidgetTemplate = {
 };
 
 export const getDefaultTemplate = () => defaultTemplate;
-

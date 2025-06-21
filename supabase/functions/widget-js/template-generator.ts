@@ -65,19 +65,26 @@ export class WidgetTemplateRenderer {
     // Generate channels HTML
     const channelsHtml = this.config.channels.map(channel => {
       const iconSvg = this.getChannelIcon(channel.type)
+      const channelUrl = this.getChannelUrl(channel)
+      const channelColor = this.getChannelColor(channel.type)
+      
       return `
-        <a href="${this.getChannelUrl(channel)}" target="_blank" class="lovable-channel-button">
-          <div class="lovable-channel-icon">${iconSvg}</div>
-          <span>${channel.label}</span>
+        <a href="${channelUrl}" target="_blank" class="hiclient-channel-item" onclick="window.openChannel('${channelUrl}')">
+          <div class="hiclient-channel-icon" style="background: ${channelColor}; color: white;">${iconSvg}</div>
+          <div class="hiclient-channel-info">
+            <div class="hiclient-channel-label">${channel.label}</div>
+            <div class="hiclient-channel-value">${channel.value}</div>
+          </div>
+          <div class="hiclient-external-icon">→</div>
         </a>
       `
     }).join('')
 
     // Generate video content
     const videoContent = this.config.videoEnabled && this.config.videoUrl
-      ? `<div style="margin-bottom: 16px; text-align: ${this.config.videoAlignment};">
-           <video src="${this.config.videoUrl}" 
-                  style="width: 100%; max-width: 100%; height: ${this.config.videoHeight}px; border-radius: 8px;" 
+      ? `<div class="hiclient-video-container" style="text-align: ${this.config.videoAlignment};">
+           <video class="hiclient-video-player" src="${this.config.videoUrl}" 
+                  style="height: ${this.config.videoHeight}px;" 
                   controls muted>
            </video>
          </div>`
@@ -96,6 +103,7 @@ export class WidgetTemplateRenderer {
       '{{BUTTON_SIZE}}': (this.config.buttonSize || 60).toString(),
       '{{TOOLTIP_TEXT}}': this.config.tooltip,
       '{{TOOLTIP_DISPLAY}}': this.config.tooltipDisplay,
+      '{{TOOLTIP_POSITION}}': this.config.tooltipPosition || 'top',
       '{{GREETING_MESSAGE}}': this.config.greetingMessage || 'Hello! How can we help you today?',
       '{{BUTTON_ICON}}': buttonIcon,
       '{{CHANNELS_HTML}}': channelsHtml,
@@ -131,23 +139,42 @@ export class WidgetTemplateRenderer {
 `
   }
 
+  getChannelColor(channelType: string): string {
+    switch (channelType) {
+      case 'whatsapp':
+        return '#25D366'
+      case 'telegram':
+        return '#0088cc'
+      case 'phone':
+        return '#34D399'
+      case 'mail':
+        return '#6B7280'
+      default:
+        return '#6B7280'
+    }
+  }
+
   getChannelIcon(channelType: string): string {
     switch (channelType) {
       case 'whatsapp':
-        return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path fill="currentColor" d="M.057 24l1.184-4.216a12.943 12.943 0 0 1-1.242 4.216zM14.057 3.343a8.006 8.006 0 0 0-11.244 11.348l1.185 4.215q.43 1.534 1.534 2.637L7.114 16.1a8.006 8.006 0 0 0 6.943-12.757zm0 1.441a6.577 6.577 0 0 1 5.043 10.532l-.841 3.007q-.248.885-.827 1.461l-1.131.331a6.448 6.448 0 0 1-5.354-1.577A6.587 6.587 0 0 1 7.4 9.835a6.426 6.426 0 0 1 6.657-6.492z"/></svg>'
+        return '📱'
+      case 'telegram':
+        return '✈️'
       case 'phone':
-        return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.54 5.04 6.21 6.48l.81-.91c.17-.19.32-.42.39-.67l1.45-5.22c.06-.21.03-.45-.09-.62-.12-.18-.32-.29-.53-.29H9.28c-.21 0-.41.11-.52.3-.11.19-.15.42-.09.63l.81 2.89c.08.27.25.47.5.58zM21 19c0 1.1-.9 2-2 2h-1c-.55 0-1-.45-1-1v-3c0-.55-.45-1-1-1H7c-.55 0-1 .45-1 1v3c0 .55-.45 1-1 1H4c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h16c1.1 0 2 .9 2 2v14z"/></svg>'
+        return '📞'
       case 'mail':
-        return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>'
+        return '📧'
       default:
-        return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>'
+        return '💬'
     }
   }
 
   getChannelUrl(channel: any): string {
     switch (channel.type) {
       case 'whatsapp':
-        return `https://wa.me/${channel.value}`
+        return `https://wa.me/${channel.value.replace(/[^0-9]/g, '')}`
+      case 'telegram':
+        return `https://t.me/${channel.value.replace('@', '')}`
       case 'phone':
         return `tel:${channel.value}`
       case 'mail':
@@ -158,6 +185,6 @@ export class WidgetTemplateRenderer {
   }
 
   getDefaultIcon(): string {
-    return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>'
+    return '💬'
   }
 }

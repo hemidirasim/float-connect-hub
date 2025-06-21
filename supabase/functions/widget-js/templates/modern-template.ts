@@ -1,5 +1,4 @@
 
-
 import type { WidgetTemplate } from '../template-types.ts'
 
 export const getModernTemplate = (): WidgetTemplate => ({
@@ -8,20 +7,25 @@ export const getModernTemplate = (): WidgetTemplate => ({
   description: 'Modern template with gradient effects and smooth animations',
   html: `
 <!-- Modern Template -->
-<div class="hiclient-widget-container" style="position: fixed; {{position}}: 20px; bottom: 20px; z-index: 99999;">
-  <div class="hiclient-tooltip {{tooltip_class}}" style="{{tooltip_style}}">{{tooltip_text}}</div>
-  <button class="hiclient-widget-button" style="{{button_style}}">
-    {{button_icon}}
+<div class="hiclient-widget-container" style="position: fixed; {{POSITION_STYLE}} bottom: 20px; z-index: 99999;">
+  <div class="hiclient-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
+  <button class="hiclient-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background: linear-gradient(135deg, {{BUTTON_COLOR}} 0%, #667eea 100%);">
+    {{BUTTON_ICON}}
   </button>
 </div>
 
 <div class="hiclient-modal-backdrop">
-  <div class="hiclient-modal-content">
-    <div class="hiclient-modal-header">Get in Touch</div>
+  <div class="h iclient-modal-content">
+    <div class="hiclient-modal-header">{{GREETING_MESSAGE}}</div>
     <div class="hiclient-modal-close">×</div>
-    {{video_section}}
-    {{channels_section}}
-    {{empty_state}}
+    {{VIDEO_CONTENT}}
+    <div class="hiclient-channels-container">
+      {{CHANNELS_HTML}}
+    </div>
+    <div class="hiclient-empty-state" style="display: none;">
+      <div class="hiclient-empty-icon">📞</div>
+      <p>No channels configured</p>
+    </div>
   </div>
 </div>`,
   
@@ -32,10 +36,10 @@ export const getModernTemplate = (): WidgetTemplate => ({
 }
 
 .hiclient-widget-button {
-  width: {{button_size}}px;
-  height: {{button_size}}px;
+  width: {{BUTTON_SIZE}}px;
+  height: {{BUTTON_SIZE}}px;
   border-radius: 50%;
-  background: linear-gradient(135deg, {{button_color}} 0%, #667eea 100%);
+  background: linear-gradient(135deg, {{BUTTON_COLOR}} 0%, #667eea 100%);
   border: none;
   cursor: pointer;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 0 0 rgba(102, 126, 234, 0.5);
@@ -68,8 +72,6 @@ export const getModernTemplate = (): WidgetTemplate => ({
 
 .hiclient-tooltip {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 8px 12px;
@@ -287,16 +289,28 @@ export const getModernTemplate = (): WidgetTemplate => ({
 }`,
   
   js: `/* Modern JS */
+console.log("Modern widget initialized with greeting:", '{{GREETING_MESSAGE}}');
+
 function initializeWidget() {
   var button = document.querySelector(".hiclient-widget-button");
   var modal = document.querySelector(".hiclient-modal-backdrop");
   var tooltip = document.querySelector(".hiclient-tooltip");
   var closeBtn = document.querySelector(".hiclient-modal-close");
   var video = document.querySelector(".hiclient-video-player");
+  var channelsContainer = document.querySelector(".hiclient-channels-container");
+  var emptyState = document.querySelector(".hiclient-empty-state");
   
   if (video) {
     video.muted = true;
     video.pause();
+  }
+  
+  // Show/hide empty state based on channels
+  if (channelsContainer && emptyState) {
+    var hasChannels = channelsContainer.children.length > 0;
+    if (!hasChannels) {
+      emptyState.style.display = 'block';
+    }
   }
   
   if (button && modal) {
@@ -343,12 +357,17 @@ function initializeWidget() {
   }
   
   if (tooltip && button) {
-    button.addEventListener("mouseenter", function() {
+    if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
+      button.addEventListener("mouseenter", function() {
+        tooltip.classList.add("show");
+      });
+      button.addEventListener("mouseleave", function() {
+        tooltip.classList.add("hide");
+      });
+    } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
+      tooltip.style.display = 'block';
       tooltip.classList.add("show");
-    });
-    button.addEventListener("mouseleave", function() {
-      tooltip.classList.add("hide");
-    });
+    }
   }
   
   window.openChannel = function(url) {
@@ -362,4 +381,3 @@ if (document.readyState === "loading") {
   initializeWidget();
 }`
 });
-
