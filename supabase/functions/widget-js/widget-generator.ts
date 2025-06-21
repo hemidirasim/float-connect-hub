@@ -5,25 +5,29 @@ import { getTemplateById } from './template-registry.ts'
 import { WidgetTemplateRenderer, type TemplateConfig } from './template-generator.ts'
 
 export function generateWidgetScript(widget: any): string {
+  console.log('Widget data received:', {
+    name: widget.name,
+    template_id: widget.template_id,
+    channels: widget.channels?.length || 0
+  })
+  
   const config = createWidgetConfig(widget)
   
-  // Get template by ID - use the actual template_id from widget, fallback to 'default'
-  // For now, we'll determine template from form data or use default
+  // Get template by ID - prioritize template_id from widget
   let templateId = 'default'
   
-  // Try different sources for template ID
-  if (widget.template_id) {
+  if (widget.template_id && typeof widget.template_id === 'string') {
     templateId = widget.template_id
-  } else if (widget.templateId) {
-    templateId = widget.templateId
-  } else if (config.templateId) {
+    console.log('Using template_id from widget:', templateId)
+  } else if (config.templateId && typeof config.templateId === 'string') {
     templateId = config.templateId
+    console.log('Using templateId from config:', templateId)
   }
   
-  console.log('Using template ID:', templateId, 'for widget:', widget.name)
+  console.log('Final template ID selected:', templateId)
   
   const template = getTemplateById(templateId)
-  console.log('Selected template:', template.name)
+  console.log('Template loaded:', template.name, 'ID:', template.id)
 
   const templateConfig: TemplateConfig = {
     channels: config.channels,
@@ -42,7 +46,11 @@ export function generateWidgetScript(widget: any): string {
   }
 
   const renderer = new WidgetTemplateRenderer(template, templateConfig)
-  return renderer.generateWidgetScript()
+  const script = renderer.generateWidgetScript()
+  
+  console.log('Widget script generated with template:', templateId, 'Length:', script.length)
+  
+  return script
 }
 
 // Simplified version that doesn't need database access

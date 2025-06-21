@@ -3,7 +3,13 @@ import type { WidgetConfig } from './types.ts'
 import { defaultWidgetConfig } from './config.ts'
 
 export function createWidgetConfig(widget: any): WidgetConfig {
-  return {
+  console.log('Creating widget config from:', {
+    template_id: widget.template_id,
+    templateId: widget.templateId,
+    name: widget.name
+  })
+  
+  const config: WidgetConfig = {
     channels: widget.channels || [],
     buttonColor: widget.button_color || defaultWidgetConfig.buttonColor,
     position: widget.position || defaultWidgetConfig.position,
@@ -17,7 +23,11 @@ export function createWidgetConfig(widget: any): WidgetConfig {
     useVideoPreview: widget.use_video_preview || false,
     buttonSize: widget.button_size || 60,
     previewVideoHeight: widget.preview_video_height || 120,
-    // Add template ID support
+    // Template ID - check both possible fields
     templateId: widget.template_id || widget.templateId || 'default'
   }
+  
+  console.log('Widget config created with templateId:', config.templateId)
+  
+  return config
 }

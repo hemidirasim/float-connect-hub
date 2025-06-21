@@ -47,7 +47,13 @@ serve(async (req) => {
       })
     }
 
-    console.log('Widget found:', widget.name, 'Channels:', widget.channels?.length || 0, 'Template ID:', widget.template_id)
+    console.log('Widget loaded from database:', {
+      name: widget.name,
+      template_id: widget.template_id,
+      channels: widget.channels?.length || 0,
+      button_color: widget.button_color,
+      position: widget.position
+    })
 
     // Record widget view and check credits
     const viewResult = await recordWidgetView(
@@ -82,9 +88,10 @@ serve(async (req) => {
         'Cache-Control': `public, max-age=${WIDGET_CACHE_TIME}`,
         'Last-Modified': lastModified,
         'ETag': etag,
-        // Add version header for debugging
+        // Add debug headers
         'X-Widget-Version': widget.updated_at,
-        'X-Widget-Template': widget.template_id || 'default'
+        'X-Widget-Template': widget.template_id || 'default',
+        'X-Widget-Name': widget.name
       }
     })
 
