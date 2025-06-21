@@ -15,7 +15,7 @@ export const getDefaultTemplate = (): WidgetTemplate => ({
 
 <div class="hiclient-modal-backdrop">
   <div class="hiclient-modal-content">
-    <div class="hiclient-modal-header">Bizimlə əlaqə saxlayın</div>
+    <div class="hiclient-modal-header">Bizimlə əlsaqə saxlayın</div>
     <div class="hiclient-modal-close">×</div>
     {{video_section}}
     {{channels_section}}
