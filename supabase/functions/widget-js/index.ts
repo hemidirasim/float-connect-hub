@@ -61,7 +61,26 @@ serve(async (req) => {
       updated_at: widget.updated_at
     })
 
-    // Record widget view and check credits
+    // Add cache busting based on widget update time
+    const lastModified = new Date(widget.updated_at).toUTCString()
+    const etag = `"${widgetId}-${widget.updated_at}-${templateId}"`
+
+    // Handle HEAD requests for update checking
+    if (req.method === 'HEAD') {
+      console.log('HEAD request for update check')
+      return new Response(null, {
+        headers: {
+          ...corsHeaders,
+          'Last-Modified': lastModified,
+          'ETag': etag,
+          'Cache-Control': 'no-cache',
+          'X-Widget-Version': widget.updated_at,
+          'X-Widget-Template': templateId
+        }
+      })
+    }
+
+    // Record widget view and check credits for GET requests
     const viewResult = await recordWidgetView(
       widgetId,
       req.headers.get('x-forwarded-for') || 'unknown',
@@ -88,10 +107,6 @@ serve(async (req) => {
       scriptLength: widgetScript.length,
       widgetName: widget.name
     })
-
-    // Add cache busting based on widget update time
-    const lastModified = new Date(widget.updated_at).toUTCString()
-    const etag = `"${widgetId}-${widget.updated_at}-${templateId}"`
 
     return new Response(widgetScript, {
       headers: {
