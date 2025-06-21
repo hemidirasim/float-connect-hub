@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { HeroSection } from "@/components/FloatingWidgetBuilder/HeroSection";
 import { WidgetForm } from "@/components/FloatingWidgetBuilder/WidgetForm";
@@ -15,7 +14,6 @@ import { toast } from "sonner";
 import { useWidgetState } from "@/hooks/useWidgetState";
 import { useWidgetActions } from "@/components/FloatingWidgetBuilder/WidgetActions";
 import { generateWidgetCode } from "@/utils/codeGenerator";
-import { platformOptions } from "@/components/FloatingWidgetBuilder/constants";
 
 const Index = () => {
   const { user, loading } = useAuth();

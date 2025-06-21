@@ -16,10 +16,7 @@ export const useWidgetActions = (
   setChannelValue: (value: string) => void,
   setSelectedChannelType: (type: string) => void
 ) => {
-  const handleAddChannel = () => {
-    const selectedChannelType = arguments[0];
-    const channelValue = arguments[1];
-    
+  const handleAddChannel = (selectedChannelType: string, channelValue: string) => {
     if (selectedChannelType && channelValue.trim()) {
       const platform = platformOptions.find(p => p.value === selectedChannelType);
       const newChannel = {
