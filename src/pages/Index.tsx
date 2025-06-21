@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -153,7 +152,6 @@ const Index = () => {
       video: null,
       useVideoPreview: false
     }));
-    // If editing widget, also mark that video should be removed from database
     if (editingWidget) {
       setEditingWidget(prev => ({
         ...prev,
@@ -238,19 +236,16 @@ const Index = () => {
   };
 
   const createWidget = async () => {
-    // Website name validation - must be filled
     if (!websiteName || !websiteName.trim()) {
       toast.error("Website adı tələb olunur");
       return;
     }
 
-    // Website URL validation - must be filled
     if (!websiteUrl || !websiteUrl.trim()) {
       toast.error("Website URL-i daxil edin");
       return;
     }
 
-    // Minimum 1 channel validation - array must have at least 1 item
     if (!channels || channels.length === 0) {
       toast.error("Minimum 1 ədəd contact channel əlavə edilməlidir");
       return;
@@ -266,7 +261,6 @@ const Index = () => {
     try {
       let videoUrl = editingWidget?.video_url || null;
 
-      // Upload new video if selected
       if (formData.video) {
         console.log('Uploading new video...');
         const uploadedVideoUrl = await uploadVideoToStorage(formData.video);
@@ -280,7 +274,6 @@ const Index = () => {
         }
       }
 
-      // If video was removed and we're editing, delete old video and set to null
       if (editingWidget && editingWidget.video_url && !formData.video && !videoUrl) {
         try {
           const oldVideoPath = editingWidget.video_url.split('/').pop();
@@ -315,7 +308,6 @@ const Index = () => {
       };
 
       if (editingWidget) {
-        // Update existing widget
         const { error } = await supabase
           .from('widgets')
           .update(widgetData)
@@ -324,7 +316,6 @@ const Index = () => {
         if (error) throw error;
         toast.success('Widget yeniləndi və dashboardda görünəcək!');
       } else {
-        // Create new widget
         const { error } = await supabase
           .from('widgets')
           .insert([widgetData]);
@@ -333,7 +324,6 @@ const Index = () => {
         toast.success('Widget yaradıldı və dashboardda görünəcək!');
       }
 
-      // Generate code after successful save
       generateCode();
 
     } catch (error) {
@@ -389,61 +379,64 @@ const Index = () => {
         onOpenAuth={() => setAuthModalOpen(true)}
       />
 
-      {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <HeroSection />
 
-        {/* Main Content */}
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
-          {/* Form Section */}
-          <WidgetForm
-            websiteName={websiteName}
-            websiteUrl={websiteUrl}
-            channels={channels}
-            selectedChannelType={selectedChannelType}
-            channelValue={channelValue}
-            formData={formData}
-            editingWidget={editingWidget}
-            saving={saving}
-            onWebsiteNameChange={setWebsiteName}
-            onWebsiteUrlChange={setWebsiteUrl}
-            onChannelsChange={setChannels}
-            onSelectedChannelTypeChange={setSelectedChannelType}
-            onChannelValueChange={setChannelValue}
-            onAddChannel={addChannel}
-            onRemoveChannel={removeChannel}
-            onEditChannel={editChannel}
-            onVideoUpload={handleVideoUpload}
-            onVideoRemove={handleVideoRemove}
-            onFormDataChange={handleInputChange}
-            onCreateWidget={createWidget}
-            onCustomIconUpload={handleCustomIconUpload}
-          />
-
-          {/* Live Preview Section */}
-          <div className="space-y-6">
-            <LivePreview
-              showWidget={showWidget}
-              formData={formData}
+        {/* Main Content - New Layout Structure */}
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-4 gap-8">
+          {/* Left Side - Form and Code (3 columns) */}
+          <div className="lg:col-span-3 space-y-8">
+            {/* Widget Form */}
+            <WidgetForm
+              websiteName={websiteName}
+              websiteUrl={websiteUrl}
               channels={channels}
-              videoModalOpen={videoModalOpen}
-              onVideoModalOpenChange={setVideoModalOpen}
+              selectedChannelType={selectedChannelType}
+              channelValue={channelValue}
+              formData={formData}
               editingWidget={editingWidget}
+              saving={saving}
+              onWebsiteNameChange={setWebsiteName}
+              onWebsiteUrlChange={setWebsiteUrl}
+              onChannelsChange={setChannels}
+              onSelectedChannelTypeChange={setSelectedChannelType}
+              onChannelValueChange={setChannelValue}
+              onAddChannel={addChannel}
+              onRemoveChannel={removeChannel}
+              onEditChannel={editChannel}
+              onVideoUpload={handleVideoUpload}
+              onVideoRemove={handleVideoRemove}
+              onFormDataChange={handleInputChange}
+              onCreateWidget={createWidget}
+              onCustomIconUpload={handleCustomIconUpload}
             />
 
-            {/* Code Preview Section */}
+            {/* Code Preview Section - Now below the form */}
             <CodePreview
               generatedCode={generatedCode}
               copied={copied}
               onCopy={copyToClipboard}
             />
           </div>
+
+          {/* Right Side - Live Preview (1 column, fixed position) */}
+          <div className="lg:col-span-1">
+            <div className="lg:sticky lg:top-8">
+              <LivePreview
+                showWidget={showWidget}
+                formData={formData}
+                channels={channels}
+                videoModalOpen={videoModalOpen}
+                onVideoModalOpenChange={setVideoModalOpen}
+                editingWidget={editingWidget}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
       <Footer />
 
-      {/* Auth Modal */}
       <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </div>
   );

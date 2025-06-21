@@ -57,7 +57,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
   onCustomIconUpload
 }) => {
   return (
-    <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm lg:col-span-2">
+    <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MessageCircle className="w-5 h-5 text-blue-600" />
@@ -89,7 +89,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           onEditChannel={onEditChannel}
         />
 
-        {/* Video Upload - Now includes Video Display Settings inside */}
+        {/* Video Upload - Now includes Video Display Settings and Button Icon Settings */}
         <VideoUpload
           video={formData.video}
           videoUrl={editingWidget?.video_url}
@@ -107,7 +107,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           onCustomIconUpload={onCustomIconUpload}
         />
 
-        {/* Customization Options - Video Display Settings removed from here */}
+        {/* Customization Options - Simplified, Video Display Settings moved to VideoUpload */}
         <CustomizationOptions
           buttonColor={formData.buttonColor}
           position={formData.position}
