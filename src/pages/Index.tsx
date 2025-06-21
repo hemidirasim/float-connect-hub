@@ -262,22 +262,66 @@ const Index = () => {
     buttonColor: "${formData.buttonColor}",
     position: "${formData.position}",
     tooltip: "${formData.tooltip}",
-    useVideo: ${formData.useVideoPreview}
+    tooltipDisplay: "${formData.tooltipDisplay}",
+    useVideo: ${formData.useVideoPreview},
+    customIconUrl: "${formData.customIconUrl}"
   };
   
   // Create widget HTML
   const widgetHTML = \`
-    <div id="floating-widget" style="position:fixed;${formData.position}:20px;bottom:20px;z-index:9999;">
-      <button style="width:60px;height:60px;border-radius:50%;background:\${config.buttonColor};border:none;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);">
-        <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
-          <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-        </svg>
+    <div id="floating-widget" style="position:fixed;\${config.position}:20px;bottom:20px;z-index:9999;">
+      <button style="width:60px;height:60px;border-radius:50%;background:\${config.buttonColor};border:none;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);position:relative;">
+        \${config.customIconUrl ? 
+          '<img src="' + config.customIconUrl + '" alt="Contact" style="width:24px;height:24px;border-radius:50%;">' :
+          '<svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>'
+        }
+        \${config.tooltipDisplay === 'always' ? 
+          '<div style="position:absolute;' + (config.position === 'left' ? 'left:70px;' : 'right:70px;') + 'bottom:50%;transform:translateY(50%);background:black;color:white;padding:4px 8px;border-radius:4px;font-size:12px;white-space:nowrap;">' + config.tooltip + '</div>' : 
+          ''
+        }
       </button>
     </div>
   \`;
   
   // Insert widget into page
   document.body.insertAdjacentHTML('beforeend', widgetHTML);
+  
+  // Add click functionality
+  document.getElementById('floating-widget').addEventListener('click', function() {
+    // Create modal for channels
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+    
+    const content = document.createElement('div');
+    content.style.cssText = 'background:white;padding:20px;border-radius:10px;max-width:400px;width:90%;max-height:80vh;overflow-y:auto;';
+    
+    let channelHTML = '<h3 style="margin:0 0 15px 0;">Contact Us</h3>';
+    config.channels.forEach(channel => {
+      channelHTML += \`<div style="display:flex;align-items:center;padding:10px;margin:5px 0;border:1px solid #ddd;border-radius:5px;cursor:pointer;" onclick="window.open('\${getChannelUrl(channel)}', '_blank')">
+        <div style="width:40px;height:40px;border-radius:50%;background:#007bff;display:flex;align-items:center;justify-content:center;margin-right:10px;color:white;font-weight:bold;">\${channel.label.charAt(0)}</div>
+        <div><strong>\${channel.label}</strong><br><small>\${channel.value}</small></div>
+      </div>\`;
+    });
+    channelHTML += '<button onclick="this.closest(\\'[style*=\"position:fixed\"]\\'). remove()" style="margin-top:15px;padding:8px 16px;background:#007bff;color:white;border:none;border-radius:5px;cursor:pointer;">Close</button>';
+    
+    content.innerHTML = channelHTML;
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) modal.remove();
+    });
+  });
+  
+  function getChannelUrl(channel) {
+    switch(channel.type) {
+      case 'whatsapp': return 'https://wa.me/' + channel.value.replace(/[^0-9]/g, '');
+      case 'telegram': return 'https://t.me/' + channel.value.replace('@', '');
+      case 'email': return 'mailto:' + channel.value;
+      case 'phone': return 'tel:' + channel.value;
+      default: return channel.value;
+    }
+  }
 })();
 </script>`;
       setGeneratedCode(code);
@@ -302,7 +346,7 @@ const Index = () => {
         onOpenAuth={() => setAuthModalOpen(true)}
       />
       
-      <main>
+      <main className="pt-8">
         <HeroSection />
         
         <section className="py-16 bg-white/50" id="widget-form">

@@ -4,8 +4,8 @@ import { MessageCircle, Zap, Shield, Users } from 'lucide-react';
 
 export const HeroSection: React.FC = () => {
   return (
-    <section className="text-center mb-16">
-      <div className="max-w-4xl mx-auto">
+    <section className="text-center mb-16 pt-8">
+      <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8">
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
             Create Beautiful
