@@ -1,78 +1,87 @@
+
 import type { WidgetTemplate } from '../template-types.ts'
 
 export const getModernTemplate = (): WidgetTemplate => ({
   id: 'modern',
-  name: 'Minimal Contact Modal with Video',
-  description: 'Minimal floating contact modal with active video support',
+  name: 'Modern Gradient',
+  description: 'Modern template with gradient effects and smooth animations',
   html: `
-<div class="hiclient-widget" style="position: fixed; {{POSITION_STYLE}} bottom: 24px; z-index: 99999;">
+<!-- Modern Template -->
+<div class="hiclient-widget-container" style="position: fixed; {{POSITION_STYLE}} bottom: 20px; z-index: 99999;">
   <div class="hiclient-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
-  <button class="hiclient-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background: {{BUTTON_COLOR}};">
+  <button class="hiclient-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background: linear-gradient(135deg, {{BUTTON_COLOR}} 0%, #667eea 100%);">
     {{BUTTON_ICON}}
   </button>
 </div>
 
-<div class="hiclient-modal">
-  <div class="hiclient-modal-overlay"></div>
-  <div class="hiclient-modal-container">
-    <div class="hiclient-modal-header">
-      <h2>{{GREETING_MESSAGE}}</h2>
-      <button class="hiclient-close">×</button>
-    </div>
-    
-    <div class="hiclient-video-container">
-      <video class="hiclient-video-player" controls autoplay muted playsinline>
-        <source src="{{VIDEO_URL}}" type="video/mp4">
-        Your browser does not support the video tag.
-      </video>
-    </div>
-    
-    <div class="hiclient-channels">
+<div class="hiclient-modal-backdrop">
+  <div class="h iclient-modal-content">
+    <div class="hiclient-modal-header">{{GREETING_MESSAGE}}</div>
+    <div class="hiclient-modal-close">×</div>
+    {{VIDEO_CONTENT}}
+    <div class="hiclient-channels-container">
       {{CHANNELS_HTML}}
     </div>
-    
-    <div class="hiclient-empty" style="display: none;">
-      <div class="hiclient-empty-icon">💬</div>
-      <p>No contact methods available</p>
+    <div class="hiclient-empty-state" style="display: none;">
+      <div class="hiclient-empty-icon">📞</div>
+      <p>No channels configured</p>
     </div>
   </div>
 </div>`,
-
+  
   css: `
-/* Minimal Contact Widget */
-.hiclient-widget {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  transition: opacity 0.3s ease;
+/* Modern Gradient CSS */
+.hiclient-widget-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.hiclient-button {
-  border: none;
+.hiclient-widget-button {
+  width: {{BUTTON_SIZE}}px;
+  height: {{BUTTON_SIZE}}px;
   border-radius: 50%;
+  background: linear-gradient(135deg, {{BUTTON_COLOR}} 0%, #667eea 100%);
+  border: none;
   cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 0 0 rgba(102, 126, 234, 0.5);
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
-  color: white;
-  font-size: 20px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  animation: pulse 2s infinite;
 }
 
-.hiclient-button:hover {
+@keyframes pulse {
+  0% {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 0 0 rgba(102, 126, 234, 0.5);
+  }
+  70% {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 0 10px rgba(102, 126, 234, 0);
+  }
+  100% {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 0 0 rgba(102, 126, 234, 0);
+  }
+}
+
+.hiclient-widget-button:hover {
   transform: scale(1.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  animation-play-state: paused;
 }
 
 .hiclient-tooltip {
   position: absolute;
-  background: #1f2937;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 4px 8px;
-  border-radius: 3px;
+  padding: 8px 12px;
+  border-radius: 20px;
   font-size: 12px;
-  font-weight: 500;
   white-space: nowrap;
+  z-index: 100000;
+  transition: all 0.3s ease;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  font-weight: 500;
 }
 
 .hiclient-tooltip.show {
@@ -85,288 +94,290 @@ export const getModernTemplate = (): WidgetTemplate => ({
   visibility: hidden;
 }
 
-.hiclient-modal {
+.hiclient-modal-backdrop {
   position: fixed;
-  bottom: calc(24px + {{BUTTON_SIZE}}px + 12px);
-  right: 24px;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(102, 126, 234, 0.2) 100%);
   z-index: 100000;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: flex-end;
-  padding: 0;
+  align-items: center;
+  justify-content: center;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  backdrop-filter: blur(10px);
 }
 
-.hiclient-modal.show {
+.hiclient-modal-backdrop.show {
   opacity: 1;
   visibility: visible;
 }
 
-.hiclient-modal.show ~ .hiclient-widget {
-  opacity: 0;
-  visibility: hidden;
-}
-
-.hiclient-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
-}
-
-.hiclient-modal-container {
-  background: #ffffff;
-  border-radius: 10px;
-  width: 100%;
-  max-width: 320px;
-  max-height: 70vh;
+.hiclient-modal-content {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  padding: 32px;
+  border-radius: 20px;
+  max-width: 28rem;
+  width: 90%;
+  max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  transform: translateY(10px);
-  transition: transform 0.3s ease;
+  transform: scale(0.8) rotateX(10deg);
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.hiclient-modal.show .hiclient-modal-container {
-  transform: translateY(0);
+.hiclient-modal-backdrop.show .hiclient-modal-content {
+  transform: scale(1) rotateX(0deg);
 }
 
-.hiclient-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.hiclient-modal-header h2 {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.hiclient-close {
-  width: 24px;
-  height: 24px;
-  border: none;
-  background: #f3f4f6;
-  border-radius: 50%;
+.hiclient-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 14px;
-  color: #6b7280;
-  transition: background 0.2s ease;
+  font-size: 24px;
+  color: #64748b;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  background: rgba(248, 250, 252, 0.8);
+  backdrop-filter: blur(10px);
 }
 
-.hiclient-close:hover {
+.hiclient-modal-close:hover {
   background: #ef4444;
   color: white;
+  transform: rotate(90deg);
+}
+
+.hiclient-modal-header {
+  margin: 0 0 28px 0;
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  line-height: 1.4;
+  padding-right: 50px;
 }
 
 .hiclient-video-container {
-  padding: 12px;
+  margin-bottom: 28px;
 }
 
 .hiclient-video-player {
   width: 100%;
-  border-radius: 6px;
-  background: #000;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-.hiclient-channels {
-  padding: 0 12px 12px;
+.hiclient-channels-container {
+  max-height: 320px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
 .hiclient-channel-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
-  margin-bottom: 6px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
   text-decoration: none;
-  color: #1f2937;
-  font-size: 13px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.hiclient-channel-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.hiclient-channel-item:hover::before {
+  left: 100%;
 }
 
 .hiclient-channel-item:hover {
-  background: #f9fafb;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+  border-color: #667eea;
 }
 
 .hiclient-channel-icon {
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  background: #e5e7eb;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .hiclient-channel-info {
   flex: 1;
-  overflow: hidden;
+  min-width: 0;
 }
 
 .hiclient-channel-label {
-  font-weight: 500;
-  color: #1f2937;
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: 600;
+  font-size: 16px;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
 }
 
 .hiclient-channel-value {
-  color: #6b7280;
-  margin: 0;
-  font-size: 12px;
-  white-space: nowrap;
+  font-size: 14px;
+  color: #64748b;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+  line-height: 1.3;
 }
 
-.hiclient-empty {
+.hiclient-external-icon {
+  width: 20px;
+  height: 20px;
+  color: #94a3b8;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.hiclient-channel-item:hover .hiclient-external-icon {
+  color: #667eea;
+  transform: translateX(2px);
+}
+
+.hiclient-empty-state {
   text-align: center;
-  padding: 24px 12px;
-  color: #6b7280;
+  padding: 60px 20px;
+  color: #64748b;
 }
 
 .hiclient-empty-icon {
-  font-size: 24px;
-  margin-bottom: 6px;
-}
-
-.hiclient-empty p {
-  margin: 0;
-  font-size: 12px;
-}
-
-/* Dark theme */
-@media (prefers-color-scheme: dark) {
-  .hiclient-modal-container {
-    background: #1f2937;
-  }
-  .hiclient-modal-header {
-    border-bottom-color: #374151;
-  }
-  .hiclient-modal-header h2 {
-    color: #f9fafb;
-  }
-  .hiclient-close {
-    background: #374151;
-    color: #d1d5db;
-  }
-  .hiclient-channel-item {
-    border-color: #374151;
-    color: #f9fafb;
-  }
-  .hiclient-channel-item:hover {
-    background: #374151;
-  }
-  .hiclient-channel-label {
-    color: #f9fafb;
-  }
-  .hiclient-channel-value {
-    color: #d1d5db;
-  }
-  .hiclient-channel-icon {
-    background: #374151;
-  }
-}
-
-/* Mobile */
-@media (max-width: 480px) {
-  .hiclient-modal {
-    bottom: calc(16px + {{BUTTON_SIZE}}px + 8px);
-    right: 16px;
-  }
-  .hiclient-modal-container {
-    max-width: 280px;
-  }
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 20px;
+  opacity: 0.4;
 }`,
+  
+  js: `/* Modern JS */
+console.log("Modern widget initialized with greeting:", '{{GREETING_MESSAGE}}');
 
-  js: `
-function initWidget() {
-  const button = document.querySelector('.hiclient-button');
-  const modal = document.querySelector('.hiclient-modal');
-  const overlay = document.querySelector('.hiclient-modal-overlay');
-  const closeBtn = document.querySelector('.hiclient-close');
-  const tooltip = document.querySelector('.hiclient-tooltip');
-  const video = document.querySelector('.hiclient-video-player');
-  const channelsContainer = document.querySelector('.hiclient-channels');
-  const emptyState = document.querySelector('.hiclient-empty');
-  const widget = document.querySelector('.hiclient-widget');
+function initializeWidget() {
+  var button = document.querySelector(".hiclient-widget-button");
+  var modal = document.querySelector(".hiclient-modal-backdrop");
+  var tooltip = document.querySelector(".hiclient-tooltip");
+  var closeBtn = document.querySelector(".hiclient-modal-close");
+  var video = document.querySelector(".hiclient-video-player");
+  var channelsContainer = document.querySelector(".hiclient-channels-container");
+  var emptyState = document.querySelector(".hiclient-empty-state");
   
   if (video) {
-    video.muted = true; // Başlanğıcda səs səng
+    video.muted = true;
     video.pause();
   }
   
+  // Show/hide empty state based on channels
   if (channelsContainer && emptyState) {
-    emptyState.style.display = channelsContainer.children.length > 0 ? 'none' : 'block';
+    var hasChannels = channelsContainer.children.length > 0;
+    if (!hasChannels) {
+      emptyState.style.display = 'block';
+    }
   }
   
-  if (button) {
-    button.addEventListener('click', () => {
-      modal.classList.add('show');
-      if (widget) {
-        widget.style.opacity = '0';
-        widget.style.visibility = 'hidden';
-      }
+  if (button && modal) {
+    button.addEventListener("click", function(e) {
+      e.preventDefault();
+      modal.classList.add("show");
+      
       if (video) {
-        video.muted = false; // Modal açılanda səs açılır
+        video.muted = false;
         video.currentTime = 0;
-        video.play().catch(() => {
-          video.muted = true;
-          video.play().catch(() => {});
+        video.play().catch(function(error) {
+          console.log("Video error:", error);
         });
+      }
+    });
+    
+    function closeModal() {
+      modal.classList.remove("show");
+      if (video) {
+        video.muted = true;
+        video.pause();
+      }
+    }
+    
+    if (closeBtn) {
+      closeBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeModal();
+      });
+    }
+    
+    modal.addEventListener("click", function(e) {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+    
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape" && modal.classList.contains("show")) {
+        closeModal();
       }
     });
   }
   
-  const closeModal = () => {
-    modal.classList.remove('show');
-    if (widget) {
-      widget.style.opacity = '1';
-      widget.style.visibility = 'visible';
-    }
-    if (video) {
-      video.muted = true;
-      video.pause();
-    }
-  };
-  
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
-  if (overlay) overlay.addEventListener('click', closeModal);
-  
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
-  });
-  
   if (tooltip && button) {
     if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
-      button.addEventListener('mouseenter', () => tooltip.classList.add('show'));
-      button.addEventListener('mouseleave', () => tooltip.classList.add('hide'));
+      button.addEventListener("mouseenter", function() {
+        tooltip.classList.add("show");
+      });
+      button.addEventListener("mouseleave", function() {
+        tooltip.classList.add("hide");
+      });
     } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
       tooltip.style.display = 'block';
-      tooltip.classList.add('show');
+      tooltip.classList.add("show");
     }
   }
+  
+  window.openChannel = function(url) {
+    window.open(url, "_blank");
+  };
 }
 
-window.openChannel = (url) => window.open(url, '_blank');
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initWidget);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeWidget);
 } else {
-  initWidget();
+  initializeWidget();
 }`
 });
