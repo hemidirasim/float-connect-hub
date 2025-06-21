@@ -84,7 +84,8 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       channels: channels.length,
       buttonColor: formData.buttonColor,
       position: formData.position,
-      tooltip: formData.tooltip
+      tooltip: formData.tooltip,
+      hasJS: !!template.js_template
     });
 
     const config: TemplateConfig = {
@@ -106,9 +107,40 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     const renderer = new TemplateRenderer(template, config);
     const html = renderer.renderComplete();
     setPreviewHtml(html);
-    setDebugInfo(`Preview generated with ${channels.length} channels`);
+    setDebugInfo(`Preview generated with ${channels.length} channels, JS: ${template.js_template ? 'YES' : 'NO'}`);
     console.log('Preview HTML generated:', html.length, 'characters');
+    console.log('JavaScript template present:', !!template.js_template);
   }, [template, formData, channels, showWidget, editingWidget, loading]);
+
+  // Add script execution after HTML is inserted
+  useEffect(() => {
+    if (previewHtml && template?.js_template) {
+      // Wait for DOM to be ready, then execute any inline scripts
+      const timer = setTimeout(() => {
+        try {
+          // Find and execute any script tags in the preview
+          const previewContainer = document.querySelector('[data-preview-container]');
+          if (previewContainer) {
+            const scripts = previewContainer.querySelectorAll('script');
+            scripts.forEach(script => {
+              if (script.textContent) {
+                console.log('Executing inline script:', script.textContent.substring(0, 100) + '...');
+                try {
+                  eval(script.textContent);
+                } catch (e) {
+                  console.error('Script execution error:', e);
+                }
+              }
+            });
+          }
+        } catch (error) {
+          console.error('Error executing preview scripts:', error);
+        }
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [previewHtml, template]);
 
   if (loading) {
     return (
@@ -157,9 +189,10 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
         </div>
       </div>
       
-      {/* Template rendered widget */}
+      {/* Template rendered widget with data attribute for script execution */}
       <div 
         className="absolute inset-0"
+        data-preview-container
         dangerouslySetInnerHTML={{ __html: previewHtml }}
         style={{ pointerEvents: 'auto' }}
       />

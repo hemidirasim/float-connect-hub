@@ -1,3 +1,4 @@
+
 import { Channel, FormData } from "@/components/FloatingWidgetBuilder/types";
 
 export interface WidgetTemplate {
@@ -183,20 +184,23 @@ export class TemplateRenderer {
   }
 
   public renderJS(): string {
-    // Use the template's JS if available, otherwise use default
+    // Always use the template's JS if available
     if (this.template.js_template && this.template.js_template.trim()) {
+      console.log('Using template JavaScript');
       return this.replacePlaceholders(this.template.js_template);
     }
+    
+    console.log('Using fallback JavaScript');
     return this.getWidgetJavaScript();
   }
 
   private getWidgetJavaScript(): string {
     return `
-      console.log('Widget JavaScript loaded in preview');
+      console.log('Widget JavaScript loaded (fallback)');
       
       // Function to handle widget initialization
       function initializeWidget() {
-        console.log('Initializing widget...');
+        console.log('Initializing widget (fallback)...');
         
         var button = document.querySelector('.hiclient-widget-button');
         var modal = document.querySelector('.hiclient-modal-backdrop');
@@ -210,7 +214,7 @@ export class TemplateRenderer {
           button.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('Widget button clicked, showing modal');
+            console.log('Widget button clicked (fallback), showing modal');
             modal.classList.add('show');
           });
           
@@ -219,7 +223,7 @@ export class TemplateRenderer {
             closeBtn.addEventListener('click', function(e) {
               e.preventDefault();
               e.stopPropagation();
-              console.log('Close button clicked');
+              console.log('Close button clicked (fallback)');
               modal.classList.remove('show');
             });
           }
@@ -227,7 +231,7 @@ export class TemplateRenderer {
           // Backdrop click handler
           modal.addEventListener('click', function(e) {
             if (e.target === modal) {
-              console.log('Backdrop clicked, closing modal');
+              console.log('Backdrop clicked (fallback), closing modal');
               modal.classList.remove('show');
             }
           });
@@ -235,7 +239,7 @@ export class TemplateRenderer {
           // ESC key handler
           document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && modal.classList.contains('show')) {
-              console.log('ESC pressed, closing modal');
+              console.log('ESC pressed (fallback), closing modal');
               modal.classList.remove('show');
             }
           });
@@ -244,13 +248,13 @@ export class TemplateRenderer {
         // Tooltip hover effects
         if (tooltip && button && '${this.config.tooltipDisplay}' === 'hover') {
           button.addEventListener('mouseenter', function() {
-            console.log('Button hover - showing tooltip');
+            console.log('Button hover (fallback) - showing tooltip');
             tooltip.classList.remove('hide');
             tooltip.classList.add('show');
           });
           
           button.addEventListener('mouseleave', function() {
-            console.log('Button leave - hiding tooltip');
+            console.log('Button leave (fallback) - hiding tooltip');
             tooltip.classList.remove('show');
             tooltip.classList.add('hide');
           });
@@ -258,11 +262,11 @@ export class TemplateRenderer {
         
         // Global channel opener
         window.openChannel = function(url) {
-          console.log('Opening channel:', url);
+          console.log('Opening channel (fallback):', url);
           window.open(url, '_blank');
         };
         
-        console.log('Widget initialization complete');
+        console.log('Widget initialization complete (fallback)');
       }
       
       // Initialize when DOM is ready
@@ -278,6 +282,8 @@ export class TemplateRenderer {
     const html = this.renderHTML();
     const css = this.renderCSS();
     const js = this.renderJS();
+
+    console.log('Rendering complete widget with JS:', !!js);
 
     return `
       <style>${css}</style>
