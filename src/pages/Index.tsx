@@ -179,7 +179,7 @@ const Index = () => {
       if (field === 'customIcon' && value !== 'custom') {
         return {
           ...prev,
-          [field]: value,
+          [field]: value as string, // Ensure customIcon is always a string
           customIconUrl: '' // Clear custom icon URL when switching to preset icons
         };
       }
