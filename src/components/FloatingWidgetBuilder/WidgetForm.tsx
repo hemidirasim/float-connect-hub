@@ -15,8 +15,6 @@ interface WidgetFormProps {
   websiteName: string;
   websiteUrl: string;
   channels: Channel[];
-  selectedChannelType: string;
-  channelValue: string;
   formData: FormData;
   editingWidget: any;
   saving: boolean;
@@ -24,11 +22,6 @@ interface WidgetFormProps {
   onWebsiteNameChange: (value: string) => void;
   onWebsiteUrlChange: (value: string) => void;
   onChannelsChange: (channels: Channel[]) => void;
-  onSelectedChannelTypeChange: (type: string) => void;
-  onChannelValueChange: (value: string) => void;
-  onAddChannel: () => void;
-  onRemoveChannel: (id: string) => void;
-  onEditChannel: (id: string, newValue: string) => void;
   onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onVideoRemove: () => void;
   onFormDataChange: (field: string, value: string | boolean | number) => void;
@@ -40,8 +33,6 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
   websiteName,
   websiteUrl,
   channels,
-  selectedChannelType,
-  channelValue,
   formData,
   editingWidget,
   saving,
@@ -49,11 +40,6 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
   onWebsiteNameChange,
   onWebsiteUrlChange,
   onChannelsChange,
-  onSelectedChannelTypeChange,
-  onChannelValueChange,
-  onAddChannel,
-  onRemoveChannel,
-  onEditChannel,
   onVideoUpload,
   onVideoRemove,
   onFormDataChange,
@@ -84,14 +70,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           {/* Channel Manager */}
           <ChannelManager
             channels={channels}
-            selectedChannelType={selectedChannelType}
-            channelValue={channelValue}
             onChannelsChange={onChannelsChange}
-            onSelectedChannelTypeChange={onSelectedChannelTypeChange}
-            onChannelValueChange={onChannelValueChange}
-            onAddChannel={onAddChannel}
-            onRemoveChannel={onRemoveChannel}
-            onEditChannel={onEditChannel}
           />
         </CardContent>
       </Card>

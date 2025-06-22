@@ -1,5 +1,5 @@
 
-import { MessageCircle, Send, Instagram, Mail, Link, Video, Phone, MessageSquare, Music, Github, Linkedin, Youtube, Twitter, Facebook, Globe, MessageCircleMore, Bot } from 'lucide-react';
+import { MessageCircle, Send, Instagram, Mail, Link, Video, Phone, MessageSquare, Music, Github, Linkedin, Youtube, Twitter, Facebook, Globe, MessageCircleMore, Bot, Palette, Camera, Briefcase, Code, Zap, Users } from 'lucide-react';
 
 export const platformOptions = [
   { value: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: '#25d366' },
@@ -15,8 +15,16 @@ export const platformOptions = [
   { value: 'twitter', label: 'Twitter', icon: Twitter, color: '#1da1f2' },
   { value: 'linkedin', label: 'LinkedIn', icon: Linkedin, color: '#0077b5' },
   { value: 'github', label: 'GitHub', icon: Github, color: '#333333' },
+  { value: 'behance', label: 'Behance', icon: Palette, color: '#1769ff' },
+  { value: 'dribbble', label: 'Dribbble', icon: Camera, color: '#ea4c89' },
+  { value: 'pinterest', label: 'Pinterest', icon: Camera, color: '#bd081c' },
+  { value: 'figma', label: 'Figma', icon: Code, color: '#f24e1e' },
+  { value: 'upwork', label: 'Upwork', icon: Briefcase, color: '#6fda44' },
+  { value: 'fiverr', label: 'Fiverr', icon: Zap, color: '#1dbf73' },
+  { value: 'freelancer', label: 'Freelancer', icon: Users, color: '#0e4194' },
   { value: 'website', label: 'Website', icon: Globe, color: '#6b7280' },
   { value: 'chatbot', label: 'Chatbot', icon: Bot, color: '#8b5cf6' },
   { value: 'email', label: 'Email', icon: Mail, color: '#ea4335' },
+  { value: 'phone', label: 'Telefon', icon: Phone, color: '#22c55e' },
   { value: 'custom', label: 'Custom Link', icon: Link, color: '#6b7280' }
 ];

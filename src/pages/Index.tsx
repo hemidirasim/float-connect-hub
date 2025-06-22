@@ -28,10 +28,6 @@ const Index = () => {
     setWebsiteUrl,
     channels,
     setChannels,
-    selectedChannelType,
-    setSelectedChannelType,
-    channelValue,
-    setChannelValue,
     editingWidget,
     setEditingWidget,
     generatedCode,
@@ -44,7 +40,6 @@ const Index = () => {
   } = useWidgetState(user);
 
   const {
-    handleAddChannel,
     handleRemoveChannel,
     handleEditChannel,
     handleCreateWidget: createWidget
@@ -57,8 +52,8 @@ const Index = () => {
     editingWidget,
     resetForm,
     setChannels,
-    setChannelValue,
-    setSelectedChannelType
+    () => {}, // setChannelValue - not needed anymore
+    () => {}  // setSelectedChannelType - not needed anymore
   );
 
   // Check for hash navigation and scroll to widget form
@@ -81,10 +76,6 @@ const Index = () => {
       console.error('Error signing out:', error);
       toast.error('Failed to sign out');
     }
-  };
-
-  const handleAddChannelWrapper = () => {
-    handleAddChannel(selectedChannelType, channelValue);
   };
 
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -238,8 +229,6 @@ const Index = () => {
                 websiteName={websiteName}
                 websiteUrl={websiteUrl}
                 channels={channels}
-                selectedChannelType={selectedChannelType}
-                channelValue={channelValue}
                 formData={formData}
                 editingWidget={editingWidget}
                 saving={saving}
@@ -247,11 +236,6 @@ const Index = () => {
                 onWebsiteNameChange={setWebsiteName}
                 onWebsiteUrlChange={setWebsiteUrl}
                 onChannelsChange={setChannels}
-                onSelectedChannelTypeChange={setSelectedChannelType}
-                onChannelValueChange={setChannelValue}
-                onAddChannel={handleAddChannelWrapper}
-                onRemoveChannel={handleRemoveChannel}
-                onEditChannel={handleEditChannel}
                 onVideoUpload={handleVideoUpload}
                 onVideoRemove={handleVideoRemove}
                 onFormDataChange={handleFormDataChange}
