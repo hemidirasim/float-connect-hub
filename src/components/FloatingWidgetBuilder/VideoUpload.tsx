@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, Trash2, MessageCircle, Info } from 'lucide-react';
+import { Upload, Trash2, MessageCircle, Info, Play } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface VideoUploadProps {
@@ -48,6 +48,15 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
   onButtonSizeChange
 }) => {
   const hasVideo = video || videoUrl;
+
+  const handleVideoPreview = () => {
+    if (videoUrl) {
+      window.open(videoUrl, '_blank');
+    } else if (video) {
+      const url = URL.createObjectURL(video);
+      window.open(url, '_blank');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -152,7 +161,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
-              Video yüklənən kimi avtomatik aktivləşir. Hər video baxışı 2 credit aparır.
+              Video is automatically activated when uploaded. Each video view costs 2 credits.
             </AlertDescription>
           </Alert>
 
@@ -176,17 +185,30 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                   className="flex-1"
                 >
                   <Upload className="w-4 h-4 mr-2" />
-                  {uploading ? 'Uploading...' : video ? video.name : 'Choose Video'}
+                  {uploading ? 'Uploading...' : hasVideo ? (video ? video.name : 'Video Uploaded') : 'Choose Video'}
                 </Button>
+                
                 {hasVideo && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={onVideoRemove}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleVideoPreview}
+                      title="Preview Video"
+                    >
+                      <Play className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={onVideoRemove}
+                      title="Remove Video"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
