@@ -16,7 +16,7 @@ export const defaultTemplate: WidgetTemplate = {
 
       <div id="lovable-widget-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000001; backdrop-filter: blur(8px);">
         <div style="position: absolute; bottom: 2%; right: 2%; background: white; border-radius: 20px; padding: 0; max-width: 400px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.15); border: 1px solid rgba(255, 255, 255, 0.2);">
-          <div style="padding: 28px 28px 20px 28px; border-bottom: 1px solid #f1f5f9; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+          <div style="padding: 8px 8px 10px 8px; border-bottom: 1px solid #f1f5f9; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
               <div style="display: flex; align-items: center; gap: 12px;">
                 <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);">
@@ -30,7 +30,7 @@ export const defaultTemplate: WidgetTemplate = {
             </div>
             {{VIDEO_CONTENT}}
           </div>
-          <div style="padding: 24px 28px 28px 28px;">
+          <div style="padding: 24px 8px 8px 8px;">
             <div id="lovable-widget-channels" style="display: flex; flex-direction: column; gap: 12px;">
               {{CHANNELS_HTML}}
             </div>
