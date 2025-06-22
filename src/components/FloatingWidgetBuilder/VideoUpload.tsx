@@ -4,9 +4,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, Trash2, MessageCircle } from 'lucide-react';
+import { Upload, Trash2, MessageCircle, Info } from 'lucide-react';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface VideoUploadProps {
   video: File | null;
@@ -33,24 +33,22 @@ interface VideoUploadProps {
 export const VideoUpload: React.FC<VideoUploadProps> = ({
   video,
   videoUrl,
-  useVideoPreview,
   videoHeight,
   videoAlignment,
   customIcon,
   customIconUrl,
   buttonSize,
-  previewVideoHeight,
   uploading = false,
   onVideoUpload,
   onVideoRemove,
-  onVideoPreviewChange,
   onVideoHeightChange,
   onVideoAlignmentChange,
   onCustomIconChange,
   onCustomIconUpload,
-  onButtonSizeChange,
-  onPreviewVideoHeightChange
+  onButtonSizeChange
 }) => {
+  const hasVideo = video || videoUrl;
+
   return (
     <div className="space-y-6">
       {/* Button Icon Selection */}
@@ -148,84 +146,82 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
       {/* Video Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Video Settings</CardTitle>
+          <CardTitle>Promotional Video</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-base font-medium">Enable Video Preview</Label>
-              <p className="text-sm text-gray-600">Show promotional video in modal</p>
-            </div>
-            <Switch
-              checked={useVideoPreview}
-              onCheckedChange={onVideoPreviewChange}
-            />
-          </div>
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              Video yüklənən kimi avtomatik aktivləşir. Hər video baxışı 2 credit aparır.
+            </AlertDescription>
+          </Alert>
 
-          {useVideoPreview && (
-            <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
-              {/* Video Upload */}
-              <div className="space-y-2">
-                <Label>Upload Video (max 10MB)</Label>
-                <input
-                  type="file"
-                  accept="video/*"
-                  onChange={onVideoUpload}
-                  className="hidden"
-                  id="video-upload"
-                />
-                <div className="flex items-center gap-2">
+          <div className="space-y-4">
+            {/* Video Upload */}
+            <div className="space-y-2">
+              <Label>Upload Video (max 10MB)</Label>
+              <input
+                type="file"
+                accept="video/*"
+                onChange={onVideoUpload}
+                className="hidden"
+                id="video-upload"
+              />
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => document.getElementById('video-upload')?.click()}
+                  disabled={uploading}
+                  className="flex-1"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {uploading ? 'Uploading...' : video ? video.name : 'Choose Video'}
+                </Button>
+                {hasVideo && (
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => document.getElementById('video-upload')?.click()}
-                    disabled={uploading}
-                    className="flex-1"
+                    size="sm"
+                    onClick={onVideoRemove}
                   >
-                    <Upload className="w-4 h-4 mr-2" />
-                    {uploading ? 'Uploading...' : video ? video.name : 'Choose Video'}
+                    <Trash2 className="w-4 h-4" />
                   </Button>
-                  {(video || videoUrl) && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={onVideoRemove}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {/* Video Height */}
-              <div className="space-y-2">
-                <Label>Video Height: {videoHeight}px</Label>
-                <Input
-                  type="range"
-                  min="150"
-                  max="400"
-                  value={videoHeight}
-                  onChange={(e) => onVideoHeightChange(Number(e.target.value))}
-                />
-              </div>
-
-              {/* Video Alignment */}
-              <div className="space-y-2">
-                <Label>Video Alignment</Label>
-                <Select value={videoAlignment} onValueChange={onVideoAlignmentChange}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectItem value="left">Left</SelectItem>
-                    <SelectItem value="center">Center</SelectItem>
-                    <SelectItem value="right">Right</SelectItem>
-                  </SelectContent>
-                </Select>
+                )}
               </div>
             </div>
-          )}
+
+            {hasVideo && (
+              <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
+                {/* Video Height */}
+                <div className="space-y-2">
+                  <Label>Video Height: {videoHeight}px</Label>
+                  <Input
+                    type="range"
+                    min="150"
+                    max="400"
+                    value={videoHeight}
+                    onChange={(e) => onVideoHeightChange(Number(e.target.value))}
+                  />
+                </div>
+
+                {/* Video Alignment */}
+                <div className="space-y-2">
+                  <Label>Video Alignment</Label>
+                  <Select value={videoAlignment} onValueChange={onVideoAlignmentChange}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      <SelectItem value="left">Left</SelectItem>
+                      <SelectItem value="center">Center</SelectItem>
+                      <SelectItem value="right">Right</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
