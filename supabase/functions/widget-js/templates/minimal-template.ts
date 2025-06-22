@@ -6,24 +6,19 @@ export const minimalTemplate: WidgetTemplate = {
   name: 'Minimal',
   description: 'Clean and simple design',
   html: `
-    <div class="widget-container position-right">
-      <button class="widget-button">
-        <i class="widget-icon"></i>
+    <div class="widget-container position-{{POSITION}}">
+      <button class="widget-button" style="background: {{BUTTON_COLOR}}; --button-size: {{BUTTON_SIZE}}px;">
+        {{BUTTON_ICON}}
       </button>
-      <div class="widget-tooltip position-top">
-        Contact us!
+      <div class="widget-tooltip position-{{TOOLTIP_POSITION}} {{TOOLTIP_DISPLAY}}">
+        {{TOOLTIP_TEXT}}
       </div>
       <div class="widget-menu">
         <div class="widget-channel-buttons">
-          <!-- Channel buttons will be dynamically inserted here -->
+          {{CHANNELS_HTML}}
         </div>
       </div>
-      <div class="widget-video">
-        <video autoplay loop muted playsinline>
-          <source src="" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>
-      </div>
+      {{VIDEO_CONTENT}}
     </div>
   `,
   css: `
@@ -78,7 +73,7 @@ export const minimalTemplate: WidgetTemplate = {
       z-index: 10000;
     }
 
-    .widget-tooltip.show {
+    .widget-tooltip.show, .widget-tooltip.always {
       opacity: 1;
     }
 
@@ -187,7 +182,7 @@ export const minimalTemplate: WidgetTemplate = {
       flex: 1;
     }
 
-    /* New styles for channel groups and dropdowns */
+    /* Channel group styles */
     .widget-channel-group {
       position: relative;
     }
@@ -227,6 +222,11 @@ export const minimalTemplate: WidgetTemplate = {
       min-width: 250px;
       border: 1px solid #e5e7eb;
       z-index: 10002;
+      display: none;
+    }
+
+    .widget-dropdown.show {
+      display: block;
     }
 
     .widget-container.position-left .widget-dropdown {
@@ -292,7 +292,6 @@ export const minimalTemplate: WidgetTemplate = {
       text-overflow: ellipsis;
     }
 
-    /* Video styles - keep existing code */
     .widget-video {
       position: absolute;
       bottom: calc(100% + 15px);
@@ -364,16 +363,22 @@ export const minimalTemplate: WidgetTemplate = {
       let activeDropdown = null;
       
       function initWidget() {
+        console.log('Initializing minimal widget...');
+        
         const button = document.querySelector('.widget-button');
         const menu = document.querySelector('.widget-menu');
         const tooltip = document.querySelector('.widget-tooltip');
         const video = document.querySelector('.widget-video');
         
-        if (!button) return;
+        if (!button) {
+          console.error('Widget button not found');
+          return;
+        }
 
         // Button click handler
         button.addEventListener('click', function(e) {
           e.stopPropagation();
+          console.log('Widget button clicked');
           toggleMenu();
         });
 
@@ -392,7 +397,7 @@ export const minimalTemplate: WidgetTemplate = {
               tooltip.classList.remove('show');
             });
           } else if (tooltipDisplay === 'always') {
-            tooltip.classList.add('show');
+            tooltip.classList.add('always');
           }
         }
 
@@ -408,12 +413,14 @@ export const minimalTemplate: WidgetTemplate = {
             video.classList.remove('show');
           });
           
-          menu?.addEventListener('mouseenter', () => {
-            video.classList.remove('show');
-          });
+          if (menu) {
+            menu.addEventListener('mouseenter', () => {
+              video.classList.remove('show');
+            });
+          }
         }
 
-        // Dropdown functionality for channel groups
+        // Initialize channel dropdowns
         initChannelDropdowns();
 
         // Close menu when clicking outside
@@ -423,6 +430,8 @@ export const minimalTemplate: WidgetTemplate = {
             closeAllDropdowns();
           }
         });
+        
+        console.log('Minimal widget initialized successfully');
       }
 
       function initChannelDropdowns() {
@@ -443,6 +452,7 @@ export const minimalTemplate: WidgetTemplate = {
             if (dropdown) {
               if (dropdown.style.display === 'none' || !dropdown.style.display) {
                 dropdown.style.display = 'block';
+                dropdown.classList.add('show');
                 this.classList.add('active');
                 activeDropdown = dropdown;
               } else {
@@ -456,11 +466,12 @@ export const minimalTemplate: WidgetTemplate = {
             const dropdownId = this.getAttribute('data-dropdown');
             const dropdown = document.getElementById(dropdownId);
             
-            if (dropdown && !dropdown.style.display) {
+            if (dropdown && (!dropdown.style.display || dropdown.style.display === 'none')) {
               setTimeout(() => {
                 if (this.matches(':hover')) {
                   closeAllDropdowns();
                   dropdown.style.display = 'block';
+                  dropdown.classList.add('show');
                   this.classList.add('active');
                   activeDropdown = dropdown;
                 }
@@ -488,6 +499,7 @@ export const minimalTemplate: WidgetTemplate = {
 
       function closeDropdown(dropdown, btn) {
         dropdown.style.display = 'none';
+        dropdown.classList.remove('show');
         btn.classList.remove('active');
         if (activeDropdown === dropdown) {
           activeDropdown = null;
@@ -500,6 +512,7 @@ export const minimalTemplate: WidgetTemplate = {
         
         dropdowns.forEach(dropdown => {
           dropdown.style.display = 'none';
+          dropdown.classList.remove('show');
         });
         
         dropdownBtns.forEach(btn => {
@@ -520,8 +533,8 @@ export const minimalTemplate: WidgetTemplate = {
         
         if (isMenuOpen) {
           menu.classList.add('show');
-          tooltip?.classList.remove('show');
-          video?.classList.remove('show');
+          if (tooltip) tooltip.classList.remove('show');
+          if (video) video.classList.remove('show');
         } else {
           menu.classList.remove('show');
           closeAllDropdowns();
@@ -535,6 +548,12 @@ export const minimalTemplate: WidgetTemplate = {
           isMenuOpen = false;
         }
       }
+
+      // Global channel opener
+      window.openChannel = function(url) {
+        console.log('Opening channel:', url);
+        window.open(url, '_blank');
+      };
 
       // Initialize when DOM is ready
       if (document.readyState === 'loading') {

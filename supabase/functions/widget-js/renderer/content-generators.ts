@@ -46,60 +46,59 @@ function generateChannelLink(channel: Channel): string {
 
 export function generateChannelsHtml(config: TemplateConfig, templateId: string): string {
   if (templateId === 'minimal') {
-    // For minimal template, maintain the original order (don't reverse)
+    // For minimal template, process channels with child support
     return config.channels.map(channel => {
-      if (channel.isGroup && channel.groupItems) {
-        // Generate group button with dropdown
-        const iconSvg = getChannelIcon(channel.type, channel.customIcon, true)
-        const channelColor = getChannelColor(channel.type)
+      if (channel.childChannels && channel.childChannels.length > 0) {
+        // Generate group button with dropdown for minimal template
+        const platform = getPlatformInfo(channel.type);
+        const dropdownId = `dropdown-${channel.id}`;
+        const childCount = channel.childChannels.length;
         
-        const buttonSize = config.buttonSize || 60
-        const iconSize = Math.max(40, Math.min(55, buttonSize * 0.83))
-        
-        const groupItemsHtml = channel.groupItems.map(item => {
-          const itemUrl = getChannelUrl(item)
+        const dropdownItems = [channel, ...channel.childChannels].map((item, index) => {
+          const href = generateChannelLink(item);
+          const label = index === 0 ? item.label : item.label;
+          
           return `
-            <a href="${itemUrl}" target="_blank" class="hiclient-group-item" onclick="window.openChannel && window.openChannel('${itemUrl}')">
-              <span class="hiclient-group-item-label">${item.label}</span>
-              <span class="hiclient-group-item-value">${item.value}</span>
+            <a href="${href}" target="_blank" class="widget-dropdown-item" onclick="window.openChannel && window.openChannel('${href}')">
+              <i class="${platform.icon}"></i>
+              <span>${label}</span>
+              <span class="dropdown-value">${item.value}</span>
             </a>
-          `
-        }).join('')
+          `;
+        }).join('');
         
         return `
-          <div class="hiclient-channel-group" style="width: ${iconSize}px; height: ${iconSize}px;">
-            <div class="hiclient-channel-animated hiclient-group-trigger" style="background: ${channelColor}; width: ${iconSize}px; height: ${iconSize}px;">
-              ${iconSvg}
-              <div class="hiclient-channel-tooltip">${channel.label}</div>
-              <span class="hiclient-group-count">${channel.groupItems.length}</span>
-            </div>
-            <div class="hiclient-group-dropdown">
-              ${groupItemsHtml}
+          <div class="widget-channel-group">
+            <button class="widget-channel-btn widget-dropdown-btn" data-dropdown="${dropdownId}">
+              <i class="${platform.icon}"></i>
+              <span>${channel.label}</span>
+              <span class="child-count">+${childCount}</span>
+              <i class="dropdown-arrow">▼</i>
+            </button>
+            <div class="widget-dropdown" id="${dropdownId}">
+              ${dropdownItems}
             </div>
           </div>
-        `
+        `;
       } else {
-        // Regular individual channel
-        const iconSvg = getChannelIcon(channel.type, channel.customIcon, true)
-        const channelUrl = getChannelUrl(channel)
-        const channelColor = getChannelColor(channel.type)
-        
-        const buttonSize = config.buttonSize || 60
-        const iconSize = Math.max(40, Math.min(55, buttonSize * 0.83))
+        // Regular individual channel for minimal template
+        const platform = getPlatformInfo(channel.type);
+        const href = generateChannelLink(channel);
         
         return `
-          <a href="${channelUrl}" target="_blank" class="hiclient-channel-animated" style="background: ${channelColor}; width: ${iconSize}px; height: ${iconSize}px;" onclick="window.openChannel && window.openChannel('${channelUrl}')">
-            ${iconSvg}
-            <div class="hiclient-channel-tooltip">${channel.label}</div>
+          <a href="${href}" target="_blank" class="widget-channel-btn" onclick="window.openChannel && window.openChannel('${href}')">
+            <i class="${platform.icon}"></i>
+            <span>${channel.label}</span>
           </a>
-        `
+        `;
       }
-    }).join('')
+    }).join('');
   }
   
+  // Default template logic
   return config.channels.map(channel => {
     if (channel.isGroup && channel.groupItems) {
-      // Generate group for regular templates
+      // Generate group for default template
       const iconSvg = getChannelIcon(channel.type, channel.customIcon, false)
       const channelColor = getChannelColor(channel.type)
       
@@ -108,7 +107,7 @@ export function generateChannelsHtml(config: TemplateConfig, templateId: string)
         const itemIcon = getChannelIcon(item.type, item.customIcon, false)
         return `
           <a href="${itemUrl}" target="_blank" class="lovable-group-item" onclick="window.openChannel && window.openChannel('${itemUrl}')">
-            <div class="lovable-group-item-icon">${itemIcon}</div>
+            <div class="lovable-group-item-icon" style="background: ${getChannelColor(item.type)}; color: white;">${itemIcon}</div>
             <div class="lovable-group-item-info">
               <div class="lovable-group-item-label">${item.label}</div>
               <div class="lovable-group-item-value">${item.value}</div>
@@ -133,8 +132,43 @@ export function generateChannelsHtml(config: TemplateConfig, templateId: string)
           </div>
         </div>
       `
+    } else if (channel.childChannels && channel.childChannels.length > 0) {
+      // Handle child channels for default template
+      const iconSvg = getChannelIcon(channel.type, channel.customIcon, false)
+      const channelColor = getChannelColor(channel.type)
+      
+      const childItemsHtml = [channel, ...channel.childChannels].map(item => {
+        const itemUrl = getChannelUrl(item)
+        const itemIcon = getChannelIcon(item.type, item.customIcon, false)
+        return `
+          <a href="${itemUrl}" target="_blank" class="lovable-group-item" onclick="window.openChannel && window.openChannel('${itemUrl}')">
+            <div class="lovable-group-item-icon" style="background: ${getChannelColor(item.type)}; color: white;">${itemIcon}</div>
+            <div class="lovable-group-item-info">
+              <div class="lovable-group-item-label">${item.label}</div>
+              <div class="lovable-group-item-value">${item.value}</div>
+            </div>
+          </a>
+        `
+      }).join('')
+      
+      return `
+        <div class="lovable-channel-group">
+          <div class="lovable-channel-button lovable-group-trigger">
+            <div class="lovable-channel-icon" style="background: ${channelColor}; color: white;">${iconSvg}</div>
+            <div class="lovable-channel-info">
+              <div class="lovable-channel-label">${channel.label}</div>
+              <div class="lovable-channel-value">${channel.childChannels.length + 1} seçim</div>
+            </div>
+            <div class="lovable-channel-arrow">→</div>
+            <span class="lovable-group-count">${channel.childChannels.length + 1}</span>
+          </div>
+          <div class="lovable-group-dropdown">
+            ${childItemsHtml}
+          </div>
+        </div>
+      `
     } else {
-      // Regular individual channel
+      // Regular individual channel for default template
       const iconSvg = getChannelIcon(channel.type, channel.customIcon, false)
       const channelUrl = getChannelUrl(channel)
       const channelColor = getChannelColor(channel.type)
@@ -227,7 +261,7 @@ function generateDropdownItems(channel: Channel): string {
     const label = index === 0 ? item.label : `${item.label}`;
     
     return `
-      <a href="${href}" target="_blank" class="widget-dropdown-item">
+      <a href="${href}" target="_blank" class="widget-dropdown-item" onclick="window.openChannel && window.openChannel('${href}')">
         <i class="${platform.icon}"></i>
         <span>${label}</span>
         <span class="dropdown-value">${item.value}</span>
@@ -241,7 +275,7 @@ function generateSingleChannelButton(channel: Channel, config: TemplateConfig): 
   const href = generateChannelLink(channel);
   
   return `
-    <a href="${href}" target="_blank" class="widget-channel-btn" data-channel-type="${channel.type}">
+    <a href="${href}" target="_blank" class="widget-channel-btn" data-channel-type="${channel.type}" onclick="window.openChannel && window.openChannel('${href}')">
       <i class="${platform.icon}"></i>
       <span>${channel.label}</span>
     </a>
