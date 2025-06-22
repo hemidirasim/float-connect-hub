@@ -4,6 +4,11 @@ export interface Channel {
   type: string;
   value: string;
   label: string;
+  customIcon?: string;
+  // New grouping properties
+  isGroup?: boolean;
+  groupItems?: Channel[];
+  displayMode?: 'individual' | 'grouped';
 }
 
 export interface WidgetData {

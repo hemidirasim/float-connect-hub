@@ -5,6 +5,10 @@ export interface Channel {
   value: string;
   label: string;
   customIcon?: string; // For custom uploaded icons
+  // New grouping properties
+  isGroup?: boolean;
+  groupItems?: Channel[];
+  displayMode?: 'individual' | 'grouped';
 }
 
 export interface FormData {

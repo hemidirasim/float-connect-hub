@@ -126,6 +126,82 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
+/* Channel Groups */
+.hiclient-channel-group {
+  position: relative;
+}
+
+.hiclient-group-trigger {
+  position: relative;
+}
+
+.hiclient-group-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ff4444;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  border: 2px solid white;
+}
+
+.hiclient-group-dropdown {
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(10px);
+  transition: all 0.3s ease;
+  min-width: 200px;
+  z-index: 100001;
+  border: 1px solid #e5e7eb;
+}
+
+.hiclient-channel-group:hover .hiclient-group-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+.hiclient-group-item {
+  display: block;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.hiclient-group-item:hover {
+  background-color: #f8f9fa;
+}
+
+.hiclient-group-item:last-child {
+  border-bottom: none;
+}
+
+.hiclient-group-item-label {
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.hiclient-group-item-value {
+  font-size: 12px;
+  color: #666;
+}
+
 .hiclient-channel-tooltip {
   position: absolute;
   right: {{TOOLTIP_RIGHT_OFFSET}}px;
@@ -262,6 +338,11 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
     right: {{MOBILE_TOOLTIP_RIGHT_OFFSET}}px;
     font-size: 11px;
     padding: 6px 10px;
+  }
+  
+  .hiclient-group-dropdown {
+    right: calc(100% + 5px);
+    min-width: 180px;
   }
 }`,
   

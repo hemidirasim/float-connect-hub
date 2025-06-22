@@ -1,15 +1,16 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Trash2, GripVertical, Upload, Link } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Trash2, GripVertical, Upload, Link, Users } from 'lucide-react';
 import { toast } from "sonner";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableChannelItem } from "@/components/SortableChannelItem";
+import { ChannelGroupManager } from "./ChannelGroupManager";
 import { platformOptions } from './constants';
 import { Channel } from './types';
 
@@ -112,6 +113,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
         type: selectedChannelType,
         value: channelValue.trim(),
         label: channelLabel.trim() || platform?.label || 'Custom',
+        displayMode: 'individual',
         // Only add customIcon if it's provided and it's a custom link
         ...(selectedChannelType === 'custom' && customIconUrl ? { customIcon: customIconUrl } : {})
       };
@@ -134,13 +136,12 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
     toast.success("Kanal silindi");
   };
 
-  // Fix editChannel to handle both value and label
   const editChannel = (id: string, newValue: string, newLabel: string) => {
     onChannelsChange(channels.map(channel => 
       channel.id === id ? { 
         ...channel, 
         value: newValue,
-        label: newLabel // Update both value and label
+        label: newLabel
       } : channel
     ));
     toast.success("Kanal yeniləndi");
@@ -156,141 +157,169 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
     }
   };
 
+  // Filter individual channels for the sortable list
+  const individualChannels = channels.filter(ch => !ch.isGroup);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Əlaqə kanalları</CardTitle>
-        <CardDescription>Kanalları sürüşdürərək sırasını dəyişə bilərsiniz</CardDescription>
+        <CardTitle className="flex items-center gap-2">
+          <Link className="w-5 h-5" />
+          Əlaqə kanalları
+        </CardTitle>
+        <CardDescription>Kanalları qruplaşdıra və ya ayrı-ayrı istifadə edə bilərsiniz</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Add Channel Form */}
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <Label>Platform</Label>
-              <Select value={selectedChannelType} onValueChange={setSelectedChannelType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Platform seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  {platformOptions.map((platform) => (
-                    <SelectItem key={platform.value} value={platform.value}>
-                      <div className="flex items-center gap-2">
-                        <platform.icon className="w-4 h-4" style={{ color: platform.color }} />
-                        {platform.label}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label>Əlaqə məlumatı</Label>
-              <Input
-                placeholder={getPlaceholderText()}
-                value={channelValue}
-                onChange={(e) => setChannelValue(e.target.value)}
-              />
-            </div>
-          </div>
+      <CardContent>
+        <Tabs defaultValue="individual" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="individual" className="flex items-center gap-2">
+              <Link className="w-4 h-4" />
+              Fərdi Kanallar
+            </TabsTrigger>
+            <TabsTrigger value="groups" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Qruplar
+            </TabsTrigger>
+          </TabsList>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <Label>Xüsusi ad (ixtiyari)</Label>
-              <Input
-                placeholder={getLabelPlaceholder()}
-                value={channelLabel}
-                onChange={(e) => setChannelLabel(e.target.value)}
-              />
-            </div>
-
-            {/* Custom Icon Upload - Only show for custom links */}
-            {selectedChannelType === 'custom' && (
-              <div>
-                <Label>Xüsusi ikon (ixtiyari)</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/svg+xml"
-                    onChange={handleCustomIconUpload}
-                    className="hidden"
-                    id="custom-icon-upload"
+          <TabsContent value="individual" className="space-y-4">
+            {/* Add Channel Form */}
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <Label>Platform</Label>
+                  <Select value={selectedChannelType} onValueChange={setSelectedChannelType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Platform seçin" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {platformOptions.map((platform) => (
+                        <SelectItem key={platform.value} value={platform.value}>
+                          <div className="flex items-center gap-2">
+                            <platform.icon className="w-4 h-4" style={{ color: platform.color }} />
+                            {platform.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label>Əlaqə məlumatı</Label>
+                  <Input
+                    placeholder={getPlaceholderText()}
+                    value={channelValue}
+                    onChange={(e) => setChannelValue(e.target.value)}
                   />
-                  <label htmlFor="custom-icon-upload" className="cursor-pointer flex-1">
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 text-center hover:border-gray-400 transition-colors">
-                      {customIconUrl ? (
-                        <div className="flex items-center gap-2 justify-center">
-                          <img src={customIconUrl} alt="Custom icon" className="w-5 h-5 object-contain" />
-                          <span className="text-sm text-green-600">Ikon yükləndi</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <Label>Xüsusi ad (ixtiyari)</Label>
+                  <Input
+                    placeholder={getLabelPlaceholder()}
+                    value={channelLabel}
+                    onChange={(e) => setChannelLabel(e.target.value)}
+                  />
+                </div>
+
+                {/* Custom Icon Upload - Only show for custom links */}
+                {selectedChannelType === 'custom' && (
+                  <div>
+                    <Label>Xüsusi ikon (ixtiyari)</Label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/svg+xml"
+                        onChange={handleCustomIconUpload}
+                        className="hidden"
+                        id="custom-icon-upload"
+                      />
+                      <label htmlFor="custom-icon-upload" className="cursor-pointer flex-1">
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 text-center hover:border-gray-400 transition-colors">
+                          {customIconUrl ? (
+                            <div className="flex items-center gap-2 justify-center">
+                              <img src={customIconUrl} alt="Custom icon" className="w-5 h-5 object-contain" />
+                              <span className="text-sm text-green-600">Ikon yükləndi</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2 justify-center text-gray-500">
+                              <Upload className="w-4 h-4" />
+                              <span className="text-sm">Ikon yükləyin</span>
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        <div className="flex items-center gap-2 justify-center text-gray-500">
-                          <Upload className="w-4 h-4" />
-                          <span className="text-sm">Ikon yükləyin</span>
-                        </div>
+                      </label>
+                      {customIconUrl && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setCustomIcon(null);
+                            setCustomIconUrl('');
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       )}
                     </div>
-                  </label>
-                  {customIconUrl && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setCustomIcon(null);
-                        setCustomIconUrl('');
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 mt-1">PNG, JPG və ya SVG (max 1MB). Boş buraxsanız link ikonu göstəriləcək.</p>
+                    <p className="text-xs text-gray-500 mt-1">PNG, JPG və ya SVG (max 1MB). Boş buraxsanız link ikonu göstəriləcək.</p>
+                  </div>
+                )}
+              </div>
+              
+              <Button 
+                onClick={addChannel}
+                disabled={!selectedChannelType || !channelValue.trim()}
+                className="w-full"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Kanal əlavə et
+              </Button>
+            </div>
+
+            {/* Individual Channels List */}
+            {individualChannels.length > 0 && (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext items={individualChannels.map(c => c.id)} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-2">
+                    {individualChannels.map((channel) => (
+                      <SortableChannelItem
+                        key={channel.id}
+                        channel={channel}
+                        onEdit={editChannel}
+                        onRemove={removeChannel}
+                        platformOptions={platformOptions}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
+
+            {individualChannels.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                <Link className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>Hələ heç bir kanal əlavə edilməyib</p>
+                <p className="text-sm">Yuxarıdakı formu istifadə edərək kanal əlavə edin</p>
               </div>
             )}
-          </div>
-          
-          <Button 
-            onClick={addChannel}
-            disabled={!selectedChannelType || !channelValue.trim()}
-            className="w-full"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Kanal əlavə et
-          </Button>
-        </div>
+          </TabsContent>
 
-        {/* Channels List */}
-        {channels.length > 0 && (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext items={channels.map(c => c.id)} strategy={verticalListSortingStrategy}>
-              <div className="space-y-2">
-                {channels.map((channel) => (
-                  <SortableChannelItem
-                    key={channel.id}
-                    channel={channel}
-                    onEdit={editChannel}
-                    onRemove={removeChannel}
-                    platformOptions={platformOptions}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
-        )}
-
-        {channels.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            <Link className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>Hələ heç bir kanal əlavə edilməyib</p>
-            <p className="text-sm">Yuxarıdakı formu istifadə edərək kanal əlavə edin</p>
-          </div>
-        )}
+          <TabsContent value="groups">
+            <ChannelGroupManager
+              channels={channels}
+              onChannelsChange={onChannelsChange}
+            />
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
