@@ -54,19 +54,19 @@ export const defaultTemplate: WidgetTemplate = {
     }
     
     .lovable-channel-button {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 16px 20px;
-      border: 2px solid #e2e8f0;
-      border-radius: 16px;
-      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-      text-decoration: none;
-      color: #334155;
-      font-weight: 500;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      position: relative;
-      overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 10px;
+    border: 1px solid #e2e8f061;
+    /* border-radius: 16px; */
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    text-decoration: none;
+    color: #334155;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
     }
     
     .lovable-channel-button::before {
