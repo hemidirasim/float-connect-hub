@@ -29,6 +29,8 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
   const [customIcon, setCustomIcon] = useState<File | null>(null);
   const [customIconUrl, setCustomIconUrl] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
+  const [addingChildTo, setAddingChildTo] = useState<string | null>(null);
+  const [childChannelValue, setChildChannelValue] = useState('');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -80,6 +82,49 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
     }
   };
 
+  const getChildPlaceholderText = (channelType: string) => {
+    switch (channelType) {
+      case 'whatsapp':
+        return '+994501234567';
+      case 'telegram':
+        return '@username2';
+      case 'instagram':
+        return 'https://instagram.com/username2';
+      case 'messenger':
+        return 'https://m.me/username2';
+      case 'viber':
+        return '+994501234568';
+      case 'skype':
+        return 'username2';
+      case 'discord':
+        return 'https://discord.gg/invite2';
+      case 'tiktok':
+        return '@username2';
+      case 'youtube':
+        return '@username2';
+      case 'facebook':
+        return 'https://facebook.com/username2';
+      case 'twitter':
+        return '@username2';
+      case 'linkedin':
+        return 'https://linkedin.com/in/username2';
+      case 'github':
+        return 'https://github.com/username2';
+      case 'website':
+        return 'https://example2.com';
+      case 'chatbot':
+        return 'https://chat2.example.com';
+      case 'email':
+        return 'contact2@example.com';
+      case 'phone':
+        return '+994501234568';
+      case 'custom':
+        return 'https://example2.com';
+      default:
+        return 'İkinci əlaqə məlumatı...';
+    }
+  };
+
   const getLabelPlaceholder = () => {
     switch (selectedChannelType) {
       case 'custom':
@@ -115,6 +160,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
         value: channelValue.trim(),
         label: channelLabel.trim() || platform?.label || 'Custom',
         displayMode: 'individual',
+        childChannels: [],
         // Only add customIcon if it's provided and it's a custom link
         ...(selectedChannelType === 'custom' && customIconUrl ? { customIcon: customIconUrl } : {})
       };
@@ -132,19 +178,91 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
     }
   };
 
+  const addChildChannel = (parentId: string) => {
+    if (!childChannelValue.trim()) return;
+
+    const parentChannel = channels.find(ch => ch.id === parentId);
+    if (!parentChannel) return;
+
+    const platform = platformOptions.find(p => p.value === parentChannel.type);
+    const newChildChannel: Channel = {
+      id: Date.now().toString(),
+      type: parentChannel.type,
+      value: childChannelValue.trim(),
+      label: `${platform?.label || parentChannel.type} #${(parentChannel.childChannels?.length || 0) + 2}`,
+      displayMode: 'individual',
+      parentId: parentId
+    };
+
+    const updatedChannels = channels.map(channel => {
+      if (channel.id === parentId) {
+        return {
+          ...channel,
+          childChannels: [...(channel.childChannels || []), newChildChannel]
+        };
+      }
+      return channel;
+    });
+
+    onChannelsChange(updatedChannels);
+    setChildChannelValue('');
+    setAddingChildTo(null);
+    toast.success(`${platform?.label || 'Alt kanal'} əlavə edildi!`);
+  };
+
   const removeChannel = (id: string) => {
-    onChannelsChange(channels.filter(channel => channel.id !== id));
+    // Check if it's a child channel
+    const parentChannel = channels.find(ch => ch.childChannels?.some(child => child.id === id));
+    
+    if (parentChannel) {
+      // Remove child channel
+      const updatedChannels = channels.map(channel => {
+        if (channel.id === parentChannel.id) {
+          return {
+            ...channel,
+            childChannels: channel.childChannels?.filter(child => child.id !== id) || []
+          };
+        }
+        return channel;
+      });
+      onChannelsChange(updatedChannels);
+    } else {
+      // Remove main channel
+      onChannelsChange(channels.filter(channel => channel.id !== id));
+    }
+    
     toast.success("Kanal silindi");
   };
 
   const editChannel = (id: string, newValue: string, newLabel: string) => {
-    onChannelsChange(channels.map(channel => 
-      channel.id === id ? { 
-        ...channel, 
-        value: newValue,
-        label: newLabel
-      } : channel
-    ));
+    // Check if it's a child channel
+    const parentChannel = channels.find(ch => ch.childChannels?.some(child => child.id === id));
+    
+    if (parentChannel) {
+      // Edit child channel
+      const updatedChannels = channels.map(channel => {
+        if (channel.id === parentChannel.id) {
+          return {
+            ...channel,
+            childChannels: channel.childChannels?.map(child => 
+              child.id === id ? { ...child, value: newValue, label: newLabel } : child
+            ) || []
+          };
+        }
+        return channel;
+      });
+      onChannelsChange(updatedChannels);
+    } else {
+      // Edit main channel
+      onChannelsChange(channels.map(channel => 
+        channel.id === id ? { 
+          ...channel, 
+          value: newValue,
+          label: newLabel
+        } : channel
+      ));
+    }
+    
     toast.success("Kanal yeniləndi");
   };
 
@@ -158,113 +276,16 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
     }
   };
 
-  // Group channels by type for suggestions
-  const getChannelsByType = () => {
-    const grouped: { [key: string]: Channel[] } = {};
-    channels.filter(ch => !ch.isGroup).forEach(channel => {
-      if (!grouped[channel.type]) {
-        grouped[channel.type] = [];
-      }  
-      grouped[channel.type].push(channel);
-    });
-    return grouped;
-  };
-
-  const createGroupFromType = (type: string) => {
-    const channelsByType = getChannelsByType();
-    const typeChannels = channelsByType[type] || [];
-    
-    if (typeChannels.length < 2) {
-      toast.error(`Qrup yaratmaq üçün ən azı 2 ədəd ${type} kanalı olmalıdır`);
-      return;
-    }
-
-    const platform = platformOptions.find(p => p.value === type);
-    const groupId = Date.now().toString();
-    
-    const newGroup: Channel = {
-      id: groupId,
-      type: type,
-      value: '', // Empty for groups
-      label: `${platform?.label || type} Qrupu`,
-      isGroup: true,
-      groupItems: [...typeChannels],
-      displayMode: 'grouped'
-    };
-
-    // Remove individual channels and add group
-    const remainingChannels = channels.filter(ch => 
-      ch.type !== type || ch.isGroup
-    );
-    
-    onChannelsChange([...remainingChannels, newGroup]);
-    toast.success(`${platform?.label || type} qrupu yaradıldı!`);
-  };
-
-  const ungroupChannel = (groupId: string) => {
-    const group = channels.find(ch => ch.id === groupId && ch.isGroup);
-    if (!group || !group.groupItems) return;
-
-    // Add individual items back and remove group
-    const otherChannels = channels.filter(ch => ch.id !== groupId);
-    const individualItems = group.groupItems.map(item => ({
-      ...item,
-      displayMode: 'individual' as const
-    }));
-    
-    onChannelsChange([...otherChannels, ...individualItems]);
-    toast.success('Qrup ləğv edildi');
-  };
-
-  const removeFromGroup = (groupId: string, itemId: string) => {
-    const updatedChannels = channels.map(channel => {
-      if (channel.id === groupId && channel.isGroup && channel.groupItems) {
-        const removedItem = channel.groupItems.find(item => item.id === itemId);
-        const updatedGroupItems = channel.groupItems.filter(item => item.id !== itemId);
-        
-        // If only one item left, ungroup entirely
-        if (updatedGroupItems.length <= 1) {
-          return null; // Will be filtered out
-        }
-        
-        return {
-          ...channel,
-          groupItems: updatedGroupItems
-        };
-      }
-      return channel;
-    }).filter(Boolean) as Channel[];
-
-    // Add the removed item back as individual
-    const group = channels.find(ch => ch.id === groupId);
-    const removedItem = group?.groupItems?.find(item => item.id === itemId);
-    
-    if (removedItem) {
-      updatedChannels.push({
-        ...removedItem,
-        displayMode: 'individual'
-      });
-    }
-
-    onChannelsChange(updatedChannels);
-    toast.success('Kanal qrupdan çıxarıldı');
-  };
-
-  const toggleGroupExpansion = (groupId: string) => {
+  const toggleChannelExpansion = (channelId: string) => {
     setExpandedGroups(prev => 
-      prev.includes(groupId) 
-        ? prev.filter(id => id !== groupId)
-        : [...prev, groupId]
+      prev.includes(channelId) 
+        ? prev.filter(id => id !== channelId)
+        : [...prev, channelId]
     );
   };
 
-  const channelsByType = getChannelsByType();
-  const groupableTypes = Object.keys(channelsByType).filter(type => 
-    channelsByType[type].length >= 2
-  );
-
-  // Filter individual channels for the sortable list
-  const individualChannels = channels.filter(ch => !ch.isGroup);
+  // Filter only main channels for the sortable list (not child channels)
+  const mainChannels = channels.filter(ch => !ch.parentId);
 
   return (
     <Card>
@@ -273,7 +294,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
           <Link className="w-5 h-5" />
           Əlaqə kanalları
         </CardTitle>
-        <CardDescription>Kanalları qruplaşdıra və ya ayrı-ayrı istifadə edə bilərsiniz</CardDescription>
+        <CardDescription>Hər kanalın yanındakı + düyməsi ilə alt linklər əlavə edə bilərsiniz</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Add Channel Form */}
@@ -374,134 +395,139 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
           </Button>
         </div>
 
-        {/* Group Creation Suggestions */}
-        {groupableTypes.length > 0 && (
-          <Card className="border-dashed border-blue-300 bg-blue-50/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Users className="w-4 h-4 text-blue-600" />
-                Qrup Yaratma Təklifləri
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Eyni tip kanalları qruplaşdıra bilərsiniz
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="flex flex-wrap gap-2">
-                {groupableTypes.map(type => {
-                  const platform = platformOptions.find(p => p.value === type);
-                  const count = channelsByType[type].length;
-                  return (
-                    <Button
-                      key={type}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => createGroupFromType(type)}
-                      className="h-8 text-xs"
-                    >
-                      <platform.icon className="w-3 h-3 mr-1" style={{ color: platform.color }} />
-                      {platform?.label} ({count})
-                      <Users className="w-3 h-3 ml-1" />
-                    </Button>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Channels Tree View */}
-        {channels.length > 0 && (
+        {mainChannels.length > 0 && (
           <div className="space-y-2">
             <h3 className="text-sm font-medium text-gray-700 mb-3">Bütün Kanallar</h3>
             
-            {/* Groups */}
-            {channels.filter(ch => ch.isGroup).map(group => {
-              const platform = platformOptions.find(p => p.value === group.type);
-              const isExpanded = expandedGroups.includes(group.id);
-              
-              return (
-                <Card key={group.id} className="border-l-4 border-l-purple-500">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleGroupExpansion(group.id)}
-                          className="h-6 w-6 p-0"
-                        >
-                          {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                        </Button>
-                        <platform.icon className="w-4 h-4" style={{ color: platform?.color }} />
-                        <span className="font-medium">{group.label}</span>
-                        <Badge variant="secondary" className="text-xs">
-                          {group.groupItems?.length || 0} element
-                        </Badge>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => ungroupChannel(group.id)}
-                        className="h-8 text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  
-                  {isExpanded && group.groupItems && (
-                    <CardContent className="pt-0">
-                      <div className="space-y-2 pl-6">
-                        {group.groupItems.map(item => (
-                          <div key={item.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium">{item.label}</span>
-                              <span className="text-xs text-gray-500">{item.value}</span>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={mainChannels.map(c => c.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2">
+                  {mainChannels.map((channel) => {
+                    const platform = platformOptions.find(p => p.value === channel.type);
+                    const isExpanded = expandedGroups.includes(channel.id);
+                    const hasChildren = channel.childChannels && channel.childChannels.length > 0;
+                    
+                    return (
+                      <Card key={channel.id} className="border-l-4 border-l-blue-500">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 flex-1">
+                              <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
+                              {hasChildren && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toggleChannelExpansion(channel.id)}
+                                  className="h-6 w-6 p-0"
+                                >
+                                  {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                </Button>
+                              )}
+                              <platform.icon className="w-4 h-4" style={{ color: platform?.color }} />
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">{channel.label}</span>
+                                  {hasChildren && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      +{channel.childChannels.length}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <span className="text-xs text-gray-500">{channel.value}</span>
+                              </div>
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeFromGroup(group.id, item.id)}
-                              className="h-6 text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setAddingChildTo(channel.id)}
+                                className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
+                                title="Alt link əlavə et"
+                              >
+                                <Plus className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeChannel(channel.id)}
+                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  )}
-                </Card>
-              );
-            })}
 
-            {/* Individual Channels */}
-            {individualChannels.length > 0 && (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext items={individualChannels.map(c => c.id)} strategy={verticalListSortingStrategy}>
-                  <div className="space-y-2">
-                    {individualChannels.map((channel) => (
-                      <SortableChannelItem
-                        key={channel.id}
-                        channel={channel}
-                        onEdit={editChannel}
-                        onRemove={removeChannel}
-                        platformOptions={platformOptions}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            )}
+                          {/* Add Child Channel Form */}
+                          {addingChildTo === channel.id && (
+                            <div className="mt-3 p-3 bg-gray-50 rounded-lg border-2 border-dashed border-green-300">
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  placeholder={getChildPlaceholderText(channel.type)}
+                                  value={childChannelValue}
+                                  onChange={(e) => setChildChannelValue(e.target.value)}
+                                  className="flex-1"
+                                />
+                                <Button
+                                  size="sm"
+                                  onClick={() => addChildChannel(channel.id)}
+                                  disabled={!childChannelValue.trim()}
+                                >
+                                  Əlavə et
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setAddingChildTo(null);
+                                    setChildChannelValue('');
+                                  }}
+                                >
+                                  Ləğv et
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Child Channels */}
+                          {hasChildren && isExpanded && (
+                            <div className="mt-3 pl-6 space-y-2">
+                              {channel.childChannels.map(childChannel => (
+                                <div key={childChannel.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border-l-2 border-l-gray-300">
+                                  <div className="flex items-center gap-2">
+                                    <platform.icon className="w-3 h-3" style={{ color: platform?.color }} />
+                                    <div>
+                                      <span className="text-sm font-medium">{childChannel.label}</span>
+                                      <div className="text-xs text-gray-500">{childChannel.value}</div>
+                                    </div>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => removeChannel(childChannel.id)}
+                                    className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </SortableContext>
+            </DndContext>
           </div>
         )}
 
-        {channels.length === 0 && (
+        {mainChannels.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             <Link className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p>Hələ heç bir kanal əlavə edilməyib</p>

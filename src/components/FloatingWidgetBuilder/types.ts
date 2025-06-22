@@ -1,4 +1,3 @@
-
 export interface Channel {
   id: string;
   type: string;
@@ -9,6 +8,9 @@ export interface Channel {
   isGroup?: boolean;
   groupItems?: Channel[];
   displayMode?: 'individual' | 'grouped';
+  // New child channels for same type grouping
+  childChannels?: Channel[];
+  parentId?: string; // Reference to parent channel
 }
 
 export interface FormData {

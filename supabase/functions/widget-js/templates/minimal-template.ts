@@ -1,464 +1,546 @@
-
 import type { WidgetTemplate } from '../template-types.ts'
 
-export const getMinimalTemplate = (): WidgetTemplate => ({
+export const minimalTemplate: WidgetTemplate = {
   id: 'minimal',
-  name: 'Minimal Clean',
-  description: 'Clean and minimal design with subtle animations',
+  name: 'Minimal',
+  description: 'Clean and simple design',
   html: `
-<!-- Minimal Template -->
-<div class="hiclient-widget-container" style="position: fixed; {{POSITION_STYLE}} bottom: 20px; z-index: 99999;">
-  <div class="hiclient-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
-  
-  <!-- Animated Channel Icons Above Button -->
-  <div class="hiclient-animated-channels" style="position: absolute; right: 0; bottom: {{CHANNEL_BOTTOM_OFFSET}}px; display: flex; flex-direction: column-reverse; gap: {{CHANNEL_GAP}}px; opacity: 0; visibility: hidden; transition: all 0.3s ease;">
-    {{CHANNELS_HTML}}
-  </div>
-  
-  <button class="hiclient-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background: {{BUTTON_COLOR}};">
-    {{BUTTON_ICON}}
-  </button>
-</div>
-
-<div class="hiclient-modal-backdrop">
-  <div class="hiclient-modal-content">
-    <div class="hiclient-modal-header">{{GREETING_MESSAGE}}</div>
-    <div class="hiclient-modal-close">×</div>
-    {{VIDEO_CONTENT}}
-    <div class="hiclient-empty-state" style="display: none;">
-      <div class="hiclient-empty-icon">📞</div>
-      <p>No channels configured</p>
+    <div class="widget-container position-right">
+      <button class="widget-button">
+        <i class="widget-icon"></i>
+      </button>
+      <div class="widget-tooltip position-top">
+        Contact us!
+      </div>
+      <div class="widget-menu">
+        <div class="widget-channel-buttons">
+          <!-- Channel buttons will be dynamically inserted here -->
+        </div>
+      </div>
+      <div class="widget-video">
+        <video autoplay loop muted playsinline>
+          <source src="" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
     </div>
-  </div>
-</div>`,
-  
+  `,
   css: `
-/* Minimal CSS */
-.hiclient-widget-container {
-  font-family: system-ui, -apple-system, sans-serif;
-}
-
-.hiclient-widget-button {
-  width: {{BUTTON_SIZE}}px;
-  height: {{BUTTON_SIZE}}px;
-  border-radius: 50%;
-  background: {{BUTTON_COLOR}};
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  overflow: hidden;
-}
-
-.hiclient-widget-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.hiclient-tooltip {
-  position: absolute;
-  background: white;
-  color: #333;
-  padding: 6px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  z-index: 100000;
-  transition: opacity 0.15s ease;
-  pointer-events: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
-}
-
-.hiclient-tooltip.show {
-  opacity: 1;
-  visibility: visible;
-}
-
-.hiclient-tooltip.hide {
-  opacity: 0;
-  visibility: hidden;
-}
-
-/* Animated Channel Icons */
-.hiclient-animated-channels {
-  font-family: system-ui, -apple-system, sans-serif;
-}
-
-.hiclient-animated-channels.show {
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-.hiclient-channel-animated {
-  position: relative;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  text-decoration: none;
-  color: white;
-  font-size: 18px;
-  transform: translateY(20px);
-  opacity: 0;
-}
-
-.hiclient-animated-channels.show .hiclient-channel-animated {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-.hiclient-channel-animated:nth-child(1) { transition-delay: 0.1s; }
-.hiclient-channel-animated:nth-child(2) { transition-delay: 0.15s; }
-.hiclient-channel-animated:nth-child(3) { transition-delay: 0.2s; }
-.hiclient-channel-animated:nth-child(4) { transition-delay: 0.25s; }
-.hiclient-channel-animated:nth-child(5) { transition-delay: 0.3s; }
-
-.hiclient-channel-animated:hover {
-  transform: translateX(-5px) scale(1.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-}
-
-/* Channel Groups */
-.hiclient-channel-group {
-  position: relative;
-}
-
-.hiclient-group-trigger {
-  position: relative;
-}
-
-.hiclient-group-count {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  background: #ff4444;
-  color: white;
-  border-radius: 50%;
-  width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: bold;
-  border: 2px solid white;
-}
-
-.hiclient-group-dropdown {
-  position: absolute;
-  right: calc(100% + 10px);
-  top: 0;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateX(10px);
-  transition: all 0.3s ease;
-  min-width: 200px;
-  z-index: 100001;
-  border: 1px solid #e5e7eb;
-}
-
-.hiclient-channel-group:hover .hiclient-group-dropdown {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(0);
-}
-
-.hiclient-group-item {
-  display: block;
-  padding: 12px 16px;
-  text-decoration: none;
-  color: #333;
-  border-bottom: 1px solid #f0f0f0;
-  transition: background-color 0.2s ease;
-}
-
-.hiclient-group-item:hover {
-  background-color: #f8f9fa;
-}
-
-.hiclient-group-item:last-child {
-  border-bottom: none;
-}
-
-.hiclient-group-item-label {
-  font-weight: 500;
-  font-size: 14px;
-  margin-bottom: 2px;
-}
-
-.hiclient-group-item-value {
-  font-size: 12px;
-  color: #666;
-}
-
-.hiclient-channel-tooltip {
-  position: absolute;
-  right: {{TOOLTIP_RIGHT_OFFSET}}px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #333;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.2s ease;
-  pointer-events: none;
-  z-index: 100001;
-}
-
-.hiclient-channel-tooltip::after {
-  content: '';
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  border: 5px solid transparent;
-  border-left-color: #333;
-}
-
-.hiclient-channel-animated:hover .hiclient-channel-tooltip {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(-50%) translateX(-5px);
-}
-
-.hiclient-modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 100000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.2s ease;
-}
-
-.hiclient-modal-backdrop.show {
-  opacity: 1;
-  visibility: visible;
-}
-
-.hiclient-modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  max-width: 400px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-  transform: scale(0.95);
-  transition: transform 0.2s ease;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  position: relative;
-}
-
-.hiclient-modal-backdrop.show .hiclient-modal-content {
-  transform: scale(1);
-}
-
-.hiclient-modal-close {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 20px;
-  color: #9ca3af;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.hiclient-modal-close:hover {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.hiclient-modal-header {
-  margin: 0 0 16px 0;
-  font-size: 16px;
-  font-weight: 500;
-  color: #111827;
-  text-align: center;
-  padding-right: 32px;
-}
-
-.hiclient-video-container {
-  margin-bottom: 16px;
-}
-
-.hiclient-video-player {
-  width: 100%;
-  border-radius: 6px;
-  object-fit: cover;
-}
-
-.hiclient-empty-state {
-  text-align: center;
-  padding: 32px 16px;
-  color: #6b7280;
-}
-
-.hiclient-empty-icon {
-  width: 28px;
-  height: 28px;
-  margin: 0 auto 10px;
-  opacity: 0.5;
-}
-
-/* Mobile responsive */
-@media (max-width: 768px) {
-  .hiclient-animated-channels {
-    gap: {{MOBILE_CHANNEL_GAP}}px;
-  }
-  
-  .hiclient-channel-tooltip {
-    right: {{MOBILE_TOOLTIP_RIGHT_OFFSET}}px;
-    font-size: 11px;
-    padding: 6px 10px;
-  }
-  
-  .hiclient-group-dropdown {
-    right: calc(100% + 5px);
-    min-width: 180px;
-  }
-}`,
-  
-  js: `/* Minimal JS */
-function initializeWidget() {
-  var button = document.querySelector(".hiclient-widget-button");
-  var modal = document.querySelector(".hiclient-modal-backdrop");
-  var tooltip = document.querySelector(".hiclient-tooltip");
-  var closeBtn = document.querySelector(".hiclient-modal-close");
-  var video = document.querySelector(".hiclient-video-player");
-  var emptyState = document.querySelector(".hiclient-empty-state");
-  var animatedChannels = document.querySelector(".hiclient-animated-channels");
-  
-  console.log('Minimal widget initialized with greeting:', '{{GREETING_MESSAGE}}');
-  console.log('Tooltip position:', '{{TOOLTIP_POSITION}}');
-  
-  var channelsVisible = false;
-  
-  if (video) {
-    video.muted = true;
-    video.pause();
-  }
-  
-  // Show/hide empty state based on channels (only for modal, not floating icons)
-  if (emptyState) {
-    var hasChannels = {{CHANNELS_COUNT}} > 0;
-    if (!hasChannels) {
-      emptyState.style.display = 'block';
+    .widget-container {
+      position: fixed;
+      z-index: 9999;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     }
-  }
-  
-  if (button && modal) {
-    button.addEventListener("click", function(e) {
-      e.preventDefault();
-      e.stopPropagation();
+
+    .widget-container.position-right {
+      right: 20px;
+      bottom: 20px;
+    }
+
+    .widget-container.position-left {
+      left: 20px;
+      bottom: 20px;
+    }
+
+    .widget-button {
+      width: var(--button-size, 60px);
+      height: var(--button-size, 60px);
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .widget-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .widget-tooltip {
+      position: absolute;
+      background: #333;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 10000;
+    }
+
+    .widget-tooltip.show {
+      opacity: 1;
+    }
+
+    .widget-tooltip.position-top {
+      bottom: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .widget-tooltip.position-bottom {
+      top: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .widget-tooltip.position-left {
+      right: calc(100% + 10px);
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .widget-tooltip.position-right {
+      left: calc(100% + 10px);
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .widget-menu {
+      position: absolute;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      min-width: 200px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      z-index: 10001;
+      border: 1px solid #e5e7eb;
+    }
+
+    .widget-menu.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .widget-container.position-right .widget-menu {
+      right: 0;
+      bottom: calc(100% + 15px);
+    }
+
+    .widget-container.position-left .widget-menu {
+      left: 0;
+      bottom: calc(100% + 15px);
+    }
+
+    .widget-channel-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      text-decoration: none;
+      color: #374151;
+      transition: all 0.2s ease;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .widget-channel-btn:hover {
+      background: #f3f4f6;
+    }
+
+    .widget-channel-btn:first-child {
+      border-radius: 12px 12px 0 0;
+    }
+
+    .widget-channel-btn:last-child {
+      border-radius: 0 0 12px 12px;
+    }
+
+    .widget-channel-btn:only-child {
+      border-radius: 12px;
+    }
+
+    .widget-channel-btn + .widget-channel-btn {
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .widget-channel-btn i {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .widget-channel-btn span {
+      font-weight: 500;
+      font-size: 14px;
+      flex: 1;
+    }
+
+    /* New styles for channel groups and dropdowns */
+    .widget-channel-group {
+      position: relative;
+    }
+
+    .widget-dropdown-btn {
+      position: relative;
+    }
+
+    .widget-dropdown-btn .child-count {
+      background: #3b82f6;
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: auto;
+      margin-right: 8px;
+    }
+
+    .widget-dropdown-btn .dropdown-arrow {
+      font-size: 10px;
+      color: #6b7280;
+      transition: transform 0.2s ease;
+    }
+
+    .widget-dropdown-btn.active .dropdown-arrow {
+      transform: rotate(180deg);
+    }
+
+    .widget-dropdown {
+      position: absolute;
+      right: 100%;
+      top: 0;
+      margin-right: 8px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      min-width: 250px;
+      border: 1px solid #e5e7eb;
+      z-index: 10002;
+    }
+
+    .widget-container.position-left .widget-dropdown {
+      right: auto;
+      left: 100%;
+      margin-right: 0;
+      margin-left: 8px;
+    }
+
+    .widget-dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      text-decoration: none;
+      color: #374151;
+      transition: background 0.2s ease;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .widget-dropdown-item:hover {
+      background: #f3f4f6;
+    }
+
+    .widget-dropdown-item:first-child {
+      border-radius: 8px 8px 0 0;
+    }
+
+    .widget-dropdown-item:last-child {
+      border-radius: 0 0 8px 8px;
+    }
+
+    .widget-dropdown-item:only-child {
+      border-radius: 8px;
+    }
+
+    .widget-dropdown-item + .widget-dropdown-item {
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .widget-dropdown-item i {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .widget-dropdown-item span {
+      font-size: 13px;
+    }
+
+    .widget-dropdown-item .dropdown-value {
+      color: #6b7280;
+      font-size: 11px;
+      margin-left: auto;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Video styles - keep existing code */
+    .widget-video {
+      position: absolute;
+      bottom: calc(100% + 15px);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      background: white;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      z-index: 10000;
+    }
+
+    .widget-video.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .widget-container.position-right .widget-video {
+      right: 0;
+    }
+
+    .widget-container.position-left .widget-video {
+      left: 0;
+    }
+
+    .widget-video.center {
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+    }
+
+    .widget-video.center.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .widget-video video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .widget-container {
+        right: 15px !important;
+        left: 15px !important;
+        bottom: 15px !important;
+      }
       
-      // Toggle animated channels
-      if (animatedChannels && {{CHANNELS_COUNT}} > 0) {
-        if (channelsVisible) {
-          animatedChannels.classList.remove("show");
-          channelsVisible = false;
-        } else {
-          animatedChannels.classList.add("show");
-          channelsVisible = true;
+      .widget-menu {
+        min-width: 180px;
+      }
+      
+      .widget-dropdown {
+        min-width: 200px;
+        right: 0 !important;
+        left: auto !important;
+        margin: 0 !important;
+        top: 100% !important;
+        margin-top: 8px !important;
+      }
+    }
+  `,
+  js: `
+    (function() {
+      let isMenuOpen = false;
+      let activeDropdown = null;
+      
+      function initWidget() {
+        const button = document.querySelector('.widget-button');
+        const menu = document.querySelector('.widget-menu');
+        const tooltip = document.querySelector('.widget-tooltip');
+        const video = document.querySelector('.widget-video');
+        
+        if (!button) return;
+
+        // Button click handler
+        button.addEventListener('click', function(e) {
+          e.stopPropagation();
+          toggleMenu();
+        });
+
+        // Tooltip functionality
+        if (tooltip) {
+          const tooltipDisplay = '{{TOOLTIP_DISPLAY}}';
+          
+          if (tooltipDisplay === 'hover') {
+            button.addEventListener('mouseenter', () => {
+              if (!isMenuOpen) {
+                tooltip.classList.add('show');
+              }
+            });
+            
+            button.addEventListener('mouseleave', () => {
+              tooltip.classList.remove('show');
+            });
+          } else if (tooltipDisplay === 'always') {
+            tooltip.classList.add('show');
+          }
         }
-      } else {
-        // If no channels, show modal
-        modal.classList.add("show");
+
+        // Video hover functionality
         if (video) {
-          video.muted = false;
-          video.currentTime = 0;
-          video.play().catch(function(error) {
-            console.log("Video error:", error);
+          button.addEventListener('mouseenter', () => {
+            if (!isMenuOpen) {
+              video.classList.add('show');
+            }
+          });
+          
+          button.addEventListener('mouseleave', () => {
+            video.classList.remove('show');
+          });
+          
+          menu?.addEventListener('mouseenter', () => {
+            video.classList.remove('show');
           });
         }
+
+        // Dropdown functionality for channel groups
+        initChannelDropdowns();
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!e.target.closest('.widget-container')) {
+            closeMenu();
+            closeAllDropdowns();
+          }
+        });
       }
-    });
-    
-    function closeModal() {
-      modal.classList.remove("show");
-      if (video) {
-        video.muted = true;
-        video.pause();
+
+      function initChannelDropdowns() {
+        const dropdownBtns = document.querySelectorAll('.widget-dropdown-btn');
+        
+        dropdownBtns.forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const dropdownId = this.getAttribute('data-dropdown');
+            const dropdown = document.getElementById(dropdownId);
+            
+            if (activeDropdown && activeDropdown !== dropdown) {
+              closeAllDropdowns();
+            }
+            
+            if (dropdown) {
+              if (dropdown.style.display === 'none' || !dropdown.style.display) {
+                dropdown.style.display = 'block';
+                this.classList.add('active');
+                activeDropdown = dropdown;
+              } else {
+                closeDropdown(dropdown, this);
+              }
+            }
+          });
+          
+          // Hover functionality for dropdowns
+          btn.addEventListener('mouseenter', function() {
+            const dropdownId = this.getAttribute('data-dropdown');
+            const dropdown = document.getElementById(dropdownId);
+            
+            if (dropdown && !dropdown.style.display) {
+              setTimeout(() => {
+                if (this.matches(':hover')) {
+                  closeAllDropdowns();
+                  dropdown.style.display = 'block';
+                  this.classList.add('active');
+                  activeDropdown = dropdown;
+                }
+              }, 200);
+            }
+          });
+        });
+        
+        // Close dropdown when mouse leaves the group
+        const channelGroups = document.querySelectorAll('.widget-channel-group');
+        channelGroups.forEach(group => {
+          group.addEventListener('mouseleave', function() {
+            setTimeout(() => {
+              if (!group.matches(':hover')) {
+                const dropdown = group.querySelector('.widget-dropdown');
+                const btn = group.querySelector('.widget-dropdown-btn');
+                if (dropdown && btn) {
+                  closeDropdown(dropdown, btn);
+                }
+              }
+            }, 300);
+          });
+        });
       }
-    }
-    
-    if (closeBtn) {
-      closeBtn.addEventListener("click", closeModal);
-    }
-    
-    modal.addEventListener("click", function(e) {
-      if (e.target === modal) closeModal();
-    });
-    
-    document.addEventListener("keydown", function(e) {
-      if (e.key === "Escape") {
-        if (modal.classList.contains("show")) {
-          closeModal();
-        } else if (channelsVisible && animatedChannels) {
-          animatedChannels.classList.remove("show");
-          channelsVisible = false;
+
+      function closeDropdown(dropdown, btn) {
+        dropdown.style.display = 'none';
+        btn.classList.remove('active');
+        if (activeDropdown === dropdown) {
+          activeDropdown = null;
         }
       }
-    });
-    
-    // Hide channels when clicking outside
-    document.addEventListener("click", function(e) {
-      if (channelsVisible && animatedChannels && !button.contains(e.target) && !animatedChannels.contains(e.target)) {
-        animatedChannels.classList.remove("show");
-        channelsVisible = false;
-      }
-    });
-  }
-  
-  if (tooltip && button) {
-    if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
-      button.addEventListener("mouseenter", function() {
-        tooltip.classList.add("show");
-      });
-      button.addEventListener("mouseleave", function() {
-        tooltip.classList.add("hide");
-      });
-    } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
-      tooltip.style.display = 'block';
-      tooltip.classList.add("show");
-    }
-  }
-  
-  window.openChannel = function(url) {
-    window.open(url, "_blank");
-  };
-}
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initializeWidget);
-} else {
-  initializeWidget();
-}`
-});
+      function closeAllDropdowns() {
+        const dropdowns = document.querySelectorAll('.widget-dropdown');
+        const dropdownBtns = document.querySelectorAll('.widget-dropdown-btn');
+        
+        dropdowns.forEach(dropdown => {
+          dropdown.style.display = 'none';
+        });
+        
+        dropdownBtns.forEach(btn => {
+          btn.classList.remove('active');
+        });
+        
+        activeDropdown = null;
+      }
+
+      function toggleMenu() {
+        const menu = document.querySelector('.widget-menu');
+        const tooltip = document.querySelector('.widget-tooltip');
+        const video = document.querySelector('.widget-video');
+        
+        if (!menu) return;
+        
+        isMenuOpen = !isMenuOpen;
+        
+        if (isMenuOpen) {
+          menu.classList.add('show');
+          tooltip?.classList.remove('show');
+          video?.classList.remove('show');
+        } else {
+          menu.classList.remove('show');
+          closeAllDropdowns();
+        }
+      }
+
+      function closeMenu() {
+        const menu = document.querySelector('.widget-menu');
+        if (menu) {
+          menu.classList.remove('show');
+          isMenuOpen = false;
+        }
+      }
+
+      // Initialize when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initWidget);
+      } else {
+        initWidget();
+      }
+    })();
+  `
+};

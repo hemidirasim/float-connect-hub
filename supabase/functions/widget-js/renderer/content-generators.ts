@@ -130,3 +130,77 @@ export function generateButtonIcon(customIconUrl?: string): string {
      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
    </svg>`
 }
+
+export function generateChannelButtons(channels: Channel[], config: TemplateConfig): string {
+  console.log('Generating channel buttons for channels:', channels);
+  
+  if (!channels || channels.length === 0) {
+    return '<p class="text-gray-500 text-sm">No channels configured</p>';
+  }
+
+  // Filter out child channels and process main channels
+  const mainChannels = channels.filter(ch => !ch.parentId);
+  
+  return mainChannels.map(channel => {
+    const hasChildren = channel.childChannels && channel.childChannels.length > 0;
+    
+    if (hasChildren) {
+      // Generate dropdown for channels with children
+      return generateChannelDropdown(channel, config);
+    } else {
+      // Generate single channel button
+      return generateSingleChannelButton(channel, config);
+    }
+  }).join('');
+}
+
+function generateChannelDropdown(channel: Channel, config: TemplateConfig): string {
+  const platform = getPlatformInfo(channel.type);
+  const childCount = channel.childChannels?.length || 0;
+  
+  const dropdownId = `dropdown-${channel.id}`;
+  
+  return `
+    <div class="widget-channel-group" data-channel-type="${channel.type}">
+      <button class="widget-channel-btn widget-dropdown-btn" data-dropdown="${dropdownId}">
+        <i class="${platform.icon}"></i>
+        <span>${channel.label}</span>
+        <span class="child-count">+${childCount}</span>
+        <i class="dropdown-arrow">▼</i>
+      </button>
+      <div class="widget-dropdown" id="${dropdownId}" style="display: none;">
+        ${generateDropdownItems(channel)}
+      </div>
+    </div>
+  `;
+}
+
+function generateDropdownItems(channel: Channel): string {
+  const platform = getPlatformInfo(channel.type);
+  const allItems = [channel, ...(channel.childChannels || [])];
+  
+  return allItems.map((item, index) => {
+    const href = generateChannelLink(item);
+    const label = index === 0 ? item.label : `${item.label}`;
+    
+    return `
+      <a href="${href}" target="_blank" class="widget-dropdown-item">
+        <i class="${platform.icon}"></i>
+        <span>${label}</span>
+        <span class="dropdown-value">${item.value}</span>
+      </a>
+    `;
+  }).join('');
+}
+
+function generateSingleChannelButton(channel: Channel, config: TemplateConfig): string {
+  const platform = getPlatformInfo(channel.type);
+  const href = generateChannelLink(channel);
+  
+  return `
+    <a href="${href}" target="_blank" class="widget-channel-btn" data-channel-type="${channel.type}">
+      <i class="${platform.icon}"></i>
+      <span>${channel.label}</span>
+    </a>
+  `;
+}
