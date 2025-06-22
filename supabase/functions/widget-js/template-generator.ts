@@ -64,7 +64,7 @@ export class WidgetTemplateRenderer {
 
     // Generate channels HTML
     const channelsHtml = this.config.channels.map(channel => {
-      const iconSvg = this.getChannelIcon(channel.type)
+      const iconSvg = this.getChannelIcon(channel.type, channel.customIcon)
       const channelUrl = this.getChannelUrl(channel)
       const channelColor = this.getChannelColor(channel.type)
       
@@ -152,33 +152,54 @@ export class WidgetTemplateRenderer {
   }
 
   getChannelColor(channelType: string): string {
-    switch (channelType) {
-      case 'whatsapp':
-        return '#25D366'
-      case 'telegram':
-        return '#0088cc'
-      case 'phone':
-        return '#22c55e'
-      case 'mail':
-        return '#6366f1'
-      default:
-        return '#6B7280'
-    }
+    const colors = {
+      whatsapp: '#25D366',
+      telegram: '#0088cc',
+      email: '#ea4335',
+      phone: '#22c55e',
+      instagram: '#e4405f',
+      facebook: '#1877f2',
+      twitter: '#1da1f2',
+      linkedin: '#0077b5',
+      youtube: '#ff0000',
+      github: '#333333',
+      tiktok: '#ff0050',
+      messenger: '#0084ff',
+      viber: '#665cac',
+      skype: '#00aff0',
+      discord: '#5865f2',
+      website: '#6b7280',
+      chatbot: '#8b5cf6'
+    };
+    return colors[channelType as keyof typeof colors] || '#6B7280'
   }
 
-  getChannelIcon(channelType: string): string {
-    switch (channelType) {
-      case 'whatsapp':
-        return '💬'
-      case 'telegram':
-        return '✈️'
-      case 'phone':
-        return '📞'
-      case 'mail':
-        return '📧'
-      default:
-        return '💬'
+  getChannelIcon(channelType: string, customIcon?: string): string {
+    // If custom icon is provided, use it
+    if (customIcon) {
+      return `<img src="${customIcon}" style="width: 20px; height: 20px; object-fit: contain;" alt="Custom icon">`
     }
+
+    const icons = {
+      whatsapp: '💬',
+      telegram: '✈️',
+      phone: '📞',
+      email: '📧',
+      instagram: '📷',
+      facebook: '👥',
+      twitter: '🐦',
+      linkedin: '💼',
+      youtube: '📺',
+      github: '🐙',
+      tiktok: '🎵',
+      messenger: '💬',
+      viber: '📞',
+      skype: '📹',
+      discord: '🎮',
+      website: '🌐',
+      chatbot: '🤖'
+    };
+    return icons[channelType as keyof typeof icons] || '💬'
   }
 
   getChannelUrl(channel: any): string {
@@ -189,14 +210,36 @@ export class WidgetTemplateRenderer {
         return `https://t.me/${channel.value.replace('@', '')}`
       case 'phone':
         return `tel:${channel.value}`
-      case 'mail':
+      case 'email':
         return `mailto:${channel.value}`
+      case 'instagram':
+        return channel.value.startsWith('http') ? channel.value : `https://instagram.com/${channel.value.replace('@', '')}`
+      case 'facebook':
+        return channel.value.startsWith('http') ? channel.value : `https://facebook.com/${channel.value}`
+      case 'twitter':
+        return channel.value.startsWith('http') ? channel.value : `https://twitter.com/${channel.value.replace('@', '')}`
+      case 'linkedin':
+        return channel.value.startsWith('http') ? channel.value : `https://linkedin.com/in/${channel.value}`
+      case 'youtube':
+        return channel.value.startsWith('http') ? channel.value : `https://youtube.com/@${channel.value}`
+      case 'github':
+        return channel.value.startsWith('http') ? channel.value : `https://github.com/${channel.value}`
+      case 'tiktok':
+        return channel.value.startsWith('http') ? channel.value : `https://tiktok.com/@${channel.value}`
+      case 'messenger':
+        return channel.value.startsWith('http') ? channel.value : `https://m.me/${channel.value}`
+      case 'viber':
+        return `viber://chat?number=${channel.value.replace(/[^0-9]/g, '')}`
+      case 'skype':
+        return `skype:${channel.value}?chat`
+      case 'discord':
+        return channel.value
+      case 'website':
+        return channel.value.startsWith('http') ? channel.value : `https://${channel.value}`
+      case 'chatbot':
+        return channel.value
       default:
-        return '#'
+        return channel.value
     }
-  }
-
-  getDefaultIcon(): string {
-    return '💬'
   }
 }

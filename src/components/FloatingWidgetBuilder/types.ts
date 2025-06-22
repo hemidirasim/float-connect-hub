@@ -4,6 +4,7 @@ export interface Channel {
   type: string;
   value: string;
   label: string;
+  customIcon?: string; // For custom uploaded icons
 }
 
 export interface FormData {
@@ -11,16 +12,16 @@ export interface FormData {
   position: string;
   tooltip: string;
   tooltipDisplay: string;
-  tooltipPosition: string; // Add tooltip position
-  greetingMessage: string; // Add greeting message
+  tooltipPosition: string;
+  greetingMessage: string;
   video: File | null;
   videoUrl?: string;
   useVideoPreview: boolean;
   videoHeight: number;
   videoAlignment: string;
-  customIcon: string | null;
+  customIcon: string;
   customIconUrl: string;
   buttonSize: number;
   previewVideoHeight: number;
-  templateId?: string;
+  templateId: string;
 }
