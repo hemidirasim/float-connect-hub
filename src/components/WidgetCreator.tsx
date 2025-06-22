@@ -114,12 +114,13 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
     toast.success("Kanal silindi");
   };
 
-  const editChannel = (id: string, newValue: string, newLabel?: string) => {
+  // Fix the editChannel function to properly handle both value and label
+  const editChannel = (id: string, newValue: string, newLabel: string) => {
     setChannels(prev => prev.map(channel => 
       channel.id === id ? { 
         ...channel, 
         value: newValue,
-        label: newLabel || channel.label 
+        label: newLabel // Make sure to update the label as well
       } : channel
     ));
     toast.success("Kanal yeniləndi");
@@ -165,9 +166,11 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
     try {
       const widgetData = {
         ...formData,
-        channels: channels,
+        channels: channels, // Make sure channels with updated labels are saved
         updated_at: new Date().toISOString()
       };
+
+      console.log('Saving widget with channels:', channels); // Debug log
 
       if (widget?.id) {
         // Update existing widget

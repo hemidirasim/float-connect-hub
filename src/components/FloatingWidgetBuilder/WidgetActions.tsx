@@ -37,9 +37,14 @@ export const useWidgetActions = (
     toast.success('Channel removed!');
   };
 
-  const handleEditChannel = (id: string, newValue: string) => {
+  // Updated to handle both value and label
+  const handleEditChannel = (id: string, newValue: string, newLabel: string) => {
     setChannels(channels.map(channel =>
-      channel.id === id ? { ...channel, value: newValue } : channel
+      channel.id === id ? { 
+        ...channel, 
+        value: newValue,
+        label: newLabel // Make sure to update the label
+      } : channel
     ));
     toast.success('Channel updated!');
   };
@@ -61,7 +66,7 @@ export const useWidgetActions = (
     }
 
     try {
-      console.log('Saving widget to database with template_id:', formData.templateId || 'default');
+      console.log('Saving widget to database with channels:', channels);
       
       // Create widget data including new fields
       const widgetData = {
@@ -81,11 +86,11 @@ export const useWidgetActions = (
         button_size: formData.buttonSize,
         preview_video_height: formData.previewVideoHeight,
         template_id: formData.templateId || 'default',
-        channels: channels,
+        channels: channels, // Save channels with both label and value
         user_id: user?.id
       };
 
-      console.log('Widget data for database:', widgetData);
+      console.log('Widget data for database with channels:', widgetData);
 
       let savedWidget;
 
@@ -120,7 +125,7 @@ export const useWidgetActions = (
         toast.success('Widget created!');
       }
       
-      console.log('Widget saved to database successfully:', savedWidget);
+      console.log('Widget saved to database successfully with channels:', savedWidget);
       
       return { success: true, widget: savedWidget };
     } catch (error) {

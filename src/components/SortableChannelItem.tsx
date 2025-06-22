@@ -24,7 +24,7 @@ interface Platform {
 
 interface SortableChannelItemProps {
   channel: Channel;
-  onEdit: (id: string, newValue: string, newLabel?: string) => void;
+  onEdit: (id: string, newValue: string, newLabel: string) => void;
   onRemove: (id: string) => void;
   platformOptions: Platform[];
 }
@@ -59,7 +59,8 @@ export const SortableChannelItem: React.FC<SortableChannelItemProps> = ({
 
   const handleSaveEdit = () => {
     if (editValue.trim()) {
-      onEdit(channel.id, editValue.trim(), editLabel.trim());
+      // Always pass both newValue and newLabel to ensure both are saved
+      onEdit(channel.id, editValue.trim(), editLabel.trim() || channel.label);
       setIsEditing(false);
     }
   };
