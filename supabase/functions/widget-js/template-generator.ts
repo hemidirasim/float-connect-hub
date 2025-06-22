@@ -69,31 +69,33 @@ export class WidgetTemplateRenderer {
       const channelColor = this.getChannelColor(channel.type)
       
       return `
-        <a href="${channelUrl}" target="_blank" class="hiclient-channel-item" onclick="window.openChannel('${channelUrl}')">
-          <div class="hiclient-channel-icon" style="background: ${channelColor}; color: white;">${iconSvg}</div>
-          <div class="hiclient-channel-info">
-            <div class="hiclient-channel-label">${channel.label}</div>
-            <div class="hiclient-channel-value">${channel.value}</div>
+        <a href="${channelUrl}" target="_blank" class="lovable-channel-button" onclick="window.openChannel && window.openChannel('${channelUrl}')">
+          <div class="lovable-channel-icon" style="background: ${channelColor}; color: white;">${iconSvg}</div>
+          <div class="lovable-channel-info">
+            <div class="lovable-channel-label">${channel.label}</div>
+            <div class="lovable-channel-value">${channel.value}</div>
           </div>
-          <div class="hiclient-external-icon">→</div>
+          <div class="lovable-channel-arrow">→</div>
         </a>
       `
     }).join('')
 
     // Generate video content
     const videoContent = this.config.videoEnabled && this.config.videoUrl
-      ? `<div class="hiclient-video-container" style="text-align: ${this.config.videoAlignment};">
+      ? `<div class="hiclient-video-container" style="text-align: ${this.config.videoAlignment}; margin-bottom: 20px;">
            <video class="hiclient-video-player" src="${this.config.videoUrl}" 
-                  style="height: ${this.config.videoHeight}px;" 
+                  style="height: ${this.config.videoHeight}px; width: 100%; border-radius: 12px;" 
                   controls muted>
            </video>
          </div>`
       : ''
 
-    // Button icon
+    // Button icon - Use custom icon if provided, otherwise use standard chat icon
     const buttonIcon = this.config.customIconUrl 
-      ? `<img src="${this.config.customIconUrl}" style="width: 24px; height: 24px;" alt="Contact">`
-      : this.getDefaultIcon()
+      ? `<img src="${this.config.customIconUrl}" style="width: 24px; height: 24px; object-fit: contain;" alt="Contact">`
+      : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+         </svg>`
 
     // Replace placeholders
     const replacements = {
@@ -104,7 +106,7 @@ export class WidgetTemplateRenderer {
       '{{TOOLTIP_TEXT}}': this.config.tooltip,
       '{{TOOLTIP_DISPLAY}}': this.config.tooltipDisplay,
       '{{TOOLTIP_POSITION}}': this.config.tooltipPosition || 'top',
-      '{{GREETING_MESSAGE}}': this.config.greetingMessage || 'Hello! How can we help you today?',
+      '{{GREETING_MESSAGE}}': this.config.greetingMessage || 'Hi 👋\nHow can we help you today?',
       '{{BUTTON_ICON}}': buttonIcon,
       '{{CHANNELS_HTML}}': channelsHtml,
       '{{VIDEO_CONTENT}}': videoContent,
@@ -120,6 +122,13 @@ export class WidgetTemplateRenderer {
       js = js.replace(regex, value)
     })
 
+    // Add global function for channel clicks
+    const globalScript = `
+    window.openChannel = function(url) {
+      window.open(url, '_blank');
+    };
+    `
+
     // Generate complete script
     return `
 (function() {
@@ -132,6 +141,9 @@ export class WidgetTemplateRenderer {
   const widgetDiv = document.createElement('div');
   widgetDiv.innerHTML = \`${html}\`;
   document.body.appendChild(widgetDiv);
+
+  // Add global functions
+  ${globalScript}
 
   // Execute JavaScript
   ${js}
@@ -146,9 +158,9 @@ export class WidgetTemplateRenderer {
       case 'telegram':
         return '#0088cc'
       case 'phone':
-        return '#34D399'
+        return '#22c55e'
       case 'mail':
-        return '#6B7280'
+        return '#6366f1'
       default:
         return '#6B7280'
     }
@@ -157,7 +169,7 @@ export class WidgetTemplateRenderer {
   getChannelIcon(channelType: string): string {
     switch (channelType) {
       case 'whatsapp':
-        return '📱'
+        return '💬'
       case 'telegram':
         return '✈️'
       case 'phone':

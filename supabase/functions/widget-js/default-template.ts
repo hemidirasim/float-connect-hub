@@ -3,27 +3,34 @@ import type { WidgetTemplate } from './template-types.ts'
 
 export const defaultTemplate: WidgetTemplate = {
   id: 'default',
-  name: 'Default Template', 
-  description: 'Clean and modern floating widget',
+  name: 'Modern Clean Template', 
+  description: 'Modern and clean floating widget with green accent',
   html: `
     <div id="lovable-widget-container" style="position: fixed; z-index: 999999; bottom: 20px; {{POSITION_STYLE}}">
-      <div id="lovable-widget-tooltip" style="display: none; position: absolute; background: rgba(0,0,0,0.8); color: white; padding: 8px 12px; border-radius: 6px; font-size: 14px; white-space: nowrap; z-index: 1000000; {{TOOLTIP_POSITION_STYLE}}">
+      <div id="lovable-widget-tooltip" style="display: none; position: absolute; background: rgba(34, 197, 94, 0.9); color: white; padding: 10px 16px; border-radius: 25px; font-size: 14px; white-space: nowrap; z-index: 1000000; {{TOOLTIP_POSITION_STYLE}} backdrop-filter: blur(10px); font-weight: 500; box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);">
         {{TOOLTIP_TEXT}}
       </div>
-      <button id="lovable-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; border-radius: 50%; border: none; background: {{BUTTON_COLOR}}; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 24px; transition: all 0.3s ease; position: relative;">
+      <button id="lovable-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; border-radius: 50%; border: none; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; cursor: pointer; box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4); display: flex; align-items: center; justify-content: center; font-size: 20px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; border: 3px solid rgba(255, 255, 255, 0.2);">
         {{BUTTON_ICON}}
       </button>
 
-      <div id="lovable-widget-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000001; backdrop-filter: blur(4px);">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 16px; padding: 0; max-width: 400px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
-          <div style="padding: 24px 24px 16px 24px; border-bottom: 1px solid #f0f0f0;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-              <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #333;">{{GREETING_MESSAGE}}</h3>
-              <button id="lovable-widget-close" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s;">×</button>
+      <div id="lovable-widget-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000001; backdrop-filter: blur(8px);">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 20px; padding: 0; max-width: 400px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.15); border: 1px solid rgba(255, 255, 255, 0.2);">
+          <div style="padding: 28px 28px 20px 28px; border-bottom: 1px solid #f1f5f9; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);">
+                  👋
+                </div>
+                <div>
+                  <h3 style="margin: 0; font-size: 20px; font-weight: 600; color: #1e293b; line-height: 1.3;">{{GREETING_MESSAGE}}</h3>
+                </div>
+              </div>
+              <button id="lovable-widget-close" style="background: rgba(148, 163, 184, 0.1); border: none; font-size: 20px; cursor: pointer; color: #64748b; padding: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s ease; font-weight: 300;">×</button>
             </div>
             {{VIDEO_CONTENT}}
           </div>
-          <div style="padding: 16px 24px 24px 24px;">
+          <div style="padding: 24px 28px 28px 28px;">
             <div id="lovable-widget-channels" style="display: flex; flex-direction: column; gap: 12px;">
               {{CHANNELS_HTML}}
             </div>
@@ -36,44 +43,106 @@ export const defaultTemplate: WidgetTemplate = {
   css: `
     #lovable-widget-button:hover {
       transform: scale(1.1);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      box-shadow: 0 12px 35px rgba(34, 197, 94, 0.5);
+      background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
     }
     
     #lovable-widget-close:hover {
-      background: #f5f5f5;
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      transform: rotate(90deg);
     }
     
     .lovable-channel-button {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
+      gap: 16px;
+      padding: 16px 20px;
       border: 2px solid #e2e8f0;
-      border-radius: 12px;
-      background: white;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
       text-decoration: none;
       color: #334155;
       font-weight: 500;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .lovable-channel-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+    
+    .lovable-channel-button:hover::before {
+      left: 100%;
     }
     
     .lovable-channel-button:hover {
-      border-color: {{BUTTON_COLOR}};
-      background: {{BUTTON_COLOR}}10;
-      transform: translateY(-1px);
+      border-color: #22c55e;
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(34, 197, 94, 0.15);
     }
     
     .lovable-channel-icon {
-      width: 24px;
-      height: 24px;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
+      border-radius: 50%;
+      font-size: 18px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
+    }
+    
+    .lovable-channel-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .lovable-channel-label {
+      font-weight: 600;
+      font-size: 16px;
+      color: #1e293b;
+      margin: 0 0 4px 0;
+      line-height: 1.3;
+    }
+    
+    .lovable-channel-value {
+      font-size: 14px;
+      color: #64748b;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin: 0;
+      line-height: 1.3;
+    }
+    
+    .lovable-channel-arrow {
+      width: 20px;
+      height: 20px;
+      color: #94a3b8;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+      font-size: 16px;
+    }
+    
+    .lovable-channel-button:hover .lovable-channel-arrow {
+      color: #22c55e;
+      transform: translateX(4px);
     }
   `,
   
   js: `
-    console.log('Initializing Lovable Widget with config:', {
+    console.log('Initializing Modern Widget with config:', {
       channels: {{CHANNELS_COUNT}},
       buttonColor: '{{BUTTON_COLOR}}',
       position: '{{POSITION}}',
@@ -102,7 +171,7 @@ export const defaultTemplate: WidgetTemplate = {
         }
         
         this.setupEventListeners();
-        console.log('Widget initialized successfully');
+        console.log('Modern widget initialized successfully');
       },
       
       setupEventListeners() {
@@ -125,6 +194,14 @@ export const defaultTemplate: WidgetTemplate = {
         this.modal.addEventListener('click', (e) => {
           if (e.target === this.modal) {
             console.log('Backdrop clicked, closing modal');
+            this.hideModal();
+          }
+        });
+        
+        // ESC key
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && this.modal.style.display === 'block') {
+            console.log('ESC pressed, closing modal');
             this.hideModal();
           }
         });
@@ -152,6 +229,7 @@ export const defaultTemplate: WidgetTemplate = {
         if (this.videoElement) {
           console.log('Starting video with sound');
           this.videoElement.muted = false;
+          this.videoElement.currentTime = 0;
           this.videoElement.play().catch(e => {
             console.log('Video autoplay failed, starting muted');
             this.videoElement.muted = true;

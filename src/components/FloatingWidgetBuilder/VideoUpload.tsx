@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, Trash2, MessageCircle, Phone, Mail, Heart, Star, Zap, Gift } from 'lucide-react';
+import { Upload, Trash2, MessageCircle } from 'lucide-react';
 
 interface VideoUploadProps {
   video: File | null;
@@ -30,16 +30,6 @@ interface VideoUploadProps {
   onPreviewVideoHeightChange: (height: number) => void;
 }
 
-const iconOptions = [
-  { value: 'message', label: 'Message', icon: MessageCircle },
-  { value: 'phone', label: 'Phone', icon: Phone },
-  { value: 'mail', label: 'Mail', icon: Mail },
-  { value: 'heart', label: 'Heart', icon: Heart },
-  { value: 'star', label: 'Star', icon: Star },
-  { value: 'zap', label: 'Zap', icon: Zap },
-  { value: 'gift', label: 'Gift', icon: Gift },
-];
-
 export const VideoUpload: React.FC<VideoUploadProps> = ({
   video,
   videoUrl,
@@ -61,80 +51,83 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
   onButtonSizeChange,
   onPreviewVideoHeightChange
 }) => {
-  const selectedIconOption = iconOptions.find(opt => opt.value === customIcon);
-  const IconComponent = selectedIconOption?.icon || MessageCircle;
-
   return (
     <div className="space-y-6">
-      {/* Button Icon Selection - Now with Select */}
+      {/* Button Icon Selection */}
       <Card>
         <CardHeader>
           <CardTitle>Button Icon</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Choose Icon</Label>
-            <Select value={customIcon || 'message'} onValueChange={onCustomIconChange}>
-              <SelectTrigger>
-                <SelectValue>
-                  <div className="flex items-center gap-2">
-                    <IconComponent className="w-4 h-4" />
-                    <span>{selectedIconOption?.label || 'Message'}</span>
-                  </div>
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="bg-white">
-                {iconOptions.map((option) => {
-                  const Icon = option.icon;
-                  return (
-                    <SelectItem key={option.value} value={option.value}>
-                      <div className="flex items-center gap-2">
-                        <Icon className="w-4 h-4" />
-                        <span>{option.label}</span>
-                      </div>
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Custom Icon Upload */}
-          <div className="space-y-2">
-            <Label className="text-sm">Or upload custom icon</Label>
-            <div className="flex items-center gap-2">
+          <div className="space-y-4">
+            {/* Standard Icon Option */}
+            <div className="flex items-center space-x-2">
               <input
-                type="file"
-                accept="image/*"
-                onChange={onCustomIconUpload}
-                className="hidden"
-                id="custom-icon-upload"
+                type="radio"
+                id="standard-icon"
+                name="icon-type"
+                checked={customIcon !== 'custom'}
+                onChange={() => onCustomIconChange('message')}
+                className="w-4 h-4"
               />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => document.getElementById('custom-icon-upload')?.click()}
-                className="flex-1"
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Custom Icon
-              </Button>
-              {customIcon === 'custom' && customIconUrl && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onCustomIconChange('message')}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+              <label htmlFor="standard-icon" className="flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 text-green-600" />
+                <span>Standard Chat Icon</span>
+              </label>
+            </div>
+
+            {/* Custom Icon Option */}
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  id="custom-icon"
+                  name="icon-type"
+                  checked={customIcon === 'custom'}
+                  onChange={() => onCustomIconChange('custom')}
+                  className="w-4 h-4"
+                />
+                <label htmlFor="custom-icon">Custom Icon</label>
+              </div>
+              
+              {customIcon === 'custom' && (
+                <div className="ml-6 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={onCustomIconUpload}
+                      className="hidden"
+                      id="custom-icon-upload"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById('custom-icon-upload')?.click()}
+                      className="flex-1"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Custom Icon
+                    </Button>
+                    {customIconUrl && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onCustomIconChange('message')}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                  {customIconUrl && (
+                    <div className="w-12 h-12 border rounded flex items-center justify-center bg-gray-50">
+                      <img src={customIconUrl} alt="Custom icon" className="w-8 h-8 object-contain" />
+                    </div>
+                  )}
+                </div>
               )}
             </div>
-            {customIcon === 'custom' && customIconUrl && (
-              <div className="w-12 h-12 border rounded flex items-center justify-center">
-                <img src={customIconUrl} alt="Custom icon" className="w-8 h-8 object-contain" />
-              </div>
-            )}
           </div>
 
           {/* Button Size */}
@@ -142,7 +135,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
             <Label>Button Size: {buttonSize}px</Label>
             <Input
               type="range"
-              min="40"
+              min="50"
               max="80"
               value={buttonSize}
               onChange={(e) => onButtonSizeChange(Number(e.target.value))}
