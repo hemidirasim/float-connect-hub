@@ -11,7 +11,7 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
   <div class="hiclient-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
   
   <!-- Animated Channel Icons Above Button -->
-  <div class="hiclient-animated-channels" style="position: absolute; right: 0; bottom: {{BUTTON_SIZE}}px; display: flex; flex-direction: column-reverse; gap: 12px; opacity: 0; visibility: hidden; transition: all 0.3s ease;">
+  <div class="hiclient-animated-channels" style="position: absolute; right: 0; bottom: {{CHANNEL_BOTTOM_OFFSET}}px; display: flex; flex-direction: column-reverse; gap: {{CHANNEL_GAP}}px; opacity: 0; visibility: hidden; transition: all 0.3s ease;">
     {{CHANNELS_HTML}}
   </div>
   
@@ -96,8 +96,6 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
 
 .hiclient-channel-animated {
   position: relative;
-  width: 50px;
-  height: 50px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -107,7 +105,7 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   text-decoration: none;
   color: white;
-  font-size: 20px;
+  font-size: 18px;
   transform: translateY(20px);
   opacity: 0;
 }
@@ -130,7 +128,7 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
 
 .hiclient-channel-tooltip {
   position: absolute;
-  right: 60px;
+  right: {{TOOLTIP_RIGHT_OFFSET}}px;
   top: 50%;
   transform: translateY(-50%);
   background: #333;
@@ -257,17 +255,11 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
 /* Mobile responsive */
 @media (max-width: 768px) {
   .hiclient-animated-channels {
-    gap: 8px;
-  }
-  
-  .hiclient-channel-animated {
-    width: 45px;
-    height: 45px;
-    font-size: 18px;
+    gap: {{MOBILE_CHANNEL_GAP}}px;
   }
   
   .hiclient-channel-tooltip {
-    right: 55px;
+    right: {{MOBILE_TOOLTIP_RIGHT_OFFSET}}px;
     font-size: 11px;
     padding: 6px 10px;
   }

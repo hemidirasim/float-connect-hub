@@ -4,13 +4,18 @@ import { getChannelIcon, getChannelColor, getChannelUrl } from './channel-utils.
 
 export function generateChannelsHtml(config: TemplateConfig, templateId: string): string {
   if (templateId === 'minimal') {
+    // For minimal template, maintain the original order (don't reverse)
     return config.channels.map(channel => {
       const iconSvg = getChannelIcon(channel.type, channel.customIcon, true)
       const channelUrl = getChannelUrl(channel)
       const channelColor = getChannelColor(channel.type)
       
+      // Calculate icon size based on button size (proportional scaling)
+      const buttonSize = config.buttonSize || 60
+      const iconSize = Math.max(40, Math.min(55, buttonSize * 0.83)) // Scale between 40-55px
+      
       return `
-        <a href="${channelUrl}" target="_blank" class="hiclient-channel-animated" style="background: ${channelColor};" onclick="window.openChannel && window.openChannel('${channelUrl}')">
+        <a href="${channelUrl}" target="_blank" class="hiclient-channel-animated" style="background: ${channelColor}; width: ${iconSize}px; height: ${iconSize}px;" onclick="window.openChannel && window.openChannel('${channelUrl}')">
           ${iconSvg}
           <div class="hiclient-channel-tooltip">${channel.label}</div>
         </a>

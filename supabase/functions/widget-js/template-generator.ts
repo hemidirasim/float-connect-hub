@@ -22,12 +22,21 @@ export class WidgetTemplateRenderer {
     const videoContent = generateVideoContent(this.config)
     const buttonIcon = generateButtonIcon(this.config.customIconUrl)
 
+    // Calculate responsive values for minimal template
+    const buttonSize = this.config.buttonSize || 60
+    const iconSize = Math.max(40, Math.min(55, buttonSize * 0.83))
+    const channelGap = Math.max(8, Math.min(12, buttonSize * 0.15))
+    const channelBottomOffset = buttonSize + 15
+    const tooltipRightOffset = iconSize + 10
+    const mobileChannelGap = Math.max(6, channelGap - 2)
+    const mobileTooltipRightOffset = Math.max(50, tooltipRightOffset - 5)
+
     // Replace placeholders
     const replacements = {
       '{{POSITION_STYLE}}': getPositionStyle(this.config.position),
       '{{TOOLTIP_POSITION_STYLE}}': getTooltipPositionStyle(this.config),
       '{{BUTTON_COLOR}}': this.config.buttonColor,
-      '{{BUTTON_SIZE}}': (this.config.buttonSize || 60).toString(),
+      '{{BUTTON_SIZE}}': buttonSize.toString(),
       '{{TOOLTIP_TEXT}}': this.config.tooltip,
       '{{TOOLTIP_DISPLAY}}': this.config.tooltipDisplay,
       '{{TOOLTIP_POSITION}}': this.config.tooltipPosition || 'top',
@@ -36,7 +45,12 @@ export class WidgetTemplateRenderer {
       '{{CHANNELS_HTML}}': channelsHtml,
       '{{VIDEO_CONTENT}}': videoContent,
       '{{CHANNELS_COUNT}}': this.config.channels.length.toString(),
-      '{{POSITION}}': this.config.position
+      '{{POSITION}}': this.config.position,
+      '{{CHANNEL_GAP}}': channelGap.toString(),
+      '{{CHANNEL_BOTTOM_OFFSET}}': channelBottomOffset.toString(),
+      '{{TOOLTIP_RIGHT_OFFSET}}': tooltipRightOffset.toString(),
+      '{{MOBILE_CHANNEL_GAP}}': mobileChannelGap.toString(),
+      '{{MOBILE_TOOLTIP_RIGHT_OFFSET}}': mobileTooltipRightOffset.toString()
     }
 
     // Apply replacements
