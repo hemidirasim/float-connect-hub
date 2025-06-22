@@ -1,3 +1,4 @@
+
 import type { WidgetTemplate } from '../template-types.ts'
 
 export const getModernTemplate = (): WidgetTemplate => ({
@@ -462,7 +463,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
 }`,
 
   js: `
-console.log("Modern template initialized");
+console.log("Modern template JavaScript loading...");
 
 // Platform configuration
 const platformConfig = {
@@ -561,10 +562,17 @@ function initializeTooltip(tooltip, button, config) {
 }
 
 function initializeModal(button, modal, closeBtn, video) {
-  if (!button || !modal) return;
+  if (!button || !modal) {
+    console.error("Modern template: Button or modal not found for initialization");
+    return;
+  }
+  
+  console.log("Modern template: Initializing modal event listeners");
   
   button.addEventListener("click", function(e) {
+    console.log("Modern template: Button clicked, opening modal");
     e.preventDefault();
+    e.stopPropagation();
     modal.classList.add("show");
     document.body.style.overflow = 'hidden';
     
@@ -578,6 +586,7 @@ function initializeModal(button, modal, closeBtn, video) {
   });
   
   function closeModal() {
+    console.log("Modern template: Closing modal");
     modal.classList.remove("show");
     document.body.style.overflow = '';
     if (video) {
@@ -588,6 +597,7 @@ function initializeModal(button, modal, closeBtn, video) {
   
   if (closeBtn) {
     closeBtn.addEventListener("click", function(e) {
+      console.log("Modern template: Close button clicked");
       e.preventDefault();
       e.stopPropagation();
       closeModal();
@@ -596,18 +606,22 @@ function initializeModal(button, modal, closeBtn, video) {
   
   modal.addEventListener("click", function(e) {
     if (e.target === modal) {
+      console.log("Modern template: Backdrop clicked");
       closeModal();
     }
   });
   
   document.addEventListener("keydown", function(e) {
     if (e.key === "Escape" && modal.classList.contains("show")) {
+      console.log("Modern template: Escape key pressed");
       closeModal();
     }
   });
 }
 
 function initializeWidget() {
+  console.log("Modern template: Starting widget initialization");
+  
   var button = document.querySelector(".hiclient-widget-button");
   var modal = document.querySelector(".hiclient-modal-backdrop");
   var tooltip = document.querySelector(".hiclient-tooltip");
@@ -616,8 +630,19 @@ function initializeWidget() {
   var channelsContainer = document.querySelector("#channels-container");
   var emptyState = document.querySelector(".hiclient-empty-state");
   
+  console.log("Modern template: Found elements:", {
+    button: !!button,
+    modal: !!modal,
+    tooltip: !!tooltip,
+    closeBtn: !!closeBtn,
+    video: !!video,
+    channelsContainer: !!channelsContainer,
+    emptyState: !!emptyState
+  });
+  
   // Generate channels HTML
   if (channelsContainer && window.widgetConfig && window.widgetConfig.channels) {
+    console.log("Modern template: Generating channels HTML for", window.widgetConfig.channels.length, "channels");
     var channelsHtml = generateChannelsHtml(window.widgetConfig.channels);
     channelsContainer.innerHTML = channelsHtml;
     
@@ -633,28 +658,38 @@ function initializeWidget() {
     video.pause();
   }
   
-  // Initialize modal
-  if (button && modal && closeBtn) {
+  // Initialize modal - This is the critical part
+  if (button && modal) {
+    console.log("Modern template: Initializing modal handlers");
     initializeModal(button, modal, closeBtn, video);
+  } else {
+    console.error("Modern template: Missing required elements for modal initialization");
   }
   
   // Initialize tooltip
   if (tooltip && button) {
+    console.log("Modern template: Initializing tooltip");
     initializeTooltip(tooltip, button, window.widgetConfig);
   }
   
   // Channel opening function
   window.openChannel = function(url) {
+    console.log("Modern template: Opening channel URL:", url);
     window.open(url, "_blank");
   };
   
   // Make toggleGroup available globally
   window.toggleGroup = toggleGroup;
+  
+  console.log("Modern template: Widget initialization completed");
 }
 
+// Initialize when DOM is ready
 if (document.readyState === "loading") {
+  console.log("Modern template: DOM still loading, adding event listener");
   document.addEventListener("DOMContentLoaded", initializeWidget);
 } else {
+  console.log("Modern template: DOM already loaded, initializing immediately");
   initializeWidget();
 }`
 });
