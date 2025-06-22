@@ -1,22 +1,19 @@
-
 import type { WidgetTemplate } from '../template-types.ts'
 
 export const minimalTemplate: WidgetTemplate = {
   id: 'minimal',
   name: 'Minimal',
-  description: 'Clean and simple design',
+  description: 'Clean and simple design with animations',
   html: `
     <div class="widget-container position-{{POSITION}}">
-      <button class="widget-button" style="background: {{BUTTON_COLOR}}; --button-size: {{BUTTON_SIZE}}px;">
+      <div class="widget-channels-list">
+        {{CHANNELS_HTML}}
+      </div>
+      <button class="widget-main-button" style="background: {{BUTTON_COLOR}}; --button-size: {{BUTTON_SIZE}}px;">
         {{BUTTON_ICON}}
       </button>
       <div class="widget-tooltip position-{{TOOLTIP_POSITION}} {{TOOLTIP_DISPLAY}}">
         {{TOOLTIP_TEXT}}
-      </div>
-      <div class="widget-menu">
-        <div class="widget-channel-buttons">
-          {{CHANNELS_HTML}}
-        </div>
       </div>
       {{VIDEO_CONTENT}}
     </div>
@@ -38,7 +35,7 @@ export const minimalTemplate: WidgetTemplate = {
       bottom: 20px;
     }
 
-    .widget-button {
+    .widget-main-button {
       width: var(--button-size, 60px);
       height: var(--button-size, 60px);
       border-radius: 50%;
@@ -49,28 +46,244 @@ export const minimalTemplate: WidgetTemplate = {
       justify-content: center;
       font-size: 24px;
       color: white;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 10001;
+    }
+
+    .widget-main-button:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+    }
+
+    .widget-main-button.active {
+      transform: rotate(45deg) scale(0.9);
+    }
+
+    .widget-channels-list {
+      position: absolute;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 10000;
+    }
+
+    .widget-channels-list.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .widget-channel-btn {
+      width: var(--button-size, 60px);
+      height: var(--button-size, 60px);
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+      text-decoration: none;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      transform: scale(0);
+      opacity: 0;
+    }
+
+    .widget-channels-list.show .widget-channel-btn {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .widget-channels-list.show .widget-channel-btn:nth-child(1) {
+      transition-delay: 0.1s;
+    }
+
+    .widget-channels-list.show .widget-channel-btn:nth-child(2) {
+      transition-delay: 0.15s;
+    }
+
+    .widget-channels-list.show .widget-channel-btn:nth-child(3) {
+      transition-delay: 0.2s;
+    }
+
+    .widget-channels-list.show .widget-channel-btn:nth-child(4) {
+      transition-delay: 0.25s;
+    }
+
+    .widget-channels-list.show .widget-channel-btn:nth-child(5) {
+      transition-delay: 0.3s;
+    }
+
+    .widget-channels-list.show .widget-channel-btn:nth-child(6) {
+      transition-delay: 0.35s;
+    }
+
+    .widget-channel-btn:hover {
+      transform: translateY(-3px) scale(1.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Platform colors */
+    .widget-channel-btn[data-type="whatsapp"] { background: #25d366; }
+    .widget-channel-btn[data-type="telegram"] { background: #0088cc; }
+    .widget-channel-btn[data-type="instagram"] { background: #e4405f; }
+    .widget-channel-btn[data-type="messenger"] { background: #006aff; }
+    .widget-channel-btn[data-type="viber"] { background: #665cac; }
+    .widget-channel-btn[data-type="skype"] { background: #00aff0; }
+    .widget-channel-btn[data-type="discord"] { background: #7289da; }
+    .widget-channel-btn[data-type="tiktok"] { background: #000000; }
+    .widget-channel-btn[data-type="youtube"] { background: #ff0000; }
+    .widget-channel-btn[data-type="facebook"] { background: #1877f2; }
+    .widget-channel-btn[data-type="twitter"] { background: #1da1f2; }
+    .widget-channel-btn[data-type="linkedin"] { background: #0077b5; }
+    .widget-channel-btn[data-type="github"] { background: #333333; }
+    .widget-channel-btn[data-type="website"] { background: #6b7280; }
+    .widget-channel-btn[data-type="chatbot"] { background: #3b82f6; }
+    .widget-channel-btn[data-type="email"] { background: #ea4335; }
+    .widget-channel-btn[data-type="phone"] { background: #34d399; }
+    .widget-channel-btn[data-type="custom"] { background: #6b7280; }
+
+    /* Channel groups for multiple same-type channels */
+    .widget-channel-group {
       position: relative;
     }
 
-    .widget-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    .widget-dropdown-btn {
+      position: relative;
+    }
+
+    .widget-dropdown-btn .child-indicator {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #ff4444;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+    }
+
+    .widget-dropdown {
+      position: absolute;
+      left: calc(100% + 15px);
+      top: 50%;
+      transform: translateY(-50%);
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      min-width: 220px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      z-index: 10002;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-50%) translateX(-10px) scale(0.95);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .widget-container.position-left .widget-dropdown {
+      left: auto;
+      right: calc(100% + 15px);
+      transform: translateY(-50%) translateX(10px) scale(0.95);
+    }
+
+    .widget-dropdown.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(-50%) translateX(0) scale(1);
+    }
+
+    .widget-container.position-left .widget-dropdown.show {
+      transform: translateY(-50%) translateX(0) scale(1);
+    }
+
+    .widget-dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      text-decoration: none;
+      color: #374151;
+      transition: all 0.2s ease;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .widget-dropdown-item:hover {
+      background: #f8fafc;
+    }
+
+    .widget-dropdown-item:first-child {
+      border-radius: 12px 12px 0 0;
+    }
+
+    .widget-dropdown-item:last-child {
+      border-radius: 0 0 12px 12px;
+    }
+
+    .widget-dropdown-item:only-child {
+      border-radius: 12px;
+    }
+
+    .widget-dropdown-item + .widget-dropdown-item {
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .widget-dropdown-item i {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .widget-dropdown-item .item-info {
+      flex: 1;
+    }
+
+    .widget-dropdown-item .item-label {
+      font-weight: 500;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .widget-dropdown-item .item-value {
+      color: #64748b;
+      font-size: 12px;
     }
 
     .widget-tooltip {
       position: absolute;
-      background: #333;
+      background: rgba(0, 0, 0, 0.8);
       color: white;
       padding: 8px 12px;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 14px;
       white-space: nowrap;
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.3s ease;
-      z-index: 10000;
+      z-index: 10003;
+      backdrop-filter: blur(10px);
     }
 
     .widget-tooltip.show, .widget-tooltip.always {
@@ -99,197 +312,6 @@ export const minimalTemplate: WidgetTemplate = {
       left: calc(100% + 10px);
       top: 50%;
       transform: translateY(-50%);
-    }
-
-    .widget-menu {
-      position: absolute;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-      min-width: 200px;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(10px);
-      transition: all 0.3s ease;
-      z-index: 10001;
-      border: 1px solid #e5e7eb;
-    }
-
-    .widget-menu.show {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-
-    .widget-container.position-right .widget-menu {
-      right: 0;
-      bottom: calc(100% + 15px);
-    }
-
-    .widget-container.position-left .widget-menu {
-      left: 0;
-      bottom: calc(100% + 15px);
-    }
-
-    .widget-channel-btn {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      text-decoration: none;
-      color: #374151;
-      transition: all 0.2s ease;
-      border: none;
-      background: none;
-      width: 100%;
-      text-align: left;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .widget-channel-btn:hover {
-      background: #f3f4f6;
-    }
-
-    .widget-channel-btn:first-child {
-      border-radius: 12px 12px 0 0;
-    }
-
-    .widget-channel-btn:last-child {
-      border-radius: 0 0 12px 12px;
-    }
-
-    .widget-channel-btn:only-child {
-      border-radius: 12px;
-    }
-
-    .widget-channel-btn + .widget-channel-btn {
-      border-top: 1px solid #e5e7eb;
-    }
-
-    .widget-channel-btn i {
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-    }
-
-    .widget-channel-btn span {
-      font-weight: 500;
-      font-size: 14px;
-      flex: 1;
-    }
-
-    /* Channel group styles */
-    .widget-channel-group {
-      position: relative;
-    }
-
-    .widget-dropdown-btn {
-      position: relative;
-    }
-
-    .widget-dropdown-btn .child-count {
-      background: #3b82f6;
-      color: white;
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 10px;
-      margin-left: auto;
-      margin-right: 8px;
-    }
-
-    .widget-dropdown-btn .dropdown-arrow {
-      font-size: 10px;
-      color: #6b7280;
-      transition: transform 0.2s ease;
-    }
-
-    .widget-dropdown-btn.active .dropdown-arrow {
-      transform: rotate(180deg);
-    }
-
-    .widget-dropdown {
-      position: absolute;
-      left: 100%;
-      top: 0;
-      margin-left: 8px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-      min-width: 250px;
-      border: 1px solid #e5e7eb;
-      z-index: 10002;
-      display: none;
-    }
-
-    .widget-dropdown.show {
-      display: block;
-    }
-
-    .widget-container.position-right .widget-dropdown {
-      left: auto;
-      right: 100%;
-      margin-left: 0;
-      margin-right: 8px;
-    }
-
-    .widget-dropdown-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      text-decoration: none;
-      color: #374151;
-      transition: background 0.2s ease;
-      border: none;
-      background: none;
-      width: 100%;
-      text-align: left;
-    }
-
-    .widget-dropdown-item:hover {
-      background: #f3f4f6;
-    }
-
-    .widget-dropdown-item:first-child {
-      border-radius: 8px 8px 0 0;
-    }
-
-    .widget-dropdown-item:last-child {
-      border-radius: 0 0 8px 8px;
-    }
-
-    .widget-dropdown-item:only-child {
-      border-radius: 8px;
-    }
-
-    .widget-dropdown-item + .widget-dropdown-item {
-      border-top: 1px solid #e5e7eb;
-    }
-
-    .widget-dropdown-item i {
-      width: 16px;
-      height: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-    }
-
-    .widget-dropdown-item span {
-      font-size: 13px;
-    }
-
-    .widget-dropdown-item .dropdown-value {
-      color: #6b7280;
-      font-size: 11px;
-      margin-left: auto;
-      max-width: 120px;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .widget-video {
@@ -343,17 +365,24 @@ export const minimalTemplate: WidgetTemplate = {
         bottom: 15px !important;
       }
       
-      .widget-menu {
-        min-width: 180px;
-      }
-      
       .widget-dropdown {
         min-width: 200px;
         left: auto !important;
-        right: 100% !important;
+        right: calc(100% + 10px) !important;
         margin: 0 !important;
-        margin-right: 8px !important;
       }
+
+      .widget-container.position-left .widget-dropdown {
+        right: auto !important;
+        left: calc(100% + 10px) !important;
+      }
+    }
+
+    /* FontAwesome icon styles */
+    .widget-channel-btn i,
+    .widget-dropdown-item i {
+      font-family: "Font Awesome 6 Brands", "Font Awesome 6 Free";
+      font-weight: 900;
     }
   `,
   js: `
@@ -364,8 +393,8 @@ export const minimalTemplate: WidgetTemplate = {
       function initWidget() {
         console.log('Initializing minimal widget...');
         
-        const button = document.querySelector('.widget-button');
-        const menu = document.querySelector('.widget-menu');
+        const button = document.querySelector('.widget-main-button');
+        const channelsList = document.querySelector('.widget-channels-list');
         const tooltip = document.querySelector('.widget-tooltip');
         const video = document.querySelector('.widget-video');
         
@@ -374,7 +403,7 @@ export const minimalTemplate: WidgetTemplate = {
           return;
         }
 
-        // Button click handler - fixed the logic
+        // Button click handler
         button.addEventListener('click', function(e) {
           e.stopPropagation();
           console.log('Widget button clicked');
@@ -411,12 +440,6 @@ export const minimalTemplate: WidgetTemplate = {
           button.addEventListener('mouseleave', () => {
             video.classList.remove('show');
           });
-          
-          if (menu) {
-            menu.addEventListener('mouseenter', () => {
-              video.classList.remove('show');
-            });
-          }
         }
 
         // Initialize channel dropdowns
@@ -439,6 +462,8 @@ export const minimalTemplate: WidgetTemplate = {
         dropdownBtns.forEach(btn => {
           // Hover functionality for dropdowns
           btn.addEventListener('mouseenter', function() {
+            if (!isMenuOpen) return;
+            
             const dropdownId = this.getAttribute('data-dropdown');
             const dropdown = document.getElementById(dropdownId);
             
@@ -446,50 +471,36 @@ export const minimalTemplate: WidgetTemplate = {
               closeAllDropdowns();
               setTimeout(() => {
                 if (this.matches(':hover')) {
-                  dropdown.style.display = 'block';
                   dropdown.classList.add('show');
-                  this.classList.add('active');
                   activeDropdown = dropdown;
                 }
               }, 100);
             }
           });
           
-          // Click functionality for dropdowns
-          btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const dropdownId = this.getAttribute('data-dropdown');
-            const dropdown = document.getElementById(dropdownId);
-            
-            if (activeDropdown && activeDropdown !== dropdown) {
-              closeAllDropdowns();
-            }
-            
-            if (dropdown) {
-              if (dropdown.style.display === 'none' || !dropdown.style.display) {
-                dropdown.style.display = 'block';
-                dropdown.classList.add('show');
-                this.classList.add('active');
-                activeDropdown = dropdown;
-              } else {
-                closeDropdown(dropdown, this);
+          btn.addEventListener('mouseleave', function() {
+            setTimeout(() => {
+              const dropdownId = this.getAttribute('data-dropdown');
+              const dropdown = document.getElementById(dropdownId);
+              if (dropdown && !dropdown.matches(':hover') && !this.matches(':hover')) {
+                dropdown.classList.remove('show');
+                if (activeDropdown === dropdown) {
+                  activeDropdown = null;
+                }
               }
-            }
+            }, 300);
           });
         });
         
-        // Close dropdown when mouse leaves the group
-        const channelGroups = document.querySelectorAll('.widget-channel-group');
-        channelGroups.forEach(group => {
-          group.addEventListener('mouseleave', function() {
+        // Keep dropdown open when hovering over it
+        const dropdowns = document.querySelectorAll('.widget-dropdown');
+        dropdowns.forEach(dropdown => {
+          dropdown.addEventListener('mouseleave', function() {
             setTimeout(() => {
-              if (!group.matches(':hover')) {
-                const dropdown = group.querySelector('.widget-dropdown');
-                const btn = group.querySelector('.widget-dropdown-btn');
-                if (dropdown && btn) {
-                  closeDropdown(dropdown, btn);
+              if (!this.matches(':hover')) {
+                this.classList.remove('show');
+                if (activeDropdown === this) {
+                  activeDropdown = null;
                 }
               }
             }, 300);
@@ -497,54 +508,42 @@ export const minimalTemplate: WidgetTemplate = {
         });
       }
 
-      function closeDropdown(dropdown, btn) {
-        dropdown.style.display = 'none';
-        dropdown.classList.remove('show');
-        btn.classList.remove('active');
-        if (activeDropdown === dropdown) {
-          activeDropdown = null;
-        }
-      }
-
       function closeAllDropdowns() {
         const dropdowns = document.querySelectorAll('.widget-dropdown');
-        const dropdownBtns = document.querySelectorAll('.widget-dropdown-btn');
-        
         dropdowns.forEach(dropdown => {
-          dropdown.style.display = 'none';
           dropdown.classList.remove('show');
         });
-        
-        dropdownBtns.forEach(btn => {
-          btn.classList.remove('active');
-        });
-        
         activeDropdown = null;
       }
 
       function toggleMenu() {
-        const menu = document.querySelector('.widget-menu');
+        const button = document.querySelector('.widget-main-button');
+        const channelsList = document.querySelector('.widget-channels-list');
         const tooltip = document.querySelector('.widget-tooltip');
         const video = document.querySelector('.widget-video');
         
-        if (!menu) return;
+        if (!channelsList) return;
         
         isMenuOpen = !isMenuOpen;
         
         if (isMenuOpen) {
-          menu.classList.add('show');
+          channelsList.classList.add('show');
+          button.classList.add('active');
           if (tooltip) tooltip.classList.remove('show');
           if (video) video.classList.remove('show');
         } else {
-          menu.classList.remove('show');
+          channelsList.classList.remove('show');
+          button.classList.remove('active');
           closeAllDropdowns();
         }
       }
 
       function closeMenu() {
-        const menu = document.querySelector('.widget-menu');
-        if (menu) {
-          menu.classList.remove('show');
+        const button = document.querySelector('.widget-main-button');
+        const channelsList = document.querySelector('.widget-channels-list');
+        if (channelsList) {
+          channelsList.classList.remove('show');
+          button.classList.remove('active');
           isMenuOpen = false;
         }
       }

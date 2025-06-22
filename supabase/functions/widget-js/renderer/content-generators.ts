@@ -1,4 +1,3 @@
-
 import type { TemplateConfig } from './types.ts'
 import type { Channel } from '../types.ts'
 import { getChannelIcon, getChannelColor, getChannelUrl } from './channel-utils.ts'
@@ -46,7 +45,7 @@ function generateChannelLink(channel: Channel): string {
 
 export function generateChannelsHtml(config: TemplateConfig, templateId: string): string {
   if (templateId === 'minimal') {
-    // For minimal template, process channels with child support
+    // For minimal template, process channels with child support and proper bottom-to-top arrangement
     return config.channels.map(channel => {
       if (channel.childChannels && channel.childChannels.length > 0) {
         // Generate group button with dropdown for minimal template
@@ -56,25 +55,25 @@ export function generateChannelsHtml(config: TemplateConfig, templateId: string)
         
         const dropdownItems = [channel, ...channel.childChannels].map((item, index) => {
           const href = generateChannelLink(item);
-          const label = index === 0 ? item.label : item.label;
+          const label = item.label;
           
           return `
             <a href="${href}" target="_blank" class="widget-dropdown-item" onclick="window.openChannel && window.openChannel('${href}')">
               <i class="${platform.icon}"></i>
-              <span>${label}</span>
-              <span class="dropdown-value">${item.value}</span>
+              <div class="item-info">
+                <div class="item-label">${label}</div>
+                <div class="item-value">${item.value}</div>
+              </div>
             </a>
           `;
         }).join('');
         
         return `
           <div class="widget-channel-group">
-            <button class="widget-channel-btn widget-dropdown-btn" data-dropdown="${dropdownId}">
+            <a href="${generateChannelLink(channel)}" target="_blank" class="widget-channel-btn widget-dropdown-btn" data-dropdown="${dropdownId}" data-type="${channel.type}" onclick="window.openChannel && window.openChannel('${generateChannelLink(channel)}')">
               <i class="${platform.icon}"></i>
-              <span>${channel.label}</span>
-              <span class="child-count">+${childCount}</span>
-              <i class="dropdown-arrow">▼</i>
-            </button>
+              <span class="child-indicator">+${childCount}</span>
+            </a>
             <div class="widget-dropdown" id="${dropdownId}">
               ${dropdownItems}
             </div>
@@ -86,13 +85,12 @@ export function generateChannelsHtml(config: TemplateConfig, templateId: string)
         const href = generateChannelLink(channel);
         
         return `
-          <a href="${href}" target="_blank" class="widget-channel-btn" onclick="window.openChannel && window.openChannel('${href}')">
+          <a href="${href}" target="_blank" class="widget-channel-btn" data-type="${channel.type}" onclick="window.openChannel && window.openChannel('${href}')">
             <i class="${platform.icon}"></i>
-            <span>${channel.label}</span>
           </a>
         `;
       }
-    }).join('');
+    }).reverse().join(''); // Reverse to show channels from bottom to top like in the image
   }
   
   // Default template logic
