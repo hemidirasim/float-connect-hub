@@ -139,6 +139,114 @@ export const defaultTemplate: WidgetTemplate = {
       color: #22c55e;
       transform: translateX(4px);
     }
+
+    /* Channel group styles */
+    .lovable-channel-group {
+      position: relative;
+    }
+    
+    .lovable-group-trigger {
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .lovable-group-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #3b82f6;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+      line-height: 1.2;
+      box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    }
+    
+    .lovable-group-dropdown {
+      position: absolute;
+      right: 0;
+      top: 100%;
+      margin-top: 8px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      min-width: 280px;
+      max-width: 320px;
+      border: 1px solid #e5e7eb;
+      z-index: 1000002;
+      display: none;
+      overflow: hidden;
+    }
+    
+    .lovable-group-dropdown.show {
+      display: block;
+    }
+    
+    .lovable-group-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      text-decoration: none;
+      color: #374151;
+      transition: all 0.2s ease;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .lovable-group-item:last-child {
+      border-bottom: none;
+    }
+    
+    .lovable-group-item:hover {
+      background: #f9fafb;
+    }
+    
+    .lovable-group-item-icon {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    
+    .lovable-group-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .lovable-group-item-label {
+      font-weight: 500;
+      font-size: 14px;
+      color: #1f2937;
+      margin: 0 0 2px 0;
+      line-height: 1.3;
+    }
+    
+    .lovable-group-item-value {
+      font-size: 12px;
+      color: #6b7280;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    @media (max-width: 768px) {
+      .lovable-group-dropdown {
+        right: -20px;
+        left: -20px;
+        min-width: auto;
+        max-width: none;
+      }
+    }
   `,
   
   js: `
@@ -171,6 +279,7 @@ export const defaultTemplate: WidgetTemplate = {
         }
         
         this.setupEventListeners();
+        this.initChannelGroups();
         console.log('Modern widget initialized successfully');
       },
       
@@ -221,10 +330,52 @@ export const defaultTemplate: WidgetTemplate = {
           this.showTooltip();
         }
       },
+
+      initChannelGroups() {
+        // Initialize channel group functionality
+        const groupTriggers = document.querySelectorAll('.lovable-group-trigger');
+        
+        groupTriggers.forEach(trigger => {
+          trigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const group = trigger.closest('.lovable-channel-group');
+            const dropdown = group.querySelector('.lovable-group-dropdown');
+            
+            if (dropdown) {
+              // Close all other dropdowns
+              this.closeAllDropdowns();
+              
+              // Toggle current dropdown
+              if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+              } else {
+                dropdown.classList.add('show');
+              }
+            }
+          });
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.lovable-channel-group')) {
+            this.closeAllDropdowns();
+          }
+        });
+      },
+      
+      closeAllDropdowns() {
+        const dropdowns = document.querySelectorAll('.lovable-group-dropdown');
+        dropdowns.forEach(dropdown => {
+          dropdown.classList.remove('show');
+        });
+      },
       
       showModal() {
         this.modal.style.display = 'block';
         this.hideTooltip();
+        this.closeAllDropdowns();
         
         if (this.videoElement) {
           console.log('Starting video with sound');
@@ -240,6 +391,7 @@ export const defaultTemplate: WidgetTemplate = {
       
       hideModal() {
         this.modal.style.display = 'none';
+        this.closeAllDropdowns();
         
         if (this.videoElement) {
           console.log('Muting and pausing video');
