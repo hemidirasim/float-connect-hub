@@ -9,14 +9,15 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
 <!-- Minimal Template -->
 <div class="hiclient-widget-container" style="position: fixed; {{POSITION_STYLE}} bottom: 20px; z-index: 99999;">
   <div class="hiclient-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
+  
+  <!-- Animated Channel Icons Above Button -->
+  <div class="hiclient-animated-channels" style="position: absolute; right: 0; bottom: {{BUTTON_SIZE}}px; display: flex; flex-direction: column-reverse; gap: 12px; opacity: 0; visibility: hidden; transition: all 0.3s ease;">
+    {{CHANNELS_HTML}}
+  </div>
+  
   <button class="hiclient-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background: {{BUTTON_COLOR}};">
     {{BUTTON_ICON}}
   </button>
-</div>
-
-<!-- Floating Channel Icons -->
-<div class="hiclient-floating-channels" style="position: fixed; right: 20px; top: 50%; transform: translateY(-50%); z-index: 99998; display: flex; flex-direction: column; gap: 12px;">
-  {{CHANNELS_HTML}}
 </div>
 
 <div class="hiclient-modal-backdrop">
@@ -83,12 +84,17 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
   visibility: hidden;
 }
 
-/* Floating Channel Icons */
-.hiclient-floating-channels {
+/* Animated Channel Icons */
+.hiclient-animated-channels {
   font-family: system-ui, -apple-system, sans-serif;
 }
 
-.hiclient-channel-float {
+.hiclient-animated-channels.show {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.hiclient-channel-animated {
   position: relative;
   width: 50px;
   height: 50px;
@@ -102,9 +108,22 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
   text-decoration: none;
   color: white;
   font-size: 20px;
+  transform: translateY(20px);
+  opacity: 0;
 }
 
-.hiclient-channel-float:hover {
+.hiclient-animated-channels.show .hiclient-channel-animated {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.hiclient-channel-animated:nth-child(1) { transition-delay: 0.1s; }
+.hiclient-channel-animated:nth-child(2) { transition-delay: 0.15s; }
+.hiclient-channel-animated:nth-child(3) { transition-delay: 0.2s; }
+.hiclient-channel-animated:nth-child(4) { transition-delay: 0.25s; }
+.hiclient-channel-animated:nth-child(5) { transition-delay: 0.3s; }
+
+.hiclient-channel-animated:hover {
   transform: translateX(-5px) scale(1.1);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
@@ -137,7 +156,7 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
   border-left-color: #333;
 }
 
-.hiclient-channel-float:hover .hiclient-channel-tooltip {
+.hiclient-channel-animated:hover .hiclient-channel-tooltip {
   opacity: 1;
   visibility: visible;
   transform: translateY(-50%) translateX(-5px);
@@ -237,12 +256,11 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
 
 /* Mobile responsive */
 @media (max-width: 768px) {
-  .hiclient-floating-channels {
-    right: 10px;
+  .hiclient-animated-channels {
     gap: 8px;
   }
   
-  .hiclient-channel-float {
+  .hiclient-channel-animated {
     width: 45px;
     height: 45px;
     font-size: 18px;
@@ -263,9 +281,12 @@ function initializeWidget() {
   var closeBtn = document.querySelector(".hiclient-modal-close");
   var video = document.querySelector(".hiclient-video-player");
   var emptyState = document.querySelector(".hiclient-empty-state");
+  var animatedChannels = document.querySelector(".hiclient-animated-channels");
   
   console.log('Minimal widget initialized with greeting:', '{{GREETING_MESSAGE}}');
   console.log('Tooltip position:', '{{TOOLTIP_POSITION}}');
+  
+  var channelsVisible = false;
   
   if (video) {
     video.muted = true;
@@ -281,14 +302,29 @@ function initializeWidget() {
   }
   
   if (button && modal) {
-    button.addEventListener("click", function() {
-      modal.classList.add("show");
-      if (video) {
-        video.muted = false;
-        video.currentTime = 0;
-        video.play().catch(function(error) {
-          console.log("Video error:", error);
-        });
+    button.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Toggle animated channels
+      if (animatedChannels && {{CHANNELS_COUNT}} > 0) {
+        if (channelsVisible) {
+          animatedChannels.classList.remove("show");
+          channelsVisible = false;
+        } else {
+          animatedChannels.classList.add("show");
+          channelsVisible = true;
+        }
+      } else {
+        // If no channels, show modal
+        modal.classList.add("show");
+        if (video) {
+          video.muted = false;
+          video.currentTime = 0;
+          video.play().catch(function(error) {
+            console.log("Video error:", error);
+          });
+        }
       }
     });
     
@@ -309,8 +345,21 @@ function initializeWidget() {
     });
     
     document.addEventListener("keydown", function(e) {
-      if (e.key === "Escape" && modal.classList.contains("show")) {
-        closeModal();
+      if (e.key === "Escape") {
+        if (modal.classList.contains("show")) {
+          closeModal();
+        } else if (channelsVisible && animatedChannels) {
+          animatedChannels.classList.remove("show");
+          channelsVisible = false;
+        }
+      }
+    });
+    
+    // Hide channels when clicking outside
+    document.addEventListener("click", function(e) {
+      if (channelsVisible && animatedChannels && !button.contains(e.target) && !animatedChannels.contains(e.target)) {
+        animatedChannels.classList.remove("show");
+        channelsVisible = false;
       }
     });
   }

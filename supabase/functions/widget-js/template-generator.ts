@@ -1,4 +1,3 @@
-
 import type { WidgetTemplate } from './template-types.ts'
 import type { Channel } from './types.ts'
 
@@ -70,7 +69,7 @@ export class WidgetTemplateRenderer {
           const channelColor = this.getChannelColor(channel.type)
           
           return `
-            <a href="${channelUrl}" target="_blank" class="hiclient-channel-float" style="background: ${channelColor};" onclick="window.openChannel && window.openChannel('${channelUrl}')">
+            <a href="${channelUrl}" target="_blank" class="hiclient-channel-animated" style="background: ${channelColor};" onclick="window.openChannel && window.openChannel('${channelUrl}')">
               ${iconSvg}
               <div class="hiclient-channel-tooltip">${channel.label}</div>
             </a>
