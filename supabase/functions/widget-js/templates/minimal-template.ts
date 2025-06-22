@@ -14,14 +14,16 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
   </button>
 </div>
 
+<!-- Floating Channel Icons -->
+<div class="hiclient-floating-channels" style="position: fixed; right: 20px; top: 50%; transform: translateY(-50%); z-index: 99998; display: flex; flex-direction: column; gap: 12px;">
+  {{CHANNELS_HTML}}
+</div>
+
 <div class="hiclient-modal-backdrop">
   <div class="hiclient-modal-content">
     <div class="hiclient-modal-header">{{GREETING_MESSAGE}}</div>
     <div class="hiclient-modal-close">×</div>
     {{VIDEO_CONTENT}}
-    <div class="hiclient-channels-container">
-      {{CHANNELS_HTML}}
-    </div>
     <div class="hiclient-empty-state" style="display: none;">
       <div class="hiclient-empty-icon">📞</div>
       <p>No channels configured</p>
@@ -79,6 +81,66 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
 .hiclient-tooltip.hide {
   opacity: 0;
   visibility: hidden;
+}
+
+/* Floating Channel Icons */
+.hiclient-floating-channels {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.hiclient-channel-float {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  text-decoration: none;
+  color: white;
+  font-size: 20px;
+}
+
+.hiclient-channel-float:hover {
+  transform: translateX(-5px) scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.hiclient-channel-tooltip {
+  position: absolute;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  z-index: 100001;
+}
+
+.hiclient-channel-tooltip::after {
+  content: '';
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-left-color: #333;
+}
+
+.hiclient-channel-float:hover .hiclient-channel-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(-5px);
 }
 
 .hiclient-modal-backdrop {
@@ -160,70 +222,6 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
   object-fit: cover;
 }
 
-.hiclient-channels-container {
-  max-height: 280px;
-  overflow-y: auto;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 6px;
-}
-
-.hiclient-channel-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  text-decoration: none;
-  background: white;
-}
-
-.hiclient-channel-item:hover {
-  background-color: #f9fafb;
-  border-color: #d1d5db;
-}
-
-.hiclient-channel-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.hiclient-channel-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.hiclient-channel-label {
-  font-weight: 500;
-  font-size: 13px;
-  color: #374151;
-  margin: 0 0 2px 0;
-}
-
-.hiclient-channel-value {
-  font-size: 11px;
-  color: #6b7280;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.hiclient-external-icon {
-  width: 14px;
-  height: 14px;
-  color: #9ca3af;
-  flex-shrink: 0;
-}
-
 .hiclient-empty-state {
   text-align: center;
   padding: 32px 16px;
@@ -235,6 +233,26 @@ export const getMinimalTemplate = (): WidgetTemplate => ({
   height: 28px;
   margin: 0 auto 10px;
   opacity: 0.5;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .hiclient-floating-channels {
+    right: 10px;
+    gap: 8px;
+  }
+  
+  .hiclient-channel-float {
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+  }
+  
+  .hiclient-channel-tooltip {
+    right: 55px;
+    font-size: 11px;
+    padding: 6px 10px;
+  }
 }`,
   
   js: `/* Minimal JS */
@@ -244,7 +262,6 @@ function initializeWidget() {
   var tooltip = document.querySelector(".hiclient-tooltip");
   var closeBtn = document.querySelector(".hiclient-modal-close");
   var video = document.querySelector(".hiclient-video-player");
-  var channelsContainer = document.querySelector(".hiclient-channels-container");
   var emptyState = document.querySelector(".hiclient-empty-state");
   
   console.log('Minimal widget initialized with greeting:', '{{GREETING_MESSAGE}}');
@@ -255,9 +272,9 @@ function initializeWidget() {
     video.pause();
   }
   
-  // Show/hide empty state based on channels
-  if (channelsContainer && emptyState) {
-    var hasChannels = channelsContainer.children.length > 0;
+  // Show/hide empty state based on channels (only for modal, not floating icons)
+  if (emptyState) {
+    var hasChannels = {{CHANNELS_COUNT}} > 0;
     if (!hasChannels) {
       emptyState.style.display = 'block';
     }
