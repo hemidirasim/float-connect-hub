@@ -16,7 +16,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
 
 <div class="hiclient-modal-backdrop">
   <div class="hiclient-modal-content">
-    <div class="hiclient-modal-header">{{GREETING_MESSAGE}}</div>
+    <div class="hiclient-modal-header">{{GREETING_MESSAGE}}aa</div>
     <div class="hiclient-modal-close">×</div>
     {{VIDEO_CONTENT}}
     <div class="hiclient-channels-container">
