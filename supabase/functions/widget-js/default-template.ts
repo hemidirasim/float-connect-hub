@@ -23,7 +23,7 @@ export const defaultTemplate: WidgetTemplate = {
                   👋
                 </div>
                 <div>
-                  <h3 style="margin: 0; font-size: 10px; font-weight: 600; color: #1e293b; line-height: 1.3;">{{GREETING_MESSAGE}}</h3>
+                  <h3 style="margin: 0; font-size: 15px; font-weight: 600; color: #1e293b; line-height: 1.3;">{{GREETING_MESSAGE}}</h3>
                 </div>
               </div>
               <button id="lovable-widget-close" style="background: rgba(148, 163, 184, 0.1); border: none; font-size: 20px; cursor: pointer; color: #64748b; padding: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s ease; font-weight: 300;">×</button>
