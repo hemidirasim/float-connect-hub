@@ -1,3 +1,4 @@
+
 import type { WidgetTemplate } from '../template-types.ts'
 
 export const minimalTemplate: WidgetTemplate = {
@@ -67,12 +68,13 @@ export const minimalTemplate: WidgetTemplate = {
       bottom: 80px;
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 12px;
       opacity: 0;
       visibility: hidden;
       transform: translateY(20px);
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 10000;
+      align-items: center;
     }
 
     .widget-channels-list.show {
@@ -96,12 +98,12 @@ export const minimalTemplate: WidgetTemplate = {
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
-      transform: scale(0);
+      transform: scale(0) translateY(20px);
       opacity: 0;
     }
 
     .widget-channels-list.show .widget-channel-btn {
-      transform: scale(1);
+      transform: scale(1) translateY(0);
       opacity: 1;
     }
 
@@ -388,6 +390,8 @@ export const minimalTemplate: WidgetTemplate = {
   `,
   js: `
     (function() {
+      console.log('Minimal widget JavaScript loading...');
+      
       let isMenuOpen = false;
       let activeDropdown = null;
       
@@ -404,7 +408,7 @@ export const minimalTemplate: WidgetTemplate = {
           return;
         }
 
-        // Button click handler - Fixed the event listener
+        // Button click handler
         button.addEventListener('click', function(e) {
           e.preventDefault();
           e.stopPropagation();
@@ -462,7 +466,6 @@ export const minimalTemplate: WidgetTemplate = {
         const dropdownBtns = document.querySelectorAll('.widget-dropdown-btn');
         
         dropdownBtns.forEach(function(btn) {
-          // Hover functionality for dropdowns
           btn.addEventListener('mouseenter', function() {
             if (!isMenuOpen) return;
             
@@ -496,7 +499,6 @@ export const minimalTemplate: WidgetTemplate = {
           });
         });
         
-        // Keep dropdown open when hovering over it
         const dropdowns = document.querySelectorAll('.widget-dropdown');
         dropdowns.forEach(function(dropdown) {
           dropdown.addEventListener('mouseleave', function() {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { HeroSection } from "@/components/FloatingWidgetBuilder/HeroSection";
 import { WidgetForm } from "@/components/FloatingWidgetBuilder/WidgetForm";
@@ -71,10 +70,14 @@ const Index = () => {
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
-      toast.success('Signed out successfully!');
+      toast.success('Uğurla çıxış edildi!', {
+        description: 'Hesabınızdan çıxış etdiniz'
+      });
     } catch (error) {
       console.error('Error signing out:', error);
-      toast.error('Failed to sign out');
+      toast.error('Çıxış zamanı xəta baş verdi', {
+        description: 'Zəhmət olmasa yenidən cəhd edin'
+      });
     }
   };
 
@@ -83,12 +86,16 @@ const Index = () => {
     if (!file) return;
 
     if (file.size > 10 * 1024 * 1024) {
-      toast.error('Video file must be less than 10MB');
+      toast.error('Video fayl 10MB-dan kiçik olmalıdır', {
+        description: 'Zəhmət olmasa daha kiçik fayl seçin'
+      });
       return;
     }
 
     if (!user) {
-      toast.error('You must be logged in to upload videos');
+      toast.error('Video yükləmək üçün daxil olmalısınız', {
+        description: 'Zəhmət olmasa hesabınıza daxil olun'
+      });
       return;
     }
 
@@ -117,10 +124,14 @@ const Index = () => {
         videoUrl: publicUrl
       }));
 
-      toast.success('Video uploaded successfully!');
+      toast.success('Video uğurla yükləndi!', {
+        description: 'Video sizin widget-ə əlavə edildi'
+      });
     } catch (error) {
       console.error('Error uploading video:', error);
-      toast.error('Failed to upload video');
+      toast.error('Video yükləmədə xəta', {
+        description: 'Zəhmət olmasa yenidən cəhd edin'
+      });
     } finally {
       setUploading(false);
     }
@@ -147,7 +158,9 @@ const Index = () => {
       video: null,
       videoUrl: undefined
     }));
-    toast.success('Video removed!');
+    toast.success('Video silindi!', {
+      description: 'Video widget-dən çıxarıldı'
+    });
   };
 
   const handleCustomIconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,7 +172,9 @@ const Index = () => {
         customIcon: 'custom',
         customIconUrl: url
       }));
-      toast.success('Custom icon uploaded!');
+      toast.success('Xüsusi ikon yükləndi!', {
+        description: 'Widget-dən istifadə edə bilərsiniz'
+      });
     }
   };
 
@@ -206,7 +221,9 @@ const Index = () => {
   const handleCopyCode = () => {
     navigator.clipboard.writeText(generatedCode);
     setCopied(true);
-    toast.success('Code copied to clipboard!');
+    toast.success('Kod kopyalandı!', {
+      description: 'Widget kodu panoya köçürüldü'
+    });
     setTimeout(() => setCopied(false), 2000);
   };
 
