@@ -134,9 +134,14 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
     toast.success("Kanal silindi");
   };
 
-  const editChannel = (id: string, newValue: string) => {
+  // Fix editChannel to handle both value and label
+  const editChannel = (id: string, newValue: string, newLabel: string) => {
     onChannelsChange(channels.map(channel => 
-      channel.id === id ? { ...channel, value: newValue } : channel
+      channel.id === id ? { 
+        ...channel, 
+        value: newValue,
+        label: newLabel // Update both value and label
+      } : channel
     ));
     toast.success("Kanal yeniləndi");
   };
