@@ -1,16 +1,16 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, GripVertical, Upload, Link, Users } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Upload, Link, Users, ChevronDown, ChevronRight } from 'lucide-react';
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableChannelItem } from "@/components/SortableChannelItem";
-import { ChannelGroupManager } from "./ChannelGroupManager";
 import { platformOptions } from './constants';
 import { Channel } from './types';
 
@@ -28,6 +28,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
   const [channelLabel, setChannelLabel] = useState('');
   const [customIcon, setCustomIcon] = useState<File | null>(null);
   const [customIconUrl, setCustomIconUrl] = useState('');
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -157,6 +158,111 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
     }
   };
 
+  // Group channels by type for suggestions
+  const getChannelsByType = () => {
+    const grouped: { [key: string]: Channel[] } = {};
+    channels.filter(ch => !ch.isGroup).forEach(channel => {
+      if (!grouped[channel.type]) {
+        grouped[channel.type] = [];
+      }  
+      grouped[channel.type].push(channel);
+    });
+    return grouped;
+  };
+
+  const createGroupFromType = (type: string) => {
+    const channelsByType = getChannelsByType();
+    const typeChannels = channelsByType[type] || [];
+    
+    if (typeChannels.length < 2) {
+      toast.error(`Qrup yaratmaq üçün ən azı 2 ədəd ${type} kanalı olmalıdır`);
+      return;
+    }
+
+    const platform = platformOptions.find(p => p.value === type);
+    const groupId = Date.now().toString();
+    
+    const newGroup: Channel = {
+      id: groupId,
+      type: type,
+      value: '', // Empty for groups
+      label: `${platform?.label || type} Qrupu`,
+      isGroup: true,
+      groupItems: [...typeChannels],
+      displayMode: 'grouped'
+    };
+
+    // Remove individual channels and add group
+    const remainingChannels = channels.filter(ch => 
+      ch.type !== type || ch.isGroup
+    );
+    
+    onChannelsChange([...remainingChannels, newGroup]);
+    toast.success(`${platform?.label || type} qrupu yaradıldı!`);
+  };
+
+  const ungroupChannel = (groupId: string) => {
+    const group = channels.find(ch => ch.id === groupId && ch.isGroup);
+    if (!group || !group.groupItems) return;
+
+    // Add individual items back and remove group
+    const otherChannels = channels.filter(ch => ch.id !== groupId);
+    const individualItems = group.groupItems.map(item => ({
+      ...item,
+      displayMode: 'individual' as const
+    }));
+    
+    onChannelsChange([...otherChannels, ...individualItems]);
+    toast.success('Qrup ləğv edildi');
+  };
+
+  const removeFromGroup = (groupId: string, itemId: string) => {
+    const updatedChannels = channels.map(channel => {
+      if (channel.id === groupId && channel.isGroup && channel.groupItems) {
+        const removedItem = channel.groupItems.find(item => item.id === itemId);
+        const updatedGroupItems = channel.groupItems.filter(item => item.id !== itemId);
+        
+        // If only one item left, ungroup entirely
+        if (updatedGroupItems.length <= 1) {
+          return null; // Will be filtered out
+        }
+        
+        return {
+          ...channel,
+          groupItems: updatedGroupItems
+        };
+      }
+      return channel;
+    }).filter(Boolean) as Channel[];
+
+    // Add the removed item back as individual
+    const group = channels.find(ch => ch.id === groupId);
+    const removedItem = group?.groupItems?.find(item => item.id === itemId);
+    
+    if (removedItem) {
+      updatedChannels.push({
+        ...removedItem,
+        displayMode: 'individual'
+      });
+    }
+
+    onChannelsChange(updatedChannels);
+    toast.success('Kanal qrupdan çıxarıldı');
+  };
+
+  const toggleGroupExpansion = (groupId: string) => {
+    setExpandedGroups(prev => 
+      prev.includes(groupId) 
+        ? prev.filter(id => id !== groupId)
+        : [...prev, groupId]
+    );
+  };
+
+  const channelsByType = getChannelsByType();
+  const groupableTypes = Object.keys(channelsByType).filter(type => 
+    channelsByType[type].length >= 2
+  );
+
   // Filter individual channels for the sortable list
   const individualChannels = channels.filter(ch => !ch.isGroup);
 
@@ -169,119 +275,208 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
         </CardTitle>
         <CardDescription>Kanalları qruplaşdıra və ya ayrı-ayrı istifadə edə bilərsiniz</CardDescription>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="individual" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="individual" className="flex items-center gap-2">
-              <Link className="w-4 h-4" />
-              Fərdi Kanallar
-            </TabsTrigger>
-            <TabsTrigger value="groups" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Qruplar
-            </TabsTrigger>
-          </TabsList>
+      <CardContent className="space-y-6">
+        {/* Add Channel Form */}
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <Label>Platform</Label>
+              <Select value={selectedChannelType} onValueChange={setSelectedChannelType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Platform seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  {platformOptions.map((platform) => (
+                    <SelectItem key={platform.value} value={platform.value}>
+                      <div className="flex items-center gap-2">
+                        <platform.icon className="w-4 h-4" style={{ color: platform.color }} />
+                        {platform.label}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label>Əlaqə məlumatı</Label>
+              <Input
+                placeholder={getPlaceholderText()}
+                value={channelValue}
+                onChange={(e) => setChannelValue(e.target.value)}
+              />
+            </div>
+          </div>
 
-          <TabsContent value="individual" className="space-y-4">
-            {/* Add Channel Form */}
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 space-y-3">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <Label>Platform</Label>
-                  <Select value={selectedChannelType} onValueChange={setSelectedChannelType}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Platform seçin" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {platformOptions.map((platform) => (
-                        <SelectItem key={platform.value} value={platform.value}>
-                          <div className="flex items-center gap-2">
-                            <platform.icon className="w-4 h-4" style={{ color: platform.color }} />
-                            {platform.label}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Label>Əlaqə məlumatı</Label>
-                  <Input
-                    placeholder={getPlaceholderText()}
-                    value={channelValue}
-                    onChange={(e) => setChannelValue(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <Label>Xüsusi ad (ixtiyari)</Label>
-                  <Input
-                    placeholder={getLabelPlaceholder()}
-                    value={channelLabel}
-                    onChange={(e) => setChannelLabel(e.target.value)}
-                  />
-                </div>
-
-                {/* Custom Icon Upload - Only show for custom links */}
-                {selectedChannelType === 'custom' && (
-                  <div>
-                    <Label>Xüsusi ikon (ixtiyari)</Label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="file"
-                        accept="image/png,image/jpeg,image/svg+xml"
-                        onChange={handleCustomIconUpload}
-                        className="hidden"
-                        id="custom-icon-upload"
-                      />
-                      <label htmlFor="custom-icon-upload" className="cursor-pointer flex-1">
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 text-center hover:border-gray-400 transition-colors">
-                          {customIconUrl ? (
-                            <div className="flex items-center gap-2 justify-center">
-                              <img src={customIconUrl} alt="Custom icon" className="w-5 h-5 object-contain" />
-                              <span className="text-sm text-green-600">Ikon yükləndi</span>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2 justify-center text-gray-500">
-                              <Upload className="w-4 h-4" />
-                              <span className="text-sm">Ikon yükləyin</span>
-                            </div>
-                          )}
-                        </div>
-                      </label>
-                      {customIconUrl && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setCustomIcon(null);
-                            setCustomIconUrl('');
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">PNG, JPG və ya SVG (max 1MB). Boş buraxsanız link ikonu göstəriləcək.</p>
-                  </div>
-                )}
-              </div>
-              
-              <Button 
-                onClick={addChannel}
-                disabled={!selectedChannelType || !channelValue.trim()}
-                className="w-full"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Kanal əlavə et
-              </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <Label>Xüsusi ad (ixtiyari)</Label>
+              <Input
+                placeholder={getLabelPlaceholder()}
+                value={channelLabel}
+                onChange={(e) => setChannelLabel(e.target.value)}
+              />
             </div>
 
-            {/* Individual Channels List */}
+            {/* Custom Icon Upload - Only show for custom links */}
+            {selectedChannelType === 'custom' && (
+              <div>
+                <Label>Xüsusi ikon (ixtiyari)</Label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/svg+xml"
+                    onChange={handleCustomIconUpload}
+                    className="hidden"
+                    id="custom-icon-upload"
+                  />
+                  <label htmlFor="custom-icon-upload" className="cursor-pointer flex-1">
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 text-center hover:border-gray-400 transition-colors">
+                      {customIconUrl ? (
+                        <div className="flex items-center gap-2 justify-center">
+                          <img src={customIconUrl} alt="Custom icon" className="w-5 h-5 object-contain" />
+                          <span className="text-sm text-green-600">Ikon yükləndi</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 justify-center text-gray-500">
+                          <Upload className="w-4 h-4" />
+                          <span className="text-sm">Ikon yükləyin</span>
+                        </div>
+                      )}
+                    </div>
+                  </label>
+                  {customIconUrl && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setCustomIcon(null);
+                        setCustomIconUrl('');
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">PNG, JPG və ya SVG (max 1MB). Boş buraxsanız link ikonu göstəriləcək.</p>
+              </div>
+            )}
+          </div>
+          
+          <Button 
+            onClick={addChannel}
+            disabled={!selectedChannelType || !channelValue.trim()}
+            className="w-full"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Kanal əlavə et
+          </Button>
+        </div>
+
+        {/* Group Creation Suggestions */}
+        {groupableTypes.length > 0 && (
+          <Card className="border-dashed border-blue-300 bg-blue-50/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Users className="w-4 h-4 text-blue-600" />
+                Qrup Yaratma Təklifləri
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Eyni tip kanalları qruplaşdıra bilərsiniz
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="flex flex-wrap gap-2">
+                {groupableTypes.map(type => {
+                  const platform = platformOptions.find(p => p.value === type);
+                  const count = channelsByType[type].length;
+                  return (
+                    <Button
+                      key={type}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => createGroupFromType(type)}
+                      className="h-8 text-xs"
+                    >
+                      <platform.icon className="w-3 h-3 mr-1" style={{ color: platform.color }} />
+                      {platform?.label} ({count})
+                      <Users className="w-3 h-3 ml-1" />
+                    </Button>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Channels Tree View */}
+        {channels.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Bütün Kanallar</h3>
+            
+            {/* Groups */}
+            {channels.filter(ch => ch.isGroup).map(group => {
+              const platform = platformOptions.find(p => p.value === group.type);
+              const isExpanded = expandedGroups.includes(group.id);
+              
+              return (
+                <Card key={group.id} className="border-l-4 border-l-purple-500">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleGroupExpansion(group.id)}
+                          className="h-6 w-6 p-0"
+                        >
+                          {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                        </Button>
+                        <platform.icon className="w-4 h-4" style={{ color: platform?.color }} />
+                        <span className="font-medium">{group.label}</span>
+                        <Badge variant="secondary" className="text-xs">
+                          {group.groupItems?.length || 0} element
+                        </Badge>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => ungroupChannel(group.id)}
+                        className="h-8 text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  
+                  {isExpanded && group.groupItems && (
+                    <CardContent className="pt-0">
+                      <div className="space-y-2 pl-6">
+                        {group.groupItems.map(item => (
+                          <div key={item.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium">{item.label}</span>
+                              <span className="text-xs text-gray-500">{item.value}</span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeFromGroup(group.id, item.id)}
+                              className="h-6 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              );
+            })}
+
+            {/* Individual Channels */}
             {individualChannels.length > 0 && (
               <DndContext
                 sensors={sensors}
@@ -303,23 +498,16 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
                 </SortableContext>
               </DndContext>
             )}
+          </div>
+        )}
 
-            {individualChannels.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                <Link className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Hələ heç bir kanal əlavə edilməyib</p>
-                <p className="text-sm">Yuxarıdakı formu istifadə edərək kanal əlavə edin</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="groups">
-            <ChannelGroupManager
-              channels={channels}
-              onChannelsChange={onChannelsChange}
-            />
-          </TabsContent>
-        </Tabs>
+        {channels.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            <Link className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>Hələ heç bir kanal əlavə edilməyib</p>
+            <p className="text-sm">Yuxarıdakı formu istifadə edərək kanal əlavə edin</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
