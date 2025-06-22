@@ -1,7 +1,9 @@
+
 import { getDefaultTemplate } from './default-template.ts'
 import { getDarkTemplate } from './templates/dark-template.ts'
 import { getMinimalTemplate } from './templates/minimal-template.ts'
 import { getModernTemplate } from './templates/modern-template.ts'
+import { getElegantTemplate } from './templates/elegant-template.ts'
 import type { WidgetTemplate } from './template-types.ts'
 
 // Available templates registry
@@ -9,7 +11,8 @@ export const TEMPLATE_REGISTRY = {
   'default': getDefaultTemplate,
   'dark': getDarkTemplate,
   'minimal': getMinimalTemplate,
-  'modern': getModernTemplate
+  'modern': getModernTemplate,
+  'elegant': getElegantTemplate
 } as const
 
 export type TemplateId = keyof typeof TEMPLATE_REGISTRY
