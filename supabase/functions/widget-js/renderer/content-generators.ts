@@ -1,5 +1,48 @@
+
 import type { TemplateConfig } from './types.ts'
+import type { Channel } from '../types.ts'
 import { getChannelIcon, getChannelColor, getChannelUrl } from './channel-utils.ts'
+
+// Platform information mapping
+const platformInfo = {
+  whatsapp: { icon: 'fab fa-whatsapp', color: '#25d366' },
+  telegram: { icon: 'fab fa-telegram-plane', color: '#0088cc' },
+  instagram: { icon: 'fab fa-instagram', color: '#e4405f' },
+  messenger: { icon: 'fab fa-facebook-messenger', color: '#006aff' },
+  viber: { icon: 'fab fa-viber', color: '#665cac' },
+  skype: { icon: 'fab fa-skype', color: '#00aff0' },
+  discord: { icon: 'fab fa-discord', color: '#7289da' },
+  tiktok: { icon: 'fab fa-tiktok', color: '#000000' },
+  youtube: { icon: 'fab fa-youtube', color: '#ff0000' },
+  facebook: { icon: 'fab fa-facebook', color: '#1877f2' },
+  twitter: { icon: 'fab fa-twitter', color: '#1da1f2' },
+  linkedin: { icon: 'fab fa-linkedin', color: '#0077b5' },
+  github: { icon: 'fab fa-github', color: '#333333' },
+  website: { icon: 'fas fa-globe', color: '#6b7280' },
+  chatbot: { icon: 'fas fa-robot', color: '#3b82f6' },
+  email: { icon: 'fas fa-envelope', color: '#ea4335' },
+  phone: { icon: 'fas fa-phone', color: '#34d399' },
+  custom: { icon: 'fas fa-link', color: '#6b7280' }
+};
+
+function getPlatformInfo(type: string) {
+  return platformInfo[type as keyof typeof platformInfo] || platformInfo.custom;
+}
+
+function generateChannelLink(channel: Channel): string {
+  switch (channel.type) {
+    case 'whatsapp':
+      return `https://wa.me/${channel.value.replace(/[^0-9]/g, '')}`;
+    case 'telegram':
+      return channel.value.startsWith('@') ? `https://t.me/${channel.value.slice(1)}` : `https://t.me/${channel.value}`;
+    case 'email':
+      return `mailto:${channel.value}`;
+    case 'phone':
+      return `tel:${channel.value}`;
+    default:
+      return channel.value.startsWith('http') ? channel.value : `https://${channel.value}`;
+  }
+}
 
 export function generateChannelsHtml(config: TemplateConfig, templateId: string): string {
   if (templateId === 'minimal') {

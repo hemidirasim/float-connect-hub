@@ -1,3 +1,4 @@
+
 import type { WidgetTemplate } from '../template-types.ts'
 
 export const minimalTemplate: WidgetTemplate = {
@@ -544,3 +545,7 @@ export const minimalTemplate: WidgetTemplate = {
     })();
   `
 };
+
+export function getMinimalTemplate(): WidgetTemplate {
+  return minimalTemplate;
+}
