@@ -46,27 +46,28 @@ export const minimalTemplate: WidgetTemplate = {
       justify-content: center;
       font-size: 24px;
       color: white;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       z-index: 10001;
     }
 
     .widget-main-button:hover {
-      transform: translateY(-3px) scale(1.05);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
     }
 
     .widget-main-button.active {
-      transform: rotate(45deg) scale(0.9);
+      transform: rotate(45deg);
+      background: #ff4444 !important;
     }
 
     .widget-channels-list {
       position: absolute;
-      bottom: 0;
+      bottom: 80px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 15px;
       opacity: 0;
       visibility: hidden;
       transform: translateY(20px);
@@ -92,7 +93,7 @@ export const minimalTemplate: WidgetTemplate = {
       font-size: 20px;
       color: white;
       text-decoration: none;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       transform: scale(0);
@@ -109,28 +110,28 @@ export const minimalTemplate: WidgetTemplate = {
     }
 
     .widget-channels-list.show .widget-channel-btn:nth-child(2) {
-      transition-delay: 0.15s;
-    }
-
-    .widget-channels-list.show .widget-channel-btn:nth-child(3) {
       transition-delay: 0.2s;
     }
 
-    .widget-channels-list.show .widget-channel-btn:nth-child(4) {
-      transition-delay: 0.25s;
-    }
-
-    .widget-channels-list.show .widget-channel-btn:nth-child(5) {
+    .widget-channels-list.show .widget-channel-btn:nth-child(3) {
       transition-delay: 0.3s;
     }
 
+    .widget-channels-list.show .widget-channel-btn:nth-child(4) {
+      transition-delay: 0.4s;
+    }
+
+    .widget-channels-list.show .widget-channel-btn:nth-child(5) {
+      transition-delay: 0.5s;
+    }
+
     .widget-channels-list.show .widget-channel-btn:nth-child(6) {
-      transition-delay: 0.35s;
+      transition-delay: 0.6s;
     }
 
     .widget-channel-btn:hover {
       transform: translateY(-3px) scale(1.1);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
     }
 
     /* Platform colors */
@@ -403,10 +404,11 @@ export const minimalTemplate: WidgetTemplate = {
           return;
         }
 
-        // Button click handler
+        // Button click handler - Fixed the event listener
         button.addEventListener('click', function(e) {
+          e.preventDefault();
           e.stopPropagation();
-          console.log('Widget button clicked');
+          console.log('Widget button clicked, current state:', isMenuOpen);
           toggleMenu();
         });
 
@@ -415,13 +417,13 @@ export const minimalTemplate: WidgetTemplate = {
           const tooltipDisplay = '{{TOOLTIP_DISPLAY}}';
           
           if (tooltipDisplay === 'hover') {
-            button.addEventListener('mouseenter', () => {
+            button.addEventListener('mouseenter', function() {
               if (!isMenuOpen) {
                 tooltip.classList.add('show');
               }
             });
             
-            button.addEventListener('mouseleave', () => {
+            button.addEventListener('mouseleave', function() {
               tooltip.classList.remove('show');
             });
           } else if (tooltipDisplay === 'always') {
@@ -431,13 +433,13 @@ export const minimalTemplate: WidgetTemplate = {
 
         // Video hover functionality
         if (video) {
-          button.addEventListener('mouseenter', () => {
+          button.addEventListener('mouseenter', function() {
             if (!isMenuOpen) {
               video.classList.add('show');
             }
           });
           
-          button.addEventListener('mouseleave', () => {
+          button.addEventListener('mouseleave', function() {
             video.classList.remove('show');
           });
         }
@@ -459,7 +461,7 @@ export const minimalTemplate: WidgetTemplate = {
       function initChannelDropdowns() {
         const dropdownBtns = document.querySelectorAll('.widget-dropdown-btn');
         
-        dropdownBtns.forEach(btn => {
+        dropdownBtns.forEach(function(btn) {
           // Hover functionality for dropdowns
           btn.addEventListener('mouseenter', function() {
             if (!isMenuOpen) return;
@@ -469,8 +471,9 @@ export const minimalTemplate: WidgetTemplate = {
             
             if (dropdown) {
               closeAllDropdowns();
-              setTimeout(() => {
-                if (this.matches(':hover')) {
+              const self = this;
+              setTimeout(function() {
+                if (self.matches(':hover')) {
                   dropdown.classList.add('show');
                   activeDropdown = dropdown;
                 }
@@ -479,10 +482,11 @@ export const minimalTemplate: WidgetTemplate = {
           });
           
           btn.addEventListener('mouseleave', function() {
-            setTimeout(() => {
-              const dropdownId = this.getAttribute('data-dropdown');
-              const dropdown = document.getElementById(dropdownId);
-              if (dropdown && !dropdown.matches(':hover') && !this.matches(':hover')) {
+            const dropdownId = this.getAttribute('data-dropdown');
+            const dropdown = document.getElementById(dropdownId);
+            const self = this;
+            setTimeout(function() {
+              if (dropdown && !dropdown.matches(':hover') && !self.matches(':hover')) {
                 dropdown.classList.remove('show');
                 if (activeDropdown === dropdown) {
                   activeDropdown = null;
@@ -494,12 +498,13 @@ export const minimalTemplate: WidgetTemplate = {
         
         // Keep dropdown open when hovering over it
         const dropdowns = document.querySelectorAll('.widget-dropdown');
-        dropdowns.forEach(dropdown => {
+        dropdowns.forEach(function(dropdown) {
           dropdown.addEventListener('mouseleave', function() {
-            setTimeout(() => {
-              if (!this.matches(':hover')) {
-                this.classList.remove('show');
-                if (activeDropdown === this) {
+            const self = this;
+            setTimeout(function() {
+              if (!self.matches(':hover')) {
+                self.classList.remove('show');
+                if (activeDropdown === self) {
                   activeDropdown = null;
                 }
               }
@@ -510,7 +515,7 @@ export const minimalTemplate: WidgetTemplate = {
 
       function closeAllDropdowns() {
         const dropdowns = document.querySelectorAll('.widget-dropdown');
-        dropdowns.forEach(dropdown => {
+        dropdowns.forEach(function(dropdown) {
           dropdown.classList.remove('show');
         });
         activeDropdown = null;
@@ -522,9 +527,13 @@ export const minimalTemplate: WidgetTemplate = {
         const tooltip = document.querySelector('.widget-tooltip');
         const video = document.querySelector('.widget-video');
         
-        if (!channelsList) return;
+        if (!channelsList) {
+          console.error('Channels list not found');
+          return;
+        }
         
         isMenuOpen = !isMenuOpen;
+        console.log('Toggling menu, new state:', isMenuOpen);
         
         if (isMenuOpen) {
           channelsList.classList.add('show');
@@ -541,7 +550,7 @@ export const minimalTemplate: WidgetTemplate = {
       function closeMenu() {
         const button = document.querySelector('.widget-main-button');
         const channelsList = document.querySelector('.widget-channels-list');
-        if (channelsList) {
+        if (channelsList && button) {
           channelsList.classList.remove('show');
           button.classList.remove('active');
           isMenuOpen = false;
