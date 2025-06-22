@@ -2,7 +2,7 @@ import type { WidgetTemplate } from '../template-types.ts'
 
 export const getModernTemplate = (): WidgetTemplate => ({
   id: 'modern',
-  name: 'Modern Gradient',
+  name: 'Modern Gradienttt',
   description: 'Modern template with gradient effects and smooth animations',
   html: `
 <!-- Minimalist Template -->
