@@ -1,4 +1,3 @@
-
 import type { WidgetTemplate } from './template-types.ts'
 
 export const defaultTemplate: WidgetTemplate = {
@@ -54,19 +53,18 @@ export const defaultTemplate: WidgetTemplate = {
     }
     
     .lovable-channel-button {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 10px;
-    border: 1px solid #e2e8f061;
-    /* border-radius: 16px; */
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    text-decoration: none;
-    color: #334155;
-    font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    position: relative;
-    overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 10px;
+      border: 1px solid #e2e8f061;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      text-decoration: none;
+      color: #334155;
+      font-weight: 500;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
     }
     
     .lovable-channel-button::before {
@@ -140,7 +138,7 @@ export const defaultTemplate: WidgetTemplate = {
       transform: translateX(4px);
     }
 
-    /* Channel group styles */
+    /* Channel group styles - improved positioning */
     .lovable-channel-group {
       position: relative;
     }
@@ -168,9 +166,9 @@ export const defaultTemplate: WidgetTemplate = {
     
     .lovable-group-dropdown {
       position: absolute;
-      right: 0;
-      top: 100%;
-      margin-top: 8px;
+      left: 100%;
+      top: 0;
+      margin-left: 12px;
       background: white;
       border-radius: 12px;
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
@@ -241,10 +239,12 @@ export const defaultTemplate: WidgetTemplate = {
 
     @media (max-width: 768px) {
       .lovable-group-dropdown {
-        right: -20px;
-        left: -20px;
+        left: auto;
+        right: 100%;
+        margin-left: 0;
+        margin-right: 12px;
         min-width: auto;
-        max-width: none;
+        max-width: 280px;
       }
     }
   `,
@@ -332,10 +332,26 @@ export const defaultTemplate: WidgetTemplate = {
       },
 
       initChannelGroups() {
-        // Initialize channel group functionality
+        //  Initialize channel group functionality with hover
         const groupTriggers = document.querySelectorAll('.lovable-group-trigger');
         
         groupTriggers.forEach(trigger => {
+          // Hover functionality
+          trigger.addEventListener('mouseenter', (e) => {
+            const group = trigger.closest('.lovable-channel-group');
+            const dropdown = group.querySelector('.lovable-group-dropdown');
+            
+            if (dropdown) {
+              this.closeAllDropdowns();
+              setTimeout(() => {
+                if (trigger.matches(':hover')) {
+                  dropdown.classList.add('show');
+                }
+              }, 100);
+            }
+          });
+          
+          // Click functionality
           trigger.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -344,16 +360,29 @@ export const defaultTemplate: WidgetTemplate = {
             const dropdown = group.querySelector('.lovable-group-dropdown');
             
             if (dropdown) {
-              // Close all other dropdowns
               this.closeAllDropdowns();
               
-              // Toggle current dropdown
               if (dropdown.classList.contains('show')) {
                 dropdown.classList.remove('show');
               } else {
                 dropdown.classList.add('show');
               }
             }
+          });
+        });
+        
+        // Close dropdowns when mouse leaves group
+        const channelGroups = document.querySelectorAll('.lovable-channel-group');
+        channelGroups.forEach(group => {
+          group.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+              if (!group.matches(':hover')) {
+                const dropdown = group.querySelector('.lovable-group-dropdown');
+                if (dropdown) {
+                  dropdown.classList.remove('show');
+                }
+              }
+            }, 300);
           });
         });
         

@@ -213,9 +213,9 @@ export const minimalTemplate: WidgetTemplate = {
 
     .widget-dropdown {
       position: absolute;
-      right: 100%;
+      left: 100%;
       top: 0;
-      margin-right: 8px;
+      margin-left: 8px;
       background: white;
       border-radius: 8px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -229,11 +229,11 @@ export const minimalTemplate: WidgetTemplate = {
       display: block;
     }
 
-    .widget-container.position-left .widget-dropdown {
-      right: auto;
-      left: 100%;
-      margin-right: 0;
-      margin-left: 8px;
+    .widget-container.position-right .widget-dropdown {
+      left: auto;
+      right: 100%;
+      margin-left: 0;
+      margin-right: 8px;
     }
 
     .widget-dropdown-item {
@@ -349,11 +349,10 @@ export const minimalTemplate: WidgetTemplate = {
       
       .widget-dropdown {
         min-width: 200px;
-        right: 0 !important;
         left: auto !important;
+        right: 100% !important;
         margin: 0 !important;
-        top: 100% !important;
-        margin-top: 8px !important;
+        margin-right: 8px !important;
       }
     }
   `,
@@ -375,7 +374,7 @@ export const minimalTemplate: WidgetTemplate = {
           return;
         }
 
-        // Button click handler
+        // Button click handler - fixed the logic
         button.addEventListener('click', function(e) {
           e.stopPropagation();
           console.log('Widget button clicked');
@@ -438,6 +437,25 @@ export const minimalTemplate: WidgetTemplate = {
         const dropdownBtns = document.querySelectorAll('.widget-dropdown-btn');
         
         dropdownBtns.forEach(btn => {
+          // Hover functionality for dropdowns
+          btn.addEventListener('mouseenter', function() {
+            const dropdownId = this.getAttribute('data-dropdown');
+            const dropdown = document.getElementById(dropdownId);
+            
+            if (dropdown) {
+              closeAllDropdowns();
+              setTimeout(() => {
+                if (this.matches(':hover')) {
+                  dropdown.style.display = 'block';
+                  dropdown.classList.add('show');
+                  this.classList.add('active');
+                  activeDropdown = dropdown;
+                }
+              }, 100);
+            }
+          });
+          
+          // Click functionality for dropdowns
           btn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -458,24 +476,6 @@ export const minimalTemplate: WidgetTemplate = {
               } else {
                 closeDropdown(dropdown, this);
               }
-            }
-          });
-          
-          // Hover functionality for dropdowns
-          btn.addEventListener('mouseenter', function() {
-            const dropdownId = this.getAttribute('data-dropdown');
-            const dropdown = document.getElementById(dropdownId);
-            
-            if (dropdown && (!dropdown.style.display || dropdown.style.display === 'none')) {
-              setTimeout(() => {
-                if (this.matches(':hover')) {
-                  closeAllDropdowns();
-                  dropdown.style.display = 'block';
-                  dropdown.classList.add('show');
-                  this.classList.add('active');
-                  activeDropdown = dropdown;
-                }
-              }, 200);
             }
           });
         });
