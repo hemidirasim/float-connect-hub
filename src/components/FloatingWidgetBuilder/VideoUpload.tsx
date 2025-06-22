@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, Trash2, MessageCircle, Info, Play } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Upload, Trash2, MessageCircle, Info, Play, X } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface VideoUploadProps {
@@ -48,14 +49,31 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
   onButtonSizeChange
 }) => {
   const hasVideo = video || videoUrl;
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
 
   const handleVideoPreview = () => {
-    if (videoUrl) {
-      window.open(videoUrl, '_blank');
-    } else if (video) {
-      const url = URL.createObjectURL(video);
-      window.open(url, '_blank');
+    setVideoModalOpen(true);
+  };
+
+  const getVideoDisplayName = () => {
+    if (video && video.name) {
+      // Truncate long filenames
+      const name = video.name;
+      if (name.length > 25) {
+        return name.substring(0, 22) + '...';
+      }
+      return name;
     }
+    return 'Video Uploaded';
+  };
+
+  const getVideoSrc = () => {
+    if (videoUrl) {
+      return videoUrl;
+    } else if (video) {
+      return URL.createObjectURL(video);
+    }
+    return '';
   };
 
   return (
@@ -182,10 +200,12 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                   variant="outline"
                   onClick={() => document.getElementById('video-upload')?.click()}
                   disabled={uploading}
-                  className="flex-1"
+                  className="flex-1 min-w-0"
                 >
-                  <Upload className="w-4 h-4 mr-2" />
-                  {uploading ? 'Uploading...' : hasVideo ? (video ? video.name : 'Video Uploaded') : 'Choose Video'}
+                  <Upload className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">
+                    {uploading ? 'Uploading...' : hasVideo ? getVideoDisplayName() : 'Choose Video'}
+                  </span>
                 </Button>
                 
                 {hasVideo && (
@@ -246,6 +266,36 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
           </div>
         </CardContent>
       </Card>
+
+      {/* Video Preview Modal */}
+      <Dialog open={videoModalOpen} onOpenChange={setVideoModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+          <DialogHeader className="p-6 pb-2">
+            <DialogTitle className="flex items-center justify-between">
+              Video Preview
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setVideoModalOpen(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="p-6 pt-2">
+            {hasVideo && (
+              <video
+                src={getVideoSrc()}
+                controls
+                className="w-full max-h-[70vh] rounded-lg"
+                autoPlay={false}
+              >
+                Your browser does not support the video tag.
+              </video>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
