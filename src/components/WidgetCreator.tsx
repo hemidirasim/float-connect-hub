@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -115,9 +114,13 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
     toast.success("Kanal silindi");
   };
 
-  const editChannel = (id: string, newValue: string) => {
+  const editChannel = (id: string, newValue: string, newLabel?: string) => {
     setChannels(prev => prev.map(channel => 
-      channel.id === id ? { ...channel, value: newValue } : channel
+      channel.id === id ? { 
+        ...channel, 
+        value: newValue,
+        label: newLabel || channel.label 
+      } : channel
     ));
     toast.success("Kanal yeniləndi");
   };

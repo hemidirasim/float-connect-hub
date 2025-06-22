@@ -4,6 +4,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { GripVertical, Edit, Trash2, Check, X } from 'lucide-react';
 
 interface Channel {
@@ -11,6 +12,7 @@ interface Channel {
   type: string;
   value: string;
   label: string;
+  customIcon?: string;
 }
 
 interface Platform {
@@ -22,7 +24,7 @@ interface Platform {
 
 interface SortableChannelItemProps {
   channel: Channel;
-  onEdit: (id: string, newValue: string) => void;
+  onEdit: (id: string, newValue: string, newLabel?: string) => void;
   onRemove: (id: string) => void;
   platformOptions: Platform[];
 }
@@ -35,6 +37,7 @@ export const SortableChannelItem: React.FC<SortableChannelItemProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(channel.value);
+  const [editLabel, setEditLabel] = useState(channel.label);
 
   const {
     attributes,
@@ -56,13 +59,14 @@ export const SortableChannelItem: React.FC<SortableChannelItemProps> = ({
 
   const handleSaveEdit = () => {
     if (editValue.trim()) {
-      onEdit(channel.id, editValue.trim());
+      onEdit(channel.id, editValue.trim(), editLabel.trim());
       setIsEditing(false);
     }
   };
 
   const handleCancelEdit = () => {
     setEditValue(channel.value);
+    setEditLabel(channel.label);
     setIsEditing(false);
   };
 
@@ -85,20 +89,47 @@ export const SortableChannelItem: React.FC<SortableChannelItemProps> = ({
           className="w-8 h-8 rounded-full flex items-center justify-center text-white flex-shrink-0"
           style={{ backgroundColor: platform?.color || '#6b7280' }}
         >
-          {IconComponent && <IconComponent className="w-4 h-4" />}
+          {channel.type === 'custom' && channel.customIcon ? (
+            <img 
+              src={channel.customIcon} 
+              className="w-4 h-4 object-contain" 
+              alt="Custom icon"
+            />
+          ) : (
+            IconComponent && <IconComponent className="w-4 h-4" />
+          )}
         </div>
         
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-sm">{channel.label}</p>
           {isEditing ? (
-            <Input
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              className="mt-1"
-              onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit()}
-            />
+            <div className="space-y-2">
+              <div>
+                <Label htmlFor="edit-label" className="text-xs text-gray-600">Ad</Label>
+                <Input
+                  id="edit-label"
+                  value={editLabel}
+                  onChange={(e) => setEditLabel(e.target.value)}
+                  className="text-sm"
+                  placeholder="Kanal adı"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-value" className="text-xs text-gray-600">Əlaqə məlumatı</Label>
+                <Input
+                  id="edit-value"
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  className="text-sm"
+                  onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit()}
+                  placeholder="Əlaqə məlumatı"
+                />
+              </div>
+            </div>
           ) : (
-            <p className="text-xs text-gray-600 truncate">{channel.value}</p>
+            <>
+              <p className="font-medium text-sm">{channel.label}</p>
+              <p className="text-xs text-gray-600 truncate">{channel.value}</p>
+            </>
           )}
         </div>
       </div>

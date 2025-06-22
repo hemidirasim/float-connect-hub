@@ -1,29 +1,23 @@
-
-import { Channel } from "@/components/FloatingWidgetBuilder/types";
-
-export interface WidgetTemplate {
+export interface Channel {
   id: string;
-  name: string;
-  description: string;
-  html: string;
-  css: string;
-  js: string;
+  type: string;
+  value: string;
+  label: string;
 }
 
-export interface TemplateConfig {
+export interface WidgetData {
+  websiteUrl: string;
   channels: Channel[];
   buttonColor: string;
   position: string;
   tooltip: string;
-  tooltipDisplay: string;
-  tooltipPosition: string;
-  greetingMessage: string;
-  customIconUrl?: string;
-  videoEnabled: boolean;
   videoUrl?: string;
+  useVideoPreview: boolean;
   videoHeight: number;
   videoAlignment: string;
-  useVideoPreview: boolean;
+  customIcon?: string;
   buttonSize: number;
   previewVideoHeight: number;
+  templateId: string;
+  greetingMessage: string;
 }
