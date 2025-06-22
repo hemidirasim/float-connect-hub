@@ -3,7 +3,7 @@ import type { WidgetTemplate } from './template-types.ts'
 
 export const defaultTemplate: WidgetTemplate = {
   id: 'default',
-  name: 'Modern Clean Templatey', 
+  name: 'Modern Clean Templateyy', 
   description: 'Modern and clean floating widget with green accent',
   html: `
     <div id="lovable-widget-container" style="position: fixed; z-index: 999999; bottom: 20px; {{POSITION_STYLE}}">
