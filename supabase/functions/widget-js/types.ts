@@ -4,6 +4,7 @@ export interface Channel {
   type: string;
   value: string;
   label: string;
+  customIcon?: string; // For custom uploaded icons
 }
 
 export interface WidgetConfig {
