@@ -17,7 +17,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
   
   <!-- Tooltip -->
   <div class="hiclient-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">
-    {{TOOLTIP_TEXT}}
+    {{TOOLTIP_TEXT}}zzzzz
   </div>
 </div>
 
