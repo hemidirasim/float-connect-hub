@@ -92,13 +92,26 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     let finalHtml = '';
     
     if (htmlMatch && cssMatch) {
-      // Content is already properly escaped from template-generator, use directly
-      const html = htmlMatch[1];
-      const css = cssMatch[1];
+      const html = htmlMatch[1]
+        .replace(/\\n/g, '\n')
+        .replace(/\\t/g, '\t')
+        .replace(/\\'/g, "'")
+        .replace(/\\"/g, '"');
+      
+      const css = cssMatch[1]
+        .replace(/\\n/g, '\n')
+        .replace(/\\t/g, '\t')
+        .replace(/\\'/g, "'")
+        .replace(/\\"/g, '"');
       
       let js = '';
       if (jsMatch) {
-        js = jsMatch[1];
+        js = jsMatch[1]
+          .replace(/\\n/g, '\n')
+          .replace(/\\t/g, '\t')
+          .replace(/\\'/g, "'")
+          .replace(/\\"/g, '"')
+          .replace(/`/g, '\\`'); // Fix: Escape backticks to prevent template literal issues
       }
       
       finalHtml = `
