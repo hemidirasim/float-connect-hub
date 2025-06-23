@@ -1,6 +1,10 @@
 
-// JavaScript Logic for Default Template
 export const defaultJavaScriptLogic = `
+  // Import utility functions at the top
+  ${getChannelUrl.toString()}
+  ${getChannelIcon.toString()}
+  ${getChannelColor.toString()}
+  
   console.log('Widget loading with channels:', {{CHANNELS_DATA}});
   
   var channelsData = {{CHANNELS_DATA}};
@@ -126,6 +130,7 @@ export const defaultJavaScriptLogic = `
     
     var button = document.querySelector('#lovable-widget-button');
     var modal = document.querySelector('#lovable-widget-modal');
+    var modalContent = document.querySelector('#lovable-modal-content');
     var tooltip = document.querySelector('#lovable-widget-tooltip');
     var closeBtn = document.querySelector('#lovable-widget-close');
     
@@ -144,12 +149,11 @@ export const defaultJavaScriptLogic = `
       modal.style.visibility = 'visible';
       modal.style.opacity = '1';
       
-      setTimeout(function() {
-        var modalContent = document.querySelector('#lovable-modal-content');
-        if (modalContent) {
+      if (modalContent) {
+        setTimeout(function() {
           modalContent.style.transform = 'translateY(0)';
-        }
-      }, 50);
+        }, 50);
+      }
     });
     
     if (closeBtn) {
@@ -176,7 +180,6 @@ export const defaultJavaScriptLogic = `
     });
     
     function closeModal() {
-      var modalContent = document.querySelector('#lovable-modal-content');
       if (modalContent) {
         modalContent.style.transform = 'translateY(20px)';
       }

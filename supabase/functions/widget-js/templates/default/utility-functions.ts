@@ -1,5 +1,5 @@
 
-// Channel utility functions
+// Channel utility functions for default template
 export function getChannelUrl(channel: any): string {
   switch (channel.type) {
     case 'whatsapp':
