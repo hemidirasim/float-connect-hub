@@ -454,7 +454,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <Label>Xüsusi ad (ixtiyari)</Label>
+                <Label>Special name (Optional)</Label>
                 <Input
                   placeholder={getLabelPlaceholder()}
                   value={channelLabel}
@@ -465,7 +465,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
               {/* Custom Icon Upload - Only show for custom links */}
               {selectedChannelType === 'custom' && (
                 <div>
-                  <Label>Xüsusi ikon (ixtiyari)</Label>
+                  <Label>Special icon (Optional)</Label>
                   <div className="flex items-center gap-2">
                     <input
                       type="file"
