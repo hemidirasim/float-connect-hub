@@ -144,7 +144,7 @@ const defaultJavaScriptLogic = `
         html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="dropdown-item">';
         html += '<div class="dropdown-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="dropdown-info">';
-        html += '<div class="dropdown-label">' + escapeHtml(channel.label) + '</div>';
+        html += '<div class="dropdown-label">' + escapeHtml(channel.label) + ' (Primary)</div>';
         html += '<div class="dropdown-value">' + escapeHtml(channel.value) + '</div>';
         html += '</div>';
         html += '</a>';
