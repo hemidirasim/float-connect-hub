@@ -13,8 +13,8 @@ interface Channel {
   childChannels?: Channel[];
 }
 
-// JavaScript məntiqi
-const defaultJavaScriptLogic = (channelsData: Channel[], tooltipBehavior: string = 'hover') => `
+// JavaScript məntiqi funksiyası
+const defaultJavaScriptLogic = (channelsData: Channel[] = [], tooltipBehavior: string = 'hover') => `
   // HTML təhlükəsizliyi üçün funksiya
   function escapeHtml(text) {
     if (!text) return '';
@@ -32,7 +32,6 @@ const defaultJavaScriptLogic = (channelsData: Channel[], tooltipBehavior: string
   const channelsData = ${JSON.stringify(channelsData)};
   console.log('Widget loading with channels:', channelsData);
 
-  // Kanal açma funksiyası
   function openChannel(url) {
     try {
       window.open(url, '_blank');
@@ -41,7 +40,6 @@ const defaultJavaScriptLogic = (channelsData: Channel[], tooltipBehavior: string
     }
   }
 
-  // Dropdown açma/bağlama funksiyası
   function toggleDropdown(dropdownId) {
     const dropdown = document.getElementById(dropdownId);
     const arrow = document.querySelector('[data-dropdown="' + dropdownId + '"]');
@@ -70,7 +68,6 @@ const defaultJavaScriptLogic = (channelsData: Channel[], tooltipBehavior: string
     arrow.classList.toggle('rotated');
   }
 
-  // Kanallar üçün HTML generasiyası
   function generateChannelsHtml() {
     if (!channelsData || channelsData.length === 0) {
       const emptyState = document.querySelector('.lovable-empty-state');
@@ -110,7 +107,6 @@ const defaultJavaScriptLogic = (channelsData: Channel[], tooltipBehavior: string
         html += '</div>';
         html += '<div class="dropdown" id="' + dropdownId + '">';
         
-        // Ana kanal dropdown-da birinci element kimi
         html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="dropdown-item">';
         html += '<div class="dropdown-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="dropdown-info">';
@@ -151,7 +147,6 @@ const defaultJavaScriptLogic = (channelsData: Channel[], tooltipBehavior: string
     return html;
   }
 
-  // Vidjetin ilkinləşdirilməsi
   function initWidget() {
     console.log('Initializing widget...');
     
@@ -259,7 +254,6 @@ const defaultJavaScriptLogic = (channelsData: Channel[], tooltipBehavior: string
     console.log('Widget initialized successfully');
   }
 
-  // Vidjeti yeniləmə funksiyası
   window.refreshWidget = function() {
     const channelsContainer = document.querySelector('#lovable-widget-channels');
     if (channelsContainer) {
@@ -269,11 +263,9 @@ const defaultJavaScriptLogic = (channelsData: Channel[], tooltipBehavior: string
     }
   };
 
-  // Qlobal funksiyalar
   window.openChannel = openChannel;
   window.toggleDropdown = toggleDropdown;
 
-  // Səhifə yüklənməsini gözlə
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initWidget);
   } else {
@@ -288,7 +280,7 @@ export const defaultTemplate: WidgetTemplate = {
   description: 'Modern and clean floating widget with green accent',
   html: defaultHtmlTemplate,
   css: defaultCssStyles,
-  js: defaultJavaScriptLogic
+  js: defaultJavaScriptLogic([], 'hover') // Call the function with default values
 };
 
 export const getDefaultTemplate = () => defaultTemplate;
