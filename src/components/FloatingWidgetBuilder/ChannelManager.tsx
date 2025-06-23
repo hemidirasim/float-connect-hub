@@ -7,12 +7,128 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Plus, Trash2, GripVertical, Upload, Link, Users, ChevronDown, ChevronRight, Edit } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { SortableChannelItem } from "@/components/SortableChannelItem";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { platformOptions } from './constants';
 import { Channel } from './types';
 import { EditChannelModal } from './EditChannelModal';
+
+// SortableChannelItem component for drag and drop
+const SortableChannelItem = ({ channel, onEdit, onRemove, onAddChild }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: channel.id });
+  const platform = platformOptions.find(p => p.value === channel.type);
+  const IconComponent = platform?.icon;
+  const [isExpanded, setIsExpanded] = useState(false);
+  const hasChildren = channel.childChannels && channel.childChannels.length > 0;
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1000 : 1,
+  };
+
+  return (
+    <Card key={channel.id} className="border-l-4 border-l-blue-500" ref={setNodeRef} style={style}>
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 flex-1">
+            <div {...attributes} {...listeners} className="cursor-grab">
+              <GripVertical className="w-4 h-4 text-gray-400" />
+            </div>
+            {hasChildren && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="h-6 w-6 p-0"
+              >
+                {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </Button>
+            )}
+            {IconComponent && <IconComponent className="w-4 h-4" style={{ color: platform?.color }} />}
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{channel.label}</span>
+                {hasChildren && (
+                  <Badge variant="secondary" className="text-xs">
+                    +{channel.childChannels.length}
+                  </Badge>
+                )}
+              </div>
+              <span className="text-xs text-gray-500">{channel.value}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEdit(channel)}
+              className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700"
+              title="Redaktə et"
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onAddChild(channel.id)}
+              className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
+              title="Alt link əlavə et"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onRemove(channel.id)}
+              className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Child Channels */}
+        {hasChildren && isExpanded && (
+          <div className="mt-3 pl-6 space-y-2">
+            {channel.childChannels.map(childChannel => (
+              <div key={childChannel.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border-l-2 border-l-gray-300">
+                <div className="flex items-center gap-2">
+                  {IconComponent && <IconComponent className="w-3 h-3" style={{ color: platform?.color }} />}
+                  <div>
+                    <span className="text-sm font-medium">{childChannel.label}</span>
+                    <div className="text-xs text-gray-500">{childChannel.value}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onEdit(childChannel)}
+                    className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700"
+                    title="Redaktə et"
+                  >
+                    <Edit className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onRemove(childChannel.id)}
+                    className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
 
 interface ChannelManagerProps {
   channels: Channel[];
@@ -28,14 +144,17 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
   const [channelLabel, setChannelLabel] = useState('');
   const [customIcon, setCustomIcon] = useState<File | null>(null);
   const [customIconUrl, setCustomIconUrl] = useState('');
-  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
   const [addingChildTo, setAddingChildTo] = useState<string | null>(null);
   const [childChannelValue, setChildChannelValue] = useState('');
   const [editingChannel, setEditingChannel] = useState<Channel | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Minimum drag distance to activate
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -236,7 +355,26 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
     toast.success("Kanal silindi");
   };
 
-  const editChannel = (id: string, newValue: string, newLabel: string) => {
+  const handleEditClick = (channel: Channel) => {
+    setEditingChannel(channel);
+    setEditModalOpen(true);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active && over && active.id !== over.id) {
+      const oldIndex = channels.findIndex(item => item.id === active.id);
+      const newIndex = channels.findIndex(item => item.id === over.id);
+      
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newChannels = arrayMove(channels, oldIndex, newIndex);
+        onChannelsChange(newChannels);
+      }
+    }
+  };
+
+  const handleEditChannel = (id: string, newValue: string, newLabel: string) => {
     // Check if it's a child channel
     const parentChannel = channels.find(ch => ch.childChannels?.some(child => child.id === id));
     
@@ -266,29 +404,6 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
     }
     
     toast.success("Kanal yeniləndi");
-  };
-
-  const handleEditClick = (channel: Channel) => {
-    setEditingChannel(channel);
-    setEditModalOpen(true);
-  };
-
-  const handleDragEnd = (event: any) => {
-    const { active, over } = event;
-
-    if (active.id !== over.id) {
-      const oldIndex = channels.findIndex(item => item.id === active.id);
-      const newIndex = channels.findIndex(item => item.id === over.id);
-      onChannelsChange(arrayMove(channels, oldIndex, newIndex));
-    }
-  };
-
-  const toggleChannelExpansion = (channelId: string) => {
-    setExpandedGroups(prev => 
-      prev.includes(channelId) 
-        ? prev.filter(id => id !== channelId)
-        : [...prev, channelId]
-    );
   };
 
   // Filter only main channels for the sortable list (not child channels)
@@ -403,7 +518,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
             </Button>
           </div>
 
-          {/* Channels Tree View */}
+          {/* Channels List with Drag and Drop */}
           {mainChannels.length > 0 && (
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-gray-700 mb-3">Bütün Kanallar</h3>
@@ -415,140 +530,15 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
               >
                 <SortableContext items={mainChannels.map(c => c.id)} strategy={verticalListSortingStrategy}>
                   <div className="space-y-2">
-                    {mainChannels.map((channel) => {
-                      const platform = platformOptions.find(p => p.value === channel.type);
-                      const isExpanded = expandedGroups.includes(channel.id);
-                      const hasChildren = channel.childChannels && channel.childChannels.length > 0;
-                      
-                      return (
-                        <Card key={channel.id} className="border-l-4 border-l-blue-500">
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 flex-1">
-                                <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
-                                {hasChildren && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => toggleChannelExpansion(channel.id)}
-                                    className="h-6 w-6 p-0"
-                                  >
-                                    {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                                  </Button>
-                                )}
-                                <platform.icon className="w-4 h-4" style={{ color: platform?.color }} />
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium">{channel.label}</span>
-                                    {hasChildren && (
-                                      <Badge variant="secondary" className="text-xs">
-                                        +{channel.childChannels.length}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <span className="text-xs text-gray-500">{channel.value}</span>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleEditClick(channel)}
-                                  className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700"
-                                  title="Redaktə et"
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setAddingChildTo(channel.id)}
-                                  className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
-                                  title="Alt link əlavə et"
-                                >
-                                  <Plus className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => removeChannel(channel.id)}
-                                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </div>
-
-                            {/* Add Child Channel Form */}
-                            {addingChildTo === channel.id && (
-                              <div className="mt-3 p-3 bg-gray-50 rounded-lg border-2 border-dashed border-green-300">
-                                <div className="flex items-center gap-2">
-                                  <Input
-                                    placeholder={getChildPlaceholderText(channel.type)}
-                                    value={childChannelValue}
-                                    onChange={(e) => setChildChannelValue(e.target.value)}
-                                    className="flex-1"
-                                  />
-                                  <Button
-                                    size="sm"
-                                    onClick={() => addChildChannel(channel.id)}
-                                    disabled={!childChannelValue.trim()}
-                                  >
-                                    Əlavə et
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setAddingChildTo(null);
-                                      setChildChannelValue('');
-                                    }}
-                                  >
-                                    Ləğv et
-                                  </Button>
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Child Channels */}
-                            {hasChildren && isExpanded && (
-                              <div className="mt-3 pl-6 space-y-2">
-                                {channel.childChannels.map(childChannel => (
-                                  <div key={childChannel.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border-l-2 border-l-gray-300">
-                                    <div className="flex items-center gap-2">
-                                      <platform.icon className="w-3 h-3" style={{ color: platform?.color }} />
-                                      <div>
-                                        <span className="text-sm font-medium">{childChannel.label}</span>
-                                        <div className="text-xs text-gray-500">{childChannel.value}</div>
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleEditClick(childChannel)}
-                                        className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700"
-                                        title="Redaktə et"
-                                      >
-                                        <Edit className="w-3 h-3" />
-                                      </Button>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => removeChannel(childChannel.id)}
-                                        className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
-                                      >
-                                        <Trash2 className="w-3 h-3" />
-                                      </Button>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
+                    {mainChannels.map((channel) => (
+                      <SortableChannelItem 
+                        key={channel.id}
+                        channel={channel}
+                        onEdit={handleEditClick}
+                        onRemove={removeChannel}
+                        onAddChild={(id) => setAddingChildTo(id)}
+                      />
+                    ))}
                   </div>
                 </SortableContext>
               </DndContext>
@@ -562,6 +552,38 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
               <p className="text-sm">Yuxarıdakı formu istifadə edərək kanal əlavə edin</p>
             </div>
           )}
+
+          {/* Add Child Channel Form */}
+          {addingChildTo && (
+            <div className="mt-3 p-3 bg-gray-50 rounded-lg border-2 border-dashed border-green-300">
+              <h4 className="font-medium mb-2">Alt kanal əlavə et</h4>
+              <div className="flex items-center gap-2">
+                <Input
+                  placeholder={getChildPlaceholderText(channels.find(ch => ch.id === addingChildTo)?.type || '')}
+                  value={childChannelValue}
+                  onChange={(e) => setChildChannelValue(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  size="sm"
+                  onClick={() => addChildChannel(addingChildTo)}
+                  disabled={!childChannelValue.trim()}
+                >
+                  Əlavə et
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setAddingChildTo(null);
+                    setChildChannelValue('');
+                  }}
+                >
+                  Ləğv et
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -572,7 +594,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
           setEditModalOpen(false);
           setEditingChannel(null);
         }}
-        onSave={editChannel}
+        onSave={handleEditChannel}
       />
     </>
   );
