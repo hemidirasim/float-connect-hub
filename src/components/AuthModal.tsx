@@ -41,7 +41,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
       } else {
         const { error } = await signUp(email, password);
         if (error) {
-          toast.error("Registration error: " + error.message);
+          if (error.message.includes('already registered')) {
+            toast.error("This email is already registered. Please log in instead.");
+          } else {
+            toast.error("Registration error: " + error.message);
+          }
         } else {
           toast.success("Registration successful! Check your email for confirmation.");
           onOpenChange(false);

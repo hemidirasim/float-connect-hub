@@ -11,6 +11,7 @@ export const useAuth = () => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('Auth state changed:', event);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -19,6 +20,7 @@ export const useAuth = () => {
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Got existing session:', session ? 'yes' : 'no');
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -34,27 +36,48 @@ export const useAuth = () => {
     
     console.log(`Signing up with redirect to: ${redirectTo}`);
     
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectTo
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectTo
+        }
+      });
+      
+      // Check if user already exists
+      if (error && error.message.includes('already registered')) {
+        return { error };
       }
-    });
-    return { error };
+      
+      return { data, error };
+    } catch (error) {
+      console.error('Error during signup:', error);
+      return { error };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      return { data, error };
+    } catch (error) {
+      console.error('Error during sign in:', error);
+      return { error };
+    }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    return { error };
+    try {
+      const { error } = await supabase.auth.signOut();
+      return { error };
+    } catch (error) {
+      console.error('Error during sign out:', error);
+      return { error };
+    }
   };
 
   return {
