@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Toaster } from 'sonner';
 
 export const NotificationToaster = () => {
   return (
     <Toaster
-      position="top-right"
+      position="bottom-center"
       expand={true}
       richColors
       closeButton
