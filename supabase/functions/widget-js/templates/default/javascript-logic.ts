@@ -12,7 +12,10 @@ export const defaultJavaScriptLogic = `
   
   function generateChannelsHtml() {
     if (!channelsData || channelsData.length === 0) {
-      document.querySelector('.lovable-empty-state').style.display = 'block';
+      var emptyState = document.querySelector('.lovable-empty-state');
+      if (emptyState) {
+        emptyState.style.display = 'block';
+      }
       return '';
     }
     
@@ -29,7 +32,7 @@ export const defaultJavaScriptLogic = `
         html += '<div class="channel-item parent-channel">';
         html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="channel-info">';
-        html += '<div class="channel-label">' + channel.label + '</div>';
+        html += '<div class="channel-label">' + escapeHtml(channel.label) + '</div>';
         html += '<div class="channel-value">' + (channel.childChannels.length + 1) + ' kanal</div>';
         html += '</div>';
         html += '<div class="channel-arrow">›</div>';
@@ -39,11 +42,11 @@ export const defaultJavaScriptLogic = `
         html += '<div class="submenu">';
         
         // Add parent channel first
-        html += '<a href="' + channelUrl + '" target="_blank" class="submenu-item" onclick="openChannel(\\'' + channelUrl + '\\'); return false;">';
+        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="submenu-item">';
         html += '<div class="submenu-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="submenu-info">';
-        html += '<div class="submenu-label">' + channel.label + '</div>';
-        html += '<div class="submenu-value">' + channel.value + '</div>';
+        html += '<div class="submenu-label">' + escapeHtml(channel.label) + '</div>';
+        html += '<div class="submenu-value">' + escapeHtml(channel.value) + '</div>';
         html += '</div>';
         html += '</a>';
         
@@ -54,11 +57,11 @@ export const defaultJavaScriptLogic = `
           var childIcon = getChannelIcon(childChannel);
           var childColor = getChannelColor(childChannel.type);
           
-          html += '<a href="' + childUrl + '" target="_blank" class="submenu-item" onclick="openChannel(\\'' + childUrl + '\\'); return false;">';
+          html += '<a href="' + escapeHtml(childUrl) + '" target="_blank" class="submenu-item">';
           html += '<div class="submenu-icon" style="background: ' + childColor + ';">' + childIcon + '</div>';
           html += '<div class="submenu-info">';
-          html += '<div class="submenu-label">' + childChannel.label + '</div>';
-          html += '<div class="submenu-value">' + childChannel.value + '</div>';
+          html += '<div class="submenu-label">' + escapeHtml(childChannel.label) + '</div>';
+          html += '<div class="submenu-value">' + escapeHtml(childChannel.value) + '</div>';
           html += '</div>';
           html += '</a>';
         }
@@ -67,11 +70,11 @@ export const defaultJavaScriptLogic = `
         html += '</div>'; // Close parent channel
       } else {
         // Regular single channel
-        html += '<a href="' + channelUrl + '" target="_blank" class="channel-item" onclick="openChannel(\\'' + channelUrl + '\\'); return false;">';
+        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="channel-item">';
         html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="channel-info">';
-        html += '<div class="channel-label">' + channel.label + '</div>';
-        html += '<div class="channel-value">' + channel.value + '</div>';
+        html += '<div class="channel-label">' + escapeHtml(channel.label) + '</div>';
+        html += '<div class="channel-value">' + escapeHtml(channel.value) + '</div>';
         html += '</div>';
         html += '<div class="channel-arrow">→</div>';
         html += '</a>';
@@ -79,6 +82,16 @@ export const defaultJavaScriptLogic = `
     }
     
     return html;
+  }
+  
+  function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;');
   }
   
   function initWidget() {
@@ -104,6 +117,7 @@ export const defaultJavaScriptLogic = `
     button.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
+      console.log('Button clicked, showing modal');
       modal.style.display = 'flex';
     });
     
@@ -112,6 +126,7 @@ export const defaultJavaScriptLogic = `
       closeBtn.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
+        console.log('Close button clicked');
         modal.style.display = 'none';
       });
     }
@@ -119,6 +134,7 @@ export const defaultJavaScriptLogic = `
     // Modal backdrop click
     modal.addEventListener('click', function(e) {
       if (e.target === modal) {
+        console.log('Modal backdrop clicked');
         modal.style.display = 'none';
       }
     });
@@ -126,6 +142,7 @@ export const defaultJavaScriptLogic = `
     // ESC key
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && modal.style.display === 'flex') {
+        console.log('ESC key pressed');
         modal.style.display = 'none';
       }
     });
