@@ -1,64 +1,98 @@
-import type { WidgetTemplate } from './template-types.ts';
-import { defaultHtmlTemplate } from './templates/default/html-template.ts';
-import { defaultCssStyles } from './templates/default/css-styles.ts';
-import { getChannelUrl, getChannelIcon, getChannelColor } from './templates/default/utility-functions.ts';
+import type { WidgetTemplate } from './template-types.ts'
+import { defaultHtmlTemplate } from './templates/default/html-template.ts'
+import { defaultCssStyles } from './templates/default/css-styles.ts'
+import { getChannelUrl, getChannelIcon, getChannelColor } from './templates/default/utility-functions.ts'
 
-// Kanallar üçün interfeys
-interface Channel {
-  id: string;
-  type: string;
-  label: string;
-  value: string;
-  displayMode?: string;
-  childChannels?: Channel[];
-}
+// JavaScript logic with proper utility injection
+const defaultJavaScriptLogic = `
+  // Utility functions
+  function getChannelUrl(channel) {
+    switch (channel.type) {
+      case 'whatsapp':
+        return 'https://wa.me/' + channel.value.replace(/[^0-9]/g, '');
+      case 'telegram':
+        return channel.value.startsWith('@') ? 'https://t.me/' + channel.value.slice(1) : 'https://t.me/' + channel.value;
+      case 'email':
+        return 'mailto:' + channel.value;
+      case 'phone':
+        return 'tel:' + channel.value;
+      default:
+        return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
+    }
+  }
 
-// JavaScript məntiqi funksiyası
-const defaultJavaScriptLogic = (channelsData: Channel[] = [], tooltipBehavior: string = 'hover') => `
-  // HTML təhlükəsizliyi üçün funksiya
-  function escapeHtml(text) {
-    if (!text) return '';
-    const htmlEscaper = {
-      '&': '&',
-      '<': '<',
-      '>': '>',
-      '"': '"',
-      "'": '''
+  function getChannelIcon(channel) {
+    var icons = {
+      whatsapp: '📱',
+      telegram: '✈️',
+      instagram: '📷',
+      messenger: '💬',
+      viber: '📞',
+      skype: '💻',
+      discord: '🎮',
+      tiktok: '🎵',
+      youtube: '📺',
+      facebook: '👥',
+      twitter: '🐦',
+      linkedin: '💼',
+      github: '⚡',
+      website: '🌐',
+      chatbot: '🤖',
+      email: '✉️',
+      phone: '📞',
+      custom: '🔗'
     };
-    return String(text).replace(/[&<>"']/g, match => htmlEscaper[match]);
+    return icons[channel.type] || '🔗';
   }
 
-  // Kanal məlumatları
-  const channelsData = ${JSON.stringify(channelsData)};
-  console.log('Widget loading with channels:', channelsData);
-
+  function getChannelColor(type) {
+    var colors = {
+      whatsapp: '#25d366',
+      telegram: '#0088cc',
+      instagram: '#e4405f',
+      messenger: '#006aff',
+      viber: '#665cac',
+      skype: '#00aff0',
+      discord: '#7289da',
+      tiktok: '#000000',
+      youtube: '#ff0000',
+      facebook: '#1877f2',
+      twitter: '#1da1f2',
+      linkedin: '#0077b5',
+      github: '#333333',
+      website: '#6b7280',
+      chatbot: '#3b82f6',
+      email: '#ea4335',
+      phone: '#34d399',
+      custom: '#6b7280'
+    };
+    return colors[type] || '#6b7280';
+  }
+  
+  console.log('Widget loading with channels:', {{CHANNELS_DATA}});
+  
+  var channelsData = {{CHANNELS_DATA}};
+  
   function openChannel(url) {
-    try {
-      window.open(url, '_blank');
-    } catch (error) {
-      console.error('Failed to open channel:', error);
-    }
+    window.open(url, '_blank');
   }
-
+  
   function toggleDropdown(dropdownId) {
-    const dropdown = document.getElementById(dropdownId);
-    const arrow = document.querySelector('[data-dropdown="' + dropdownId + '"]');
+    var dropdown = document.getElementById(dropdownId);
+    var arrow = document.querySelector('[data-dropdown="' + dropdownId + '"]');
     
-    if (!dropdown || !arrow) {
-      console.warn('Dropdown or arrow not found for ID:', dropdownId);
-      return;
-    }
+    if (!dropdown || !arrow) return;
     
-    const allDropdowns = document.querySelectorAll('.dropdown');
-    const allArrows = document.querySelectorAll('.dropdown-arrow');
+    var allDropdowns = document.querySelectorAll('.dropdown');
+    var allArrows = document.querySelectorAll('.dropdown-arrow');
     
-    allDropdowns.forEach(d => {
+    allDropdowns.forEach(function(d) {
       if (d.id !== dropdownId) {
         d.classList.remove('show');
       }
     });
     
-    allArrows.forEach(a => {
+    allArrows.forEach(function(a) {
       if (a !== arrow) {
         a.classList.remove('rotated');
       }
@@ -67,29 +101,31 @@ const defaultJavaScriptLogic = (channelsData: Channel[] = [], tooltipBehavior: s
     dropdown.classList.toggle('show');
     arrow.classList.toggle('rotated');
   }
-
+  
   function generateChannelsHtml() {
     if (!channelsData || channelsData.length === 0) {
-      const emptyState = document.querySelector('.lovable-empty-state');
+      var emptyState = document.querySelector('.lovable-empty-state');
       if (emptyState) {
         emptyState.style.display = 'block';
       }
       return '';
     }
     
-    let html = '';
+    var html = '';
     
-    for (let i = 0; i < channelsData.length; i++) {
-      const channel = channelsData[i];
-      const channelUrl = getChannelUrl(channel);
-      const channelIcon = getChannelIcon(channel);
-      const channelColor = getChannelColor(channel.type);
+    for (var i = 0; i < channelsData.length; i++) {
+      var channel = channelsData[i];
+      var channelUrl = getChannelUrl(channel);
+      var channelIcon = getChannelIcon(channel);
+      var channelColor = getChannelColor(channel.type);
       
       if (channel.childChannels && channel.childChannels.length > 0) {
-        const dropdownId = 'dropdown-' + channel.id;
+        var dropdownId = 'dropdown-' + channel.id;
         
         html += '<div class="parent-channel-wrapper">';
         html += '<div style="display: flex; align-items: center; border: 1px solid #e2e8f0; border-radius: 12px; background: white; transition: all 0.3s ease;">';
+        
+        // Changed to a div instead of an anchor to prevent direct navigation
         html += '<div class="parent-channel" style="border: none; margin: 0; flex: 1; cursor: pointer;" onclick="toggleDropdown(\\'' + dropdownId + '\\')">';
         html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="channel-info">';
@@ -107,6 +143,7 @@ const defaultJavaScriptLogic = (channelsData: Channel[] = [], tooltipBehavior: s
         html += '</div>';
         html += '<div class="dropdown" id="' + dropdownId + '">';
         
+        // Add the parent channel as the first item in the dropdown
         html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="dropdown-item">';
         html += '<div class="dropdown-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="dropdown-info">';
@@ -115,11 +152,11 @@ const defaultJavaScriptLogic = (channelsData: Channel[] = [], tooltipBehavior: s
         html += '</div>';
         html += '</a>';
         
-        for (let j = 0; j < channel.childChannels.length; j++) {
-          const childChannel = channel.childChannels[j];
-          const childUrl = getChannelUrl(childChannel);
-          const childIcon = getChannelIcon(childChannel);
-          const childColor = getChannelColor(childChannel.type);
+        for (var j = 0; j < channel.childChannels.length; j++) {
+          var childChannel = channel.childChannels[j];
+          var childUrl = getChannelUrl(childChannel);
+          var childIcon = getChannelIcon(childChannel);
+          var childColor = getChannelColor(childChannel.type);
           
           html += '<a href="' + escapeHtml(childUrl) + '" target="_blank" class="dropdown-item">';
           html += '<div class="dropdown-icon" style="background: ' + childColor + ';">' + childIcon + '</div>';
@@ -146,24 +183,32 @@ const defaultJavaScriptLogic = (channelsData: Channel[] = [], tooltipBehavior: s
     
     return html;
   }
-
+  
+  function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+  
   function initWidget() {
     console.log('Initializing widget...');
     
-    const channelsContainer = document.querySelector('#lovable-widget-channels');
+    var channelsContainer = document.querySelector('#lovable-widget-channels');
     if (channelsContainer) {
-      const generatedHtml = generateChannelsHtml();
+      var generatedHtml = generateChannelsHtml();
       channelsContainer.innerHTML = generatedHtml;
       console.log('Channels HTML generated and inserted');
-    } else {
-      console.warn('Channels container not found');
     }
     
-    const button = document.querySelector('#lovable-widget-button');
-    const modal = document.querySelector('#lovable-widget-modal');
-    const modalContent = document.querySelector('#lovable-modal-content');
-    const tooltip = document.querySelector('#lovable-widget-tooltip');
-    const closeBtn = document.querySelector('#lovable-widget-close');
+    var button = document.querySelector('#lovable-widget-button');
+    var modal = document.querySelector('#lovable-widget-modal');
+    var modalContent = document.querySelector('#lovable-modal-content');
+    var tooltip = document.querySelector('#lovable-widget-tooltip');
+    var closeBtn = document.querySelector('#lovable-widget-close');
     
     if (!button || !modal) {
       console.error('Missing widget elements:', { button: !!button, modal: !!modal });
@@ -172,7 +217,7 @@ const defaultJavaScriptLogic = (channelsData: Channel[] = [], tooltipBehavior: s
     
     console.log('Widget elements found:', { button: !!button, modal: !!modal, closeBtn: !!closeBtn });
     
-    button.addEventListener('click', (e) => {
+    button.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
       console.log('Button clicked, showing modal');
@@ -181,14 +226,14 @@ const defaultJavaScriptLogic = (channelsData: Channel[] = [], tooltipBehavior: s
       modal.style.opacity = '1';
       
       if (modalContent) {
-        setTimeout(() => {
+        setTimeout(function() {
           modalContent.style.transform = 'translateY(0)';
         }, 50);
       }
     });
     
     if (closeBtn) {
-      closeBtn.addEventListener('click', (e) => {
+      closeBtn.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
         console.log('Close button clicked');
@@ -196,14 +241,14 @@ const defaultJavaScriptLogic = (channelsData: Channel[] = [], tooltipBehavior: s
       });
     }
     
-    modal.addEventListener('click', (e) => {
+    modal.addEventListener('click', function(e) {
       if (e.target === modal) {
         console.log('Modal backdrop clicked');
         closeModal();
       }
     });
     
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && modal.style.display === 'flex') {
         console.log('ESC key pressed');
         closeModal();
@@ -215,36 +260,36 @@ const defaultJavaScriptLogic = (channelsData: Channel[] = [], tooltipBehavior: s
         modalContent.style.transform = 'translateY(20px)';
       }
       
-      setTimeout(() => {
+      setTimeout(function() {
         modal.style.display = 'none';
         modal.style.visibility = 'hidden';
         modal.style.opacity = '0';
         
-        const allDropdowns = document.querySelectorAll('.dropdown');
-        const allArrows = document.querySelectorAll('.dropdown-arrow');
-        allDropdowns.forEach(dropdown => {
+        var allDropdowns = document.querySelectorAll('.dropdown');
+        var allArrows = document.querySelectorAll('.dropdown-arrow');
+        allDropdowns.forEach(function(dropdown) {
           dropdown.classList.remove('show');
         });
-        allArrows.forEach(arrow => {
+        allArrows.forEach(function(arrow) {
           arrow.classList.remove('rotated');
         });
       }, 100);
     }
     
     if (tooltip && button) {
-      if ('${tooltipBehavior}' === 'hover') {
-        button.addEventListener('mouseenter', () => {
+      if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
+        button.addEventListener('mouseenter', function() {
           tooltip.style.display = 'block';
           tooltip.style.visibility = 'visible';
           tooltip.style.opacity = '1';
         });
         
-        button.addEventListener('mouseleave', () => {
+        button.addEventListener('mouseleave', function() {
           tooltip.style.display = 'none';
           tooltip.style.visibility = 'hidden';
           tooltip.style.opacity = '0';
         });
-      } else if ('${tooltipBehavior}' === 'always') {
+      } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
         tooltip.style.display = 'block';
         tooltip.style.visibility = 'visible';
         tooltip.style.opacity = '1';
@@ -253,19 +298,18 @@ const defaultJavaScriptLogic = (channelsData: Channel[] = [], tooltipBehavior: s
     
     console.log('Widget initialized successfully');
   }
-
+  
   window.refreshWidget = function() {
-    const channelsContainer = document.querySelector('#lovable-widget-channels');
+    var channelsContainer = document.querySelector('#lovable-widget-channels');
     if (channelsContainer) {
-      const generatedHtml = generateChannelsHtml();
+      var generatedHtml = generateChannelsHtml();
       channelsContainer.innerHTML = generatedHtml;
-      console.log('Widget refreshed');
     }
   };
-
+  
   window.openChannel = openChannel;
   window.toggleDropdown = toggleDropdown;
-
+  
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initWidget);
   } else {
@@ -273,14 +317,13 @@ const defaultJavaScriptLogic = (channelsData: Channel[] = [], tooltipBehavior: s
   }
 `;
 
-// Şablon obyekti
 export const defaultTemplate: WidgetTemplate = {
   id: 'default',
-  name: 'Modern Clean Template',
+  name: 'Modern Clean Template', 
   description: 'Modern and clean floating widget with green accent',
   html: defaultHtmlTemplate,
   css: defaultCssStyles,
-  js: defaultJavaScriptLogic([], 'hover') // Call the function with default values
+  js: defaultJavaScriptLogic
 };
 
 export const getDefaultTemplate = () => defaultTemplate;
