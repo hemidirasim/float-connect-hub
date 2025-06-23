@@ -1,5 +1,5 @@
 
-import { Channel } from './types';
+import { Channel } from '../../components/FloatingWidgetBuilder/types';
 
 export class ChannelUtils {
   static getChannelUrl(channel: Channel): string {
