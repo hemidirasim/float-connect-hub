@@ -1,4 +1,3 @@
-
 import type { WidgetTemplate } from './template-types.ts'
 import type { TemplateConfig } from './renderer/types.ts'
 import { getPositionStyle, getTooltipPositionStyle } from './renderer/position-utils.ts'
@@ -59,6 +58,11 @@ export class WidgetTemplateRenderer {
       js = js.replace(regex, value)
     })
 
+    // Properly escape backticks to prevent template literal syntax errors
+    const escapedHtml = html.replace(/`/g, '\\`')
+    const escapedCss = css.replace(/`/g, '\\`')
+    const escapedJs = js.replace(/`/g, '\\`')
+
     // Add global function for channel clicks
     const globalScript = `
     window.openChannel = function(url) {
@@ -66,24 +70,24 @@ export class WidgetTemplateRenderer {
     };
     `
 
-    // Generate complete script
+    // Generate complete script using escaped content
     return `
 (function() {
   // Inject CSS
   const style = document.createElement('style');
-  style.textContent = \`${css}\`;
+  style.textContent = \`${escapedCss}\`;
   document.head.appendChild(style);
 
   // Inject HTML
   const widgetDiv = document.createElement('div');
-  widgetDiv.innerHTML = \`${html}\`;
+  widgetDiv.innerHTML = \`${escapedHtml}\`;
   document.body.appendChild(widgetDiv);
 
   // Add global functions
   ${globalScript}
 
   // Execute JavaScript
-  ${js}
+  ${escapedJs}
 })();
 `
   }
