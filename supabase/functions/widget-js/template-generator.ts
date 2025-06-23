@@ -5,6 +5,30 @@ import { generateVideoContent, generateButtonIcon } from './renderer/content-gen
 
 export type { TemplateConfig }
 
+// Utility function to escape special characters for JavaScript string literals
+function escapeJavaScriptString(str: string): string {
+  if (!str) return str;
+  
+  return str
+    .replace(/\\/g, '\\\\')    // Escape backslashes first
+    .replace(/'/g, "\\'")      // Escape single quotes
+    .replace(/"/g, '\\"')      // Escape double quotes
+    .replace(/`/g, '\\`')      // Escape backticks
+    .replace(/\n/g, '\\n')     // Escape newlines
+    .replace(/\r/g, '\\r')     // Escape carriage returns
+    .replace(/\t/g, '\\t');    // Escape tabs
+}
+
+// Utility function to escape content for template literals
+function escapeTemplateContent(content: string): string {
+  if (!content) return content;
+  
+  return content
+    .replace(/\\/g, '\\\\')    // Escape backslashes
+    .replace(/`/g, '\\`')      // Escape backticks
+    .replace(/\${/g, '\\${');  // Escape template literal expressions
+}
+
 export class WidgetTemplateRenderer {
   constructor(private template: WidgetTemplate, private config: TemplateConfig) {}
 
@@ -28,16 +52,20 @@ export class WidgetTemplateRenderer {
     const mobileChannelGap = Math.max(6, channelGap - 2)
     const mobileTooltipRightOffset = Math.max(50, tooltipRightOffset - 5)
 
+    // Escape user input values that will be used in JavaScript strings
+    const escapedTooltip = escapeJavaScriptString(this.config.tooltip || '')
+    const escapedGreetingMessage = escapeJavaScriptString(this.config.greetingMessage || 'Hi 👋\\nHow can we help you today?')
+
     // Replace placeholders - templates now generate their own channels
     const replacements = {
       '{{POSITION_STYLE}}': getPositionStyle(this.config.position),
       '{{TOOLTIP_POSITION_STYLE}}': getTooltipPositionStyle(this.config),
       '{{BUTTON_COLOR}}': this.config.buttonColor,
       '{{BUTTON_SIZE}}': buttonSize.toString(),
-      '{{TOOLTIP_TEXT}}': this.config.tooltip,
+      '{{TOOLTIP_TEXT}}': escapedTooltip,
       '{{TOOLTIP_DISPLAY}}': this.config.tooltipDisplay,
       '{{TOOLTIP_POSITION}}': this.config.tooltipPosition || 'top',
-      '{{GREETING_MESSAGE}}': this.config.greetingMessage || 'Hi 👋\\nHow can we help you today?',
+      '{{GREETING_MESSAGE}}': escapedGreetingMessage,
       '{{BUTTON_ICON}}': buttonIcon,
       '{{CHANNELS_DATA}}': JSON.stringify(this.config.channels), // Pass channel data to templates
       '{{VIDEO_CONTENT}}': videoContent,
@@ -58,10 +86,10 @@ export class WidgetTemplateRenderer {
       js = js.replace(regex, value)
     })
 
-    // Don't escape backticks - they are handled properly in template literals
-    const escapedHtml = html
-    const escapedCss = css
-    const escapedJs = js
+    // Escape content for template literals to prevent syntax errors
+    const escapedHtml = escapeTemplateContent(html)
+    const escapedCss = escapeTemplateContent(css)
+    const escapedJs = escapeTemplateContent(js)
 
     // Add global function for channel clicks
     const globalScript = `
@@ -70,7 +98,7 @@ export class WidgetTemplateRenderer {
     };
     `
 
-    // Generate complete script using content without backtick escaping
+    // Generate complete script using properly escaped content
     return `
 (function() {
   // Inject CSS
