@@ -179,9 +179,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
               if (script.textContent && script.textContent.trim()) {
                 console.log('Executing widget script for preview...');
                 try {
-                  // Create a new function from the script content and execute it
-                  const scriptContent = script.textContent;
-                  const scriptFunction = new Function(scriptContent);
+                  const scriptFunction = new Function(script.textContent);
                   scriptFunction();
                 } catch (e) {
                   console.error('Script execution error:', e);
