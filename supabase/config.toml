@@ -10,7 +10,7 @@ max_rows = 1000
 [auth]
 enabled = true
 port = 9999
-site_url = "https://hiclient.co"
+site_url = "https://monumental-bonbon-88b744.netlify.app"
 additional_redirect_urls = [
   "https://ttzioshkresaqmsodhfb.supabase.co",
   "https://hiclient.co",
@@ -20,12 +20,13 @@ additional_redirect_urls = [
   "http://localhost:5173",
   "http://127.0.0.1:8080",
   "http://127.0.0.1:3000",
-  "http://127.0.0.1:5173"
+  "http://127.0.0.1:5173",
+  "https://monumental-bonbon-88b744.netlify.app"
 ]
 jwt_expiry = 3600
 refresh_token_rotation_enabled = true
 security_update_password_require_reauthentication = true
-email_template_fetch_url = "https://hiclient.co/email-templates"
+email_template_fetch_url = "https://monumental-bonbon-88b744.netlify.app/email-templates"
 email_template_override_path = "email-templates"
 
 [functions.paddle-webhook]

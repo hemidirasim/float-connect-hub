@@ -31,13 +31,13 @@ export const useAuth = () => {
 
   const signUp = async (email: string, password: string) => {
     try {
-      // We're using passwordless auth disabled, so we don't need email confirmation
+      // Enable email confirmation by setting emailRedirectTo
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          // No email confirmation needed
-          emailRedirectTo: undefined,
+          // Set redirect URL for email confirmation
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             full_name: email.split('@')[0] // Default name from email
           }
@@ -47,11 +47,6 @@ export const useAuth = () => {
       // Check if user already exists
       if (error && error.message.includes('already registered')) {
         return { error };
-      }
-      
-      // If successful, automatically sign in the user
-      if (!error) {
-        await signIn(email, password);
       }
       
       return { data, error };

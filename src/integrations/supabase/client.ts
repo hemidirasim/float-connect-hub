@@ -12,6 +12,6 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     flowType: 'pkce', // Use PKCE flow for better security
     debug: false, // Set to true for development only
     // Custom email template settings
-    emailRedirectTo: window.location.origin
+    emailRedirectTo: `${window.location.origin}/auth/callback`
   }
 })

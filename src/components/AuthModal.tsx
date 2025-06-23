@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Mail, Lock, User, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, AlertCircle, Info } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AuthModalProps {
@@ -21,6 +21,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
   const { signIn, signUp } = useAuth();
 
   // Password validation states
@@ -95,7 +96,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
           setPassword('');
         }
       } else {
-        const { error } = await signUp(email, password);
+        const { data, error } = await signUp(email, password);
         if (error) {
           if (error.message.includes('already registered')) {
             toast.error("Bu email artıq qeydiyyatdan keçib. Zəhmət olmasa daxil olun.");
@@ -103,13 +104,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
             toast.error("Qeydiyyat xətası: " + error.message);
           }
         } else {
+          setEmailSent(true);
           toast.success("Qeydiyyat uğurla tamamlandı!", {
-            description: "Hesabınız yaradıldı və artıq daxil ola bilərsiniz."
+            description: "Təsdiq emaili göndərildi. Zəhmət olmasa emailinizi yoxlayın."
           });
-          // Switch to login mode after successful registration
-          setIsLogin(true);
-          setPassword('');
-          setConfirmPassword('');
         }
       }
     } catch (error) {
@@ -127,8 +125,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
+  const resetForm = () => {
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setPasswordErrors([]);
+    setEmailSent(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(newOpen) => {
+      if (!newOpen) {
+        resetForm();
+      }
+      onOpenChange(newOpen);
+    }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -136,120 +147,147 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
             {isLogin ? 'Daxil ol' : 'Qeydiyyatdan keç'}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="flex items-center gap-2">
-              <Mail className="w-4 h-4" />
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="email@example.com"
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="password" className="flex items-center gap-2">
-              <Lock className="w-4 h-4" />
-              Şifrə
-            </Label>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
-                onClick={togglePasswordVisibility}
+        
+        {emailSent ? (
+          <div className="space-y-4">
+            <Alert className="bg-blue-50 border-blue-200">
+              <Info className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-700">
+                <p className="font-medium">Təsdiq emaili göndərildi!</p>
+                <p className="mt-1">Zəhmət olmasa <strong>{email}</strong> ünvanına göndərilən emaili yoxlayın və hesabınızı təsdiqləyin.</p>
+              </AlertDescription>
+            </Alert>
+            
+            <div className="space-y-2 text-center">
+              <p className="text-sm text-gray-600">Emaili almadınız?</p>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => {
+                  setEmailSent(false);
+                  setIsLogin(true);
+                }}
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                Daxil olmağa qayıt
               </Button>
             </div>
           </div>
-          
-          {!isLogin && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="flex items-center gap-2">
-                  <Lock className="w-4 h-4" />
-                  Şifrəni təsdiqlə
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
-                    onClick={toggleConfirmPasswordVisibility}
-                  >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="email@example.com"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password" className="flex items-center gap-2">
+                <Lock className="w-4 h-4" />
+                Şifrə
+              </Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+                  onClick={togglePasswordVisibility}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
               </div>
-              
-              {passwordErrors.length > 0 && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    <div className="text-sm font-medium mb-1">Şifrə tələbləri:</div>
-                    <ul className="text-xs list-disc pl-5 space-y-1">
-                      {passwordErrors.map((error, index) => (
-                        <li key={index}>{error}</li>
-                      ))}
-                    </ul>
-                  </AlertDescription>
-                </Alert>
-              )}
-              
-              {password && confirmPassword && password !== confirmPassword && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Şifrələr uyğun gəlmir
-                  </AlertDescription>
-                </Alert>
-              )}
-            </>
-          )}
-          
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Zəhmət olmasa gözləyin...' : (isLogin ? 'Daxil ol' : 'Qeydiyyatdan keç')}
-          </Button>
-          
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setPassword('');
-                setConfirmPassword('');
-                setPasswordErrors([]);
-              }}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              {isLogin ? "Hesabınız yoxdur? Qeydiyyatdan keçin" : "Artıq hesabınız var? Daxil olun"}
-            </button>
-          </div>
-        </form>
+            </div>
+            
+            {!isLogin && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="flex items-center gap-2">
+                    <Lock className="w-4 h-4" />
+                    Şifrəni təsdiqlə
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+                      onClick={toggleConfirmPasswordVisibility}
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+                
+                {passwordErrors.length > 0 && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      <div className="text-sm font-medium mb-1">Şifrə tələbləri:</div>
+                      <ul className="text-xs list-disc pl-5 space-y-1">
+                        {passwordErrors.map((error, index) => (
+                          <li key={index}>{error}</li>
+                        ))}
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
+                {password && confirmPassword && password !== confirmPassword && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Şifrələr uyğun gəlmir
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </>
+            )}
+            
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Zəhmət olmasa gözləyin...' : (isLogin ? 'Daxil ol' : 'Qeydiyyatdan keç')}
+            </Button>
+            
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setPassword('');
+                  setConfirmPassword('');
+                  setPasswordErrors([]);
+                }}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                {isLogin ? "Hesabınız yoxdur? Qeydiyyatdan keçin" : "Artıq hesabınız var? Daxil olun"}
+              </button>
+            </div>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
