@@ -1,0 +1,180 @@
+
+import { getChannelUrl, getChannelIcon, getChannelColor } from './channel-utils.ts';
+
+export const defaultJavaScriptLogic = `
+  console.log('Widget loading with channels:', {{CHANNELS_DATA}});
+  
+  var channelsData = {{CHANNELS_DATA}};
+  
+  function openChannel(url) {
+    window.open(url, '_blank');
+  }
+  
+  function generateChannelsHtml() {
+    if (!channelsData || channelsData.length === 0) {
+      document.querySelector('.lovable-empty-state').style.display = 'block';
+      return '';
+    }
+    
+    var html = '';
+    
+    for (var i = 0; i < channelsData.length; i++) {
+      var channel = channelsData[i];
+      var channelUrl = getChannelUrl(channel);
+      var channelIcon = getChannelIcon(channel);
+      var channelColor = getChannelColor(channel.type);
+      
+      // Check if channel has child channels
+      if (channel.childChannels && channel.childChannels.length > 0) {
+        html += '<div class="channel-item parent-channel">';
+        html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
+        html += '<div class="channel-info">';
+        html += '<div class="channel-label">' + channel.label + '</div>';
+        html += '<div class="channel-value">' + (channel.childChannels.length + 1) + ' kanal</div>';
+        html += '</div>';
+        html += '<div class="channel-arrow">›</div>';
+        html += '<div class="child-count">' + (channel.childChannels.length + 1) + '</div>';
+        
+        // Submenu with all channels (parent + children)
+        html += '<div class="submenu">';
+        
+        // Add parent channel first
+        html += '<a href="' + channelUrl + '" target="_blank" class="submenu-item" onclick="openChannel(\\'' + channelUrl + '\\'); return false;">';
+        html += '<div class="submenu-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
+        html += '<div class="submenu-info">';
+        html += '<div class="submenu-label">' + channel.label + '</div>';
+        html += '<div class="submenu-value">' + channel.value + '</div>';
+        html += '</div>';
+        html += '</a>';
+        
+        // Add child channels
+        for (var j = 0; j < channel.childChannels.length; j++) {
+          var childChannel = channel.childChannels[j];
+          var childUrl = getChannelUrl(childChannel);
+          var childIcon = getChannelIcon(childChannel);
+          var childColor = getChannelColor(childChannel.type);
+          
+          html += '<a href="' + childUrl + '" target="_blank" class="submenu-item" onclick="openChannel(\\'' + childUrl + '\\'); return false;">';
+          html += '<div class="submenu-icon" style="background: ' + childColor + ';">' + childIcon + '</div>';
+          html += '<div class="submenu-info">';
+          html += '<div class="submenu-label">' + childChannel.label + '</div>';
+          html += '<div class="submenu-value">' + childChannel.value + '</div>';
+          html += '</div>';
+          html += '</a>';
+        }
+        
+        html += '</div>'; // Close submenu
+        html += '</div>'; // Close parent channel
+      } else {
+        // Regular single channel
+        html += '<a href="' + channelUrl + '" target="_blank" class="channel-item" onclick="openChannel(\\'' + channelUrl + '\\'); return false;">';
+        html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
+        html += '<div class="channel-info">';
+        html += '<div class="channel-label">' + channel.label + '</div>';
+        html += '<div class="channel-value">' + channel.value + '</div>';
+        html += '</div>';
+        html += '<div class="channel-arrow">→</div>';
+        html += '</a>';
+      }
+    }
+    
+    return html;
+  }
+  
+  function initWidget() {
+    console.log('Initializing widget...');
+    
+    var channelsContainer = document.querySelector('#lovable-widget-channels');
+    if (channelsContainer) {
+      var generatedHtml = generateChannelsHtml();
+      channelsContainer.innerHTML = generatedHtml;
+    }
+    
+    var button = document.querySelector('#lovable-widget-button');
+    var modal = document.querySelector('#lovable-widget-modal');
+    var tooltip = document.querySelector('#lovable-widget-tooltip');
+    var closeBtn = document.querySelector('#lovable-widget-close');
+    
+    if (!button || !modal) {
+      console.error('Missing widget elements');
+      return;
+    }
+    
+    // Button click to show modal
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      modal.style.display = 'flex';
+    });
+    
+    // Close button
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        modal.style.display = 'none';
+      });
+    }
+    
+    // Modal backdrop click
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+    
+    // ESC key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal.style.display === 'flex') {
+        modal.style.display = 'none';
+      }
+    });
+    
+    // Tooltip functionality
+    if (tooltip && button) {
+      if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
+        button.addEventListener('mouseenter', function() {
+          tooltip.style.display = 'block';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+          tooltip.style.display = 'none';
+        });
+      } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
+        tooltip.style.display = 'block';
+      }
+    }
+    
+    console.log('Widget initialized successfully');
+  }
+  
+  // Global function for refreshing widget
+  window.refreshWidget = function() {
+    var channelsContainer = document.querySelector('#lovable-widget-channels');
+    if (channelsContainer) {
+      var generatedHtml = generateChannelsHtml();
+      channelsContainer.innerHTML = generatedHtml;
+    }
+  };
+  
+  // Global function for opening channels
+  window.openChannel = openChannel;
+  
+  // Initialize when ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWidget);
+  } else {
+    initWidget();
+  }
+`;
+
+// Inject the utility functions into the JavaScript template
+export function getJavaScriptWithUtils(): string {
+  const utils = `
+    ${getChannelUrl.toString()}
+    ${getChannelIcon.toString()}
+    ${getChannelColor.toString()}
+  `;
+  
+  return utils + defaultJavaScriptLogic;
+}
