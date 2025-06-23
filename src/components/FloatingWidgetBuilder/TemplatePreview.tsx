@@ -172,22 +172,8 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
             document.body.appendChild(element);
           });
 
-          // Wait a bit for DOM to be ready, then execute any inline scripts
-          setTimeout(() => {
-            // Find and execute script tags
-            const scripts = document.querySelectorAll('script[data-widget-preview]');
-            scripts.forEach(script => {
-              if (script.textContent && script.textContent.trim()) {
-                console.log('Executing widget script for preview...');
-                try {
-                  const scriptFunction = new Function(script.textContent);
-                  scriptFunction();
-                } catch (e) {
-                  console.error('Script execution error:', e);
-                }
-              }
-            });
-          }, 100);
+          // The script will execute automatically when appended to DOM
+          // No need to manually execute it again
 
         } catch (error) {
           console.error('Error rendering floating widget:', error);
