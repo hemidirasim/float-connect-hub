@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { Mail, Lock, User, Eye, EyeOff, AlertCircle, Info } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, AlertCircle, Info, ArrowLeft } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AuthModalProps {
@@ -15,6 +15,7 @@ interface AuthModalProps {
 
 export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -22,7 +23,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const [resetEmailSent, setResetEmailSent] = useState(false);
+  const { signIn, signUp, resetPassword } = useAuth();
 
   // Password validation states
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
@@ -61,13 +63,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password) {
+    if (!email || (!isForgotPassword && !password)) {
       toast.error("Email və şifrə tələb olunur");
       return;
     }
 
     // Additional validation for registration
-    if (!isLogin) {
+    if (!isLogin && !isForgotPassword) {
       if (password !== confirmPassword) {
         toast.error("Şifrələr uyğun gəlmir");
         return;
@@ -81,7 +83,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
 
     setLoading(true);
     try {
-      if (isLogin) {
+      if (isForgotPassword) {
+        // Handle password reset
+        const { error } = await resetPassword(email);
+        if (error) {
+          toast.error("Şifrə sıfırlama xətası: " + error.message);
+        } else {
+          setResetEmailSent(true);
+          toast.success("Şifrə sıfırlama linki göndərildi!", {
+            description: "Zəhmət olmasa emailinizi yoxlayın."
+          });
+        }
+      } else if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
           if (error.message.includes('Invalid login credentials')) {
@@ -131,6 +144,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
     setConfirmPassword('');
     setPasswordErrors([]);
     setEmailSent(false);
+    setResetEmailSent(false);
+    setIsForgotPassword(false);
   };
 
   return (
@@ -143,8 +158,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <User className="w-5 h-5 text-blue-600" />
-            {isLogin ? 'Daxil ol' : 'Qeydiyyatdan keç'}
+            {isForgotPassword ? (
+              <>
+                <Lock className="w-5 h-5 text-blue-600" />
+                Şifrəni sıfırla
+              </>
+            ) : (
+              <>
+                <User className="w-5 h-5 text-blue-600" />
+                {isLogin ? 'Daxil ol' : 'Qeydiyyatdan keç'}
+              </>
+            )}
           </DialogTitle>
         </DialogHeader>
         
@@ -172,6 +196,66 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
               </Button>
             </div>
           </div>
+        ) : resetEmailSent ? (
+          <div className="space-y-4">
+            <Alert className="bg-blue-50 border-blue-200">
+              <Info className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-700">
+                <p className="font-medium">Şifrə sıfırlama linki göndərildi!</p>
+                <p className="mt-1">Zəhmət olmasa <strong>{email}</strong> ünvanına göndərilən emaili yoxlayın və şifrənizi sıfırlayın.</p>
+              </AlertDescription>
+            </Alert>
+            
+            <div className="space-y-2 text-center">
+              <p className="text-sm text-gray-600">Emaili almadınız?</p>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => {
+                  setResetEmailSent(false);
+                  setIsForgotPassword(false);
+                  setIsLogin(true);
+                }}
+              >
+                Daxil olmağa qayıt
+              </Button>
+            </div>
+          </div>
+        ) : isForgotPassword ? (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="mb-2 -ml-2 text-gray-600"
+                onClick={() => setIsForgotPassword(false)}
+              >
+                <ArrowLeft className="w-4 h-4 mr-1" />
+                Geri qayıt
+              </Button>
+              
+              <p className="text-sm text-gray-600 mb-4">
+                Email ünvanınızı daxil edin və şifrə sıfırlama linki alacaqsınız.
+              </p>
+              
+              <Label htmlFor="reset-email" className="flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Email
+              </Label>
+              <Input
+                id="reset-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="email@example.com"
+                required
+              />
+            </div>
+            
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Göndərilir...' : 'Şifrə sıfırlama linki göndər'}
+            </Button>
+          </form>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -272,7 +356,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
               {loading ? 'Zəhmət olmasa gözləyin...' : (isLogin ? 'Daxil ol' : 'Qeydiyyatdan keç')}
             </Button>
             
-            <div className="text-center">
+            <div className="flex justify-between text-sm">
+              {isLogin && (
+                <button
+                  type="button"
+                  onClick={() => setIsForgotPassword(true)}
+                  className="text-blue-600 hover:underline"
+                >
+                  Şifrəni unutmusunuz?
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => {
@@ -281,7 +374,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
                   setConfirmPassword('');
                   setPasswordErrors([]);
                 }}
-                className="text-sm text-blue-600 hover:underline"
+                className={`text-blue-600 hover:underline ${isLogin ? 'ml-auto' : ''}`}
               >
                 {isLogin ? "Hesabınız yoxdur? Qeydiyyatdan keçin" : "Artıq hesabınız var? Daxil olun"}
               </button>
