@@ -96,6 +96,7 @@ const Index = () => {
       toast.error('Video yükləmək üçün daxil olmalısınız', {
         description: 'Zəhmət olmasa hesabınıza daxil olun'
       });
+      setAuthModalOpen(true);
       return;
     }
 
@@ -196,6 +197,12 @@ const Index = () => {
   };
 
   const handleCreateWidgetWrapper = async () => {
+    if (!user) {
+      // Show login modal if user is not authenticated
+      setAuthModalOpen(true);
+      return;
+    }
+    
     setSaving(true);
     const result = await createWidget();
     
