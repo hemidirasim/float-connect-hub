@@ -479,12 +479,12 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
                         {customIconUrl ? (
                           <div className="flex items-center gap-2 justify-center">
                             <img src={customIconUrl} alt="Custom icon" className="w-5 h-5 object-contain" />
-                            <span className="text-sm text-green-600">Ikon yükləndi</span>
+                            <span className="text-sm text-green-600">Icon uploaded</span>
                           </div>
                         ) : (
                           <div className="flex items-center gap-2 justify-center text-gray-500">
                             <Upload className="w-4 h-4" />
-                            <span className="text-sm">Ikon yükləyin</span>
+                            <span className="text-sm">Upload icon</span>
                           </div>
                         )}
                       </div>
@@ -503,7 +503,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
                       </Button>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">PNG, JPG və ya SVG (max 1MB). Boş buraxsanız link ikonu göstəriləcək.</p>
+                  <p className="text-xs text-gray-500 mt-1">PNG, JPG və ya SVG (max 1MB).If you leave it blank, the default link icon will be displayed.</p>
                 </div>
               )}
             </div>
@@ -514,14 +514,14 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
               className="w-full"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Kanal əlavə et
+              Add chanell
             </Button>
           </div>
 
           {/* Channels List with Drag and Drop */}
           {mainChannels.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Bütün Kanallar</h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">All chanells</h3>
               
               <DndContext
                 sensors={sensors}
