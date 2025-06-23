@@ -1,3 +1,4 @@
+
 import type { WidgetTemplate } from './template-types.ts'
 
 export const defaultTemplate: WidgetTemplate = {
@@ -266,6 +267,23 @@ export const defaultTemplate: WidgetTemplate = {
     console.log('channelsData type:', typeof channelsData);
     console.log('channelsData length:', channelsData ? channelsData.length : 'null');
     
+    // Global function to refresh widget content when channels change
+    window.refreshWidget = function() {
+      console.log('Refreshing widget content...');
+      const channelsContainer = document.querySelector('#lovable-widget-channels');
+      if (channelsContainer) {
+        const generatedHtml = generateChannelsHtml();
+        console.log('Refreshing with new HTML:', generatedHtml);
+        channelsContainer.innerHTML = generatedHtml;
+        
+        // Re-add event listeners for channel clicks
+        addChannelClickListeners();
+        
+        // Re-initialize channel groups
+        initChannelGroups();
+      }
+    };
+    
     function generateChannelsHtml() {
       console.log('generateChannelsHtml called');
       
@@ -367,6 +385,27 @@ export const defaultTemplate: WidgetTemplate = {
       return html;
     }
     
+    function addChannelClickListeners() {
+      console.log('Adding channel click listeners...');
+      const channelsContainer = document.querySelector('#lovable-widget-channels');
+      
+      if (channelsContainer) {
+        // Add event listeners for channel clicks using data attributes
+        const channelButtons = channelsContainer.querySelectorAll('[data-channel-url]');
+        console.log('Found channel buttons:', channelButtons.length);
+        
+        channelButtons.forEach(function(button, index) {
+          console.log('Adding click listener to button ' + index);
+          button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = button.getAttribute('data-channel-url');
+            console.log('Channel button clicked, opening:', url);
+            window.open(url, '_blank');
+          });
+        });
+      }
+    }
+    
     function getChannelUrl(channel) {
       console.log('getChannelUrl called for:', channel);
       
@@ -428,19 +467,8 @@ export const defaultTemplate: WidgetTemplate = {
         console.log('Setting innerHTML with:', generatedHtml);
         channelsContainer.innerHTML = generatedHtml;
         
-        // Add event listeners for channel clicks using data attributes
-        const channelButtons = channelsContainer.querySelectorAll('[data-channel-url]');
-        console.log('Found channel buttons:', channelButtons.length);
-        
-        channelButtons.forEach(function(button, index) {
-          console.log('Adding click listener to button ' + index);
-          button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const url = button.getAttribute('data-channel-url');
-            console.log('Channel button clicked, opening:', url);
-            window.open(url, '_blank');
-          });
-        });
+        // Add event listeners for channel clicks
+        addChannelClickListeners();
       }
       
       const button = document.querySelector('#lovable-widget-button');
@@ -496,8 +524,10 @@ export const defaultTemplate: WidgetTemplate = {
         }
       });
       
-      // Initialize channel groups AFTER HTML is inserted
-      initChannelGroups();
+      // Initialize channel groups AFTER HTML is inserted and click listeners added
+      setTimeout(function() {
+        initChannelGroups();
+      }, 100);
       
       // Tooltip functionality
       if (tooltip && button) {
@@ -528,14 +558,24 @@ export const defaultTemplate: WidgetTemplate = {
         const groupId = trigger.getAttribute('data-group-id');
         console.log('Group ID:', groupId);
         
+        // Remove any existing listeners to avoid duplicates
+        trigger.replaceWith(trigger.cloneNode(true));
+        // Get the new element after cloning
+        const newTrigger = document.querySelector('[data-group-id="' + groupId + '"]');
+        
+        if (!newTrigger) {
+          console.log('Could not find trigger after cloning');
+          return;
+        }
+        
         // Click functionality for showing dropdown
-        trigger.addEventListener('click', function(e) {
+        newTrigger.addEventListener('click', function(e) {
           console.log('Group trigger clicked for group:', groupId);
           e.preventDefault();
           e.stopPropagation();
           
-          const group = trigger.closest('.lovable-channel-group');
-          const dropdown = group.querySelector('.lovable-group-dropdown');
+          const group = newTrigger.closest('.lovable-channel-group');
+          const dropdown = group ? group.querySelector('.lovable-group-dropdown') : null;
           
           console.log('Group found:', !!group);
           console.log('Dropdown found:', !!dropdown);
@@ -555,14 +595,14 @@ export const defaultTemplate: WidgetTemplate = {
         });
         
         // Hover functionality
-        trigger.addEventListener('mouseenter', function(e) {
-          const group = trigger.closest('.lovable-channel-group');
-          const dropdown = group.querySelector('.lovable-group-dropdown');
+        newTrigger.addEventListener('mouseenter', function(e) {
+          const group = newTrigger.closest('.lovable-channel-group');
+          const dropdown = group ? group.querySelector('.lovable-group-dropdown') : null;
           
           if (dropdown) {
             closeAllDropdowns();
             setTimeout(function() {
-              if (trigger.matches(':hover')) {
+              if (newTrigger.matches(':hover')) {
                 dropdown.classList.add('show');
               }
             }, 100);
@@ -591,6 +631,8 @@ export const defaultTemplate: WidgetTemplate = {
           closeAllDropdowns();
         }
       });
+      
+      console.log('Channel groups initialized');
     }
     
     function closeAllDropdowns() {
