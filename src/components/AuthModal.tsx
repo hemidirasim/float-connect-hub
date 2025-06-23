@@ -43,7 +43,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
         if (error) {
           toast.error("Registration error: " + error.message);
         } else {
-          toast.success("Registration successful! Check your email.");
+          toast.success("Registration successful! Check your email for confirmation.");
           onOpenChange(false);
           setEmail('');
           setPassword('');

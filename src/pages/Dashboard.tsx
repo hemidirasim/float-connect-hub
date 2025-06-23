@@ -77,7 +77,7 @@ const Dashboard = () => {
 
       if (error && error.code !== 'PGRST116') throw error;
       // Only log and show error for non-PGRST116 errors
-      if (error.code !== 'PGRST116') {
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching credits:', error);
         toast.error('Error loading credits');
       }
@@ -85,7 +85,7 @@ const Dashboard = () => {
       setUserCredits(data || { balance: 100, total_spent: 0 });
     } catch (error) {
       // Only log and show error for non-PGRST116 errors
-      if (error.code !== 'PGRST116') {
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching credits:', error);
         toast.error('Error loading credits');
       }
@@ -136,24 +136,7 @@ const Dashboard = () => {
   };
 
   const generateWidgetCode = (widget: Widget) => {
-    let scriptCode = `<script src="https://yourdomain.com/floating.js"`;
-    
-    widget.channels?.forEach((channel: any) => {
-      scriptCode += `\n  data-${channel.type}="${channel.value}"`;
-    });
-    
-    scriptCode += `\n  data-position="${widget.position}"`;
-    scriptCode += `\n  data-color="${widget.button_color}"`;
-    
-    if (widget.tooltip) {
-      scriptCode += `\n  data-tooltip="${widget.tooltip}"`;
-    }
-
-    if (widget.video_enabled) {
-      scriptCode += `\n  data-video-enabled="true"`;
-    }
-    
-    scriptCode += `>\n</script>`;
+    let scriptCode = `<script src="https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/widget-js/${widget.id}"></script>`;
     return scriptCode;
   };
 
@@ -193,6 +176,11 @@ const Dashboard = () => {
             <CardTitle>Login Required</CardTitle>
             <CardDescription>Please sign in to access the dashboard</CardDescription>
           </CardHeader>
+          <CardContent className="flex justify-center">
+            <Button onClick={() => navigate('/')}>
+              Go to Login
+            </Button>
+          </CardContent>
         </Card>
       </div>
     );
@@ -265,7 +253,7 @@ const Dashboard = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Views</p>
                   <p className="text-2xl font-bold text-purple-600">
-                    {widgets.reduce((sum, w) => sum + w.total_views, 0)}
+                    {widgets.reduce((sum, w) => sum + (w.total_views || 0), 0)}
                   </p>
                   <p className="text-xs text-gray-500">all websites</p>
                 </div>
@@ -345,7 +333,7 @@ const Dashboard = () => {
                       <div className="space-y-3">
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-600">Views:</span>
-                          <span className="font-medium">{widget.total_views}</span>
+                          <span className="font-medium">{widget.total_views || 0}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-600">Channels:</span>

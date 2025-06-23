@@ -8,5 +8,7 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true, // This enables automatic handling of OAuth and magic link URLs
+    flowType: 'pkce' // Use PKCE flow for better security
   }
 })
