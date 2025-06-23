@@ -269,7 +269,7 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <Select value={selectedChannelType} onValueChange={setSelectedChannelType}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Platform seçin" />
+                  <SelectValue placeholder="choose platform" />
                 </SelectTrigger>
                 <SelectContent>
                   {platformOptions.map((platform) => (
