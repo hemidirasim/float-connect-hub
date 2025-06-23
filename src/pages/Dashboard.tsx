@@ -76,6 +76,12 @@ const Dashboard = () => {
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
+      // Only log and show error for non-PGRST116 errors
+      if (error.code !== 'PGRST116') {
+        console.error('Error fetching credits:', error);
+        toast.error('Error loading credits');
+      }
+      // For PGRST116 (no rows found), silently use default values
       setUserCredits(data || { balance: 100, total_spent: 0 });
     } catch (error) {
       // Only log and show error for non-PGRST116 errors
