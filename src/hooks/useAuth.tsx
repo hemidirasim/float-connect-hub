@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,7 +28,9 @@ export const useAuth = () => {
   }, []);
 
   const signUp = async (email: string, password: string) => {
-    const redirectUrl = `${window.location.origin}/`;
+    // Use the current domain for the redirect URL
+    const currentDomain = window.location.origin;
+    const redirectUrl = `${currentDomain}/`;
     
     const { error } = await supabase.auth.signUp({
       email,
