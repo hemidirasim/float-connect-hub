@@ -273,7 +273,7 @@ export const defaultTemplate: WidgetTemplate = {
       let html = '';
       
       function processChannels(channels, isChild = false) {
-        channels.forEach(channel => {
+        channels.forEach(function(channel) {
           const channelUrl = getChannelUrl(channel);
           const channelIcon = getChannelIcon(channel);
           const channelColor = getChannelColor(channel.type);
@@ -296,7 +296,7 @@ export const defaultTemplate: WidgetTemplate = {
             
             // Render dropdown with child channels
             html += '<div class="lovable-group-dropdown">';
-            channel.childChannels.forEach(childChannel => {
+            channel.childChannels.forEach(function(childChannel) {
               const childUrl = getChannelUrl(childChannel);
               const childIcon = getChannelIcon(childChannel);
               const childColor = getChannelColor(childChannel.type);
@@ -450,7 +450,7 @@ export const defaultTemplate: WidgetTemplate = {
     function initChannelGroups() {
       const groupTriggers = document.querySelectorAll('.lovable-group-trigger');
       
-      groupTriggers.forEach(trigger => {
+      groupTriggers.forEach(function(trigger) {
         // Hover functionality
         trigger.addEventListener('mouseenter', function(e) {
           const group = trigger.closest('.lovable-channel-group');
