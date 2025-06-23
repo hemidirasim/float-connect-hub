@@ -161,6 +161,7 @@ export const minimalTemplate: WidgetTemplate = {
 
     .widget-dropdown-btn {
       position: relative;
+      cursor: pointer;
     }
 
     .widget-dropdown-btn .child-indicator {
@@ -467,52 +468,29 @@ export const minimalTemplate: WidgetTemplate = {
         const dropdownBtns = document.querySelectorAll('.widget-dropdown-btn');
         
         dropdownBtns.forEach(function(btn) {
-          btn.addEventListener('mouseenter', function() {
-            if (!isMenuOpen) return;
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             
             const dropdownId = this.getAttribute('data-dropdown');
             const dropdown = document.getElementById(dropdownId);
             
             if (dropdown) {
+              // Close other dropdowns first
               closeAllDropdowns();
-              const self = this;
-              setTimeout(function() {
-                if (self.matches(':hover')) {
-                  dropdown.classList.add('show');
-                  activeDropdown = dropdown;
-                }
-              }, 100);
+              
+              // Toggle this dropdown
+              dropdown.classList.toggle('show');
+              activeDropdown = dropdown.classList.contains('show') ? dropdown : null;
             }
-          });
-          
-          btn.addEventListener('mouseleave', function() {
-            const dropdownId = this.getAttribute('data-dropdown');
-            const dropdown = document.getElementById(dropdownId);
-            const self = this;
-            setTimeout(function() {
-              if (dropdown && !dropdown.matches(':hover') && !self.matches(':hover')) {
-                dropdown.classList.remove('show');
-                if (activeDropdown === dropdown) {
-                  activeDropdown = null;
-                }
-              }
-            }, 300);
           });
         });
         
-        const dropdowns = document.querySelectorAll('.widget-dropdown');
-        dropdowns.forEach(function(dropdown) {
-          dropdown.addEventListener('mouseleave', function() {
-            const self = this;
-            setTimeout(function() {
-              if (!self.matches(':hover')) {
-                self.classList.remove('show');
-                if (activeDropdown === self) {
-                  activeDropdown = null;
-                }
-              }
-            }, 300);
-          });
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!e.target.closest('.widget-dropdown') && !e.target.closest('.widget-dropdown-btn')) {
+            closeAllDropdowns();
+          }
         });
       }
 

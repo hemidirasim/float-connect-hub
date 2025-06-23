@@ -124,13 +124,16 @@ const defaultJavaScriptLogic = `
         
         html += '<div class="parent-channel-wrapper">';
         html += '<div style="display: flex; align-items: center; border: 1px solid #e2e8f0; border-radius: 12px; background: white; transition: all 0.3s ease;">';
-        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="parent-channel" style="border: none; margin: 0; flex: 1;">';
+        
+        // For parent channels with children, make the entire row a dropdown toggle instead of a link
+        html += '<div class="parent-channel" style="border: none; margin: 0; flex: 1; cursor: pointer;" onclick="toggleDropdown(\\'' + dropdownId + '\\')">';
         html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="channel-info">';
         html += '<div class="channel-label">' + escapeHtml(channel.label) + '</div>';
         html += '<div class="channel-value">' + escapeHtml(channel.value) + '</div>';
         html += '</div>';
-        html += '</a>';
+        html += '</div>';
+        
         html += '<button class="dropdown-toggle" onclick="toggleDropdown(\\'' + dropdownId + '\\')">';
         html += '<svg class="dropdown-arrow" data-dropdown="' + dropdownId + '" viewBox="0 0 24 24" fill="currentColor">';
         html += '<path d="M7 10l5 5 5-5z"/>';
@@ -139,6 +142,15 @@ const defaultJavaScriptLogic = `
         html += '<div class="child-count">' + (channel.childChannels.length + 1) + '</div>';
         html += '</div>';
         html += '<div class="dropdown" id="' + dropdownId + '">';
+        
+        // Add the parent channel itself as the first item in the dropdown
+        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="dropdown-item">';
+        html += '<div class="dropdown-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
+        html += '<div class="dropdown-info">';
+        html += '<div class="dropdown-label">' + escapeHtml(channel.label) + ' (Primary)</div>';
+        html += '<div class="dropdown-value">' + escapeHtml(channel.value) + '</div>';
+        html += '</div>';
+        html += '</a>';
         
         for (var j = 0; j < channel.childChannels.length; j++) {
           var childChannel = channel.childChannels[j];

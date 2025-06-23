@@ -176,6 +176,80 @@ export function getElegantTemplate(): WidgetTemplate {
         fill: currentColor;
       }
       
+      /* Channel group styles */
+      .lovable-channel-group {
+        position: relative;
+      }
+      
+      .lovable-group-trigger {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+        position: relative;
+      }
+      
+      .lovable-group-trigger:hover {
+        background: #f9fafb;
+        border-color: {{BUTTON_COLOR}};
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      
+      .lovable-group-dropdown {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        background: #f9fafb;
+        border-radius: 8px;
+        margin-top: 8px;
+        border: 1px solid #e5e7eb;
+      }
+      
+      .lovable-group-dropdown.show {
+        max-height: 300px;
+      }
+      
+      .lovable-group-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        text-decoration: none;
+        color: #374151;
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      
+      .lovable-group-item:last-child {
+        border-bottom: none;
+      }
+      
+      .lovable-group-item:hover {
+        background: #f1f5f9;
+      }
+      
+      .lovable-group-count {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #3b82f6;
+        color: white;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 10px;
+        min-width: 18px;
+        text-align: center;
+        line-height: 1.2;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+      }
+      
       /* Mobile Responsive */
       @media (max-width: 768px) {
         .lovable-channels-container {
@@ -219,6 +293,148 @@ export function getElegantTemplate(): WidgetTemplate {
         });
       } else {
         console.log('Elegant widget elements found');
+      }
+      
+      // Generate channels HTML
+      function generateChannelsHtml() {
+        const channelsData = {{CHANNELS_DATA}};
+        if (!channelsData || channelsData.length === 0) return '';
+        
+        let html = '';
+        
+        channelsData.forEach(channel => {
+          const channelUrl = getChannelUrl(channel);
+          const channelIcon = getChannelIcon(channel);
+          const channelColor = getChannelColor(channel.type);
+          
+          if (channel.childChannels && channel.childChannels.length > 0) {
+            // Create a group with dropdown
+            const groupId = 'elegant-group-' + channel.id;
+            
+            html += '<div class="lovable-channel-group">';
+            html += '<div class="lovable-group-trigger" onclick="toggleElegantGroup(\\'' + groupId + '\\')">';
+            html += '<div class="lovable-channel-icon" style="color: ' + channelColor + ';">' + channelIcon + '</div>';
+            html += '<div class="lovable-channel-info">';
+            html += '<div class="lovable-channel-label">' + escapeHtml(channel.label) + '</div>';
+            html += '<div class="lovable-channel-value">' + (channel.childChannels.length + 1) + ' options</div>';
+            html += '</div>';
+            html += '<span class="lovable-group-count">' + (channel.childChannels.length + 1) + '</span>';
+            html += '</div>';
+            
+            html += '<div class="lovable-group-dropdown" id="' + groupId + '">';
+            
+            // Add parent channel as first item
+            html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="lovable-group-item" onclick="openChannel(\\'' + escapeHtml(channelUrl) + '\\'); return false;">';
+            html += '<div class="lovable-channel-icon" style="color: ' + channelColor + ';">' + channelIcon + '</div>';
+            html += '<div class="lovable-channel-info">';
+            html += '<div class="lovable-channel-label">' + escapeHtml(channel.label) + ' (Primary)</div>';
+            html += '<div class="lovable-channel-value">' + escapeHtml(channel.value) + '</div>';
+            html += '</div>';
+            html += '</a>';
+            
+            // Add child channels
+            channel.childChannels.forEach(childChannel => {
+              const childUrl = getChannelUrl(childChannel);
+              const childIcon = getChannelIcon(childChannel);
+              const childColor = getChannelColor(childChannel.type);
+              
+              html += '<a href="' + escapeHtml(childUrl) + '" target="_blank" class="lovable-group-item" onclick="openChannel(\\'' + escapeHtml(childUrl) + '\\'); return false;">';
+              html += '<div class="lovable-channel-icon" style="color: ' + childColor + ';">' + childIcon + '</div>';
+              html += '<div class="lovable-channel-info">';
+              html += '<div class="lovable-channel-label">' + escapeHtml(childChannel.label) + '</div>';
+              html += '<div class="lovable-channel-value">' + escapeHtml(childChannel.value) + '</div>';
+              html += '</div>';
+              html += '</a>';
+            });
+            
+            html += '</div>'; // End dropdown
+            html += '</div>'; // End channel group
+          } else {
+            // Regular channel without children
+            html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="lovable-channel-button" onclick="openChannel(\\'' + escapeHtml(channelUrl) + '\\'); return false;">';
+            html += '<div class="lovable-channel-icon" style="color: ' + channelColor + ';">' + channelIcon + '</div>';
+            html += '<div class="lovable-channel-info">';
+            html += '<div class="lovable-channel-label">' + escapeHtml(channel.label) + '</div>';
+            html += '<div class="lovable-channel-value">' + escapeHtml(channel.value) + '</div>';
+            html += '</div>';
+            html += '</a>';
+          }
+        });
+        
+        return html;
+      }
+      
+      function getChannelUrl(channel) {
+        switch (channel.type) {
+          case 'whatsapp': return 'https://wa.me/' + channel.value.replace(/\\D/g, '');
+          case 'telegram': return 'https://t.me/' + channel.value.replace('@', '');
+          case 'email': return 'mailto:' + channel.value;
+          case 'phone': return 'tel:' + channel.value;
+          default: return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
+        }
+      }
+      
+      function getChannelIcon(channel) {
+        const icons = {
+          whatsapp: '📱',
+          telegram: '✈️',
+          instagram: '📷',
+          messenger: '💬',
+          viber: '📞',
+          skype: '💻',
+          discord: '🎮',
+          tiktok: '🎵',
+          youtube: '📺',
+          facebook: '👥',
+          twitter: '🐦',
+          linkedin: '💼',
+          github: '⚡',
+          website: '🌐',
+          chatbot: '🤖',
+          email: '✉️',
+          phone: '📞',
+          custom: '🔗'
+        };
+        return icons[channel.type] || '🔗';
+      }
+      
+      function getChannelColor(type) {
+        const colors = {
+          whatsapp: '#25d366',
+          telegram: '#0088cc',
+          instagram: '#e4405f',
+          messenger: '#006aff',
+          viber: '#665cac',
+          skype: '#00aff0',
+          discord: '#7289da',
+          tiktok: '#000000',
+          youtube: '#ff0000',
+          facebook: '#1877f2',
+          twitter: '#1da1f2',
+          linkedin: '#0077b5',
+          github: '#333333',
+          website: '#6b7280',
+          chatbot: '#3b82f6',
+          email: '#ea4335',
+          phone: '#34d399',
+          custom: '#6b7280'
+        };
+        return colors[type] || '#6b7280';
+      }
+      
+      function escapeHtml(text) {
+        if (!text) return '';
+        return String(text)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+      
+      // Render channels
+      if (elegantChannelsContainer) {
+        elegantChannelsContainer.querySelector('.lovable-channels-list').innerHTML = generateChannelsHtml();
       }
       
       // Handle mobile clicks (different behavior for mobile)
@@ -274,21 +490,6 @@ export function getElegantTemplate(): WidgetTemplate {
         }
       }
       
-      // Enhanced hover effects for channels
-      const elegantChannels = document.querySelectorAll('.lovable-channel-button');
-      elegantChannels.forEach((channel, index) => {
-        channel.addEventListener('mouseenter', function() {
-          // Staggered animation effect
-          setTimeout(() => {
-            this.style.transform = 'translateX(8px) scale(1.02)';
-          }, index * 50);
-        });
-        
-        channel.addEventListener('mouseleave', function() {
-          this.style.transform = 'translateX(0) scale(1)';
-        });
-      });
-      
       // Update mobile status on resize
       window.addEventListener('resize', function() {
         isMobile = window.innerWidth <= 768;
@@ -302,6 +503,15 @@ export function getElegantTemplate(): WidgetTemplate {
       window.openChannel = function(url) {
         window.open(url, '_blank');
         console.log('Channel opened:', url);
+      };
+      
+      // Global group toggle function
+      window.toggleElegantGroup = function(groupId) {
+        const dropdown = document.getElementById(groupId);
+        if (dropdown) {
+          dropdown.classList.toggle('show');
+          console.log('Toggled group:', groupId);
+        }
       };
       
       console.log('Elegant widget loaded with HOVER behavior (desktop) and CLICK (mobile)');

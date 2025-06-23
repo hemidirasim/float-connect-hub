@@ -291,6 +291,115 @@ export const getModernTemplate = (): WidgetTemplate => ({
   opacity: 0.5;
 }
 
+/* Channel group styles */
+.hiclient-channel-group {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.hiclient-group-trigger {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  background: white;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.hiclient-group-trigger:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: {{BUTTON_COLOR}};
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #fafafa, #ffffff);
+}
+
+.hiclient-group-dropdown {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin-top: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.hiclient-group-dropdown.show {
+  max-height: 300px;
+}
+
+.hiclient-group-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  text-decoration: none;
+  color: #334155;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.hiclient-group-item:last-child {
+  border-bottom: none;
+}
+
+.hiclient-group-item:hover {
+  background: #f1f5f9;
+}
+
+.hiclient-group-item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hiclient-group-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.hiclient-group-item-label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #334155;
+  margin: 0 0 2px 0;
+  line-height: 1.2;
+}
+
+.hiclient-group-item-value {
+  font-size: 12px;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.hiclient-group-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #3b82f6;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.2;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
   .hiclient-modal-content {
@@ -336,17 +445,57 @@ export const getModernTemplate = (): WidgetTemplate => ({
         const channelIcon = getChannelIcon(channel);
         const channelColor = getChannelColor(channel.type);
         
-        html += '<div class="hiclient-channel-item" data-type="' + channel.type + '">';
-        html += '<a href="' + channelUrl + '" target="_blank" class="hiclient-channel-btn" onclick="window.openChannel(\\'' + channelUrl + '\\'); return false;">';
-        html += '<div class="hiclient-channel-icon" style="background: ' + channelColor + ';">';
-        html += channelIcon;
-        html += '</div>';
-        html += '<span class="hiclient-channel-label">' + channel.label + '</span>';
-        html += '</a>';
-        html += '</div>';
-        
         if (channel.childChannels && channel.childChannels.length > 0) {
-          processChannels(channel.childChannels, true);
+          // Create a group with dropdown for channels with children
+          const groupId = 'group-' + channel.id;
+          
+          html += '<div class="hiclient-channel-group hiclient-channel-item">';
+          html += '<div class="hiclient-group-trigger" onclick="toggleChannelGroup(\\'' + groupId + '\\')">';
+          html += '<div class="hiclient-channel-icon" style="background: ' + channelColor + ';">';
+          html += channelIcon;
+          html += '</div>';
+          html += '<div class="hiclient-channel-label">' + escapeHtml(channel.label) + '</div>';
+          html += '<div class="hiclient-group-count">' + (channel.childChannels.length + 1) + '</div>';
+          html += '</div>';
+          
+          html += '<div class="hiclient-group-dropdown" id="' + groupId + '">';
+          
+          // Add parent channel as first item
+          html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="hiclient-group-item" onclick="openChannel(\\'' + escapeHtml(channelUrl) + '\\'); return false;">';
+          html += '<div class="hiclient-group-item-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
+          html += '<div class="hiclient-group-item-info">';
+          html += '<div class="hiclient-group-item-label">' + escapeHtml(channel.label) + ' (Primary)</div>';
+          html += '<div class="hiclient-group-item-value">' + escapeHtml(channel.value) + '</div>';
+          html += '</div>';
+          html += '</a>';
+          
+          // Add child channels
+          channel.childChannels.forEach(childChannel => {
+            const childUrl = getChannelUrl(childChannel);
+            const childIcon = getChannelIcon(childChannel);
+            const childColor = getChannelColor(childChannel.type);
+            
+            html += '<a href="' + escapeHtml(childUrl) + '" target="_blank" class="hiclient-group-item" onclick="openChannel(\\'' + escapeHtml(childUrl) + '\\'); return false;">';
+            html += '<div class="hiclient-group-item-icon" style="background: ' + childColor + ';">' + childIcon + '</div>';
+            html += '<div class="hiclient-group-item-info">';
+            html += '<div class="hiclient-group-item-label">' + escapeHtml(childChannel.label) + '</div>';
+            html += '<div class="hiclient-group-item-value">' + escapeHtml(childChannel.value) + '</div>';
+            html += '</div>';
+            html += '</a>';
+          });
+          
+          html += '</div>'; // End dropdown
+          html += '</div>'; // End channel group
+        } else {
+          // Regular channel without children
+          html += '<div class="hiclient-channel-item">';
+          html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="hiclient-channel-btn" onclick="openChannel(\\'' + escapeHtml(channelUrl) + '\\'); return false;">';
+          html += '<div class="hiclient-channel-icon" style="background: ' + channelColor + ';">';
+          html += channelIcon;
+          html += '</div>';
+          html += '<span class="hiclient-channel-label">' + escapeHtml(channel.label) + '</span>';
+          html += '</a>';
+          html += '</div>';
         }
       });
     }
@@ -401,6 +550,16 @@ export const getModernTemplate = (): WidgetTemplate => ({
       facebook: '#1877F2'
     };
     return colors[type] || '#667eea';
+  }
+  
+  function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
   
   function initWidget() {
@@ -488,6 +647,14 @@ export const getModernTemplate = (): WidgetTemplate => ({
   window.openChannel = function(url) {
     window.open(url, '_blank');
     console.log('Channel opened:', url);
+  };
+  
+  window.toggleChannelGroup = function(groupId) {
+    const dropdown = document.getElementById(groupId);
+    if (dropdown) {
+      dropdown.classList.toggle('show');
+      console.log('Toggled channel group:', groupId);
+    }
   };
   
   if (document.readyState === 'loading') {

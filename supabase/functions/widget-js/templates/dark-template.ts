@@ -243,6 +243,114 @@ export const getDarkTemplate = (): WidgetTemplate => ({
   height: 40px;
   margin: 0 auto 16px;
   opacity: 0.4;
+}
+
+/* Channel group styles */
+.hiclient-channel-group {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.hiclient-group-trigger {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #333;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #222;
+  position: relative;
+}
+
+.hiclient-group-trigger:hover {
+  background-color: #2a2a2a;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border-color: #444;
+}
+
+.hiclient-group-dropdown {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background: #1a1a1a;
+  border-radius: 8px;
+  margin-top: 8px;
+  border: 1px solid #333;
+}
+
+.hiclient-group-dropdown.show {
+  max-height: 300px;
+}
+
+.hiclient-group-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  text-decoration: none;
+  color: #fff;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #333;
+}
+
+.hiclient-group-item:last-child {
+  border-bottom: none;
+}
+
+.hiclient-group-item:hover {
+  background: #2a2a2a;
+}
+
+.hiclient-group-item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hiclient-group-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.hiclient-group-item-label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #fff;
+  margin: 0 0 2px 0;
+  line-height: 1.2;
+}
+
+.hiclient-group-item-value {
+  font-size: 12px;
+  color: #aaa;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.hiclient-group-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #444;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }`,
   
   js: `/* Dark Theme JS */
@@ -337,6 +445,20 @@ function initializeWidget() {
       tooltip.classList.add("show");
     }
   }
+  
+  // Handle channel groups
+  var groupTriggers = document.querySelectorAll('.hiclient-group-trigger');
+  groupTriggers.forEach(function(trigger) {
+    trigger.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      var dropdown = this.nextElementSibling;
+      if (dropdown && dropdown.classList.contains('hiclient-group-dropdown')) {
+        dropdown.classList.toggle('show');
+      }
+    });
+  });
   
   window.openChannel = function(url) {
     window.open(url, "_blank");
