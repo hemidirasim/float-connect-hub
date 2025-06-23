@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,7 +45,12 @@ export const ProfileSettings: React.FC = () => {
         });
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      // Only log and show error for non-PGRST116 errors
+      if (error.code !== 'PGRST116') {
+        console.error('Error fetching profile:', error);
+        toast.error('Error loading profile');
+      }
+      // For PGRST116 (no rows found), silently use default values
     } finally {
       setLoadingProfile(false);
     }
