@@ -60,45 +60,30 @@ export const defaultTemplate: WidgetTemplate = {
       transform: rotate(90deg);
     }
     
-    .lovable-channel-button {
+    .channel-item {
       display: flex;
       align-items: center;
       gap: 16px;
       padding: 16px 10px;
-      border: 1px solid #e2e8f061;
-      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid #e2e8f0;
+      background: white;
       text-decoration: none;
       color: #334155;
       font-weight: 500;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: all 0.3s ease;
       position: relative;
-      overflow: hidden;
       border-radius: 12px;
+      cursor: pointer;
     }
     
-    .lovable-channel-button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.1), transparent);
-      transition: left 0.5s ease;
-    }
-    
-    .lovable-channel-button:hover::before {
-      left: 100%;
-    }
-    
-    .lovable-channel-button:hover {
+    .channel-item:hover {
       border-color: #22c55e;
-      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      background: #f0fdf4;
       transform: translateY(-2px);
       box-shadow: 0 8px 25px rgba(34, 197, 94, 0.15);
     }
     
-    .lovable-channel-icon {
+    .channel-icon {
       width: 44px;
       height: 44px;
       display: flex;
@@ -108,14 +93,15 @@ export const defaultTemplate: WidgetTemplate = {
       font-size: 18px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       flex-shrink: 0;
+      color: white;
     }
     
-    .lovable-channel-info {
+    .channel-info {
       flex: 1;
       min-width: 0;
     }
     
-    .lovable-channel-label {
+    .channel-label {
       font-weight: 600;
       font-size: 16px;
       color: #1e293b;
@@ -123,7 +109,7 @@ export const defaultTemplate: WidgetTemplate = {
       line-height: 1.3;
     }
     
-    .lovable-channel-value {
+    .channel-value {
       font-size: 14px;
       color: #64748b;
       overflow: hidden;
@@ -133,7 +119,7 @@ export const defaultTemplate: WidgetTemplate = {
       line-height: 1.3;
     }
     
-    .lovable-channel-arrow {
+    .channel-arrow {
       width: 20px;
       height: 20px;
       color: #94a3b8;
@@ -142,17 +128,17 @@ export const defaultTemplate: WidgetTemplate = {
       font-size: 16px;
     }
     
-    .lovable-channel-button:hover .lovable-channel-arrow {
+    .channel-item:hover .channel-arrow {
       color: #22c55e;
       transform: translateX(4px);
     }
 
-    /* Channel group with hover submenu */
-    .lovable-channel-group {
+    /* Parent channel with children */
+    .parent-channel {
       position: relative;
     }
     
-    .lovable-group-count {
+    .child-count {
       position: absolute;
       top: -8px;
       right: -8px;
@@ -168,7 +154,7 @@ export const defaultTemplate: WidgetTemplate = {
       box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
     }
     
-    .lovable-hover-submenu {
+    .submenu {
       position: absolute;
       right: 100%;
       top: 0;
@@ -179,23 +165,16 @@ export const defaultTemplate: WidgetTemplate = {
       min-width: 280px;
       max-width: 320px;
       border: 1px solid #e5e7eb;
-      z-index: 1000002;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateX(10px);
-      transition: all 0.3s ease;
+      z-index: 1000010;
+      display: none;
       overflow: hidden;
-      pointer-events: none;
     }
     
-    .lovable-channel-group:hover .lovable-hover-submenu {
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(0);
-      pointer-events: auto;
+    .parent-channel:hover .submenu {
+      display: block;
     }
     
-    .lovable-submenu-item {
+    .submenu-item {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -206,15 +185,15 @@ export const defaultTemplate: WidgetTemplate = {
       border-bottom: 1px solid #f3f4f6;
     }
     
-    .lovable-submenu-item:last-child {
+    .submenu-item:last-child {
       border-bottom: none;
     }
     
-    .lovable-submenu-item:hover {
+    .submenu-item:hover {
       background: #f9fafb;
     }
     
-    .lovable-submenu-item-icon {
+    .submenu-icon {
       width: 36px;
       height: 36px;
       display: flex;
@@ -223,14 +202,15 @@ export const defaultTemplate: WidgetTemplate = {
       border-radius: 50%;
       font-size: 16px;
       flex-shrink: 0;
+      color: white;
     }
     
-    .lovable-submenu-item-info {
+    .submenu-info {
       flex: 1;
       min-width: 0;
     }
     
-    .lovable-submenu-item-label {
+    .submenu-label {
       font-weight: 500;
       font-size: 14px;
       color: #1f2937;
@@ -238,7 +218,7 @@ export const defaultTemplate: WidgetTemplate = {
       line-height: 1.3;
     }
     
-    .lovable-submenu-item-value {
+    .submenu-value {
       font-size: 12px;
       color: #6b7280;
       overflow: hidden;
@@ -249,7 +229,7 @@ export const defaultTemplate: WidgetTemplate = {
     }
 
     @media (max-width: 768px) {
-      .lovable-hover-submenu {
+      .submenu {
         left: 100%;
         right: auto;
         margin-left: 12px;
@@ -259,131 +239,15 @@ export const defaultTemplate: WidgetTemplate = {
   `,
   
   js: `
-    console.log('=== DEFAULT TEMPLATE HOVER VERSION START ===');
-    console.log('Loading template with channels:', {{CHANNELS_DATA}});
+    console.log('Widget loading with channels:', {{CHANNELS_DATA}});
     
-    const channelsData = {{CHANNELS_DATA}};
-    console.log('Parsed channelsData:', channelsData);
+    var channelsData = {{CHANNELS_DATA}};
     
-    // Global function to refresh widget content when channels change
-    window.refreshWidget = function() {
-      console.log('Refreshing widget content...');
-      const channelsContainer = document.querySelector('#lovable-widget-channels');
-      if (channelsContainer) {
-        const generatedHtml = generateChannelsHtml();
-        console.log('Refreshing with new HTML:', generatedHtml);
-        channelsContainer.innerHTML = generatedHtml;
-        
-        // Re-add event listeners for channel clicks
-        addChannelClickListeners();
-      }
-    };
-    
-    function generateChannelsHtml() {
-      console.log('generateChannelsHtml called');
-      
-      if (!channelsData || channelsData.length === 0) {
-        console.log('No channels data found, showing empty state');
-        const emptyState = document.querySelector('.lovable-empty-state');
-        if (emptyState) emptyState.style.display = 'block';
-        return '';
-      }
-      
-      console.log('Processing channels:', channelsData);
-      let html = '';
-      
-      channelsData.forEach(function(channel, index) {
-        console.log('Processing channel ' + index + ':', channel);
-        
-        const channelUrl = getChannelUrl(channel);
-        const channelIcon = getChannelIcon(channel);
-        const channelColor = getChannelColor(channel.type);
-        
-        console.log('Channel URL:', channelUrl);
-        console.log('Channel Icon:', channelIcon);
-        console.log('Channel Color:', channelColor);
-        
-        // Check if channel has child channels (grouped channels)
-        if (channel.childChannels && channel.childChannels.length > 0) {
-          console.log('Processing grouped channel with ' + channel.childChannels.length + ' children');
-          
-          // Render parent channel with hover submenu
-          html += '<div class="lovable-channel-group">';
-          html += '<div class="lovable-channel-button" style="border-color: ' + channelColor + '; cursor: default;">';
-          html += '<div class="lovable-channel-icon" style="background: ' + channelColor + ';">';
-          html += channelIcon;
-          html += '</div>';
-          html += '<div class="lovable-channel-info">';
-          html += '<div class="lovable-channel-label">' + channel.label + '</div>';
-          html += '<div class="lovable-channel-value">' + (channel.childChannels.length + 1) + ' kanal</div>';
-          html += '</div>';
-          html += '<div class="lovable-channel-arrow">›</div>';
-          html += '<div class="lovable-group-count">' + (channel.childChannels.length + 1) + '</div>';
-          html += '</div>';
-          
-          // Render hover submenu with all channels (parent + children)
-          html += '<div class="lovable-hover-submenu">';
-          
-          // Add parent channel as first item
-          html += '<a href="' + channelUrl + '" target="_blank" class="lovable-submenu-item" onclick="window.openChannel && window.openChannel(\'' + channelUrl + '\'); return false;">';
-          html += '<div class="lovable-submenu-item-icon" style="background: ' + channelColor + ';">';
-          html += channelIcon;
-          html += '</div>';
-          html += '<div class="lovable-submenu-item-info">';
-          html += '<div class="lovable-submenu-item-label">' + channel.label + '</div>';
-          html += '<div class="lovable-submenu-item-value">' + channel.value + '</div>';
-          html += '</div>';
-          html += '</a>';
-          
-          // Add child channels
-          channel.childChannels.forEach(function(childChannel, childIndex) {
-            console.log('Processing child channel ' + childIndex + ':', childChannel);
-            
-            const childUrl = getChannelUrl(childChannel);
-            const childIcon = getChannelIcon(childChannel);
-            const childColor = getChannelColor(childChannel.type);
-            
-            html += '<a href="' + childUrl + '" target="_blank" class="lovable-submenu-item" onclick="window.openChannel && window.openChannel(\'' + childUrl + '\'); return false;">';
-            html += '<div class="lovable-submenu-item-icon" style="background: ' + childColor + ';">';
-            html += childIcon;
-            html += '</div>';
-            html += '<div class="lovable-submenu-item-info">';
-            html += '<div class="lovable-submenu-item-label">' + childChannel.label + '</div>';
-            html += '<div class="lovable-submenu-item-value">' + childChannel.value + '</div>';
-            html += '</div>';
-            html += '</a>';
-          });
-          html += '</div>';
-          html += '</div>';
-        } else {
-          console.log('Processing regular channel');
-          
-          html += '<a href="' + channelUrl + '" target="_blank" class="lovable-channel-button" style="border-color: ' + channelColor + ';" onclick="window.openChannel && window.openChannel(\'' + channelUrl + '\'); return false;">';
-          html += '<div class="lovable-channel-icon" style="background: ' + channelColor + ';">';
-          html += channelIcon;
-          html += '</div>';
-          html += '<div class="lovable-channel-info">';
-          html += '<div class="lovable-channel-label">' + channel.label + '</div>';
-          html += '<div class="lovable-channel-value">' + channel.value + '</div>';
-          html += '</div>';
-          html += '<div class="lovable-channel-arrow">→</div>';
-          html += '</a>';
-        }
-      });
-      
-      console.log('Generated HTML length:', html.length);
-      return html;
-    }
-    
-    function addChannelClickListeners() {
-      console.log('Adding channel click listeners...');
-      // Channel clicks are now handled by inline onclick events
-      // This ensures they work immediately after HTML is generated
+    function openChannel(url) {
+      window.open(url, '_blank');
     }
     
     function getChannelUrl(channel) {
-      console.log('getChannelUrl called for:', channel);
-      
       switch (channel.type) {
         case 'whatsapp':
           return 'https://wa.me/' + channel.value.replace(/[^0-9]/g, '');
@@ -407,7 +271,7 @@ export const defaultTemplate: WidgetTemplate = {
         return '<img src="' + channel.customIcon + '" style="width: 20px; height: 20px;" alt="' + channel.type + '">';
       }
 
-      const icons = {
+      var icons = {
         whatsapp: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/></svg>',
         telegram: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>',
         phone: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>',
@@ -420,7 +284,7 @@ export const defaultTemplate: WidgetTemplate = {
     }
     
     function getChannelColor(type) {
-      const colors = {
+      var colors = {
         whatsapp: '#25D366',
         telegram: '#0088CC',
         phone: '#34C759',
@@ -431,62 +295,115 @@ export const defaultTemplate: WidgetTemplate = {
       return colors[type] || '#22c55e';
     }
     
-    function initWidget() {
-      console.log('initWidget called');
-      
-      const channelsContainer = document.querySelector('#lovable-widget-channels');
-      console.log('Channels container found:', !!channelsContainer);
-      
-      if (channelsContainer) {
-        const generatedHtml = generateChannelsHtml();
-        console.log('Setting innerHTML with:', generatedHtml);
-        channelsContainer.innerHTML = generatedHtml;
-        
-        // Add event listeners for channel clicks
-        addChannelClickListeners();
+    function generateChannelsHtml() {
+      if (!channelsData || channelsData.length === 0) {
+        document.querySelector('.lovable-empty-state').style.display = 'block';
+        return '';
       }
       
-      const button = document.querySelector('#lovable-widget-button');
-      const modal = document.querySelector('#lovable-widget-modal');
-      const tooltip = document.querySelector('#lovable-widget-tooltip');
-      const closeBtn = document.querySelector('#lovable-widget-close');
+      var html = '';
       
-      console.log('Widget elements found:', {
-        button: !!button,
-        modal: !!modal,
-        tooltip: !!tooltip,
-        closeBtn: !!closeBtn
-      });
+      for (var i = 0; i < channelsData.length; i++) {
+        var channel = channelsData[i];
+        var channelUrl = getChannelUrl(channel);
+        var channelIcon = getChannelIcon(channel);
+        var channelColor = getChannelColor(channel.type);
+        
+        // Check if channel has child channels
+        if (channel.childChannels && channel.childChannels.length > 0) {
+          html += '<div class="channel-item parent-channel">';
+          html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
+          html += '<div class="channel-info">';
+          html += '<div class="channel-label">' + channel.label + '</div>';
+          html += '<div class="channel-value">' + (channel.childChannels.length + 1) + ' kanal</div>';
+          html += '</div>';
+          html += '<div class="channel-arrow">›</div>';
+          html += '<div class="child-count">' + (channel.childChannels.length + 1) + '</div>';
+          
+          // Submenu with all channels (parent + children)
+          html += '<div class="submenu">';
+          
+          // Add parent channel first
+          html += '<a href="' + channelUrl + '" target="_blank" class="submenu-item" onclick="openChannel(\'' + channelUrl + '\'); return false;">';
+          html += '<div class="submenu-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
+          html += '<div class="submenu-info">';
+          html += '<div class="submenu-label">' + channel.label + '</div>';
+          html += '<div class="submenu-value">' + channel.value + '</div>';
+          html += '</div>';
+          html += '</a>';
+          
+          // Add child channels
+          for (var j = 0; j < channel.childChannels.length; j++) {
+            var childChannel = channel.childChannels[j];
+            var childUrl = getChannelUrl(childChannel);
+            var childIcon = getChannelIcon(childChannel);
+            var childColor = getChannelColor(childChannel.type);
+            
+            html += '<a href="' + childUrl + '" target="_blank" class="submenu-item" onclick="openChannel(\'' + childUrl + '\'); return false;">';
+            html += '<div class="submenu-icon" style="background: ' + childColor + ';">' + childIcon + '</div>';
+            html += '<div class="submenu-info">';
+            html += '<div class="submenu-label">' + childChannel.label + '</div>';
+            html += '<div class="submenu-value">' + childChannel.value + '</div>';
+            html += '</div>';
+            html += '</a>';
+          }
+          
+          html += '</div>'; // Close submenu
+          html += '</div>'; // Close parent channel
+        } else {
+          // Regular single channel
+          html += '<a href="' + channelUrl + '" target="_blank" class="channel-item" onclick="openChannel(\'' + channelUrl + '\'); return false;">';
+          html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
+          html += '<div class="channel-info">';
+          html += '<div class="channel-label">' + channel.label + '</div>';
+          html += '<div class="channel-value">' + channel.value + '</div>';
+          html += '</div>';
+          html += '<div class="channel-arrow">→</div>';
+          html += '</a>';
+        }
+      }
+      
+      return html;
+    }
+    
+    function initWidget() {
+      console.log('Initializing widget...');
+      
+      var channelsContainer = document.querySelector('#lovable-widget-channels');
+      if (channelsContainer) {
+        var generatedHtml = generateChannelsHtml();
+        channelsContainer.innerHTML = generatedHtml;
+      }
+      
+      var button = document.querySelector('#lovable-widget-button');
+      var modal = document.querySelector('#lovable-widget-modal');
+      var tooltip = document.querySelector('#lovable-widget-tooltip');
+      var closeBtn = document.querySelector('#lovable-widget-close');
       
       if (!button || !modal) {
-        console.error('Missing required widget elements');
+        console.error('Missing widget elements');
         return;
       }
       
       // Button click to show modal
       button.addEventListener('click', function(e) {
-        console.log('Widget button clicked');
         e.preventDefault();
         e.stopPropagation();
         modal.style.display = 'flex';
-        console.log('Widget modal opened');
       });
       
       // Close button
       if (closeBtn) {
         closeBtn.addEventListener('click', function(e) {
-          console.log('Close button clicked');
           e.preventDefault();
           e.stopPropagation();
           modal.style.display = 'none';
-          console.log('Widget modal closed');
         });
       }
       
       // Modal backdrop click
       modal.addEventListener('click', function(e) {
         if (e.target === modal) {
-          console.log('Modal backdrop clicked');
           modal.style.display = 'none';
         }
       });
@@ -494,7 +411,6 @@ export const defaultTemplate: WidgetTemplate = {
       // ESC key
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal.style.display === 'flex') {
-          console.log('ESC key pressed, closing modal');
           modal.style.display = 'none';
         }
       });
@@ -514,23 +430,27 @@ export const defaultTemplate: WidgetTemplate = {
         }
       }
       
-      console.log('Hover-based template initialized successfully');
+      console.log('Widget initialized successfully');
     }
     
-    window.openChannel = function(url) {
-      console.log('openChannel called with:', url);
-      window.open(url, '_blank');
+    // Global function for refreshing widget
+    window.refreshWidget = function() {
+      var channelsContainer = document.querySelector('#lovable-widget-channels');
+      if (channelsContainer) {
+        var generatedHtml = generateChannelsHtml();
+        channelsContainer.innerHTML = generatedHtml;
+      }
     };
     
+    // Global function for opening channels
+    window.openChannel = openChannel;
+    
+    // Initialize when ready
     if (document.readyState === 'loading') {
-      console.log('Document still loading, waiting for DOMContentLoaded');
       document.addEventListener('DOMContentLoaded', initWidget);
     } else {
-      console.log('Document ready, initializing widget immediately');
       initWidget();
     }
-    
-    console.log('=== DEFAULT TEMPLATE HOVER VERSION END ===');
   `
 };
 
