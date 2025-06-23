@@ -227,6 +227,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
   overflow-y: auto;
 }
 
+/* Individual Channel Item - Clean Layout */
 .hiclient-channel-item {
   display: flex;
   align-items: center;
@@ -242,7 +243,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
   color: inherit;
   backdrop-filter: blur(10px);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .hiclient-channel-item::before {
@@ -255,6 +256,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
+  border-radius: 14px;
 }
 
 .hiclient-channel-item:last-child {
@@ -329,43 +331,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
   transform: translateX(4px) rotate(15deg);
 }
 
-.hiclient-empty-state {
-  text-align: center;
-  padding: 80px 32px;
-  color: #999;
-}
-
-.hiclient-empty-state svg {
-  margin-bottom: 20px;
-  opacity: 0.6;
-}
-
-.hiclient-empty-state p {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 500;
-}
-
-/* Scrollbar styling */
-.hiclient-channels-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.hiclient-channels-list::-webkit-scrollbar-track {
-  background: rgba(102, 126, 234, 0.1);
-  border-radius: 3px;
-}
-
-.hiclient-channels-list::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 3px;
-}
-
-.hiclient-channels-list::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-}
-
-/* Channel Group Styles */
+/* Group Channel with Hover Dropdown */
 .hiclient-channel-group {
   position: relative;
   margin-bottom: 12px;
@@ -375,11 +341,11 @@ export const getModernTemplate = (): WidgetTemplate => ({
   position: relative;
 }
 
-.hiclient-group-trigger::after {
+.hiclient-group-trigger .hiclient-channel-value::after {
   content: '';
   position: absolute;
-  top: 50%;
   right: 20px;
+  top: 50%;
   width: 8px;
   height: 8px;
   border: 2px solid #667eea;
@@ -389,29 +355,41 @@ export const getModernTemplate = (): WidgetTemplate => ({
   transition: transform 0.3s ease;
 }
 
-.hiclient-channel-group.expanded .hiclient-group-trigger::after {
-  transform: translateY(-50%) rotate(135deg);
-}
-
+/* Hover Dropdown for Sub-channels */
 .hiclient-group-dropdown {
-  max-height: 0;
-  overflow: hidden;
+  position: absolute;
+  left: -280px;
+  top: 0;
+  width: 260px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+  backdrop-filter: blur(20px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(20px);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-top: 8px;
-  padding-left: 20px;
+  z-index: 1000;
+  padding: 12px;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
-.hiclient-channel-group.expanded .hiclient-group-dropdown {
-  max-height: 500px;
+.hiclient-channel-group:hover .hiclient-group-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
 }
 
+/* Sub-channel Items in Dropdown */
 .hiclient-group-item {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
   margin-bottom: 8px;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(102, 126, 234, 0.1);
   border-radius: 12px;
   cursor: pointer;
@@ -421,10 +399,15 @@ export const getModernTemplate = (): WidgetTemplate => ({
   font-size: 14px;
 }
 
+.hiclient-group-item:last-child {
+  margin-bottom: 0;
+}
+
 .hiclient-group-item:hover {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(102, 126, 234, 0.2);
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(102, 126, 234, 0.3);
   transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
 }
 
 .hiclient-group-item-icon {
@@ -437,6 +420,11 @@ export const getModernTemplate = (): WidgetTemplate => ({
   font-size: 16px;
   color: white;
   flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.hiclient-group-item:hover .hiclient-group-item-icon {
+  transform: scale(1.1);
 }
 
 .hiclient-group-item-info {
@@ -460,6 +448,46 @@ export const getModernTemplate = (): WidgetTemplate => ({
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.hiclient-empty-state {
+  text-align: center;
+  padding: 80px 32px;
+  color: #999;
+}
+
+.hiclient-empty-state svg {
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.hiclient-empty-state p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Scrollbar styling */
+.hiclient-channels-list::-webkit-scrollbar,
+.hiclient-group-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.hiclient-channels-list::-webkit-scrollbar-track,
+.hiclient-group-dropdown::-webkit-scrollbar-track {
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 3px;
+}
+
+.hiclient-channels-list::-webkit-scrollbar-thumb,
+.hiclient-group-dropdown::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 3px;
+}
+
+.hiclient-channels-list::-webkit-scrollbar-thumb:hover,
+.hiclient-group-dropdown::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }`,
 
   js: `
@@ -507,7 +535,7 @@ function generateChannelUrl(channel) {
   }
 }
 
-// Generate channels HTML
+// Generate channels HTML with proper structure
 function generateChannelsHtml(channels) {
   if (!channels || channels.length === 0) {
     return '<div class="hiclient-empty-state"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg><p>Heç bir əlaqə mövcud deyil</p></div>';
@@ -520,25 +548,21 @@ function generateChannelsHtml(channels) {
     const hasChildren = channel.childChannels && channel.childChannels.length > 0;
     
     if (hasChildren) {
+      // Generate hover dropdown for group
       const childrenHtml = [channel, ...channel.childChannels].map(childChannel => {
         const childPlatform = getPlatformConfig(childChannel.type);
         const childUrl = generateChannelUrl(childChannel);
         return '<a href="' + childUrl + '" target="_blank" class="hiclient-group-item" onclick="window.openChannel && window.openChannel(\\'' + childUrl + '\\')"><div class="hiclient-group-item-icon" style="background: ' + childPlatform.color + ';">' + childPlatform.icon + '</div><div class="hiclient-group-item-info"><div class="hiclient-group-item-label">' + childChannel.label + '</div><div class="hiclient-group-item-value">' + childChannel.value + '</div></div></a>';
       }).join('');
       
-      return '<div class="hiclient-channel-group"><div class="hiclient-channel-item hiclient-group-trigger" onclick="toggleGroup(this)"><div class="hiclient-channel-icon" style="background: ' + platform.color + ';">' + platform.icon + '</div><div class="hiclient-channel-info"><div class="hiclient-channel-label">' + channel.label + '</div><div class="hiclient-channel-value">' + (channel.childChannels.length + 1) + ' seçim</div></div></div><div class="hiclient-group-dropdown">' + childrenHtml + '</div></div>';
+      const mainUrl = generateChannelUrl(channel);
+      return '<div class="hiclient-channel-group"><a href="' + mainUrl + '" target="_blank" class="hiclient-channel-item hiclient-group-trigger" onclick="window.openChannel && window.openChannel(\\'' + mainUrl + '\\')"><div class="hiclient-channel-icon" style="background: ' + platform.color + ';">' + platform.icon + '</div><div class="hiclient-channel-info"><div class="hiclient-channel-label">' + channel.label + '</div><div class="hiclient-channel-value">' + (channel.childChannels.length + 1) + ' seçim</div></div></a><div class="hiclient-group-dropdown">' + childrenHtml + '</div></div>';
     } else {
+      // Regular individual channel
       const channelUrl = generateChannelUrl(channel);
       return '<a href="' + channelUrl + '" target="_blank" class="hiclient-channel-item" onclick="window.openChannel && window.openChannel(\\'' + channelUrl + '\\')"><div class="hiclient-channel-icon" style="background: ' + platform.color + ';">' + platform.icon + '</div><div class="hiclient-channel-info"><div class="hiclient-channel-label">' + channel.label + '</div><div class="hiclient-channel-value">' + channel.value + '</div></div><svg class="hiclient-external-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></a>';
     }
   }).join('');
-}
-
-function toggleGroup(trigger) {
-  const group = trigger.closest('.hiclient-channel-group');
-  if (group) {
-    group.classList.toggle('expanded');
-  }
 }
 
 // Widget handlers
@@ -678,16 +702,13 @@ function initializeWidget() {
     window.open(url, "_blank");
   };
   
-  // Make toggleGroup available globally
-  window.toggleGroup = toggleGroup;
-  
   console.log("Modern template: Widget initialization completed");
 }
 
 // Initialize when DOM is ready
 if (document.readyState === "loading") {
   console.log("Modern template: DOM still loading, adding event listener");
-  document.addEventListener("DOMContentLoaded", initializeWidget);
+  document.addEventListener("D OMContentLoaded", initializeWidget);
 } else {
   console.log("Modern template: DOM already loaded, initializing immediately");
   initializeWidget();
