@@ -2,7 +2,7 @@
 import type { WidgetTemplate } from './template-types.ts'
 import { defaultHtmlTemplate } from './templates/default/html-template.ts'
 import { defaultCssStyles } from './templates/default/css-styles.ts'
-import { getJavaScript WithUtils } from './templates/default/javascript-logic.ts'
+import { getJavaScriptWithUtils } from './templates/default/javascript-logic.ts'
 
 export const defaultTemplate: WidgetTemplate = {
   id: 'default',
