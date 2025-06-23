@@ -1,4 +1,3 @@
-
 import type { WidgetTemplate } from './template-types.ts'
 import { defaultHtmlTemplate } from './templates/default/html-template.ts'
 import { defaultCssStyles } from './templates/default/css-styles.ts'
@@ -180,7 +179,7 @@ const defaultJavaScriptLogic = `
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#x27;');
+      .replace(/'/g, '&#39;');
   }
   
   function initWidget() {

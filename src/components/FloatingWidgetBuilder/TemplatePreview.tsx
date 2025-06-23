@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { Channel, FormData } from './types';
 
@@ -112,6 +111,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
           .replace(/\\t/g, '\t')
           .replace(/\\'/g, "'")
           .replace(/\\"/g, '"')
+          .replace(/`/g, '\\`') // Fix: Escape backticks to prevent template literal issues
           .trim();
       }
       
