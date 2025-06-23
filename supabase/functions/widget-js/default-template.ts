@@ -312,8 +312,21 @@ export const defaultTemplate: WidgetTemplate = {
             html += '<div class="lovable-group-count">' + channel.childChannels.length + '</div>';
             html += '</div>';
             
-            // Render dropdown with child channels
+            // Render dropdown with child channels - INCLUDING PARENT AS FIRST ITEM
             html += '<div class="lovable-group-dropdown">';
+            
+            // Add parent channel as first item
+            html += '<a href="' + channelUrl + '" target="_blank" class="lovable-group-item" data-channel-url="' + channelUrl + '">';
+            html += '<div class="lovable-group-item-icon" style="background: ' + channelColor + ';">';
+            html += channelIcon;
+            html += '</div>';
+            html += '<div class="lovable-group-item-info">';
+            html += '<div class="lovable-group-item-label">' + channel.label + '</div>';
+            html += '<div class="lovable-group-item-value">' + channel.value + '</div>';
+            html += '</div>';
+            html += '</a>';
+            
+            // Add child channels
             channel.childChannels.forEach(function(childChannel, childIndex) {
               console.log('Processing child channel ' + childIndex + ':', childChannel);
               
@@ -321,7 +334,6 @@ export const defaultTemplate: WidgetTemplate = {
               const childIcon = getChannelIcon(childChannel);
               const childColor = getChannelColor(childChannel.type);
               
-              // Fixed: Using data attributes instead of inline onclick to avoid escaping issues
               html += '<a href="' + childUrl + '" target="_blank" class="lovable-group-item" data-channel-url="' + childUrl + '">';
               html += '<div class="lovable-group-item-icon" style="background: ' + childColor + ';">';
               html += childIcon;
@@ -337,7 +349,6 @@ export const defaultTemplate: WidgetTemplate = {
           } else {
             console.log('Processing regular channel');
             
-            // Fixed: Using data attributes instead of inline onclick to avoid escaping issues
             html += '<a href="' + channelUrl + '" target="_blank" class="lovable-channel-button" style="border-color: ' + channelColor + ';" data-channel-url="' + channelUrl + '">';
             html += '<div class="lovable-channel-icon" style="background: ' + channelColor + ';">';
             html += channelIcon;
@@ -516,6 +527,29 @@ export const defaultTemplate: WidgetTemplate = {
       groupTriggers.forEach(function(trigger, index) {
         console.log('Setting up group trigger ' + index);
         
+        // Click functionality for showing dropdown
+        trigger.addEventListener('click', function(e) {
+          console.log('Group trigger clicked');
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const group = trigger.closest('.lovable-channel-group');
+          const dropdown = group.querySelector('.lovable-group-dropdown');
+          
+          if (dropdown) {
+            console.log('Toggling dropdown visibility');
+            closeAllDropdowns();
+            
+            if (dropdown.classList.contains('show')) {
+              dropdown.classList.remove('show');
+              console.log('Dropdown hidden');
+            } else {
+              dropdown.classList.add('show');
+              console.log('Dropdown shown');
+            }
+          }
+        });
+        
         // Hover functionality
         trigger.addEventListener('mouseenter', function(e) {
           const group = trigger.closest('.lovable-channel-group');
@@ -528,26 +562,6 @@ export const defaultTemplate: WidgetTemplate = {
                 dropdown.classList.add('show');
               }
             }, 100);
-          }
-        });
-        
-        // Click functionality  
-        trigger.addEventListener('click', function(e) {
-          console.log('Group trigger clicked');
-          e.preventDefault();
-          e.stopPropagation();
-          
-          const group = trigger.closest('.lovable-channel-group');
-          const dropdown = group.querySelector('.lovable-group-dropdown');
-          
-          if (dropdown) {
-            closeAllDropdowns();
-            
-            if (dropdown.classList.contains('show')) {
-              dropdown.classList.remove('show');
-            } else {
-              dropdown.classList.add('show');
-            }
           }
         });
       });
