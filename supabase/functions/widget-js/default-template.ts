@@ -1,4 +1,3 @@
-
 import type { WidgetTemplate } from './template-types.ts'
 
 export const defaultTemplate: WidgetTemplate = {
@@ -147,14 +146,9 @@ export const defaultTemplate: WidgetTemplate = {
       transform: translateX(4px);
     }
 
-    /* Channel group styles */
+    /* Channel group with hover submenu */
     .lovable-channel-group {
       position: relative;
-    }
-    
-    .lovable-group-trigger {
-      position: relative;
-      cursor: pointer;
     }
     
     .lovable-group-count {
@@ -173,11 +167,11 @@ export const defaultTemplate: WidgetTemplate = {
       box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
     }
     
-    .lovable-group-dropdown {
+    .lovable-hover-submenu {
       position: absolute;
-      left: 100%;
+      right: 100%;
       top: 0;
-      margin-left: 12px;
+      margin-right: 12px;
       background: white;
       border-radius: 12px;
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
@@ -185,15 +179,20 @@ export const defaultTemplate: WidgetTemplate = {
       max-width: 320px;
       border: 1px solid #e5e7eb;
       z-index: 1000002;
-      display: none;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(10px);
+      transition: all 0.3s ease;
       overflow: hidden;
     }
     
-    .lovable-group-dropdown.show {
-      display: block;
+    .lovable-channel-group:hover .lovable-hover-submenu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
     }
     
-    .lovable-group-item {
+    .lovable-submenu-item {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -204,15 +203,15 @@ export const defaultTemplate: WidgetTemplate = {
       border-bottom: 1px solid #f3f4f6;
     }
     
-    .lovable-group-item:last-child {
+    .lovable-submenu-item:last-child {
       border-bottom: none;
     }
     
-    .lovable-group-item:hover {
+    .lovable-submenu-item:hover {
       background: #f9fafb;
     }
     
-    .lovable-group-item-icon {
+    .lovable-submenu-item-icon {
       width: 36px;
       height: 36px;
       display: flex;
@@ -223,12 +222,12 @@ export const defaultTemplate: WidgetTemplate = {
       flex-shrink: 0;
     }
     
-    .lovable-group-item-info {
+    .lovable-submenu-item-info {
       flex: 1;
       min-width: 0;
     }
     
-    .lovable-group-item-label {
+    .lovable-submenu-item-label {
       font-weight: 500;
       font-size: 14px;
       color: #1f2937;
@@ -236,7 +235,7 @@ export const defaultTemplate: WidgetTemplate = {
       line-height: 1.3;
     }
     
-    .lovable-group-item-value {
+    .lovable-submenu-item-value {
       font-size: 12px;
       color: #6b7280;
       overflow: hidden;
@@ -247,20 +246,18 @@ export const defaultTemplate: WidgetTemplate = {
     }
 
     @media (max-width: 768px) {
-      .lovable-group-dropdown {
-        left: auto;
-        right: 100%;
-        margin-left: 0;
-        margin-right: 12px;
-        min-width: auto;
-        max-width: 280px;
+      .lovable-hover-submenu {
+        left: 100%;
+        right: auto;
+        margin-left: 12px;
+        margin-right: 0;
       }
     }
   `,
   
   js: `
-    console.log('=== DEFAULT TEMPLATE DEBUG START ===');
-    console.log('Default template loading with channels:', {{CHANNELS_DATA}});
+    console.log('=== DEFAULT TEMPLATE HOVER VERSION START ===');
+    console.log('Loading template with channels:', {{CHANNELS_DATA}});
     
     const channelsData = {{CHANNELS_DATA}};
     console.log('Parsed channelsData:', channelsData);
@@ -278,9 +275,6 @@ export const defaultTemplate: WidgetTemplate = {
         
         // Re-add event listeners for channel clicks
         addChannelClickListeners();
-        
-        // Re-initialize channel groups
-        initChannelGroups();
       }
     };
     
@@ -315,9 +309,9 @@ export const defaultTemplate: WidgetTemplate = {
           if (channel.childChannels && channel.childChannels.length > 0) {
             console.log('Processing grouped channel with ' + channel.childChannels.length + ' children');
             
-            // Render parent channel with count badge
+            // Render parent channel with hover submenu
             html += '<div class="lovable-channel-group">';
-            html += '<div class="lovable-group-trigger lovable-channel-button" data-group-id="group-' + channel.id + '" style="border-color: ' + channelColor + ';">';
+            html += '<div class="lovable-channel-button" style="border-color: ' + channelColor + ';">';
             html += '<div class="lovable-channel-icon" style="background: ' + channelColor + ';">';
             html += channelIcon;
             html += '</div>';
@@ -329,17 +323,17 @@ export const defaultTemplate: WidgetTemplate = {
             html += '<div class="lovable-group-count">' + (channel.childChannels.length + 1) + '</div>';
             html += '</div>';
             
-            // Render dropdown with child channels - INCLUDING PARENT AS FIRST ITEM
-            html += '<div class="lovable-group-dropdown" id="dropdown-' + channel.id + '">';
+            // Render hover submenu with all channels (parent + children)
+            html += '<div class="lovable-hover-submenu">';
             
             // Add parent channel as first item
-            html += '<a href="' + channelUrl + '" target="_blank" class="lovable-group-item" data-channel-url="' + channelUrl + '">';
-            html += '<div class="lovable-group-item-icon" style="background: ' + channelColor + ';">';
+            html += '<a href="' + channelUrl + '" target="_blank" class="lovable-submenu-item" data-channel-url="' + channelUrl + '">';
+            html += '<div class="lovable-submenu-item-icon" style="background: ' + channelColor + ';">';
             html += channelIcon;
             html += '</div>';
-            html += '<div class="lovable-group-item-info">';
-            html += '<div class="lovable-group-item-label">' + channel.label + '</div>';
-            html += '<div class="lovable-group-item-value">' + channel.value + '</div>';
+            html += '<div class="lovable-submenu-item-info">';
+            html += '<div class="lovable-submenu-item-label">' + channel.label + '</div>';
+            html += '<div class="lovable-submenu-item-value">' + channel.value + '</div>';
             html += '</div>';
             html += '</a>';
             
@@ -351,13 +345,13 @@ export const defaultTemplate: WidgetTemplate = {
               const childIcon = getChannelIcon(childChannel);
               const childColor = getChannelColor(childChannel.type);
               
-              html += '<a href="' + childUrl + '" target="_blank" class="lovable-group-item" data-channel-url="' + childUrl + '">';
-              html += '<div class="lovable-group-item-icon" style="background: ' + childColor + ';">';
+              html += '<a href="' + childUrl + '" target="_blank" class="lovable-submenu-item" data-channel-url="' + childUrl + '">';
+              html += '<div class="lovable-submenu-item-icon" style="background: ' + childColor + ';">';
               html += childIcon;
               html += '</div>';
-              html += '<div class="lovable-group-item-info">';
-              html += '<div class="lovable-group-item-label">' + childChannel.label + '</div>';
-              html += '<div class="lovable-group-item-value">' + childChannel.value + '</div>';
+              html += '<div class="lovable-submenu-item-info">';
+              html += '<div class="lovable-submenu-item-label">' + childChannel.label + '</div>';
+              html += '<div class="lovable-submenu-item-value">' + childChannel.value + '</div>';
               html += '</div>';
               html += '</a>';
             });
@@ -494,7 +488,7 @@ export const defaultTemplate: WidgetTemplate = {
         e.preventDefault();
         e.stopPropagation();
         modal.style.display = 'flex';
-        console.log('Default widget modal opened');
+        console.log('Widget modal opened');
       });
       
       // Close button
@@ -504,7 +498,7 @@ export const defaultTemplate: WidgetTemplate = {
           e.preventDefault();
           e.stopPropagation();
           modal.style.display = 'none';
-          console.log('Default widget modal closed');
+          console.log('Widget modal closed');
         });
       }
       
@@ -524,11 +518,6 @@ export const defaultTemplate: WidgetTemplate = {
         }
       });
       
-      // Initialize channel groups AFTER HTML is inserted and click listeners added
-      setTimeout(function() {
-        initChannelGroups();
-      }, 100);
-      
       // Tooltip functionality
       if (tooltip && button) {
         if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
@@ -544,102 +533,7 @@ export const defaultTemplate: WidgetTemplate = {
         }
       }
       
-      console.log('Default template initialized successfully');
-    }
-    
-    function initChannelGroups() {
-      console.log('initChannelGroups called');
-      
-      const groupTriggers = document.querySelectorAll('.lovable-group-trigger');
-      console.log('Found group triggers:', groupTriggers.length);
-      
-      groupTriggers.forEach(function(trigger, index) {
-        console.log('Setting up group trigger ' + index);
-        const groupId = trigger.getAttribute('data-group-id');
-        console.log('Group ID:', groupId);
-        
-        // Remove any existing listeners to avoid duplicates
-        trigger.replaceWith(trigger.cloneNode(true));
-        // Get the new element after cloning
-        const newTrigger = document.querySelector('[data-group-id="' + groupId + '"]');
-        
-        if (!newTrigger) {
-          console.log('Could not find trigger after cloning');
-          return;
-        }
-        
-        // Click functionality for showing dropdown
-        newTrigger.addEventListener('click', function(e) {
-          console.log('Group trigger clicked for group:', groupId);
-          e.preventDefault();
-          e.stopPropagation();
-          
-          const group = newTrigger.closest('.lovable-channel-group');
-          const dropdown = group ? group.querySelector('.lovable-group-dropdown') : null;
-          
-          console.log('Group found:', !!group);
-          console.log('Dropdown found:', !!dropdown);
-          
-          if (dropdown) {
-            console.log('Toggling dropdown visibility');
-            closeAllDropdowns();
-            
-            if (dropdown.classList.contains('show')) {
-              dropdown.classList.remove('show');
-              console.log('Dropdown hidden');
-            } else {
-              dropdown.classList.add('show');
-              console.log('Dropdown shown');
-            }
-          }
-        });
-        
-        // Hover functionality
-        newTrigger.addEventListener('mouseenter', function(e) {
-          const group = newTrigger.closest('.lovable-channel-group');
-          const dropdown = group ? group.querySelector('.lovable-group-dropdown') : null;
-          
-          if (dropdown) {
-            closeAllDropdowns();
-            setTimeout(function() {
-              if (newTrigger.matches(':hover')) {
-                dropdown.classList.add('show');
-              }
-            }, 100);
-          }
-        });
-      });
-      
-      // Close dropdowns when mouse leaves group
-      const channelGroups = document.querySelectorAll('.lovable-channel-group');
-      channelGroups.forEach(function(group) {
-        group.addEventListener('mouseleave', function() {
-          setTimeout(function() {
-            if (!group.matches(':hover')) {
-              const dropdown = group.querySelector('.lovable-group-dropdown');
-              if (dropdown) {
-                dropdown.classList.remove('show');
-              }
-            }
-          }, 300);
-        });
-      });
-      
-      // Close dropdowns when clicking outside
-      document.addEventListener('click', function(e) {
-        if (!e.target.closest('.lovable-channel-group')) {
-          closeAllDropdowns();
-        }
-      });
-      
-      console.log('Channel groups initialized');
-    }
-    
-    function closeAllDropdowns() {
-      const dropdowns = document.querySelectorAll('.lovable-group-dropdown');
-      dropdowns.forEach(function(dropdown) {
-        dropdown.classList.remove('show');
-      });
+      console.log('Hover-based template initialized successfully');
     }
     
     window.openChannel = function(url) {
@@ -655,7 +549,7 @@ export const defaultTemplate: WidgetTemplate = {
       initWidget();
     }
     
-    console.log('=== DEFAULT TEMPLATE DEBUG END ===');
+    console.log('=== DEFAULT TEMPLATE HOVER VERSION END ===');
   `
 };
 
