@@ -28,15 +28,15 @@ export const useAuth = () => {
   }, []);
 
   const signUp = async (email: string, password: string) => {
-    // Use the current domain for the redirect URL
+    // Get the current domain for the redirect URL
     const currentDomain = window.location.origin;
-    const redirectUrl = `${currentDomain}/`;
     
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl
+        // Use the current domain instead of hardcoded localhost
+        emailRedirectTo: currentDomain
       }
     });
     return { error };
