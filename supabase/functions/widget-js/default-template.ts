@@ -506,6 +506,14 @@ const jsLogic = `
       modal.style.display = 'flex';
       modal.style.visibility = 'visible';
       modal.style.opacity = '1';
+      
+      // Add slight delay for smooth animation
+      setTimeout(function() {
+        var modalContent = document.querySelector('#lovable-modal-content');
+        if (modalContent) {
+          modalContent.style.transform = 'translateY(0)';
+        }
+      }, 50);
     });
     
     // Close button
@@ -514,19 +522,7 @@ const jsLogic = `
         e.preventDefault();
         e.stopPropagation();
         console.log('Close button clicked');
-        modal.style.display = 'none';
-        modal.style.visibility = 'hidden';
-        modal.style.opacity = '0';
-        
-        // Close all dropdowns when modal closes
-        var allDropdowns = document.querySelectorAll('.dropdown');
-        var allArrows = document.querySelectorAll('.dropdown-arrow');
-        allDropdowns.forEach(function(dropdown) {
-          dropdown.classList.remove('show');
-        });
-        allArrows.forEach(function(arrow) {
-          arrow.classList.remove('rotated');
-        });
+        closeModal();
       });
     }
     
@@ -534,19 +530,7 @@ const jsLogic = `
     modal.addEventListener('click', function(e) {
       if (e.target === modal) {
         console.log('Modal backdrop clicked');
-        modal.style.display = 'none';
-        modal.style.visibility = 'hidden';
-        modal.style.opacity = '0';
-        
-        // Close all dropdowns when modal closes
-        var allDropdowns = document.querySelectorAll('.dropdown');
-        var allArrows = document.querySelectorAll('.dropdown-arrow');
-        allDropdowns.forEach(function(dropdown) {
-          dropdown.classList.remove('show');
-        });
-        allArrows.forEach(function(arrow) {
-          arrow.classList.remove('rotated');
-        });
+        closeModal();
       }
     });
     
@@ -554,6 +538,17 @@ const jsLogic = `
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && modal.style.display === 'flex') {
         console.log('ESC key pressed');
+        closeModal();
+      }
+    });
+    
+    function closeModal() {
+      var modalContent = document.querySelector('#lovable-modal-content');
+      if (modalContent) {
+        modalContent.style.transform = 'translateY(20px)';
+      }
+      
+      setTimeout(function() {
         modal.style.display = 'none';
         modal.style.visibility = 'hidden';
         modal.style.opacity = '0';
@@ -567,8 +562,8 @@ const jsLogic = `
         allArrows.forEach(function(arrow) {
           arrow.classList.remove('rotated');
         });
-      }
-    });
+      }, 100);
+    }
     
     // Tooltip functionality
     if (tooltip && button) {
