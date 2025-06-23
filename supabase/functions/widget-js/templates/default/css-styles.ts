@@ -1,4 +1,3 @@
-
 export const defaultCssStyles = `
   #lovable-widget-button:hover {
     transform: scale(1.1);
