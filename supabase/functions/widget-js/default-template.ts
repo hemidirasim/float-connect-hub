@@ -259,27 +259,45 @@ export const defaultTemplate: WidgetTemplate = {
   `,
   
   js: `
+    console.log('=== DEFAULT TEMPLATE DEBUG START ===');
     console.log('Default template loading with channels:', {{CHANNELS_DATA}});
     
     const channelsData = {{CHANNELS_DATA}};
+    console.log('Parsed channelsData:', channelsData);
+    console.log('channelsData type:', typeof channelsData);
+    console.log('channelsData length:', channelsData ? channelsData.length : 'null');
     
     function generateChannelsHtml() {
+      console.log('generateChannelsHtml called');
+      
       if (!channelsData || channelsData.length === 0) {
+        console.log('No channels data found, showing empty state');
         const emptyState = document.querySelector('.lovable-empty-state');
         if (emptyState) emptyState.style.display = 'block';
         return '';
       }
       
+      console.log('Processing channels:', channelsData);
       let html = '';
       
-      function processChannels(channels, isChild = false) {
-        channels.forEach(function(channel) {
+      function processChannels(channels) {
+        console.log('processChannels called with:', channels);
+        
+        channels.forEach(function(channel, index) {
+          console.log('Processing channel ' + index + ':', channel);
+          
           const channelUrl = getChannelUrl(channel);
           const channelIcon = getChannelIcon(channel);
           const channelColor = getChannelColor(channel.type);
           
+          console.log('Channel URL:', channelUrl);
+          console.log('Channel Icon:', channelIcon);
+          console.log('Channel Color:', channelColor);
+          
           // Check if channel has child channels (grouped channels)
           if (channel.childChannels && channel.childChannels.length > 0) {
+            console.log('Processing grouped channel with ' + channel.childChannels.length + ' children');
+            
             // Render parent channel with count badge
             html += '<div class="lovable-channel-group">';
             html += '<div class="lovable-group-trigger lovable-channel-button" style="border-color: ' + channelColor + ';">';
@@ -296,12 +314,15 @@ export const defaultTemplate: WidgetTemplate = {
             
             // Render dropdown with child channels
             html += '<div class="lovable-group-dropdown">';
-            channel.childChannels.forEach(function(childChannel) {
+            channel.childChannels.forEach(function(childChannel, childIndex) {
+              console.log('Processing child channel ' + childIndex + ':', childChannel);
+              
               const childUrl = getChannelUrl(childChannel);
               const childIcon = getChannelIcon(childChannel);
               const childColor = getChannelColor(childChannel.type);
               
-              html += '<a href="' + childUrl + '" target="_blank" class="lovable-group-item" onclick="window.openChannel(\\'' + childUrl + '\\'); return false;">';
+              // Fixed: Using data attributes instead of inline onclick to avoid escaping issues
+              html += '<a href="' + childUrl + '" target="_blank" class="lovable-group-item" data-channel-url="' + childUrl + '">';
               html += '<div class="lovable-group-item-icon" style="background: ' + childColor + ';">';
               html += childIcon;
               html += '</div>';
@@ -314,8 +335,10 @@ export const defaultTemplate: WidgetTemplate = {
             html += '</div>';
             html += '</div>';
           } else {
-            // Regular channel
-            html += '<a href="' + channelUrl + '" target="_blank" class="lovable-channel-button" style="border-color: ' + channelColor + ';" onclick="window.openChannel(\\'' + channelUrl + '\\'); return false;">';
+            console.log('Processing regular channel');
+            
+            // Fixed: Using data attributes instead of inline onclick to avoid escaping issues
+            html += '<a href="' + channelUrl + '" target="_blank" class="lovable-channel-button" style="border-color: ' + channelColor + ';" data-channel-url="' + channelUrl + '">';
             html += '<div class="lovable-channel-icon" style="background: ' + channelColor + ';">';
             html += channelIcon;
             html += '</div>';
@@ -330,13 +353,16 @@ export const defaultTemplate: WidgetTemplate = {
       }
       
       processChannels(channelsData);
+      console.log('Generated HTML length:', html.length);
       return html;
     }
     
     function getChannelUrl(channel) {
+      console.log('getChannelUrl called for:', channel);
+      
       switch (channel.type) {
         case 'whatsapp':
-          return 'https://wa.me/' + channel.value.replace(/\\D/g, '');
+          return 'https://wa.me/' + channel.value.replace(/[^0-9]/g, '');
         case 'telegram':
           return channel.value.startsWith('http') ? channel.value : 'https://t.me/' + channel.value;
         case 'phone':
@@ -382,9 +408,29 @@ export const defaultTemplate: WidgetTemplate = {
     }
     
     function initWidget() {
+      console.log('initWidget called');
+      
       const channelsContainer = document.querySelector('#lovable-widget-channels');
+      console.log('Channels container found:', !!channelsContainer);
+      
       if (channelsContainer) {
-        channelsContainer.innerHTML = generateChannelsHtml();
+        const generatedHtml = generateChannelsHtml();
+        console.log('Setting innerHTML with:', generatedHtml);
+        channelsContainer.innerHTML = generatedHtml;
+        
+        // Add event listeners for channel clicks using data attributes
+        const channelButtons = channelsContainer.querySelectorAll('[data-channel-url]');
+        console.log('Found channel buttons:', channelButtons.length);
+        
+        channelButtons.forEach(function(button, index) {
+          console.log('Adding click listener to button ' + index);
+          button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const url = button.getAttribute('data-channel-url');
+            console.log('Channel button clicked, opening:', url);
+            window.open(url, '_blank');
+          });
+        });
       }
       
       const button = document.querySelector('#lovable-widget-button');
@@ -392,10 +438,21 @@ export const defaultTemplate: WidgetTemplate = {
       const tooltip = document.querySelector('#lovable-widget-tooltip');
       const closeBtn = document.querySelector('#lovable-widget-close');
       
-      if (!button || !modal) return;
+      console.log('Widget elements found:', {
+        button: !!button,
+        modal: !!modal,
+        tooltip: !!tooltip,
+        closeBtn: !!closeBtn
+      });
+      
+      if (!button || !modal) {
+        console.error('Missing required widget elements');
+        return;
+      }
       
       // Button click to show modal
       button.addEventListener('click', function(e) {
+        console.log('Widget button clicked');
         e.preventDefault();
         e.stopPropagation();
         modal.style.display = 'flex';
@@ -405,6 +462,7 @@ export const defaultTemplate: WidgetTemplate = {
       // Close button
       if (closeBtn) {
         closeBtn.addEventListener('click', function(e) {
+          console.log('Close button clicked');
           e.preventDefault();
           e.stopPropagation();
           modal.style.display = 'none';
@@ -415,6 +473,7 @@ export const defaultTemplate: WidgetTemplate = {
       // Modal backdrop click
       modal.addEventListener('click', function(e) {
         if (e.target === modal) {
+          console.log('Modal backdrop clicked');
           modal.style.display = 'none';
         }
       });
@@ -422,6 +481,7 @@ export const defaultTemplate: WidgetTemplate = {
       // ESC key
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal.style.display === 'flex') {
+          console.log('ESC key pressed, closing modal');
           modal.style.display = 'none';
         }
       });
@@ -444,13 +504,18 @@ export const defaultTemplate: WidgetTemplate = {
         }
       }
       
-      console.log('Default template initialized with hover-based channel groups');
+      console.log('Default template initialized successfully');
     }
     
     function initChannelGroups() {
-      const groupTriggers = document.querySelectorAll('.lovable-group-trigger');
+      console.log('initChannelGroups called');
       
-      groupTriggers.forEach(function(trigger) {
+      const groupTriggers = document.querySelectorAll('.lovable-group-trigger');
+      console.log('Found group triggers:', groupTriggers.length);
+      
+      groupTriggers.forEach(function(trigger, index) {
+        console.log('Setting up group trigger ' + index);
+        
         // Hover functionality
         trigger.addEventListener('mouseenter', function(e) {
           const group = trigger.closest('.lovable-channel-group');
@@ -468,6 +533,7 @@ export const defaultTemplate: WidgetTemplate = {
         
         // Click functionality  
         trigger.addEventListener('click', function(e) {
+          console.log('Group trigger clicked');
           e.preventDefault();
           e.stopPropagation();
           
@@ -517,15 +583,19 @@ export const defaultTemplate: WidgetTemplate = {
     }
     
     window.openChannel = function(url) {
+      console.log('openChannel called with:', url);
       window.open(url, '_blank');
-      console.log('Channel opened:', url);
     };
     
     if (document.readyState === 'loading') {
+      console.log('Document still loading, waiting for DOMContentLoaded');
       document.addEventListener('DOMContentLoaded', initWidget);
     } else {
+      console.log('Document ready, initializing widget immediately');
       initWidget();
     }
+    
+    console.log('=== DEFAULT TEMPLATE DEBUG END ===');
   `
 };
 
