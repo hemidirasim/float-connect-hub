@@ -10,6 +10,8 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     autoRefreshToken: true,
     detectSessionInUrl: true, // This enables automatic handling of OAuth and magic link URLs
     flowType: 'pkce', // Use PKCE flow for better security
-    debug: false // Set to true for development only
+    debug: false, // Set to true for development only
+    // Custom email template settings
+    emailRedirectTo: window.location.origin
   }
 })

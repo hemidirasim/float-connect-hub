@@ -25,6 +25,8 @@ additional_redirect_urls = [
 jwt_expiry = 3600
 refresh_token_rotation_enabled = true
 security_update_password_require_reauthentication = true
+email_template_fetch_url = "https://hiclient.co/email-templates"
+email_template_override_path = "email-templates"
 
 [functions.paddle-webhook]
 verify_jwt = false

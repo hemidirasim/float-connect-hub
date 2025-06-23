@@ -30,24 +30,28 @@ export const useAuth = () => {
   }, []);
 
   const signUp = async (email: string, password: string) => {
-    // Get the current domain for the redirect URL
-    const currentOrigin = window.location.origin;
-    const redirectTo = `${currentOrigin}/`;
-    
-    console.log(`Signing up with redirect to: ${redirectTo}`);
-    
     try {
+      // We're using passwordless auth disabled, so we don't need email confirmation
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: redirectTo
+          // No email confirmation needed
+          emailRedirectTo: undefined,
+          data: {
+            full_name: email.split('@')[0] // Default name from email
+          }
         }
       });
       
       // Check if user already exists
       if (error && error.message.includes('already registered')) {
         return { error };
+      }
+      
+      // If successful, automatically sign in the user
+      if (!error) {
+        await signIn(email, password);
       }
       
       return { data, error };

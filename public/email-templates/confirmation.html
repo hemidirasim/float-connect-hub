@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hesabınızı təsdiqləyin - Hiclient</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      background-color: #f9fafb;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      text-align: center;
+      padding: 20px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .logo {
+      width: 120px;
+      height: auto;
+    }
+    .content {
+      padding: 30px 20px;
+    }
+    .button {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: 600;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .footer {
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      color: #6b7280;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://hiclient.co/logo.png" alt="Hiclient Logo" class="logo">
+    </div>
+    <div class="content">
+      <h1>Salam!</h1>
+      <p>Hiclient-də qeydiyyatdan keçdiyiniz üçün təşəkkür edirik. Hesabınızı təsdiqləmək üçün aşağıdakı düyməyə klikləyin:</p>
+      
+      <div style="text-align: center;">
+        <a href="{{ .ConfirmationURL }}" class="button">Hesabımı Təsdiqlə</a>
+      </div>
+      
+      <p>Və ya bu linki kopyalayıb brauzerinizə yapışdırın:</p>
+      <p>{{ .ConfirmationURL }}</p>
+      
+      <p>Əgər siz qeydiyyatdan keçməmisinizsə, bu emaili nəzərə almayın.</p>
+    </div>
+    <div class="footer">
+      <p>&copy; 2024 Hiclient. Bütün hüquqlar qorunur.</p>
+      <p>Bakı, Azərbaycan</p>
+    </div>
+  </div>
+</body>
+</html>

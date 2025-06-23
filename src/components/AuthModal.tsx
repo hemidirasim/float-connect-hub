@@ -83,7 +83,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
-          toast.error("Giriş xətası: " + error.message);
+          if (error.message.includes('Invalid login credentials')) {
+            toast.error("Yanlış email və ya şifrə");
+          } else {
+            toast.error("Giriş xətası: " + error.message);
+          }
         } else {
           toast.success("Uğurla daxil oldunuz!");
           onOpenChange(false);
@@ -99,9 +103,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
             toast.error("Qeydiyyat xətası: " + error.message);
           }
         } else {
-          toast.success("Qeydiyyat uğurla tamamlandı! Təsdiq emailinizi yoxlayın.");
-          onOpenChange(false);
-          setEmail('');
+          toast.success("Qeydiyyat uğurla tamamlandı!", {
+            description: "Hesabınız yaradıldı və artıq daxil ola bilərsiniz."
+          });
+          // Switch to login mode after successful registration
+          setIsLogin(true);
           setPassword('');
           setConfirmPassword('');
         }
