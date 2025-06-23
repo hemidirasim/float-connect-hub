@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { toast } from "sonner";
 
 const AuthCallback = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { updatePassword } = useAuth();
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'reset_password'>('loading');
   const [message, setMessage] = useState('Hesabınız təsdiqlənir...');
@@ -54,14 +55,53 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get the URL hash parameters
-        const hash = window.location.hash.substring(1);
-        const params = new URLSearchParams(hash);
+        console.log("Auth callback handling started");
         
-        // Check if this is an email confirmation
-        const accessToken = params.get('access_token');
-        const refreshToken = params.get('refresh_token');
-        const type = params.get('type');
+        // Check for recovery token in URL query parameters
+        const queryParams = new URLSearchParams(location.search);
+        const code = queryParams.get('code');
+        const type = queryParams.get('type');
+        
+        console.log("URL parameters:", { code, type });
+        
+        if (code) {
+          // This is a recovery flow
+          if (type === 'recovery' || location.hash.includes('type=recovery')) {
+            console.log("Password recovery flow detected");
+            setStatus('reset_password');
+            setMessage('Yeni şifrənizi təyin edin');
+            return;
+          }
+          
+          // Exchange code for session
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          
+          if (error) {
+            console.error('Error exchanging code for session:', error);
+            setStatus('error');
+            setMessage('Giriş zamanı xəta baş verdi: ' + error.message);
+            return;
+          }
+          
+          setStatus('success');
+          setMessage('Uğurla daxil oldunuz!');
+          
+          // Redirect to dashboard after 2 seconds
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 2000);
+          return;
+        }
+        
+        // Check for hash parameters (for older auth flows)
+        const hash = window.location.hash.substring(1);
+        const hashParams = new URLSearchParams(hash);
+        
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        const hashType = hashParams.get('type');
+        
+        console.log("Hash parameters:", { accessToken: !!accessToken, refreshToken: !!refreshToken, hashType });
         
         if (accessToken && refreshToken) {
           // Set the session manually
@@ -73,12 +113,13 @@ const AuthCallback = () => {
           if (error) {
             console.error('Error setting session:', error);
             setStatus('error');
-            setMessage('Hesab təsdiqlənməsi zamanı xəta baş verdi.');
+            setMessage('Hesab təsdiqlənməsi zamanı xəta baş verdi: ' + error.message);
             return;
           }
           
           // Check if this is a password reset
-          if (type === 'recovery') {
+          if (hashType === 'recovery') {
+            console.log("Password recovery flow detected from hash");
             setStatus('reset_password');
             setMessage('Yeni şifrənizi təyin edin');
             return;
@@ -91,16 +132,20 @@ const AuthCallback = () => {
           setTimeout(() => {
             navigate('/dashboard');
           }, 2000);
-        } else {
-          // Handle other auth callbacks
-          const { error } = await supabase.auth.getSession();
-          if (error) {
-            console.error('Error getting session:', error);
-            setStatus('error');
-            setMessage('Giriş zamanı xəta baş verdi.');
-            return;
-          }
-          
+          return;
+        }
+        
+        // If we get here, try to get the current session
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          setStatus('error');
+          setMessage('Giriş zamanı xəta baş verdi: ' + error.message);
+          return;
+        }
+        
+        if (data.session) {
           setStatus('success');
           setMessage('Uğurla daxil oldunuz!');
           
@@ -108,6 +153,9 @@ const AuthCallback = () => {
           setTimeout(() => {
             navigate('/dashboard');
           }, 2000);
+        } else {
+          setStatus('error');
+          setMessage('Sessiya tapılmadı. Zəhmət olmasa yenidən daxil olun.');
         }
       } catch (error) {
         console.error('Error during auth callback:', error);
@@ -117,7 +165,7 @@ const AuthCallback = () => {
     };
 
     handleAuthCallback();
-  }, [navigate]);
+  }, [navigate, location]);
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,9 +191,10 @@ const AuthCallback = () => {
       const { error } = await updatePassword(newPassword);
       
       if (error) {
+        console.error('Error updating password:', error);
         toast.error("Şifrə yeniləmə xətası: " + error.message);
         setStatus('error');
-        setMessage('Şifrə yeniləmə zamanı xəta baş verdi.');
+        setMessage('Şifrə yeniləmə zamanı xəta baş verdi: ' + error.message);
       } else {
         toast.success("Şifrəniz uğurla yeniləndi!");
         setStatus('success');
@@ -156,11 +205,11 @@ const AuthCallback = () => {
           navigate('/dashboard');
         }, 2000);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating password:', error);
       toast.error("Şifrə yeniləmə zamanı xəta baş verdi");
       setStatus('error');
-      setMessage('Şifrə yeniləmə zamanı xəta baş verdi.');
+      setMessage('Şifrə yeniləmə zamanı xəta baş verdi: ' + error.message);
     } finally {
       setPasswordUpdating(false);
     }

@@ -10,8 +10,8 @@ const getSiteUrl = () => {
     return window.location.origin;
   }
   
-  // For local development, use the Netlify URL or a fallback
-  return 'https://monumental-bonbon-88b744.netlify.app';
+  // For local development, use the current origin with correct port
+  return window.location.origin;
 };
 
 export const useAuth = () => {
