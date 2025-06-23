@@ -15,7 +15,7 @@ export function getElegantTemplate(): WidgetTemplate {
         
         <!-- Tooltip -->
         <div class="lovable-tooltip" id="lovable-tooltip" style="display: {{TOOLTIP_DISPLAY}};">
-          {{TOOLTIP_TEXT}}
+          {{TOOLTIP_TEXT}}dfdfd
         </div>
         
         <!-- Channels Container -->
