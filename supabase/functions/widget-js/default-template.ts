@@ -1,3 +1,4 @@
+
 import type { WidgetTemplate } from './template-types.ts'
 
 export const defaultTemplate: WidgetTemplate = {
@@ -184,12 +185,14 @@ export const defaultTemplate: WidgetTemplate = {
       transform: translateX(10px);
       transition: all 0.3s ease;
       overflow: hidden;
+      pointer-events: none;
     }
     
     .lovable-channel-group:hover .lovable-hover-submenu {
       opacity: 1;
       visibility: visible;
       transform: translateX(0);
+      pointer-events: auto;
     }
     
     .lovable-submenu-item {
@@ -261,8 +264,6 @@ export const defaultTemplate: WidgetTemplate = {
     
     const channelsData = {{CHANNELS_DATA}};
     console.log('Parsed channelsData:', channelsData);
-    console.log('channelsData type:', typeof channelsData);
-    console.log('channelsData length:', channelsData ? channelsData.length : 'null');
     
     // Global function to refresh widget content when channels change
     window.refreshWidget = function() {
@@ -291,113 +292,93 @@ export const defaultTemplate: WidgetTemplate = {
       console.log('Processing channels:', channelsData);
       let html = '';
       
-      function processChannels(channels) {
-        console.log('processChannels called with:', channels);
+      channelsData.forEach(function(channel, index) {
+        console.log('Processing channel ' + index + ':', channel);
         
-        channels.forEach(function(channel, index) {
-          console.log('Processing channel ' + index + ':', channel);
+        const channelUrl = getChannelUrl(channel);
+        const channelIcon = getChannelIcon(channel);
+        const channelColor = getChannelColor(channel.type);
+        
+        console.log('Channel URL:', channelUrl);
+        console.log('Channel Icon:', channelIcon);
+        console.log('Channel Color:', channelColor);
+        
+        // Check if channel has child channels (grouped channels)
+        if (channel.childChannels && channel.childChannels.length > 0) {
+          console.log('Processing grouped channel with ' + channel.childChannels.length + ' children');
           
-          const channelUrl = getChannelUrl(channel);
-          const channelIcon = getChannelIcon(channel);
-          const channelColor = getChannelColor(channel.type);
+          // Render parent channel with hover submenu
+          html += '<div class="lovable-channel-group">';
+          html += '<div class="lovable-channel-button" style="border-color: ' + channelColor + '; cursor: default;">';
+          html += '<div class="lovable-channel-icon" style="background: ' + channelColor + ';">';
+          html += channelIcon;
+          html += '</div>';
+          html += '<div class="lovable-channel-info">';
+          html += '<div class="lovable-channel-label">' + channel.label + '</div>';
+          html += '<div class="lovable-channel-value">' + (channel.childChannels.length + 1) + ' kanal</div>';
+          html += '</div>';
+          html += '<div class="lovable-channel-arrow">›</div>';
+          html += '<div class="lovable-group-count">' + (channel.childChannels.length + 1) + '</div>';
+          html += '</div>';
           
-          console.log('Channel URL:', channelUrl);
-          console.log('Channel Icon:', channelIcon);
-          console.log('Channel Color:', channelColor);
+          // Render hover submenu with all channels (parent + children)
+          html += '<div class="lovable-hover-submenu">';
           
-          // Check if channel has child channels (grouped channels)
-          if (channel.childChannels && channel.childChannels.length > 0) {
-            console.log('Processing grouped channel with ' + channel.childChannels.length + ' children');
+          // Add parent channel as first item
+          html += '<a href="' + channelUrl + '" target="_blank" class="lovable-submenu-item" onclick="window.openChannel && window.openChannel(\'' + channelUrl + '\'); return false;">';
+          html += '<div class="lovable-submenu-item-icon" style="background: ' + channelColor + ';">';
+          html += channelIcon;
+          html += '</div>';
+          html += '<div class="lovable-submenu-item-info">';
+          html += '<div class="lovable-submenu-item-label">' + channel.label + '</div>';
+          html += '<div class="lovable-submenu-item-value">' + channel.value + '</div>';
+          html += '</div>';
+          html += '</a>';
+          
+          // Add child channels
+          channel.childChannels.forEach(function(childChannel, childIndex) {
+            console.log('Processing child channel ' + childIndex + ':', childChannel);
             
-            // Render parent channel with hover submenu
-            html += '<div class="lovable-channel-group">';
-            html += '<div class="lovable-channel-button" style="border-color: ' + channelColor + ';">';
-            html += '<div class="lovable-channel-icon" style="background: ' + channelColor + ';">';
-            html += channelIcon;
-            html += '</div>';
-            html += '<div class="lovable-channel-info">';
-            html += '<div class="lovable-channel-label">' + channel.label + '</div>';
-            html += '<div class="lovable-channel-value">' + (channel.childChannels.length + 1) + ' kanal</div>';
-            html += '</div>';
-            html += '<div class="lovable-channel-arrow">›</div>';
-            html += '<div class="lovable-group-count">' + (channel.childChannels.length + 1) + '</div>';
-            html += '</div>';
+            const childUrl = getChannelUrl(childChannel);
+            const childIcon = getChannelIcon(childChannel);
+            const childColor = getChannelColor(childChannel.type);
             
-            // Render hover submenu with all channels (parent + children)
-            html += '<div class="lovable-hover-submenu">';
-            
-            // Add parent channel as first item
-            html += '<a href="' + channelUrl + '" target="_blank" class="lovable-submenu-item" data-channel-url="' + channelUrl + '">';
-            html += '<div class="lovable-submenu-item-icon" style="background: ' + channelColor + ';">';
-            html += channelIcon;
+            html += '<a href="' + childUrl + '" target="_blank" class="lovable-submenu-item" onclick="window.openChannel && window.openChannel(\'' + childUrl + '\'); return false;">';
+            html += '<div class="lovable-submenu-item-icon" style="background: ' + childColor + ';">';
+            html += childIcon;
             html += '</div>';
             html += '<div class="lovable-submenu-item-info">';
-            html += '<div class="lovable-submenu-item-label">' + channel.label + '</div>';
-            html += '<div class="lovable-submenu-item-value">' + channel.value + '</div>';
+            html += '<div class="lovable-submenu-item-label">' + childChannel.label + '</div>';
+            html += '<div class="lovable-submenu-item-value">' + childChannel.value + '</div>';
             html += '</div>';
             html += '</a>';
-            
-            // Add child channels
-            channel.childChannels.forEach(function(childChannel, childIndex) {
-              console.log('Processing child channel ' + childIndex + ':', childChannel);
-              
-              const childUrl = getChannelUrl(childChannel);
-              const childIcon = getChannelIcon(childChannel);
-              const childColor = getChannelColor(childChannel.type);
-              
-              html += '<a href="' + childUrl + '" target="_blank" class="lovable-submenu-item" data-channel-url="' + childUrl + '">';
-              html += '<div class="lovable-submenu-item-icon" style="background: ' + childColor + ';">';
-              html += childIcon;
-              html += '</div>';
-              html += '<div class="lovable-submenu-item-info">';
-              html += '<div class="lovable-submenu-item-label">' + childChannel.label + '</div>';
-              html += '<div class="lovable-submenu-item-value">' + childChannel.value + '</div>';
-              html += '</div>';
-              html += '</a>';
-            });
-            html += '</div>';
-            html += '</div>';
-          } else {
-            console.log('Processing regular channel');
-            
-            html += '<a href="' + channelUrl + '" target="_blank" class="lovable-channel-button" style="border-color: ' + channelColor + ';" data-channel-url="' + channelUrl + '">';
-            html += '<div class="lovable-channel-icon" style="background: ' + channelColor + ';">';
-            html += channelIcon;
-            html += '</div>';
-            html += '<div class="lovable-channel-info">';
-            html += '<div class="lovable-channel-label">' + channel.label + '</div>';
-            html += '<div class="lovable-channel-value">' + channel.value + '</div>';
-            html += '</div>';
-            html += '<div class="lovable-channel-arrow">→</div>';
-            html += '</a>';
-          }
-        });
-      }
+          });
+          html += '</div>';
+          html += '</div>';
+        } else {
+          console.log('Processing regular channel');
+          
+          html += '<a href="' + channelUrl + '" target="_blank" class="lovable-channel-button" style="border-color: ' + channelColor + ';" onclick="window.openChannel && window.openChannel(\'' + channelUrl + '\'); return false;">';
+          html += '<div class="lovable-channel-icon" style="background: ' + channelColor + ';">';
+          html += channelIcon;
+          html += '</div>';
+          html += '<div class="lovable-channel-info">';
+          html += '<div class="lovable-channel-label">' + channel.label + '</div>';
+          html += '<div class="lovable-channel-value">' + channel.value + '</div>';
+          html += '</div>';
+          html += '<div class="lovable-channel-arrow">→</div>';
+          html += '</a>';
+        }
+      });
       
-      processChannels(channelsData);
       console.log('Generated HTML length:', html.length);
       return html;
     }
     
     function addChannelClickListeners() {
       console.log('Adding channel click listeners...');
-      const channelsContainer = document.querySelector('#lovable-widget-channels');
-      
-      if (channelsContainer) {
-        // Add event listeners for channel clicks using data attributes
-        const channelButtons = channelsContainer.querySelectorAll('[data-channel-url]');
-        console.log('Found channel buttons:', channelButtons.length);
-        
-        channelButtons.forEach(function(button, index) {
-          console.log('Adding click listener to button ' + index);
-          button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const url = button.getAttribute('data-channel-url');
-            console.log('Channel button clicked, opening:', url);
-            window.open(url, '_blank');
-          });
-        });
-      }
+      // Channel clicks are now handled by inline onclick events
+      // This ensures they work immediately after HTML is generated
     }
     
     function getChannelUrl(channel) {
