@@ -58,10 +58,10 @@ export class WidgetTemplateRenderer {
       js = js.replace(regex, value)
     })
 
-    // Properly escape backticks to prevent template literal syntax errors
-    const escapedHtml = html.replace(/`/g, '\\`')
-    const escapedCss = css.replace(/`/g, '\\`')
-    const escapedJs = js.replace(/`/g, '\\`')
+    // Don't escape backticks - they are handled properly in template literals
+    const escapedHtml = html
+    const escapedCss = css
+    const escapedJs = js
 
     // Add global function for channel clicks
     const globalScript = `
@@ -70,7 +70,7 @@ export class WidgetTemplateRenderer {
     };
     `
 
-    // Generate complete script using escaped content
+    // Generate complete script using content without backtick escaping
     return `
 (function() {
   // Inject CSS
