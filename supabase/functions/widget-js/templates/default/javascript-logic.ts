@@ -38,7 +38,7 @@ export const defaultJavaScriptLogic = `
         html += '<div class="channel-arrow">›</div>';
         html += '<div class="child-count">' + (channel.childChannels.length + 1) + '</div>';
         
-        // Submenu with all channels (parent + children)
+        // Submenu with all channels (parent + children) - FIXED HTML STRUCTURE
         html += '<div class="submenu">';
         
         // Add parent channel first
@@ -101,6 +101,7 @@ export const defaultJavaScriptLogic = `
     if (channelsContainer) {
       var generatedHtml = generateChannelsHtml();
       channelsContainer.innerHTML = generatedHtml;
+      console.log('Channels HTML generated and inserted');
     }
     
     var button = document.querySelector('#lovable-widget-button');

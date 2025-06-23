@@ -85,9 +85,18 @@ export const defaultCssStyles = `
     transform: translateX(4px);
   }
 
-  /* Parent channel with children */
+  /* Parent channel with children - FIXED HOVER FUNCTIONALITY */
   .parent-channel {
     position: relative;
+    display: block !important;
+    text-decoration: none !important;
+  }
+  
+  .parent-channel:hover {
+    border-color: #22c55e !important;
+    background: #f0fdf4 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.15) !important;
   }
   
   .child-count {
@@ -104,8 +113,10 @@ export const defaultCssStyles = `
     text-align: center;
     line-height: 1.2;
     box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    z-index: 10;
   }
   
+  /* FIXED SUBMENU - Now works properly with hover */
   .submenu {
     position: absolute;
     right: 100%;
@@ -118,12 +129,27 @@ export const defaultCssStyles = `
     max-width: 320px;
     border: 1px solid #e5e7eb;
     z-index: 1000010;
-    display: none;
+    display: none !important;
     overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(10px);
+    transition: all 0.3s ease;
   }
   
+  /* CRITICAL FIX: Show submenu on hover of parent */
   .parent-channel:hover .submenu {
-    display: block;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(0) !important;
+  }
+  
+  /* Keep submenu visible when hovering over submenu itself */
+  .submenu:hover {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
   .submenu-item {
@@ -143,6 +169,7 @@ export const defaultCssStyles = `
   
   .submenu-item:hover {
     background: #f9fafb;
+    color: #1f2937;
   }
   
   .submenu-icon {
@@ -180,6 +207,7 @@ export const defaultCssStyles = `
     line-height: 1.3;
   }
 
+  /* Mobile responsiveness */
   @media (max-width: 768px) {
     .submenu {
       left: 100%;
