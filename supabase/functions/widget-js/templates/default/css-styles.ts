@@ -85,14 +85,14 @@ export const defaultCssStyles = `
     transform: translateX(4px);
   }
 
-  /* Parent channel wrapper - FIXED STRUCTURE */
+  /* DÜZƏLDILMIŞ: Ana kanal konteyner */
   .parent-channel-wrapper {
-    position: relative;
-    display: block;
+    position: relative !important;
+    display: block !important;
   }
   
   .parent-channel {
-    position: relative;
+    position: relative !important;
     display: flex !important;
     text-decoration: none !important;
   }
@@ -121,36 +121,36 @@ export const defaultCssStyles = `
     z-index: 10;
   }
   
-  /* FIXED SUBMENU - Now works properly with hover */
+  /* DÜZƏLDILMIŞ: Alt menyu hover funksiyası */
   .submenu {
-    position: absolute;
-    right: 100%;
-    top: 0;
-    margin-right: 12px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-    min-width: 280px;
-    max-width: 320px;
-    border: 1px solid #e5e7eb;
-    z-index: 1000010;
+    position: absolute !important;
+    right: 100% !important;
+    top: 0 !important;
+    margin-right: 12px !important;
+    background: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15) !important;
+    min-width: 280px !important;
+    max-width: 320px !important;
+    border: 1px solid #e5e7eb !important;
+    z-index: 1000010 !important;
+    overflow: hidden !important;
     display: none !important;
-    overflow: hidden;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateX(10px);
-    transition: all 0.3s ease;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateX(10px) !important;
+    transition: all 0.3s ease !important;
   }
   
-  /* CRITICAL FIX: Show submenu on hover of parent wrapper */
-  .parent-channel-wrapper:hover .submenu {
+  /* ƏSAS DÜZƏLIŞ: Hover zamanı alt menyu göstər */
+  .parent-channel-wrapper:hover > .submenu {
     display: block !important;
     opacity: 1 !important;
     visibility: visible !important;
     transform: translateX(0) !important;
   }
   
-  /* Keep submenu visible when hovering over submenu itself */
+  /* Alt menyu öz üzərində hover zamanı da görünən qalsın */
   .submenu:hover {
     display: block !important;
     opacity: 1 !important;
@@ -158,23 +158,23 @@ export const defaultCssStyles = `
   }
   
   .submenu-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    text-decoration: none;
-    color: #374151;
-    transition: all 0.2s ease;
-    border-bottom: 1px solid #f3f4f6;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px 16px !important;
+    text-decoration: none !important;
+    color: #374151 !important;
+    transition: all 0.2s ease !important;
+    border-bottom: 1px solid #f3f4f6 !important;
   }
   
   .submenu-item:last-child {
-    border-bottom: none;
+    border-bottom: none !important;
   }
   
   .submenu-item:hover {
-    background: #f9fafb;
-    color: #1f2937;
+    background: #f9fafb !important;
+    color: #1f2937 !important;
   }
   
   .submenu-icon {
@@ -212,13 +212,13 @@ export const defaultCssStyles = `
     line-height: 1.3;
   }
 
-  /* Mobile responsiveness */
+  /* Mobil responsive */
   @media (max-width: 768px) {
     .submenu {
-      left: 100%;
-      right: auto;
-      margin-left: 12px;
-      margin-right: 0;
+      left: 100% !important;
+      right: auto !important;
+      margin-left: 12px !important;
+      margin-right: 0 !important;
     }
   }
 `;

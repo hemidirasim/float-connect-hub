@@ -1,4 +1,3 @@
-
 import { getChannelUrl, getChannelIcon, getChannelColor } from './channel-utils.ts';
 
 export const defaultJavaScriptLogic = `
@@ -27,25 +26,25 @@ export const defaultJavaScriptLogic = `
       var channelIcon = getChannelIcon(channel);
       var channelColor = getChannelColor(channel.type);
       
-      // Check if channel has child channels
+      // Alt kanalları olan kanallar
       if (channel.childChannels && channel.childChannels.length > 0) {
-        // FIXED: Parent channel is now a clickable link with hover submenu
+        // DÜZƏLDILMIŞ: Ana kanal konteyner və linkləri
         html += '<div class="parent-channel-wrapper">';
-        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="channel-item parent-channel">';
+        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="channel-item parent-channel" onclick="window.openChannel && window.openChannel(\'' + escapeHtml(channelUrl) + '\')">';
         html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="channel-info">';
         html += '<div class="channel-label">' + escapeHtml(channel.label) + '</div>';
-        html += '<div class="channel-value">' + (channel.childChannels.length + 1) + ' kanal</div>';
+        html += '<div class="channel-value">' + (channel.childChannels.length + 1) + ' seçim</div>';
         html += '</div>';
         html += '<div class="channel-arrow">›</div>';
         html += '<div class="child-count">' + (channel.childChannels.length + 1) + '</div>';
         html += '</a>';
         
-        // Submenu with all channels (parent + children) - FIXED HTML STRUCTURE
+        // DÜZƏLDILMIŞ: Alt menyu bütün linklər ilə
         html += '<div class="submenu">';
         
-        // Add parent channel first
-        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="submenu-item">';
+        // Əvvəlcə ana kanalı əlavə et
+        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="submenu-item" onclick="window.openChannel && window.openChannel(\'' + escapeHtml(channelUrl) + '\')">';
         html += '<div class="submenu-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="submenu-info">';
         html += '<div class="submenu-label">' + escapeHtml(channel.label) + '</div>';
@@ -53,14 +52,14 @@ export const defaultJavaScriptLogic = `
         html += '</div>';
         html += '</a>';
         
-        // Add child channels
+        // Sonra alt kanalları əlavə et
         for (var j = 0; j < channel.childChannels.length; j++) {
           var childChannel = channel.childChannels[j];
           var childUrl = getChannelUrl(childChannel);
           var childIcon = getChannelIcon(childChannel);
           var childColor = getChannelColor(childChannel.type);
           
-          html += '<a href="' + escapeHtml(childUrl) + '" target="_blank" class="submenu-item">';
+          html += '<a href="' + escapeHtml(childUrl) + '" target="_blank" class="submenu-item" onclick="window.openChannel && window.openChannel(\'' + escapeHtml(childUrl) + '\')">';
           html += '<div class="submenu-icon" style="background: ' + childColor + ';">' + childIcon + '</div>';
           html += '<div class="submenu-info">';
           html += '<div class="submenu-label">' + escapeHtml(childChannel.label) + '</div>';
@@ -69,11 +68,11 @@ export const defaultJavaScriptLogic = `
           html += '</a>';
         }
         
-        html += '</div>'; // Close submenu
-        html += '</div>'; // Close parent channel wrapper
+        html += '</div>'; // submenu bağla
+        html += '</div>'; // parent-channel-wrapper bağla
       } else {
-        // Regular single channel
-        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="channel-item">';
+        // Adi tək kanal
+        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="channel-item" onclick="window.openChannel && window.openChannel(\'' + escapeHtml(channelUrl) + '\')">';
         html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="channel-info">';
         html += '<div class="channel-label">' + escapeHtml(channel.label) + '</div>';
