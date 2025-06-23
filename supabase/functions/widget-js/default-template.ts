@@ -195,7 +195,6 @@ const cssStyles = `
     transform: translateX(4px);
   }
 
-  /* Parent channel with dropdown */
   .parent-channel-wrapper {
     position: relative;
     margin-bottom: 12px;
@@ -269,7 +268,6 @@ const cssStyles = `
     z-index: 10;
   }
   
-  /* Dropdown */
   .dropdown {
     max-height: 0;
     overflow: hidden;
@@ -339,7 +337,6 @@ const cssStyles = `
     line-height: 1.3;
   }
 
-  /* Mobile responsive */
   @media (max-width: 768px) {
     .dropdown {
       margin-top: 5px;
@@ -363,7 +360,6 @@ const jsLogic = `
     
     if (!dropdown || !arrow) return;
     
-    // Close other dropdowns
     var allDropdowns = document.querySelectorAll('.dropdown');
     var allArrows = document.querySelectorAll('.dropdown-arrow');
     
@@ -379,7 +375,6 @@ const jsLogic = `
       }
     });
     
-    // Toggle current dropdown
     dropdown.classList.toggle('show');
     arrow.classList.toggle('rotated');
   }
@@ -401,16 +396,11 @@ const jsLogic = `
       var channelIcon = getChannelIcon(channel);
       var channelColor = getChannelColor(channel.type);
       
-      // Parent channels with sub-channels
       if (channel.childChannels && channel.childChannels.length > 0) {
         var dropdownId = 'dropdown-' + channel.id;
         
         html += '<div class="parent-channel-wrapper">';
-        
-        // Parent channel with dropdown toggle
         html += '<div style="display: flex; align-items: center; border: 1px solid #e2e8f0; border-radius: 12px; background: white; transition: all 0.3s ease;">';
-        
-        // Main channel link
         html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="parent-channel" style="border: none; margin: 0; flex: 1;">';
         html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="channel-info">';
@@ -418,21 +408,15 @@ const jsLogic = `
         html += '<div class="channel-value">' + escapeHtml(channel.value) + '</div>';
         html += '</div>';
         html += '</a>';
-        
-        // Dropdown toggle button
         html += '<button class="dropdown-toggle" onclick="toggleDropdown(\'' + dropdownId + '\')">';
         html += '<svg class="dropdown-arrow" data-dropdown="' + dropdownId + '" viewBox="0 0 24 24" fill="currentColor">';
         html += '<path d="M7 10l5 5 5-5z"/>';
         html += '</svg>';
         html += '</button>';
-        
         html += '<div class="child-count">' + (channel.childChannels.length + 1) + '</div>';
         html += '</div>';
-        
-        // Dropdown menu
         html += '<div class="dropdown" id="' + dropdownId + '">';
         
-        // Add child channels to dropdown
         for (var j = 0; j < channel.childChannels.length; j++) {
           var childChannel = channel.childChannels[j];
           var childUrl = getChannelUrl(childChannel);
@@ -448,10 +432,9 @@ const jsLogic = `
           html += '</a>';
         }
         
-        html += '</div>'; // dropdown close
-        html += '</div>'; // parent-channel-wrapper close
+        html += '</div>';
+        html += '</div>';
       } else {
-        // Regular single channel
         html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="channel-item">';
         html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="channel-info">';
@@ -498,7 +481,6 @@ const jsLogic = `
     
     console.log('Widget elements found:', { button: !!button, modal: !!modal, closeBtn: !!closeBtn });
     
-    // Button click to show modal
     button.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -507,7 +489,6 @@ const jsLogic = `
       modal.style.visibility = 'visible';
       modal.style.opacity = '1';
       
-      // Add slight delay for smooth animation
       setTimeout(function() {
         var modalContent = document.querySelector('#lovable-modal-content');
         if (modalContent) {
@@ -516,7 +497,6 @@ const jsLogic = `
       }, 50);
     });
     
-    // Close button
     if (closeBtn) {
       closeBtn.addEventListener('click', function(e) {
         e.preventDefault();
@@ -526,7 +506,6 @@ const jsLogic = `
       });
     }
     
-    // Modal backdrop click
     modal.addEventListener('click', function(e) {
       if (e.target === modal) {
         console.log('Modal backdrop clicked');
@@ -534,7 +513,6 @@ const jsLogic = `
       }
     });
     
-    // ESC key
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && modal.style.display === 'flex') {
         console.log('ESC key pressed');
@@ -553,7 +531,6 @@ const jsLogic = `
         modal.style.visibility = 'hidden';
         modal.style.opacity = '0';
         
-        // Close all dropdowns when modal closes
         var allDropdowns = document.querySelectorAll('.dropdown');
         var allArrows = document.querySelectorAll('.dropdown-arrow');
         allDropdowns.forEach(function(dropdown) {
@@ -565,7 +542,6 @@ const jsLogic = `
       }, 100);
     }
     
-    // Tooltip functionality
     if (tooltip && button) {
       if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
         button.addEventListener('mouseenter', function() {
@@ -589,7 +565,6 @@ const jsLogic = `
     console.log('Widget initialized successfully');
   }
   
-  // Global function for refreshing widget
   window.refreshWidget = function() {
     var channelsContainer = document.querySelector('#lovable-widget-channels');
     if (channelsContainer) {
@@ -598,22 +573,16 @@ const jsLogic = `
     }
   };
   
-  // Global function for opening channels
   window.openChannel = openChannel;
-  
-  // Global function for dropdown toggle
   window.toggleDropdown = toggleDropdown;
   
-  // Initialize when ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initWidget);
   } else {
-    // Add a small delay to ensure elements are rendered
     setTimeout(initWidget, 100);
   }
 `;
 
-// Get JavaScript with utility functions
 function getJavaScriptWithUtils(): string {
   const utils = `
     ${getChannelUrl.toString()}
