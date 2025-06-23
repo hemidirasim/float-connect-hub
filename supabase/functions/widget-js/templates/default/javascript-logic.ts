@@ -1,6 +1,5 @@
 
-import { getChannelUrl, getChannelIcon, getChannelColor } from './channel-utils.ts';
-
+// JavaScript Logic for Default Template
 export const defaultJavaScriptLogic = `
   console.log('Widget loading with channels:', {{CHANNELS_DATA}});
   
@@ -16,7 +15,6 @@ export const defaultJavaScriptLogic = `
     
     if (!dropdown || !arrow) return;
     
-    // Close other dropdowns
     var allDropdowns = document.querySelectorAll('.dropdown');
     var allArrows = document.querySelectorAll('.dropdown-arrow');
     
@@ -32,7 +30,6 @@ export const defaultJavaScriptLogic = `
       }
     });
     
-    // Toggle current dropdown
     dropdown.classList.toggle('show');
     arrow.classList.toggle('rotated');
   }
@@ -54,45 +51,34 @@ export const defaultJavaScriptLogic = `
       var channelIcon = getChannelIcon(channel);
       var channelColor = getChannelColor(channel.type);
       
-      // Parent channels with sub-channels
       if (channel.childChannels && channel.childChannels.length > 0) {
         var dropdownId = 'dropdown-' + channel.id;
         
         html += '<div class="parent-channel-wrapper">';
-        
-        // Parent channel with dropdown toggle
         html += '<div style="display: flex; align-items: center; border: 1px solid #e2e8f0; border-radius: 12px; background: white; transition: all 0.3s ease;">';
-        
-        // Main channel link
-        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="parent-channel" style="border: none; margin: 0; flex: 1;" onclick="window.openChannel && window.openChannel(\'' + escapeHtml(channelUrl) + '\')">';
+        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="parent-channel" style="border: none; margin: 0; flex: 1;">';
         html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="channel-info">';
         html += '<div class="channel-label">' + escapeHtml(channel.label) + '</div>';
         html += '<div class="channel-value">' + escapeHtml(channel.value) + '</div>';
         html += '</div>';
         html += '</a>';
-        
-        // Dropdown toggle button
         html += '<button class="dropdown-toggle" onclick="toggleDropdown(\'' + dropdownId + '\')">';
         html += '<svg class="dropdown-arrow" data-dropdown="' + dropdownId + '" viewBox="0 0 24 24" fill="currentColor">';
         html += '<path d="M7 10l5 5 5-5z"/>';
         html += '</svg>';
         html += '</button>';
-        
         html += '<div class="child-count">' + (channel.childChannels.length + 1) + '</div>';
         html += '</div>';
-        
-        // Dropdown menu
         html += '<div class="dropdown" id="' + dropdownId + '">';
         
-        // Add child channels to dropdown
         for (var j = 0; j < channel.childChannels.length; j++) {
           var childChannel = channel.childChannels[j];
           var childUrl = getChannelUrl(childChannel);
           var childIcon = getChannelIcon(childChannel);
           var childColor = getChannelColor(childChannel.type);
           
-          html += '<a href="' + escapeHtml(childUrl) + '" target="_blank" class="dropdown-item" onclick="window.openChannel && window.openChannel(\'' + escapeHtml(childUrl) + '\')">';
+          html += '<a href="' + escapeHtml(childUrl) + '" target="_blank" class="dropdown-item">';
           html += '<div class="dropdown-icon" style="background: ' + childColor + ';">' + childIcon + '</div>';
           html += '<div class="dropdown-info">';
           html += '<div class="dropdown-label">' + escapeHtml(childChannel.label) + '</div>';
@@ -101,11 +87,10 @@ export const defaultJavaScriptLogic = `
           html += '</a>';
         }
         
-        html += '</div>'; // dropdown close
-        html += '</div>'; // parent-channel-wrapper close
+        html += '</div>';
+        html += '</div>';
       } else {
-        // Regular single channel
-        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="channel-item" onclick="window.openChannel && window.openChannel(\'' + escapeHtml(channelUrl) + '\')">';
+        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="channel-item">';
         html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="channel-info">';
         html += '<div class="channel-label">' + escapeHtml(channel.label) + '</div>';
@@ -151,7 +136,6 @@ export const defaultJavaScriptLogic = `
     
     console.log('Widget elements found:', { button: !!button, modal: !!modal, closeBtn: !!closeBtn });
     
-    // Button click to show modal
     button.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -159,59 +143,49 @@ export const defaultJavaScriptLogic = `
       modal.style.display = 'flex';
       modal.style.visibility = 'visible';
       modal.style.opacity = '1';
+      
+      setTimeout(function() {
+        var modalContent = document.querySelector('#lovable-modal-content');
+        if (modalContent) {
+          modalContent.style.transform = 'translateY(0)';
+        }
+      }, 50);
     });
     
-    // Close button
     if (closeBtn) {
       closeBtn.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
         console.log('Close button clicked');
-        modal.style.display = 'none';
-        modal.style.visibility = 'hidden';
-        modal.style.opacity = '0';
-        
-        // Close all dropdowns when modal closes
-        var allDropdowns = document.querySelectorAll('.dropdown');
-        var allArrows = document.querySelectorAll('.dropdown-arrow');
-        allDropdowns.forEach(function(dropdown) {
-          dropdown.classList.remove('show');
-        });
-        allArrows.forEach(function(arrow) {
-          arrow.classList.remove('rotated');
-        });
+        closeModal();
       });
     }
     
-    // Modal backdrop click
     modal.addEventListener('click', function(e) {
       if (e.target === modal) {
         console.log('Modal backdrop clicked');
-        modal.style.display = 'none';
-        modal.style.visibility = 'hidden';
-        modal.style.opacity = '0';
-        
-        // Close all dropdowns when modal closes
-        var allDropdowns = document.querySelectorAll('.dropdown');
-        var allArrows = document.querySelectorAll('.dropdown-arrow');
-        allDropdowns.forEach(function(dropdown) {
-          dropdown.classList.remove('show');
-        });
-        allArrows.forEach(function(arrow) {
-          arrow.classList.remove('rotated');
-        });
+        closeModal();
       }
     });
     
-    // ESC key
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && modal.style.display === 'flex') {
         console.log('ESC key pressed');
+        closeModal();
+      }
+    });
+    
+    function closeModal() {
+      var modalContent = document.querySelector('#lovable-modal-content');
+      if (modalContent) {
+        modalContent.style.transform = 'translateY(20px)';
+      }
+      
+      setTimeout(function() {
         modal.style.display = 'none';
         modal.style.visibility = 'hidden';
         modal.style.opacity = '0';
         
-        // Close all dropdowns when modal closes
         var allDropdowns = document.querySelectorAll('.dropdown');
         var allArrows = document.querySelectorAll('.dropdown-arrow');
         allDropdowns.forEach(function(dropdown) {
@@ -220,10 +194,9 @@ export const defaultJavaScriptLogic = `
         allArrows.forEach(function(arrow) {
           arrow.classList.remove('rotated');
         });
-      }
-    });
+      }, 100);
+    }
     
-    // Tooltip functionality
     if (tooltip && button) {
       if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
         button.addEventListener('mouseenter', function() {
@@ -247,7 +220,6 @@ export const defaultJavaScriptLogic = `
     console.log('Widget initialized successfully');
   }
   
-  // Global function for refreshing widget
   window.refreshWidget = function() {
     var channelsContainer = document.querySelector('#lovable-widget-channels');
     if (channelsContainer) {
@@ -256,28 +228,12 @@ export const defaultJavaScriptLogic = `
     }
   };
   
-  // Global function for opening channels
   window.openChannel = openChannel;
-  
-  // Global function for dropdown toggle
   window.toggleDropdown = toggleDropdown;
   
-  // Initialize when ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initWidget);
   } else {
-    // Add a small delay to ensure elements are rendered
     setTimeout(initWidget, 100);
   }
 `;
-
-// Inject the utility functions into the JavaScript template
-export function getJavaScriptWithUtils(): string {
-  const utils = `
-    ${getChannelUrl.toString()}
-    ${getChannelIcon.toString()}
-    ${getChannelColor.toString()}
-  `;
-  
-  return utils + defaultJavaScriptLogic;
-}
