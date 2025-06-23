@@ -1,4 +1,3 @@
-
 import type { WidgetTemplate } from '../template-types.ts'
 
 export function getElegantTemplate(): WidgetTemplate {
@@ -14,7 +13,7 @@ export function getElegantTemplate(): WidgetTemplate {
         </div>
         
         <!-- Tooltip -->
-        <div class="lovable-tooltip" id="lovable-tooltip" style="display: {{TOOLTIP_DISPLAY}};">
+        <div class="lovable-tooltip" id="lovable-tooltip" style="display: none;">
           {{TOOLTIP_TEXT}}
         </div>
         
@@ -211,6 +210,17 @@ export function getElegantTemplate(): WidgetTemplate {
       let isMobile = window.innerWidth <= 768;
       let isOpen = false;
       
+      // Initialize elements
+      if (!elegantWidget || !elegantMainBtn || !elegantChannelsContainer) {
+        console.error('Elegant widget elements not found:', {
+          widget: !!elegantWidget,
+          button: !!elegantMainBtn,
+          container: !!elegantChannelsContainer
+        });
+      } else {
+        console.log('Elegant widget elements found');
+      }
+      
       // Handle mobile clicks (different behavior for mobile)
       if (elegantMainBtn && elegantChannelsContainer) {
         elegantMainBtn.addEventListener('click', function(e) {
@@ -247,10 +257,16 @@ export function getElegantTemplate(): WidgetTemplate {
         if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
           elegantMainBtn.addEventListener('mouseenter', function() {
             elegantTooltip.classList.add('show');
+            elegantTooltip.style.display = 'block';
           });
           
           elegantMainBtn.addEventListener('mouseleave', function() {
             elegantTooltip.classList.remove('show');
+            setTimeout(function() {
+              if (!elegantTooltip.classList.contains('show')) {
+                elegantTooltip.style.display = 'none';
+              }
+            }, 300);
           });
         } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
           elegantTooltip.style.display = 'block';

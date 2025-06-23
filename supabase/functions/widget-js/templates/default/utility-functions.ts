@@ -94,5 +94,6 @@ export function getChannelColor(type: string): string {
     chatbot: '#8b5cf6',
     custom: '#6b7280'
   };
-  return colors[type as keyof typeof colors] || '#6B7280'
+  
+  return colors[type as keyof typeof colors] || '#6b7280';
 }

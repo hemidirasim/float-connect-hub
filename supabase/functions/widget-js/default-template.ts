@@ -66,7 +66,7 @@ const defaultJavaScriptLogic = `
       phone: '#34d399',
       custom: '#6b7280'
     };
-    return colors[type] || '#6B7280';
+    return colors[type] || '#6b7280';
   }
   
   console.log('Widget loading with channels:', {{CHANNELS_DATA}});

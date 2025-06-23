@@ -1,14 +1,107 @@
 export const defaultCssStyles = `
+  #lovable-widget-button {
+    border-radius: 50%;
+    background-color: {{BUTTON_COLOR}};
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    color: white;
+  }
+  
   #lovable-widget-button:hover {
     transform: scale(1.1);
     box-shadow: 0 12px 35px rgba(34, 197, 94, 0.5);
     background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
   }
   
+  #lovable-widget-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    white-space: nowrap;
+    z-index: 100000;
+    transition: all 0.2s ease;
+    pointer-events: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  
+  #lovable-widget-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  
+  #lovable-modal-content {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    max-width: 400px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    transition: transform 0.3s ease;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  #lovable-modal-header {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+    text-align: center;
+    line-height: 1.4;
+    padding-right: 40px;
+  }
+  
+  #lovable-widget-close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 24px;
+    color: #9ca3af;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    font-weight: 300;
+  }
+  
   #lovable-widget-close:hover {
     background: rgba(239, 68, 68, 0.1);
     color: #ef4444;
     transform: rotate(90deg);
+  }
+  
+  #lovable-widget-channels {
+    max-height: 300px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
   
   .channel-item {

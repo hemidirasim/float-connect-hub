@@ -70,7 +70,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       tooltipDisplay: formData.tooltipDisplay,
       tooltipPosition: formData.tooltipPosition,
       greetingMessage: formData.greetingMessage,
-      customIconUrl: formData.customIconUrl,
+      customIconUrl: formData.customIcon === 'custom' ? formData.customIconUrl : null,
       videoEnabled: Boolean(formData.videoUrl),
       videoUrl: formData.videoUrl || editingWidget?.video_url,
       videoHeight: formData.videoHeight,
@@ -111,8 +111,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
           .replace(/\\t/g, '\t')
           .replace(/\\'/g, "'")
           .replace(/\\"/g, '"')
-          .replace(/`/g, '\\`') // Fix: Escape backticks to prevent template literal issues
-          .trim();
+          .replace(/`/g, '\\`'); // Fix: Escape backticks to prevent template literal issues
       }
       
       finalHtml = `
@@ -172,8 +171,22 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
             document.body.appendChild(element);
           });
 
-          // The script will execute automatically when appended to DOM
-          // No need to manually execute it again
+          // Wait a bit for DOM to be ready, then execute any inline scripts
+          setTimeout(() => {
+            // Find and execute script tags
+            const scripts = document.querySelectorAll('script[data-widget-preview]');
+            scripts.forEach(script => {
+              if (script.textContent && script.textContent.trim()) {
+                console.log('Executing widget script for preview...');
+                try {
+                  const scriptFunction = new Function(script.textContent);
+                  scriptFunction();
+                } catch (e) {
+                  console.error('Script execution error:', e);
+                }
+              }
+            });
+          }, 100);
 
         } catch (error) {
           console.error('Error rendering floating widget:', error);
