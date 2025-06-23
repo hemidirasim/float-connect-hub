@@ -29,7 +29,9 @@ export const defaultJavaScriptLogic = `
       
       // Check if channel has child channels
       if (channel.childChannels && channel.childChannels.length > 0) {
-        html += '<div class="channel-item parent-channel">';
+        // FIXED: Parent channel is now a clickable link with hover submenu
+        html += '<div class="parent-channel-wrapper">';
+        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="channel-item parent-channel">';
         html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="channel-info">';
         html += '<div class="channel-label">' + escapeHtml(channel.label) + '</div>';
@@ -37,6 +39,7 @@ export const defaultJavaScriptLogic = `
         html += '</div>';
         html += '<div class="channel-arrow">›</div>';
         html += '<div class="child-count">' + (channel.childChannels.length + 1) + '</div>';
+        html += '</a>';
         
         // Submenu with all channels (parent + children) - FIXED HTML STRUCTURE
         html += '<div class="submenu">';
@@ -67,7 +70,7 @@ export const defaultJavaScriptLogic = `
         }
         
         html += '</div>'; // Close submenu
-        html += '</div>'; // Close parent channel
+        html += '</div>'; // Close parent channel wrapper
       } else {
         // Regular single channel
         html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="channel-item">';

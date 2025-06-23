@@ -85,10 +85,15 @@ export const defaultCssStyles = `
     transform: translateX(4px);
   }
 
-  /* Parent channel with children - FIXED HOVER FUNCTIONALITY */
+  /* Parent channel wrapper - FIXED STRUCTURE */
+  .parent-channel-wrapper {
+    position: relative;
+    display: block;
+  }
+  
   .parent-channel {
     position: relative;
-    display: block !important;
+    display: flex !important;
     text-decoration: none !important;
   }
   
@@ -137,8 +142,8 @@ export const defaultCssStyles = `
     transition: all 0.3s ease;
   }
   
-  /* CRITICAL FIX: Show submenu on hover of parent */
-  .parent-channel:hover .submenu {
+  /* CRITICAL FIX: Show submenu on hover of parent wrapper */
+  .parent-channel-wrapper:hover .submenu {
     display: block !important;
     opacity: 1 !important;
     visibility: visible !important;
