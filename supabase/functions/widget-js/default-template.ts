@@ -1,4 +1,3 @@
-
 import type { WidgetTemplate } from './template-types.ts'
 
 export const defaultTemplate: WidgetTemplate = {
@@ -300,20 +299,20 @@ export const defaultTemplate: WidgetTemplate = {
             
             // Render parent channel with count badge
             html += '<div class="lovable-channel-group">';
-            html += '<div class="lovable-group-trigger lovable-channel-button" style="border-color: ' + channelColor + ';">';
+            html += '<div class="lovable-group-trigger lovable-channel-button" data-group-id="group-' + channel.id + '" style="border-color: ' + channelColor + ';">';
             html += '<div class="lovable-channel-icon" style="background: ' + channelColor + ';">';
             html += channelIcon;
             html += '</div>';
             html += '<div class="lovable-channel-info">';
             html += '<div class="lovable-channel-label">' + channel.label + '</div>';
-            html += '<div class="lovable-channel-value">' + channel.childChannels.length + ' kanal</div>';
+            html += '<div class="lovable-channel-value">' + (channel.childChannels.length + 1) + ' kanal</div>';
             html += '</div>';
             html += '<div class="lovable-channel-arrow">›</div>';
-            html += '<div class="lovable-group-count">' + channel.childChannels.length + '</div>';
+            html += '<div class="lovable-group-count">' + (channel.childChannels.length + 1) + '</div>';
             html += '</div>';
             
             // Render dropdown with child channels - INCLUDING PARENT AS FIRST ITEM
-            html += '<div class="lovable-group-dropdown">';
+            html += '<div class="lovable-group-dropdown" id="dropdown-' + channel.id + '">';
             
             // Add parent channel as first item
             html += '<a href="' + channelUrl + '" target="_blank" class="lovable-group-item" data-channel-url="' + channelUrl + '">';
@@ -497,7 +496,7 @@ export const defaultTemplate: WidgetTemplate = {
         }
       });
       
-      // Initialize channel groups
+      // Initialize channel groups AFTER HTML is inserted
       initChannelGroups();
       
       // Tooltip functionality
@@ -526,15 +525,20 @@ export const defaultTemplate: WidgetTemplate = {
       
       groupTriggers.forEach(function(trigger, index) {
         console.log('Setting up group trigger ' + index);
+        const groupId = trigger.getAttribute('data-group-id');
+        console.log('Group ID:', groupId);
         
         // Click functionality for showing dropdown
         trigger.addEventListener('click', function(e) {
-          console.log('Group trigger clicked');
+          console.log('Group trigger clicked for group:', groupId);
           e.preventDefault();
           e.stopPropagation();
           
           const group = trigger.closest('.lovable-channel-group');
           const dropdown = group.querySelector('.lovable-group-dropdown');
+          
+          console.log('Group found:', !!group);
+          console.log('Dropdown found:', !!dropdown);
           
           if (dropdown) {
             console.log('Toggling dropdown visibility');
