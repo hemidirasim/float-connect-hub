@@ -260,8 +260,8 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
       {/* Channels */}
       <Card>
         <CardHeader>
-          <CardTitle>Əlaqə kanalları</CardTitle>
-          <CardDescription>Kanalları sürüşdürərək sırasını dəyişə bilərsiniz</CardDescription>
+          <CardTitle>Communication channels</CardTitle>
+          <CardDescription>You can change the order of channels by sliding them.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Add Channel */}
@@ -269,7 +269,7 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <Select value={selectedChannelType} onValueChange={setSelectedChannelType}>
                 <SelectTrigger>
-                  <SelectValue placeholder="choose platform" />
+                  <SelectValue placeholder="Choose platform" />
                 </SelectTrigger>
                 <SelectContent>
                   {platformOptions.map((platform) => (
@@ -294,7 +294,7 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
                 disabled={!selectedChannelType || !channelValue.trim()}
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Əlavə et
+                Add
               </Button>
             </div>
           </div>
@@ -327,12 +327,12 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
       {/* Appearance */}
       <Card>
         <CardHeader>
-          <CardTitle>Görünüş tənzimləri</CardTitle>
+          <CardTitle>Appearance settings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label>Düymə forması</Label>
+              <Label>Button shape</Label>
               <Select value={formData.button_style} onValueChange={(value) => handleInputChange('button_style', value)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -351,7 +351,7 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
             </div>
 
             <div className="space-y-2">
-              <Label>Rəng</Label>
+              <Label>Color</Label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
@@ -368,14 +368,14 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
             </div>
 
             <div className="space-y-2">
-              <Label>Mövqe</Label>
+              <Label>Position</Label>
               <Select value={formData.position} onValueChange={(value) => handleInputChange('position', value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="left">Sol</SelectItem>
-                  <SelectItem value="right">Sağ</SelectItem>
+                  <SelectItem value="left">Left</SelectItem>
+                  <SelectItem value="right">right</SelectItem>
                 </SelectContent>
               </Select>
             </div>
