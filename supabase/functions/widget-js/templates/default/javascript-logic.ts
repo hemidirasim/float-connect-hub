@@ -109,9 +109,11 @@ export const defaultJavaScriptLogic = `
     var closeBtn = document.querySelector('#lovable-widget-close');
     
     if (!button || !modal) {
-      console.error('Missing widget elements');
+      console.error('Missing widget elements:', { button: !!button, modal: !!modal });
       return;
     }
+    
+    console.log('Widget elements found:', { button: !!button, modal: !!modal, closeBtn: !!closeBtn });
     
     // Button click to show modal
     button.addEventListener('click', function(e) {
@@ -119,6 +121,8 @@ export const defaultJavaScriptLogic = `
       e.stopPropagation();
       console.log('Button clicked, showing modal');
       modal.style.display = 'flex';
+      modal.style.visibility = 'visible';
+      modal.style.opacity = '1';
     });
     
     // Close button
@@ -128,6 +132,8 @@ export const defaultJavaScriptLogic = `
         e.stopPropagation();
         console.log('Close button clicked');
         modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
       });
     }
     
@@ -136,6 +142,8 @@ export const defaultJavaScriptLogic = `
       if (e.target === modal) {
         console.log('Modal backdrop clicked');
         modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
       }
     });
     
@@ -144,6 +152,8 @@ export const defaultJavaScriptLogic = `
       if (e.key === 'Escape' && modal.style.display === 'flex') {
         console.log('ESC key pressed');
         modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
       }
     });
     
@@ -152,13 +162,19 @@ export const defaultJavaScriptLogic = `
       if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
         button.addEventListener('mouseenter', function() {
           tooltip.style.display = 'block';
+          tooltip.style.visibility = 'visible';
+          tooltip.style.opacity = '1';
         });
         
         button.addEventListener('mouseleave', function() {
           tooltip.style.display = 'none';
+          tooltip.style.visibility = 'hidden';
+          tooltip.style.opacity = '0';
         });
       } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
         tooltip.style.display = 'block';
+        tooltip.style.visibility = 'visible';
+        tooltip.style.opacity = '1';
       }
     }
     
@@ -181,7 +197,8 @@ export const defaultJavaScriptLogic = `
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initWidget);
   } else {
-    initWidget();
+    // Add a small delay to ensure elements are rendered
+    setTimeout(initWidget, 100);
   }
 `;
 

@@ -1,15 +1,15 @@
 
 export const defaultHtmlTemplate = `
   <div id="lovable-widget-container" style="position: fixed; z-index: 999999; bottom: 20px; {{POSITION_STYLE}}">
-    <div id="lovable-widget-tooltip" style="display: none; position: absolute; background: rgba(34, 197, 94, 0.9); color: white; padding: 10px 16px; border-radius: 25px; font-size: 14px; white-space: nowrap; z-index: 1000000; {{TOOLTIP_POSITION_STYLE}} backdrop-filter: blur(10px); font-weight: 500; box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);">
+    <div id="lovable-widget-tooltip" style="display: none; position: absolute; background: rgba(34, 197, 94, 0.9); color: white; padding: 10px 16px; border-radius: 25px; font-size: 14px; white-space: nowrap; z-index: 1000000; {{TOOLTIP_POSITION_STYLE}} backdrop-filter: blur(10px); font-weight: 500; box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3); visibility: hidden; opacity: 0; transition: all 0.3s ease;">
       {{TOOLTIP_TEXT}}
     </div>
     <button id="lovable-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; border-radius: 50%; border: none; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; cursor: pointer; box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4); display: flex; align-items: center; justify-content: center; font-size: 20px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; border: 3px solid rgba(255, 255, 255, 0.2);">
       {{BUTTON_ICON}}
     </button>
 
-    <div id="lovable-widget-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000001; backdrop-filter: blur(8px);">
-      <div style="position: absolute; bottom: 2%; right: 2%; background: white; border-radius: 20px; padding: 0; max-width: 400px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.15); border: 1px solid rgba(255, 255, 255, 0.2);">
+    <div id="lovable-widget-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000001; backdrop-filter: blur(8px); visibility: hidden; opacity: 0; transition: all 0.3s ease;">
+      <div style="position: absolute; bottom: 2%; right: 2%; background: white; border-radius: 20px; padding: 0; max-width: 400px; width: 90%; max-height: 80vh; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.15); border: 1px solid rgba(255, 255, 255, 0.2); transform: translateY(20px); transition: transform 0.3s ease;">
         <div style="padding: 8px 8px 10px 8px; border-bottom: 1px solid #f1f5f9; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
             <div style="display: flex; align-items: center; gap: 12px;">
