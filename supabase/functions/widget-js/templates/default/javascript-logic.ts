@@ -1,3 +1,4 @@
+
 import { getChannelUrl, getChannelIcon, getChannelColor } from './channel-utils.ts';
 
 export const defaultJavaScriptLogic = `
@@ -7,6 +8,33 @@ export const defaultJavaScriptLogic = `
   
   function openChannel(url) {
     window.open(url, '_blank');
+  }
+  
+  function toggleDropdown(dropdownId) {
+    var dropdown = document.getElementById(dropdownId);
+    var arrow = document.querySelector('[data-dropdown="' + dropdownId + '"]');
+    
+    if (!dropdown || !arrow) return;
+    
+    // Close other dropdowns
+    var allDropdowns = document.querySelectorAll('.dropdown');
+    var allArrows = document.querySelectorAll('.dropdown-arrow');
+    
+    allDropdowns.forEach(function(d) {
+      if (d.id !== dropdownId) {
+        d.classList.remove('show');
+      }
+    });
+    
+    allArrows.forEach(function(a) {
+      if (a !== arrow) {
+        a.classList.remove('rotated');
+      }
+    });
+    
+    // Toggle current dropdown
+    dropdown.classList.toggle('show');
+    arrow.classList.toggle('rotated');
   }
   
   function generateChannelsHtml() {
@@ -26,52 +54,57 @@ export const defaultJavaScriptLogic = `
       var channelIcon = getChannelIcon(channel);
       var channelColor = getChannelColor(channel.type);
       
-      // Alt kanalları olan kanallar
+      // Parent channels with sub-channels
       if (channel.childChannels && channel.childChannels.length > 0) {
-        // DÜZƏLDILMIŞ: Ana kanal konteyner və linkləri
+        var dropdownId = 'dropdown-' + channel.id;
+        
         html += '<div class="parent-channel-wrapper">';
-        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="channel-item parent-channel" onclick="window.openChannel && window.openChannel(\'' + escapeHtml(channelUrl) + '\')">';
+        
+        // Parent channel with dropdown toggle
+        html += '<div style="display: flex; align-items: center; border: 1px solid #e2e8f0; border-radius: 12px; background: white; transition: all 0.3s ease;">';
+        
+        // Main channel link
+        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="parent-channel" style="border: none; margin: 0; flex: 1;" onclick="window.openChannel && window.openChannel(\'' + escapeHtml(channelUrl) + '\')">';
         html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="channel-info">';
         html += '<div class="channel-label">' + escapeHtml(channel.label) + '</div>';
-        html += '<div class="channel-value">' + (channel.childChannels.length + 1) + ' seçim</div>';
+        html += '<div class="channel-value">' + escapeHtml(channel.value) + '</div>';
         html += '</div>';
-        html += '<div class="channel-arrow">›</div>';
+        html += '</a>';
+        
+        // Dropdown toggle button
+        html += '<button class="dropdown-toggle" onclick="toggleDropdown(\'' + dropdownId + '\')">';
+        html += '<svg class="dropdown-arrow" data-dropdown="' + dropdownId + '" viewBox="0 0 24 24" fill="currentColor">';
+        html += '<path d="M7 10l5 5 5-5z"/>';
+        html += '</svg>';
+        html += '</button>';
+        
         html += '<div class="child-count">' + (channel.childChannels.length + 1) + '</div>';
-        html += '</a>';
-        
-        // DÜZƏLDILMIŞ: Alt menyu bütün linklər ilə
-        html += '<div class="submenu">';
-        
-        // Əvvəlcə ana kanalı əlavə et
-        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="submenu-item" onclick="window.openChannel && window.openChannel(\'' + escapeHtml(channelUrl) + '\')">';
-        html += '<div class="submenu-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
-        html += '<div class="submenu-info">';
-        html += '<div class="submenu-label">' + escapeHtml(channel.label) + '</div>';
-        html += '<div class="submenu-value">' + escapeHtml(channel.value) + '</div>';
         html += '</div>';
-        html += '</a>';
         
-        // Sonra alt kanalları əlavə et
+        // Dropdown menu
+        html += '<div class="dropdown" id="' + dropdownId + '">';
+        
+        // Add child channels to dropdown
         for (var j = 0; j < channel.childChannels.length; j++) {
           var childChannel = channel.childChannels[j];
           var childUrl = getChannelUrl(childChannel);
           var childIcon = getChannelIcon(childChannel);
           var childColor = getChannelColor(childChannel.type);
           
-          html += '<a href="' + escapeHtml(childUrl) + '" target="_blank" class="submenu-item" onclick="window.openChannel && window.openChannel(\'' + escapeHtml(childUrl) + '\')">';
-          html += '<div class="submenu-icon" style="background: ' + childColor + ';">' + childIcon + '</div>';
-          html += '<div class="submenu-info">';
-          html += '<div class="submenu-label">' + escapeHtml(childChannel.label) + '</div>';
-          html += '<div class="submenu-value">' + escapeHtml(childChannel.value) + '</div>';
+          html += '<a href="' + escapeHtml(childUrl) + '" target="_blank" class="dropdown-item" onclick="window.openChannel && window.openChannel(\'' + escapeHtml(childUrl) + '\')">';
+          html += '<div class="dropdown-icon" style="background: ' + childColor + ';">' + childIcon + '</div>';
+          html += '<div class="dropdown-info">';
+          html += '<div class="dropdown-label">' + escapeHtml(childChannel.label) + '</div>';
+          html += '<div class="dropdown-value">' + escapeHtml(childChannel.value) + '</div>';
           html += '</div>';
           html += '</a>';
         }
         
-        html += '</div>'; // submenu bağla
-        html += '</div>'; // parent-channel-wrapper bağla
+        html += '</div>'; // dropdown close
+        html += '</div>'; // parent-channel-wrapper close
       } else {
-        // Adi tək kanal
+        // Regular single channel
         html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="channel-item" onclick="window.openChannel && window.openChannel(\'' + escapeHtml(channelUrl) + '\')">';
         html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="channel-info">';
@@ -137,6 +170,16 @@ export const defaultJavaScriptLogic = `
         modal.style.display = 'none';
         modal.style.visibility = 'hidden';
         modal.style.opacity = '0';
+        
+        // Close all dropdowns when modal closes
+        var allDropdowns = document.querySelectorAll('.dropdown');
+        var allArrows = document.querySelectorAll('.dropdown-arrow');
+        allDropdowns.forEach(function(dropdown) {
+          dropdown.classList.remove('show');
+        });
+        allArrows.forEach(function(arrow) {
+          arrow.classList.remove('rotated');
+        });
       });
     }
     
@@ -147,6 +190,16 @@ export const defaultJavaScriptLogic = `
         modal.style.display = 'none';
         modal.style.visibility = 'hidden';
         modal.style.opacity = '0';
+        
+        // Close all dropdowns when modal closes
+        var allDropdowns = document.querySelectorAll('.dropdown');
+        var allArrows = document.querySelectorAll('.dropdown-arrow');
+        allDropdowns.forEach(function(dropdown) {
+          dropdown.classList.remove('show');
+        });
+        allArrows.forEach(function(arrow) {
+          arrow.classList.remove('rotated');
+        });
       }
     });
     
@@ -157,6 +210,16 @@ export const defaultJavaScriptLogic = `
         modal.style.display = 'none';
         modal.style.visibility = 'hidden';
         modal.style.opacity = '0';
+        
+        // Close all dropdowns when modal closes
+        var allDropdowns = document.querySelectorAll('.dropdown');
+        var allArrows = document.querySelectorAll('.dropdown-arrow');
+        allDropdowns.forEach(function(dropdown) {
+          dropdown.classList.remove('show');
+        });
+        allArrows.forEach(function(arrow) {
+          arrow.classList.remove('rotated');
+        });
       }
     });
     
@@ -195,6 +258,9 @@ export const defaultJavaScriptLogic = `
   
   // Global function for opening channels
   window.openChannel = openChannel;
+  
+  // Global function for dropdown toggle
+  window.toggleDropdown = toggleDropdown;
   
   // Initialize when ready
   if (document.readyState === 'loading') {
