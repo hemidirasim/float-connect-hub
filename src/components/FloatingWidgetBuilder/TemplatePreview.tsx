@@ -174,20 +174,25 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
           // Wait a bit for DOM to be ready, then execute any inline scripts
           setTimeout(() => {
             // Find and execute script tags
-            const scripts = document.querySelectorAll('script[data-widget-preview]');
-            scripts.forEach(script => {
-              if (script.textContent && script.textContent.trim()) {
-                console.log('Executing widget script for preview...');
+            const scriptElements = document.querySelectorAll('script[data-widget-preview]');
+            scriptElements.forEach(scriptElement => {
+              if (scriptElement.textContent && scriptElement.textContent.trim()) {
                 try {
-                  const scriptFunction = new Function(script.textContent);
-                  scriptFunction();
+                  // Create a new script element to ensure execution
+                  const newScript = document.createElement('script');
+                  newScript.setAttribute('data-widget-preview', 'true');
+                  
+                  // Copy the content
+                  newScript.textContent = scriptElement.textContent;
+                  
+                  // Replace the old script with the new one
+                  scriptElement.parentNode?.replaceChild(newScript, scriptElement);
                 } catch (e) {
                   console.error('Script execution error:', e);
                 }
               }
             });
           }, 100);
-
         } catch (error) {
           console.error('Error rendering floating widget:', error);
         }
