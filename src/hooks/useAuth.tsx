@@ -18,11 +18,17 @@ export const useAuth = () => {
       }
     );
 
-    // THEN check for existing session
+    // THEN check for existing session with proper error handling
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Got existing session:', session ? 'yes' : 'no');
       setSession(session);
       setUser(session?.user ?? null);
+      setLoading(false);
+    }).catch((error) => {
+      console.log('Error getting session:', error);
+      // Handle invalid/expired refresh token gracefully
+      setSession(null);
+      setUser(null);
       setLoading(false);
     });
 
