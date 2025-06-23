@@ -29,7 +29,7 @@ export class WidgetTemplateRenderer {
     const mobileChannelGap = Math.max(6, channelGap - 2)
     const mobileTooltipRightOffset = Math.max(50, tooltipRightOffset - 5)
 
-    // Replace placeholders - now including channel data directly for template use
+    // Replace placeholders - templates now generate their own channels
     const replacements = {
       '{{POSITION_STYLE}}': getPositionStyle(this.config.position),
       '{{TOOLTIP_POSITION_STYLE}}': getTooltipPositionStyle(this.config),
@@ -40,8 +40,7 @@ export class WidgetTemplateRenderer {
       '{{TOOLTIP_POSITION}}': this.config.tooltipPosition || 'top',
       '{{GREETING_MESSAGE}}': this.config.greetingMessage || 'Hi 👋\\nHow can we help you today?',
       '{{BUTTON_ICON}}': buttonIcon,
-      '{{CHANNELS_HTML}}': '', // Templates now generate their own channels
-      '{{CHANNELS_DATA}}': JSON.stringify(this.config.channels), // Pass raw channel data to templates
+      '{{CHANNELS_DATA}}': JSON.stringify(this.config.channels), // Pass channel data to templates
       '{{VIDEO_CONTENT}}': videoContent,
       '{{CHANNELS_COUNT}}': this.config.channels.length.toString(),
       '{{POSITION}}': this.config.position,
