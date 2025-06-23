@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Loader2, KeyRound } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, KeyRound, AlertCircle } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -56,6 +56,7 @@ const AuthCallback = () => {
     const handleAuthCallback = async () => {
       try {
         console.log("Auth callback handling started");
+        console.log("Current URL:", window.location.href);
         
         // Check for recovery token in URL query parameters
         const queryParams = new URLSearchParams(location.search);
@@ -64,16 +65,39 @@ const AuthCallback = () => {
         
         console.log("URL parameters:", { code, type });
         
-        if (code) {
-          // This is a recovery flow
-          if (type === 'recovery' || location.hash.includes('type=recovery')) {
-            console.log("Password recovery flow detected");
-            setStatus('reset_password');
-            setMessage('Yeni şifrənizi təyin edin');
-            return;
+        // Check for hash parameters (for older auth flows)
+        const hash = window.location.hash.substring(1);
+        const hashParams = new URLSearchParams(hash);
+        
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        const hashType = hashParams.get('type');
+        
+        console.log("Hash parameters:", { accessToken: !!accessToken, refreshToken: !!refreshToken, hashType });
+        
+        // First, check if this is a recovery flow
+        if (type === 'recovery' || hashType === 'recovery') {
+          console.log("Password recovery flow detected");
+          setStatus('reset_password');
+          setMessage('Yeni şifrənizi təyin edin');
+          
+          // If we have a code, exchange it for a session
+          if (code) {
+            const { error } = await supabase.auth.exchangeCodeForSession(code);
+            if (error) {
+              console.error('Error exchanging recovery code for session:', error);
+              setStatus('error');
+              setMessage('Şifrə sıfırlama zamanı xəta baş verdi: ' + error.message);
+              return;
+            }
           }
           
-          // Exchange code for session
+          return;
+        }
+        
+        // Handle code exchange for other flows
+        if (code) {
+          console.log("Exchanging code for session");
           const { error } = await supabase.auth.exchangeCodeForSession(code);
           
           if (error) {
@@ -93,17 +117,9 @@ const AuthCallback = () => {
           return;
         }
         
-        // Check for hash parameters (for older auth flows)
-        const hash = window.location.hash.substring(1);
-        const hashParams = new URLSearchParams(hash);
-        
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
-        const hashType = hashParams.get('type');
-        
-        console.log("Hash parameters:", { accessToken: !!accessToken, refreshToken: !!refreshToken, hashType });
-        
+        // Handle hash-based auth (older flow)
         if (accessToken && refreshToken) {
+          console.log("Setting session from hash parameters");
           // Set the session manually
           const { error } = await supabase.auth.setSession({
             access_token: accessToken,
@@ -114,14 +130,6 @@ const AuthCallback = () => {
             console.error('Error setting session:', error);
             setStatus('error');
             setMessage('Hesab təsdiqlənməsi zamanı xəta baş verdi: ' + error.message);
-            return;
-          }
-          
-          // Check if this is a password reset
-          if (hashType === 'recovery') {
-            console.log("Password recovery flow detected from hash");
-            setStatus('reset_password');
-            setMessage('Yeni şifrənizi təyin edin');
             return;
           }
           
@@ -278,7 +286,8 @@ const AuthCallback = () => {
               </div>
               
               {passwordErrors.length > 0 && (
-                <Alert variant="destructive">
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
                     <div className="text-sm font-medium mb-1">Şifrə tələbləri:</div>
                     <ul className="text-xs list-disc pl-5 space-y-1">
