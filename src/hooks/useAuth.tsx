@@ -2,6 +2,18 @@ import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
+// Get the current site URL for redirects
+const getSiteUrl = () => {
+  // For production, use the actual domain
+  if (window.location.hostname !== 'localhost' && 
+      window.location.hostname !== '127.0.0.1') {
+    return window.location.origin;
+  }
+  
+  // For local development, use the Netlify URL or a fallback
+  return 'https://monumental-bonbon-88b744.netlify.app';
+};
+
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -43,7 +55,7 @@ export const useAuth = () => {
         password,
         options: {
           // Set redirect URL for email confirmation
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${getSiteUrl()}/auth/callback`,
           data: {
             full_name: email.split('@')[0] // Default name from email
           }
