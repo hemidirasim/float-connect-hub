@@ -66,7 +66,7 @@ const SortableChannelItem = ({ channel, onEdit, onRemove, onAddChild }) => {
               size="sm"
               onClick={() => onEdit(channel)}
               className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700"
-              title="Redaktə et"
+              title="Edit"
             >
               <Edit className="w-4 h-4" />
             </Button>
@@ -75,7 +75,7 @@ const SortableChannelItem = ({ channel, onEdit, onRemove, onAddChild }) => {
               size="sm"
               onClick={() => onAddChild(channel.id)}
               className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
-              title="Alt link əlavə et"
+              title="Add alt link"
             >
               <Plus className="w-4 h-4" />
             </Button>
@@ -199,7 +199,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
       case 'custom':
         return 'https://example.com';
       default:
-        return 'Əlaqə məlumatı daxil edin...';
+        return 'Enter contact information...';
     }
   };
 
@@ -242,16 +242,16 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
       case 'custom':
         return 'https://example2.com';
       default:
-        return 'İkinci əlaqə məlumatı...';
+        return 'Second contact information...';
     }
   };
 
   const getLabelPlaceholder = () => {
     switch (selectedChannelType) {
       case 'custom':
-        return 'Məsələn: Ddestək, Satış, vb.';
+        return 'For example: Support, Sales, etc.';
       default:
-        return 'Xüsusi ad (ixtiyari)';
+        return 'Custom name (optional)';
     }
   };
 
@@ -263,12 +263,12 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
         // Create a temporary URL for preview
         const url = URL.createObjectURL(file);
         setCustomIconUrl(url);
-        toast.success("Ikon yükləndi!");
+        toast.success("Icon loaded!");
       } else {
-        toast.error("Ikon fayl 1MB-dan az olmalıdır");
+        toast.error("Icon file must be less than 1MB");
       }
     } else if (file) {
-      toast.error("Yalnız PNG, JPG və ya SVG formatında ikon yükləyin");
+      toast.error("Upload icons in PNG, JPG, or SVG format only.");
     }
   };
 
@@ -415,9 +415,9 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Link className="w-5 h-5" />
-            Əlaqə kanalları
+            Contact channels
           </CardTitle>
-          <CardDescription>Hər kanalın yanındakı + düyməsi ilə alt linklər əlavə edə bilərsiniz</CardDescription>
+          <CardDescription>You can add sublinks with the + button next to each channel.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Add Channel Form */}
@@ -443,7 +443,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
               </div>
               
               <div>
-                <Label>Əlaqə məlumatı</Label>
+                <Label>Contact info</Label>
                 <Input
                   placeholder={getPlaceholderText()}
                   value={channelValue}
@@ -548,15 +548,15 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
           {mainChannels.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               <Link className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>Hələ heç bir kanal əlavə edilməyib</p>
-              <p className="text-sm">Yuxarıdakı formu istifadə edərək kanal əlavə edin</p>
+              <p>No channels have been added yet.</p>
+              <p className="text-sm">Add a channel using the form above.</p>
             </div>
           )}
 
           {/* Add Child Channel Form */}
           {addingChildTo && (
             <div className="mt-3 p-3 bg-gray-50 rounded-lg border-2 border-dashed border-green-300">
-              <h4 className="font-medium mb-2">Alt kanal əlavə et</h4>
+              <h4 className="font-medium mb-2">Add subchannel</h4>
               <div className="flex items-center gap-2">
                 <Input
                   placeholder={getChildPlaceholderText(channels.find(ch => ch.id === addingChildTo)?.type || '')}
@@ -569,7 +569,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
                   onClick={() => addChildChannel(addingChildTo)}
                   disabled={!childChannelValue.trim()}
                 >
-                  Əlavə et
+                  Add
                 </Button>
                 <Button
                   variant="outline"
@@ -579,7 +579,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
                     setChildChannelValue('');
                   }}
                 >
-                  Ləğv et
+                  Cancel
                 </Button>
               </div>
             </div>
