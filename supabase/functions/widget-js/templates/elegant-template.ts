@@ -5,7 +5,7 @@ export function getElegantTemplate(): WidgetTemplate {
   return {
     id: 'elegant',
     name: 'Elegant Design',
-    description: 'Modern elegant design with smooth animations and perfect functionality',
+    description: 'Modern elegant design with hover-based channel dropdown and smooth animations',
     html: `
       <div id="lovable-widget-elegant" class="lovable-widget-elegant">
         <!-- Main Button -->
@@ -18,7 +18,7 @@ export function getElegantTemplate(): WidgetTemplate {
           {{TOOLTIP_TEXT}}
         </div>
         
-        <!-- Channels Container -->
+        <!-- Channels Container - Shows on HOVER -->
         <div class="lovable-channels-container" id="lovable-channels">
           <!-- Greeting Message -->
           <div class="lovable-greeting">
@@ -30,7 +30,7 @@ export function getElegantTemplate(): WidgetTemplate {
           
           <!-- Channels List -->
           <div class="lovable-channels-list">
-            {{CHANNELS_HTML}}111
+            {{CHANNELS_HTML}}
           </div>
         </div>
       </div>
@@ -114,12 +114,15 @@ export function getElegantTemplate(): WidgetTemplate {
         visibility: hidden;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 1000000;
+        pointer-events: none;
       }
       
-      .lovable-channels-container.show {
+      /* HOVER BEHAVIOR - Show channels on hover */
+      .lovable-widget-elegant:hover .lovable-channels-container {
         opacity: 1;
         transform: translateY(0) scale(1);
         visibility: visible;
+        pointer-events: auto;
       }
       
       .lovable-greeting {
@@ -149,12 +152,13 @@ export function getElegantTemplate(): WidgetTemplate {
         font-weight: 500;
         transition: all 0.2s ease;
         background: white;
+        transform: translateX(0);
       }
       
       .lovable-channel-button:hover {
         background: #f9fafb;
         border-color: {{BUTTON_COLOR}};
-        transform: translateY(-1px);
+        transform: translateX(5px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
       
@@ -173,58 +177,6 @@ export function getElegantTemplate(): WidgetTemplate {
         fill: currentColor;
       }
       
-      .lovable-channel-group {
-        position: relative;
-      }
-      
-      .lovable-channel-group-trigger {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        background: white;
-        cursor: pointer;
-        font-weight: 500;
-        color: #374151;
-        transition: all 0.2s ease;
-      }
-      
-      .lovable-channel-group-trigger:hover {
-        background: #f9fafb;
-        border-color: {{BUTTON_COLOR}};
-        transform: translateY(-1px);
-      }
-      
-      .lovable-channel-group-items {
-        position: absolute;
-        left: 100%;
-        top: 0;
-        margin-left: 8px;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-        padding: 8px;
-        min-width: 200px;
-        opacity: 0;
-        transform: translateX(-10px);
-        visibility: hidden;
-        transition: all 0.2s ease;
-        z-index: 1000001;
-      }
-      
-      .lovable-channel-group:hover .lovable-channel-group-items {
-        opacity: 1;
-        transform: translateX(0);
-        visibility: visible;
-      }
-      
-      .lovable-channel-group-items .lovable-channel-button {
-        margin: 0;
-        border-radius: 8px;
-      }
-      
       /* Mobile Responsive */
       @media (max-width: 768px) {
         .lovable-channels-container {
@@ -235,52 +187,55 @@ export function getElegantTemplate(): WidgetTemplate {
           transform-origin: bottom center;
         }
         
-        .lovable-channel-group-items {
-          position: static;
-          margin-left: 0;
-          margin-top: 8px;
-          transform: none;
-          visibility: visible;
-          opacity: 1;
-          display: none;
+        /* On mobile, click instead of hover */
+        .lovable-widget-elegant:hover .lovable-channels-container {
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
         }
         
-        .lovable-channel-group.active .lovable-channel-group-items {
-          display: block;
+        .lovable-channels-container.mobile-show {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+          visibility: visible;
+          pointer-events: auto;
         }
       }
     `,
     js: `
-      // Widget functionality
-      const widget = document.getElementById('lovable-widget-elegant');
-      const mainBtn = document.getElementById('lovable-main-btn');
-      const channelsContainer = document.getElementById('lovable-channels');
-      const tooltip = document.getElementById('lovable-tooltip');
+      // Elegant Template - HOVER behavior (desktop) and CLICK (mobile)
+      const elegantWidget = document.getElementById('lovable-widget-elegant');
+      const elegantMainBtn = document.getElementById('lovable-main-btn');
+      const elegantChannelsContainer = document.getElementById('lovable-channels');
+      const elegantTooltip = document.getElementById('lovable-tooltip');
+      let isMobile = window.innerWidth <= 768;
       let isOpen = false;
       
-      // Main button click handler
-      if (mainBtn && channelsContainer) {
-        mainBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          isOpen = !isOpen;
-          
-          if (isOpen) {
-            channelsContainer.classList.add('show');
-            console.log('Elegant widget opened');
-          } else {
-            channelsContainer.classList.remove('show');
-            console.log('Elegant widget closed');
+      // Handle mobile clicks (different behavior for mobile)
+      if (elegantMainBtn && elegantChannelsContainer) {
+        elegantMainBtn.addEventListener('click', function(e) {
+          if (isMobile) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            isOpen = !isOpen;
+            
+            if (isOpen) {
+              elegantChannelsContainer.classList.add('mobile-show');
+              console.log('Elegant widget opened on mobile');
+            } else {
+              elegantChannelsContainer.classList.remove('mobile-show');
+              console.log('Elegant widget closed on mobile');
+            }
           }
         });
       }
       
-      // Close when clicking outside
+      // Close when clicking outside (mobile only)
       document.addEventListener('click', function(e) {
-        if (widget && !widget.contains(e.target)) {
+        if (isMobile && elegantWidget && !elegantWidget.contains(e.target)) {
           if (isOpen) {
-            channelsContainer.classList.remove('show');
+            elegantChannelsContainer.classList.remove('mobile-show');
             isOpen = false;
             console.log('Elegant widget closed by outside click');
           }
@@ -288,31 +243,43 @@ export function getElegantTemplate(): WidgetTemplate {
       });
       
       // Tooltip functionality
-      if (tooltip && mainBtn) {
+      if (elegantTooltip && elegantMainBtn) {
         if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
-          mainBtn.addEventListener('mouseenter', function() {
-            tooltip.classList.add('show');
+          elegantMainBtn.addEventListener('mouseenter', function() {
+            elegantTooltip.classList.add('show');
           });
           
-          mainBtn.addEventListener('mouseleave', function() {
-            tooltip.classList.remove('show');
+          elegantMainBtn.addEventListener('mouseleave', function() {
+            elegantTooltip.classList.remove('show');
           });
         } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
-          tooltip.style.display = 'block';
-          tooltip.classList.add('show');
+          elegantTooltip.style.display = 'block';
+          elegantTooltip.classList.add('show');
         }
       }
       
-      // Channel group functionality for mobile
-      const channelGroups = document.querySelectorAll('.lovable-channel-group-trigger');
-      channelGroups.forEach(trigger => {
-        trigger.addEventListener('click', function(e) {
-          if (window.innerWidth <= 768) {
-            e.preventDefault();
-            const group = this.closest('.lovable-channel-group');
-            group.classList.toggle('active');
-          }
+      // Enhanced hover effects for channels
+      const elegantChannels = document.querySelectorAll('.lovable-channel-button');
+      elegantChannels.forEach((channel, index) => {
+        channel.addEventListener('mouseenter', function() {
+          // Staggered animation effect
+          setTimeout(() => {
+            this.style.transform = 'translateX(8px) scale(1.02)';
+          }, index * 50);
         });
+        
+        channel.addEventListener('mouseleave', function() {
+          this.style.transform = 'translateX(0) scale(1)';
+        });
+      });
+      
+      // Update mobile status on resize
+      window.addEventListener('resize', function() {
+        isMobile = window.innerWidth <= 768;
+        if (!isMobile && isOpen) {
+          elegantChannelsContainer.classList.remove('mobile-show');
+          isOpen = false;
+        }
       });
       
       // Global channel click function
@@ -321,7 +288,7 @@ export function getElegantTemplate(): WidgetTemplate {
         console.log('Channel opened:', url);
       };
       
-      console.log('Elegant widget loaded successfully');
+      console.log('Elegant widget loaded with HOVER behavior (desktop) and CLICK (mobile)');
     `
   }
 }
