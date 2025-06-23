@@ -15,7 +15,7 @@ export function getElegantTemplate(): WidgetTemplate {
         
         <!-- Tooltip -->
         <div class="lovable-tooltip" id="lovable-tooltip" style="display: {{TOOLTIP_DISPLAY}};">
-          {{TOOLTIP_TEXT}}dfdfd
+          {{TOOLTIP_TEXT}}
         </div>
         
         <!-- Channels Container -->
@@ -30,7 +30,7 @@ export function getElegantTemplate(): WidgetTemplate {
           
           <!-- Channels List -->
           <div class="lovable-channels-list">
-            {{CHANNELS_HTML}}
+            {{CHANNELS_HTML}}111
           </div>
         </div>
       </div>
