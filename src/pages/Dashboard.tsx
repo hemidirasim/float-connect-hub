@@ -75,21 +75,37 @@ const Dashboard = () => {
         .select('*')
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      // Only log and show error for non-PGRST116 errors
-      if (error && error.code !== 'PGRST116') {
+      if (error && error.code === 'PGRST116') {
+        // No user credits record found, create one
+        console.log('No user credits found, creating default record...');
+        const { data: newCredits, error: insertError } = await supabase
+          .from('user_credits')
+          .insert({
+            user_id: user?.id,
+            balance: 100,
+            total_spent: 0
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('Error creating user credits:', insertError);
+          toast.error('Error initializing credits');
+          setUserCredits({ balance: 100, total_spent: 0 });
+        } else {
+          console.log('Created new user credits record:', newCredits);
+          setUserCredits(newCredits || { balance: 100, total_spent: 0 });
+          toast.success('Credits account initialized');
+        }
+      } else if (error) {
         console.error('Error fetching credits:', error);
         toast.error('Error loading credits');
+        setUserCredits({ balance: 100, total_spent: 0 });
+      } else {
+        setUserCredits(data || { balance: 100, total_spent: 0 });
       }
-      // For PGRST116 (no rows found), silently use default values
-      setUserCredits(data || { balance: 100, total_spent: 0 });
     } catch (error) {
-      // Only log and show error for non-PGRST116 errors
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching credits:', error);
-        toast.error('Error loading credits');
-      }
-      // For PGRST116 (no rows found), silently use default values
+      console.error('Unexpected error fetching credits:', error);
       setUserCredits({ balance: 100, total_spent: 0 });
     }
   };

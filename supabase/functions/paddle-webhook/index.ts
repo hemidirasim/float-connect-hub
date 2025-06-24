@@ -72,7 +72,7 @@ serve(async (req) => {
         return new Response('Already processed', { status: 200, headers: corsHeaders });
       }
 
-      // Record the transaction
+      // Record the transaction first
       const { error: transactionError } = await supabase
         .from('payment_transactions')
         .insert({
@@ -107,9 +107,9 @@ serve(async (req) => {
       const creditsToAdd = parseInt(customData.credits);
 
       if (fetchError && fetchError.code === 'PGRST116') {
-        // User credits record doesn't exist, create one
-        console.log('Creating new user credits record');
-        newBalance = creditsToAdd;
+        // User credits record doesn't exist, create one with the purchased credits
+        console.log('Creating new user credits record with purchased credits');
+        newBalance = 100 + creditsToAdd; // Default 100 + purchased credits
         const { error: insertError } = await supabase
           .from('user_credits')
           .insert({
