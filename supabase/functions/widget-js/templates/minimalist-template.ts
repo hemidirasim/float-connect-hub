@@ -44,14 +44,14 @@ export function getMinimalistTemplate(): WidgetTemplate {
         font-size: 24px;
         color: white;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.3s ease;
         position: relative;
         z-index: 10001;
       }
 
       .minimalist-main-button:hover {
-        transform: translateY(-2px) scale(1.05);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        transform: scale(1.05);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
       }
 
       .minimalist-main-button.active {
@@ -68,7 +68,7 @@ export function getMinimalistTemplate(): WidgetTemplate {
         opacity: 0;
         visibility: hidden;
         transform: translateY(20px);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.3s ease;
         z-index: 10000;
         align-items: center;
       }
@@ -92,7 +92,7 @@ export function getMinimalistTemplate(): WidgetTemplate {
         color: white;
         text-decoration: none;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.3s ease;
         position: relative;
         transform: scale(0) translateY(20px);
         opacity: 0;
@@ -348,13 +348,13 @@ export function getMinimalistTemplate(): WidgetTemplate {
             if (channel.type === 'instagram' && index === reversedChannels.length - 1) {
               html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" ';
               html += 'class="minimalist-channel-btn instagram-rect" ';
-              html += 'onclick="window.openChannel && window.openChannel(\'' + escapeHtml(channelUrl) + '\'); return false;">';
+              html += 'onclick="window.openChannel && window.openChannel(\\'' + escapeHtml(channelUrl) + '\\'); return false;">';
               html += 'Instagram';
               html += '</a>';
             } else {
               html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" ';
               html += 'class="minimalist-channel-btn" data-type="' + escapeHtml(channel.type) + '" ';
-              html += 'onclick="window.openChannel && window.openChannel(\'' + escapeHtml(channelUrl) + '\'); return false;">';
+              html += 'onclick="window.openChannel && window.openChannel(\\'' + escapeHtml(channelUrl) + '\\'); return false;">';
               html += channelIcon;
               html += '<span class="channel-name">' + escapeHtml(channel.label) + '</span>';
               html += '</a>';
