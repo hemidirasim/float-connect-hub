@@ -89,7 +89,7 @@ export class WidgetTemplateRenderer {
     // Escape content for template literals to prevent syntax errors
     const escapedHtml = escapeTemplateContent(html)
     const escapedCss = escapeTemplateContent(css)
-    const escapedJs = escapeJavaScriptString(js)
+    const escapedJs = js; // Don't escape JS - it's already valid and ready for execution
 
     // Add global function for channel clicks
     const globalScript = `
