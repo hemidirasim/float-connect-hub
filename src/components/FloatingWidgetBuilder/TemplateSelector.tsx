@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -6,12 +7,18 @@ import { Palette } from 'lucide-react';
 
 // Import templates to get their actual names and descriptions
 import { getDefaultTemplate } from '../../../supabase/functions/widget-js/default-template';
-import { getMinimalistTemplate } from '../../../supabase/functions/widget-js/templates/minimalist-template';
+import { getDarkTemplate } from '../../../supabase/functions/widget-js/templates/dark-template';
+import { getMinimalTemplate } from '../../../supabase/functions/widget-js/templates/minimal-template';
+import { getModernTemplate } from '../../../supabase/functions/widget-js/templates/modern-template';
+import { getElegantTemplate } from '../../../supabase/functions/widget-js/templates/elegant-template';
 
 // Get template definitions dynamically
 const AVAILABLE_TEMPLATES = [
   { ...getDefaultTemplate(), is_default: true },
-  { ...getMinimalistTemplate(), is_default: false }
+  { ...getDarkTemplate(), is_default: false },
+  { ...getMinimalTemplate(), is_default: false },
+  { ...getModernTemplate(), is_default: false },
+  { ...getElegantTemplate(), is_default: false }
 ];
 
 interface TemplateSelectorProps {

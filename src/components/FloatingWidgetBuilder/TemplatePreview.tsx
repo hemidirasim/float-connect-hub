@@ -3,7 +3,10 @@ import { Channel, FormData } from './types';
 
 // Import template definitions from the same source as edge function
 import { getDefaultTemplate } from '../../../supabase/functions/widget-js/default-template';
-import { getMinimalistTemplate } from '../../../supabase/functions/widget-js/templates/minimalist-template';
+import { getDarkTemplate } from '../../../supabase/functions/widget-js/templates/dark-template';
+import { getMinimalTemplate } from '../../../supabase/functions/widget-js/templates/minimal-template';
+import { getModernTemplate } from '../../../supabase/functions/widget-js/templates/modern-template';
+import { getElegantTemplate } from '../../../supabase/functions/widget-js/templates/elegant-template';
 
 // Import the SAME template renderer as edge functions
 import { WidgetTemplateRenderer } from '../../../supabase/functions/widget-js/template-generator';
@@ -11,7 +14,10 @@ import { WidgetTemplateRenderer } from '../../../supabase/functions/widget-js/te
 // Use the same template registry as edge functions
 const TEMPLATE_REGISTRY = {
   'default': getDefaultTemplate,
-  'minimalist': getMinimalistTemplate
+  'dark': getDarkTemplate,
+  'minimal': getMinimalTemplate,
+  'modern': getModernTemplate,
+  'elegant': getElegantTemplate
 } as const;
 
 interface TemplatePreviewProps {
@@ -31,10 +37,8 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 
   // Memoize template getter to prevent infinite re-renders
   const getTemplate = useCallback((templateId: string) => {
-    console.log(`Getting template for ID: '${templateId}'`);
     const templateFunction = TEMPLATE_REGISTRY[templateId as keyof typeof TEMPLATE_REGISTRY] || TEMPLATE_REGISTRY['default'];
     const template = templateFunction();
-    console.log(`Template loaded: ${template.name}`);
     return template;
   }, []);
 
@@ -88,12 +92,25 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     let finalHtml = '';
     
     if (htmlMatch && cssMatch) {
-      const html = htmlMatch[1];
-      const css = cssMatch[1];
+      const html = htmlMatch[1]
+        .replace(/\\n/g, '\n')
+        .replace(/\\t/g, '\t')
+        .replace(/\\'/g, "'")
+        .replace(/\\"/g, '"');
+      
+      const css = cssMatch[1]
+        .replace(/\\n/g, '\n')
+        .replace(/\\t/g, '\t')
+        .replace(/\\'/g, "'")
+        .replace(/\\"/g, '"');
       
       let js = '';
       if (jsMatch) {
-        js = jsMatch[1];
+        js = jsMatch[1]
+          .replace(/\\n/g, '\n')
+          .replace(/\\t/g, '\t')
+          .replace(/\\'/g, "'")
+          .replace(/\\"/g, '"');
       }
       
       finalHtml = `
@@ -191,4 +208,4 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 
   // Don't render any visible component - the widget is injected directly into the page
   return null;
-}
+};

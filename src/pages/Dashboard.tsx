@@ -69,27 +69,27 @@ const Dashboard = () => {
   };
 
   const fetchUserCredits = async () => {
-    if (!user?.id) return;
-    
     try {
       const { data, error } = await supabase
         .from('user_credits')
         .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .single();
 
-      if (error) throw error;
-      
-      if (data) {
-        setUserCredits(data);
-      } else {
-        // No user_credits record found, use default values
-        setUserCredits({ balance: 100, total_spent: 0 });
+      if (error && error.code !== 'PGRST116') throw error;
+      // Only log and show error for non-PGRST116 errors
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching credits:', error);
+        toast.error('Error loading credits');
       }
+      // For PGRST116 (no rows found), silently use default values
+      setUserCredits(data || { balance: 100, total_spent: 0 });
     } catch (error) {
-      console.error('Error fetching credits:', error);
-      toast.error('Error loading credits');
-      // Use default values on error
+      // Only log and show error for non-PGRST116 errors
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching credits:', error);
+        toast.error('Error loading credits');
+      }
+      // For PGRST116 (no rows found), silently use default values
       setUserCredits({ balance: 100, total_spent: 0 });
     }
   };

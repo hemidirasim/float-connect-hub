@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,11 +46,6 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
   onCreateWidget,
   onCustomIconUpload
 }) => {
-  // Log the current template ID for debugging
-  React.useEffect(() => {
-    console.log('Current template ID in WidgetForm:', formData.templateId);
-  }, [formData.templateId]);
-
   return (
     <>
       <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
@@ -96,10 +92,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             <h3 className="text-lg font-medium">Choose Template</h3>
             <TemplateSelector
               selectedTemplateId={formData.templateId || ''}
-              onTemplateChange={(templateId) => {
-                console.log('Template changed to:', templateId);
-                onFormDataChange('templateId', templateId);
-              }}
+              onTemplateChange={(templateId) => onFormDataChange('templateId', templateId)}
             />
           </div>
 
