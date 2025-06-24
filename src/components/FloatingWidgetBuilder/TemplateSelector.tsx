@@ -2,24 +2,15 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Palette } from 'lucide-react';
 
-// Import templates to get their actual names and descriptions
-import { getDefaultTemplate } from '../../../supabase/functions/widget-js/default-template';
-import { getDarkTemplate } from '../../../supabase/functions/widget-js/templates/dark-template';
-import { getMinimalTemplate } from '../../../supabase/functions/widget-js/templates/minimal-template';
-import { getModernTemplate } from '../../../supabase/functions/widget-js/templates/modern-template';
-import { getElegantTemplate } from '../../../supabase/functions/widget-js/templates/elegant-template';
-
-// Get template definitions dynamically
-const AVAILABLE_TEMPLATES = [
-  { ...getDefaultTemplate(), is_default: true },
-  { ...getDarkTemplate(), is_default: false },
-  { ...getMinimalTemplate(), is_default: false },
-  { ...getModernTemplate(), is_default: false },
-  { ...getElegantTemplate(), is_default: false }
-];
+// Yalnız default template-i göstəririk
+const DEFAULT_TEMPLATE = {
+  id: 'default',
+  name: 'Standart Dizayn',
+  description: 'Klassik və asan istifadə edilən dizayn',
+  is_default: true
+};
 
 interface TemplateSelectorProps {
   selectedTemplateId: string;
@@ -30,58 +21,41 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   selectedTemplateId,
   onTemplateChange
 }) => {
-  // Auto-select default template if none selected
+  // Auto-select default template
   React.useEffect(() => {
-    if (!selectedTemplateId) {
-      const defaultTemplate = AVAILABLE_TEMPLATES.find(t => t.is_default) || AVAILABLE_TEMPLATES[0];
-      onTemplateChange(defaultTemplate.id);
+    if (!selectedTemplateId || selectedTemplateId !== 'default') {
+      onTemplateChange('default');
     }
   }, [selectedTemplateId, onTemplateChange]);
-
-  const selectedTemplate = AVAILABLE_TEMPLATES.find(t => t.id === selectedTemplateId);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Palette className="w-5 h-5 text-purple-600" />
-          Widget Template
+          Widget Dizaynı
         </CardTitle>
         <CardDescription>
-          Choose the design template for your widget
+          Widget-inizin dizaynı (indiki vaxtda yalnız standart dizayn mövcuddur)
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          <Label htmlFor="template-select">Template</Label>
-          <Select 
-            value={selectedTemplateId} 
-            onValueChange={onTemplateChange}
-          >
-            <SelectTrigger id="template-select">
-              <SelectValue placeholder="Select a template" />
-            </SelectTrigger>
-            <SelectContent>
-              {AVAILABLE_TEMPLATES.map((template) => (
-                <SelectItem key={template.id} value={template.id}>
-                  <div className="flex items-center gap-2">
-                    <span>{template.name}</span>
-                    {template.is_default && (
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                        Default
-                      </span>
-                    )}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          {selectedTemplate && (
-            <div className="mt-2 text-sm text-gray-600">
-              {selectedTemplate.description}
+          <Label htmlFor="template-info">Seçilmiş Template</Label>
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{DEFAULT_TEMPLATE.name}</span>
+              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                Aktiv
+              </span>
             </div>
-          )}
+            <div className="mt-1 text-sm text-gray-600">
+              {DEFAULT_TEMPLATE.description}
+            </div>
+          </div>
+          <div className="text-xs text-gray-500 mt-2">
+            * Yeni dizaynlar tezliklə əlavə ediləcək
+          </div>
         </div>
       </CardContent>
     </Card>

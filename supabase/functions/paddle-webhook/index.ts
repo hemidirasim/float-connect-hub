@@ -17,25 +17,37 @@ serve(async (req) => {
     const signature = req.headers.get('paddle-signature');
     const body = await req.text();
     
-    console.log('Webhook received:', body);
-    console.log('Paddle signature:', signature);
+    console.log('Webhook received:', {
+      method: req.method,
+      headers: Object.fromEntries(req.headers.entries()),
+      bodyLength: body.length
+    });
 
     // Parse the webhook data
-    const webhookData = JSON.parse(body);
+    let webhookData;
+    try {
+      webhookData = JSON.parse(body);
+    } catch (parseError) {
+      console.error('Failed to parse webhook body:', parseError);
+      return new Response('Invalid JSON', { status: 400, headers: corsHeaders });
+    }
     
     console.log('Webhook event type:', webhookData.event_type);
     console.log('Webhook data:', JSON.stringify(webhookData, null, 2));
     
-    // Only process completed transactions
-    if (webhookData.event_type === 'transaction.completed') {
+    // Process both completed and paid transactions
+    if (webhookData.event_type === 'transaction.completed' || webhookData.event_type === 'transaction.paid') {
       const transaction = webhookData.data;
       const customData = transaction.custom_data || {};
       
-      console.log('Processing completed transaction:', transaction.id);
-      console.log('Custom data:', customData);
+      console.log('Processing transaction:', {
+        id: transaction.id,
+        status: transaction.status,
+        customData: customData
+      });
       
       if (!customData.user_id || !customData.credits) {
-        console.error('Missing user_id or credits in custom data');
+        console.error('Missing user_id or credits in custom data:', customData);
         return new Response('Missing user data', { 
           status: 400,
           headers: corsHeaders 
@@ -48,15 +60,27 @@ serve(async (req) => {
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
       );
 
+      // Check if transaction already processed
+      const { data: existingTransaction } = await supabase
+        .from('payment_transactions')
+        .select('id')
+        .eq('paddle_transaction_id', transaction.id)
+        .single();
+
+      if (existingTransaction) {
+        console.log('Transaction already processed:', transaction.id);
+        return new Response('Already processed', { status: 200, headers: corsHeaders });
+      }
+
       // Record the transaction
       const { error: transactionError } = await supabase
         .from('payment_transactions')
         .insert({
           user_id: customData.user_id,
           paddle_transaction_id: transaction.id,
-          product_id: transaction.items[0]?.price?.product_id || '',
-          amount: parseFloat(transaction.details.totals.grand_total) / 100, // Convert cents to dollars
-          currency: transaction.currency_code,
+          product_id: transaction.items?.[0]?.price?.product_id || '',
+          amount: parseFloat(transaction.details?.totals?.grand_total || transaction.amount || '0') / 100,
+          currency: transaction.currency_code || 'USD',
           credits_purchased: parseInt(customData.credits),
           status: 'completed',
           paddle_checkout_id: transaction.checkout?.id
@@ -80,10 +104,12 @@ serve(async (req) => {
         .single();
 
       let newBalance;
+      const creditsToAdd = parseInt(customData.credits);
+
       if (fetchError && fetchError.code === 'PGRST116') {
         // User credits record doesn't exist, create one
         console.log('Creating new user credits record');
-        newBalance = parseInt(customData.credits);
+        newBalance = creditsToAdd;
         const { error: insertError } = await supabase
           .from('user_credits')
           .insert({
@@ -109,7 +135,7 @@ serve(async (req) => {
         });
       } else {
         // Update existing credits
-        newBalance = currentCredits.balance + parseInt(customData.credits);
+        newBalance = currentCredits.balance + creditsToAdd;
         const { error: creditsError } = await supabase
           .from('user_credits')
           .update({ 
@@ -127,8 +153,10 @@ serve(async (req) => {
         }
       }
 
-      console.log(`Added ${customData.credits} credits to user ${customData.user_id}`);
+      console.log(`Successfully added ${creditsToAdd} credits to user ${customData.user_id}`);
       console.log(`New balance: ${newBalance}`);
+    } else {
+      console.log('Ignoring webhook event type:', webhookData.event_type);
     }
 
     return new Response('OK', { 
@@ -138,6 +166,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Webhook error:', error);
+    console.error('Error stack:', error.stack);
     return new Response('Internal error', { 
       status: 500,
       headers: corsHeaders 
