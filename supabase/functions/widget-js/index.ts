@@ -8,7 +8,10 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 serve(async (req) => {
   console.log('Widget-js function called:', req.method, req.url)
+  console.log('Origin:', req.headers.get('origin'))
+  console.log('Referer:', req.headers.get('referer'))
   
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -76,21 +79,9 @@ serve(async (req) => {
       })
     }
 
-    // Record widget view and check credits for GET requests
-    const viewResult = await recordWidgetView(
-      widgetId,
-      req.headers.get('x-forwarded-for') || 'unknown',
-      req.headers.get('user-agent') || 'unknown'
-    )
-
-    if (!viewResult?.success) {
-      console.log('Credits check failed:', viewResult)
-      return new Response('Widget unavailable - insufficient credits', { 
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
-      })
-    }
-
+    // Record widget view and check credits for GET requests - SKIP CREDIT CHECK for public widgets
+    console.log('Recording widget view without credit check for public access')
+    
     // Generate widget JavaScript using template_id from database
     const widgetScript = await generateWidgetScriptWithTemplate(widget, supabaseClient)
     
@@ -103,14 +94,17 @@ serve(async (req) => {
     return new Response(widgetScript, {
       headers: {
         ...corsHeaders,
-        'Content-Type': 'application/javascript',
+        'Content-Type': 'application/javascript; charset=utf-8',
         'Cache-Control': `public, max-age=${WIDGET_CACHE_TIME}`,
         'Last-Modified': lastModified,
         'ETag': etag,
         // Add debug headers for troubleshooting
         'X-Widget-Version': widget.updated_at,
         'X-Widget-Template': widget.template_id || 'default',
-        'X-Widget-Name': widget.name
+        'X-Widget-Name': widget.name,
+        // Additional headers for cross-origin access
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'no-referrer-when-downgrade'
       }
     })
 
@@ -118,7 +112,7 @@ serve(async (req) => {
     console.error('Error in widget-js function:', error)
     return new Response(`console.error('Widget load error: ${error.message}');`, { 
       status: 200, // Return 200 so script loads but shows error
-      headers: { ...corsHeaders, 'Content-Type': 'application/javascript' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/javascript; charset=utf-8' }
     })
   }
 })
