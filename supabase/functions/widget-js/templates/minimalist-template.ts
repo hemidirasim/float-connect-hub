@@ -4,7 +4,7 @@ export function getMinimalistTemplate(): WidgetTemplate {
   return {
     id: 'minimalist',
     name: 'Minimalist',
-    description: 'Simple icons-only design with hover tooltips',
+    description: 'Clean, icon-based design with circular buttons and subtle animations',
     html: `
       <div class="minimalist-widget-container position-{{POSITION}}" id="minimalist-widget-container">
         <div class="minimalist-channels-list" id="minimalist-channels-list">
@@ -254,6 +254,21 @@ export function getMinimalistTemplate(): WidgetTemplate {
           transform: translateX(100%);
         }
       }
+
+      /* Accessibility - reduced motion */
+      @media (prefers-reduced-motion: reduce) {
+        .minimalist-main-button,
+        .minimalist-channel-btn,
+        .minimalist-channels-list,
+        .minimalist-tooltip,
+        .channel-name {
+          transition-duration: 0.1s;
+        }
+        
+        .minimalist-channels-list.show .minimalist-channel-btn {
+          transition-delay: 0s !important;
+        }
+      }
     `,
     js: `
       (function() {
@@ -295,6 +310,14 @@ export function getMinimalistTemplate(): WidgetTemplate {
             toggleMenu();
           });
 
+          // Keyboard accessibility
+          button.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              toggleMenu();
+            }
+          });
+
           // Tooltip functionality
           if (tooltip) {
             const tooltipDisplay = '{{TOOLTIP_DISPLAY}}';
@@ -309,6 +332,17 @@ export function getMinimalistTemplate(): WidgetTemplate {
               button.addEventListener('mouseleave', function() {
                 tooltip.classList.remove('show');
               });
+              
+              // For focus accessibility
+              button.addEventListener('focus', function() {
+                if (!isMenuOpen) {
+                  tooltip.classList.add('show');
+                }
+              });
+              
+              button.addEventListener('blur', function() {
+                tooltip.classList.remove('show');
+              });
             } else if (tooltipDisplay === 'always') {
               tooltip.classList.add('always');
             }
@@ -317,6 +351,13 @@ export function getMinimalistTemplate(): WidgetTemplate {
           // Close menu when clicking outside
           document.addEventListener('click', function(e) {
             if (!e.target.closest('.minimalist-widget-container')) {
+              closeMenu();
+            }
+          });
+          
+          // Escape key to close menu
+          document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isMenuOpen) {
               closeMenu();
             }
           });
@@ -348,12 +389,14 @@ export function getMinimalistTemplate(): WidgetTemplate {
             if (channel.type === 'instagram' && index === reversedChannels.length - 1) {
               html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" ';
               html += 'class="minimalist-channel-btn instagram-rect" ';
+              html += 'aria-label="Contact via Instagram" ';
               html += 'onclick="window.openChannel && window.openChannel(\\'' + escapeHtml(channelUrl) + '\\'); return false;">';
               html += 'Instagram';
               html += '</a>';
             } else {
               html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" ';
               html += 'class="minimalist-channel-btn" data-type="' + escapeHtml(channel.type) + '" ';
+              html += 'aria-label="Contact via ' + escapeHtml(channel.label) + '" ';
               html += 'onclick="window.openChannel && window.openChannel(\\'' + escapeHtml(channelUrl) + '\\'); return false;">';
               html += channelIcon;
               html += '<span class="channel-name">' + escapeHtml(channel.label) + '</span>';
@@ -362,7 +405,7 @@ export function getMinimalistTemplate(): WidgetTemplate {
           });
           
           // Add close button at the bottom
-          html += '<button class="minimalist-channel-btn close-button" onclick="closeMinimalistMenu()">';
+          html += '<button class="minimalist-channel-btn close-button" aria-label="Close menu" onclick="closeMinimalistMenu()">';
           html += '<svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
           html += '<span class="channel-name">Close</span>';
           html += '</button>';
@@ -438,10 +481,12 @@ export function getMinimalistTemplate(): WidgetTemplate {
           if (isMenuOpen) {
             channelsList.classList.add('show');
             button.classList.add('active');
+            button.setAttribute('aria-expanded', 'true');
             if (tooltip) tooltip.classList.remove('show');
           } else {
             channelsList.classList.remove('show');
             button.classList.remove('active');
+            button.setAttribute('aria-expanded', 'false');
           }
         }
 
@@ -451,6 +496,7 @@ export function getMinimalistTemplate(): WidgetTemplate {
           if (channelsList && button) {
             channelsList.classList.remove('show');
             button.classList.remove('active');
+            button.setAttribute('aria-expanded', 'false');
             isMenuOpen = false;
           }
         }
