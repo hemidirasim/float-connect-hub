@@ -204,4 +204,4 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 
   // Don't render any visible component - the widget is injected directly into the page
   return null;
-};
+}
