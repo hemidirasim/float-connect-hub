@@ -88,25 +88,12 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     let finalHtml = '';
     
     if (htmlMatch && cssMatch) {
-      const html = htmlMatch[1]
-        .replace(/\\n/g, '\n')
-        .replace(/\\t/g, '\t')
-        .replace(/\\'/g, "'")
-        .replace(/\\"/g, '"');
-      
-      const css = cssMatch[1]
-        .replace(/\\n/g, '\n')
-        .replace(/\\t/g, '\t')
-        .replace(/\\'/g, "'")
-        .replace(/\\"/g, '"');
+      const html = htmlMatch[1];
+      const css = cssMatch[1];
       
       let js = '';
       if (jsMatch) {
-        js = jsMatch[1]
-          .replace(/\\n/g, '\n')
-          .replace(/\\t/g, '\t')
-          .replace(/\\'/g, "'")
-          .replace(/\\"/g, '"');
+        js = jsMatch[1];
       }
       
       finalHtml = `
