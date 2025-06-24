@@ -35,6 +35,12 @@ const creditPackages = [
     productId: 'pri_01js1kg2d3q6cf947hz5v6eqjy',
     popular: false 
   },
+  { 
+    credits: 10, 
+    price: 1, 
+    productId: 'pri_01jygks56v6vpvncqxn5harqae',
+    popular: false 
+  },
 ];
 
 declare global {
