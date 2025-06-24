@@ -76,24 +76,20 @@ const Dashboard = () => {
         .from('user_credits')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) throw error;
       
-      // Only log and show error for non-PGRST116 errors
       if (data) {
         setUserCredits(data);
       } else {
-        // For PGRST116 (no rows found), silently use default values
+        // No user_credits record found, use default values
         setUserCredits({ balance: 100, total_spent: 0 });
       }
     } catch (error) {
-      // Only log and show error for non-PGRST116 errors
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching credits:', error);
-        toast.error('Error loading credits');
-      }
-      // For PGRST116 (no rows found), silently use default values
+      console.error('Error fetching credits:', error);
+      toast.error('Error loading credits');
+      // Use default values on error
       setUserCredits({ balance: 100, total_spent: 0 });
     }
   };
