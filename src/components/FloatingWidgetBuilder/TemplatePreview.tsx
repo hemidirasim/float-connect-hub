@@ -3,10 +3,7 @@ import { Channel, FormData } from './types';
 
 // Import template definitions from the same source as edge function
 import { getDefaultTemplate } from '../../../supabase/functions/widget-js/default-template';
-import { getDarkTemplate } from '../../../supabase/functions/widget-js/templates/dark-template';
-import { getMinimalTemplate } from '../../../supabase/functions/widget-js/templates/minimal-template';
-import { getModernTemplate } from '../../../supabase/functions/widget-js/templates/modern-template';
-import { getElegantTemplate } from '../../../supabase/functions/widget-js/templates/elegant-template';
+import { getMinimalistTemplate } from '../../../supabase/functions/widget-js/templates/minimalist-template';
 
 // Import the SAME template renderer as edge functions
 import { WidgetTemplateRenderer } from '../../../supabase/functions/widget-js/template-generator';
@@ -14,10 +11,7 @@ import { WidgetTemplateRenderer } from '../../../supabase/functions/widget-js/te
 // Use the same template registry as edge functions
 const TEMPLATE_REGISTRY = {
   'default': getDefaultTemplate,
-  'dark': getDarkTemplate,
-  'minimal': getMinimalTemplate,
-  'modern': getModernTemplate,
-  'elegant': getElegantTemplate
+  'minimalist': getMinimalistTemplate
 } as const;
 
 interface TemplatePreviewProps {
@@ -37,8 +31,10 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 
   // Memoize template getter to prevent infinite re-renders
   const getTemplate = useCallback((templateId: string) => {
+    console.log(`Getting template for ID: '${templateId}'`);
     const templateFunction = TEMPLATE_REGISTRY[templateId as keyof typeof TEMPLATE_REGISTRY] || TEMPLATE_REGISTRY['default'];
     const template = templateFunction();
+    console.log(`Template loaded: ${template.name}`);
     return template;
   }, []);
 

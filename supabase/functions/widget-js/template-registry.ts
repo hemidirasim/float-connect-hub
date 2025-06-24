@@ -12,13 +12,17 @@ export type TemplateId = keyof typeof TEMPLATE_REGISTRY
 
 // Get template by ID
 export function getTemplateById(templateId: string): WidgetTemplate {
+  console.log(`Getting template for ID: '${templateId}'`);
+  
   const templateFunction = TEMPLATE_REGISTRY[templateId as TemplateId]
   if (templateFunction) {
-    return templateFunction()
+    const template = templateFunction();
+    console.log(`Template found: ${template.name}`);
+    return template;
   }
   
   // Fallback to default template
-  console.log(`Template '${templateId}' not found, using default template`)
+  console.log(`Template '${templateId}' not found, using default template`);
   return getDefaultTemplate()
 }
 
