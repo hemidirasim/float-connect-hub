@@ -162,6 +162,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
       if (error) throw error;
       
       setTransactions(data || []);
+      console.log('Transactions loaded:', data?.length || 0);
     } catch (err) {
       console.error('Error fetching transactions:', err);
       toast.error('Failed to load transaction history');
@@ -217,7 +218,8 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
         customData: {
           user_id: user.id,
           credits: credits.toString(),
-          user_email: user.email
+          user_email: user.email,
+          product_id: productId
         },
         settings: {
           theme: "light",

@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -74,10 +73,11 @@ serve(async (req) => {
       },
       custom_data: {
         user_id: user.id,
-        credits: credits.toString()
+        credits: credits.toString(),
+        product_id: productId
       },
       checkout: {
-        url: `https://hiclient.co/dashboard?success=true`
+        success_url: `https://hiclient.co/dashboard?success=true`
       }
     };
 
