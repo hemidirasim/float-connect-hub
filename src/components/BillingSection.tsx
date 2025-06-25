@@ -1,14 +1,25 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Plus, History, RefreshCw } from 'lucide-react';
+import { CreditCard, Plus, History, RefreshCw, AlertCircle } from 'lucide-react';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 interface UserCredits {
   balance: number;
   total_spent: number;
+}
+
+interface PaymentTransaction {
+  id: string;
+  amount: number;
+  currency: string;
+  credits_purchased: number;
+  status: string;
+  created_at: string;
+  paddle_transaction_id: string;
 }
 
 interface BillingSectionProps {
@@ -52,7 +63,7 @@ declare global {
 export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onCreditsUpdate }) => {
   const [loading, setLoading] = useState(false);
   const [paddleLoaded, setPaddleLoaded] = useState(false);
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<PaymentTransaction[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -81,15 +92,22 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
 
   const fetchTransactions = async () => {
     try {
+      console.log('Fetching transactions...');
       const { data, error } = await supabase
         .from('payment_transactions')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching transactions:', error);
+        throw error;
+      }
+      
+      console.log('Fetched transactions:', data);
       setTransactions(data || []);
     } catch (err) {
       console.error('Error fetching transactions:', err);
+      toast.error('Failed to load transaction history');
     }
   };
 
@@ -98,7 +116,8 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
     try {
       // Force refresh credits from database
       await onCreditsUpdate();
-      toast.success('Credits refreshed successfully!');
+      await fetchTransactions();
+      toast.success('Credits and transactions refreshed successfully!');
     } catch (error) {
       console.error('Error refreshing credits:', error);
       toast.error('Failed to refresh credits');
@@ -112,6 +131,8 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
       if (window.Paddle) {
         window.Paddle.Environment.set("production");
         const { data: { user } } = await supabase.auth.getUser();
+
+        console.log('Initializing Paddle for user:', user?.email);
 
         window.Paddle.Initialize({
           token: "live_c780f029236977ad3ae72c25114",
@@ -172,7 +193,13 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
         return;
       }
 
-      console.log('Opening Paddle checkout for:', { credits, price, productId, userId: user.id, userEmail: user.email });
+      console.log('Opening Paddle checkout for:', { 
+        credits, 
+        price, 
+        productId, 
+        userId: user.id, 
+        userEmail: user.email 
+      });
 
       window.Paddle.Checkout.open({
         items: [{
@@ -275,7 +302,10 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
           )}
           
           <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-medium text-blue-800 mb-2">Payment Issue?</h4>
+            <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              Payment Issue?
+            </h4>
             <p className="text-sm text-blue-700 mb-2">
               If your payment was successful but credits haven't been added, please:
             </p>
@@ -304,10 +334,14 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
                   <div>
                     <div className="font-medium">{transaction.credits_purchased} credits</div>
                     <div className="text-sm text-gray-600">{formatDate(transaction.created_at)}</div>
+                    <div className="text-xs text-gray-500">ID: {transaction.paddle_transaction_id}</div>
                   </div>
-                  <Badge variant="outline" className="text-green-600">
-                    ${transaction.amount} {transaction.currency}
-                  </Badge>
+                  <div className="text-right">
+                    <Badge variant="outline" className="text-green-600 mb-1">
+                      ${transaction.amount} {transaction.currency}
+                    </Badge>
+                    <div className="text-xs text-gray-500 capitalize">{transaction.status}</div>
+                  </div>
                 </div>
               ))}
             </div>

@@ -21,23 +21,27 @@ serve(async (req) => {
       method: req.method,
       hasSignature: !!signature,
       bodyLength: body.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      headers: Object.fromEntries(req.headers.entries())
     });
 
     // Parse the webhook data
     let webhookData;
     try {
       webhookData = JSON.parse(body);
+      console.log('📋 Parsed webhook data:', JSON.stringify(webhookData, null, 2));
     } catch (parseError) {
       console.error('❌ Failed to parse webhook body:', parseError);
       return new Response('Invalid JSON', { status: 400, headers: corsHeaders });
     }
     
-    console.log('📋 Webhook event:', {
+    console.log('📋 Webhook event details:', {
       event_type: webhookData.event_type,
       transaction_id: webhookData.data?.id,
       customer_email: webhookData.data?.customer?.email,
-      custom_data: webhookData.data?.custom_data
+      custom_data: webhookData.data?.custom_data,
+      amount: webhookData.data?.details?.totals?.grand_total || webhookData.data?.amount,
+      currency: webhookData.data?.currency_code
     });
     
     // Process both completed and paid transactions
@@ -51,60 +55,87 @@ serve(async (req) => {
         amount: transaction.details?.totals?.grand_total || transaction.amount,
         currency: transaction.currency_code,
         customer_email: transaction.customer?.email,
-        customData: customData
+        customData: customData,
+        items: transaction.items
       });
       
-      if (!customData.user_id || !customData.credits) {
-        console.error('❌ Missing user_id or credits in custom data:', customData);
-        
-        // Try to find user by email if custom data is missing
-        if (transaction.customer?.email) {
-          console.log('🔍 Attempting to find user by email:', transaction.customer.email);
-          
-          const supabase = createClient(
-            Deno.env.get('SUPABASE_URL') ?? '',
-            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-          );
-          
-          const { data: user } = await supabase.auth.admin.listUsers();
-          const foundUser = user?.users?.find(u => u.email === transaction.customer.email);
-          
-          if (foundUser) {
-            console.log('✅ Found user by email:', foundUser.id);
-            customData.user_id = foundUser.id;
-            // Set default credits based on transaction amount
-            const amount = parseFloat(transaction.details?.totals?.grand_total || transaction.amount || '0') / 100;
-            if (amount >= 30) customData.credits = '800';
-            else if (amount >= 20) customData.credits = '500';
-            else if (amount >= 10) customData.credits = '200';
-            else customData.credits = '10';
-          } else {
-            console.error('❌ Could not find user with email:', transaction.customer.email);
-            return new Response('User not found', { 
-              status: 400,
-              headers: corsHeaders 
-            });
-          }
-        } else {
-          return new Response('Missing user data', { 
-            status: 400,
-            headers: corsHeaders 
-          });
-        }
-      }
-
       // Create service role client
       const supabase = createClient(
         Deno.env.get('SUPABASE_URL') ?? '',
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
       );
 
+      let userId = customData.user_id;
+      let creditsToAdd = parseInt(customData.credits || '0');
+
+      // If missing user_id or credits, try to find user by email and determine credits
+      if (!userId || !creditsToAdd) {
+        console.log('🔍 Missing user data, attempting to find user by email:', transaction.customer?.email);
+        
+        if (!transaction.customer?.email) {
+          console.error('❌ No customer email provided');
+          return new Response('Missing customer email', { 
+            status: 400,
+            headers: corsHeaders 
+          });
+        }
+
+        // Find user by email using service role
+        const { data: users, error: usersError } = await supabase.auth.admin.listUsers();
+        
+        if (usersError) {
+          console.error('❌ Error fetching users:', usersError);
+          return new Response('Error fetching users', { 
+            status: 500,
+            headers: corsHeaders 
+          });
+        }
+
+        const foundUser = users?.users?.find(u => u.email === transaction.customer.email);
+        
+        if (!foundUser) {
+          console.error('❌ Could not find user with email:', transaction.customer.email);
+          return new Response('User not found', { 
+            status: 400,
+            headers: corsHeaders 
+          });
+        }
+
+        console.log('✅ Found user by email:', { id: foundUser.id, email: foundUser.email });
+        userId = foundUser.id;
+
+        // Determine credits based on transaction amount
+        const amount = parseFloat(transaction.details?.totals?.grand_total || transaction.amount || '0') / 100;
+        console.log('💰 Calculating credits for amount:', amount);
+        
+        if (amount >= 30) creditsToAdd = 800;
+        else if (amount >= 20) creditsToAdd = 500;
+        else if (amount >= 10) creditsToAdd = 200;
+        else if (amount >= 1) creditsToAdd = 10;
+        else creditsToAdd = 0;
+
+        console.log('🎯 Determined credits to add:', creditsToAdd);
+      }
+
+      if (!creditsToAdd) {
+        console.error('❌ No credits to add');
+        return new Response('No credits determined', { 
+          status: 400,
+          headers: corsHeaders 
+        });
+      }
+
       // Check if transaction already processed
-      const { data: existingTransaction } = await supabase
+      console.log('🔍 Checking if transaction already exists:', transaction.id);
+      const { data: existingTransaction, error: checkError } = await supabase
         .from('payment_transactions')
         .select('id')
         .eq('paddle_transaction_id', transaction.id)
-        .single();
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('❌ Error checking existing transaction:', checkError);
+      }
 
       if (existingTransaction) {
         console.log('⚠️ Transaction already processed:', transaction.id);
@@ -113,89 +144,106 @@ serve(async (req) => {
 
       // Record the transaction first
       console.log('💾 Recording transaction in database...');
-      const { error: transactionError } = await supabase
+      const transactionData = {
+        user_id: userId,
+        paddle_transaction_id: transaction.id,
+        product_id: transaction.items?.[0]?.price?.product_id || '',
+        amount: parseFloat(transaction.details?.totals?.grand_total || transaction.amount || '0') / 100,
+        currency: transaction.currency_code || 'USD',
+        credits_purchased: creditsToAdd,
+        status: 'completed',
+        paddle_checkout_id: transaction.checkout?.id
+      };
+
+      console.log('💾 Transaction data to insert:', transactionData);
+
+      const { data: insertedTransaction, error: transactionError } = await supabase
         .from('payment_transactions')
-        .insert({
-          user_id: customData.user_id,
-          paddle_transaction_id: transaction.id,
-          product_id: transaction.items?.[0]?.price?.product_id || '',
-          amount: parseFloat(transaction.details?.totals?.grand_total || transaction.amount || '0') / 100,
-          currency: transaction.currency_code || 'USD',
-          credits_purchased: parseInt(customData.credits),
-          status: 'completed',
-          paddle_checkout_id: transaction.checkout?.id
-        });
+        .insert(transactionData)
+        .select()
+        .single();
 
       if (transactionError) {
         console.error('❌ Error recording transaction:', transactionError);
-        return new Response('Database error', { 
+        return new Response('Database error: ' + transactionError.message, { 
           status: 500,
           headers: corsHeaders 
         });
       }
 
-      console.log('✅ Transaction recorded successfully');
+      console.log('✅ Transaction recorded successfully:', insertedTransaction);
 
-      // Get current user credits or create if doesn't exist
-      console.log('🔍 Checking user credits...');
+      // Handle user credits
+      console.log('🔍 Checking user credits for user:', userId);
       const { data: currentCredits, error: fetchError } = await supabase
         .from('user_credits')
-        .select('balance')
-        .eq('user_id', customData.user_id)
-        .single();
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error('❌ Error fetching current credits:', fetchError);
+        return new Response('Error fetching credits: ' + fetchError.message, { 
+          status: 500,
+          headers: corsHeaders 
+        });
+      }
 
       let newBalance;
-      const creditsToAdd = parseInt(customData.credits);
 
-      if (fetchError && fetchError.code === 'PGRST116') {
-        // User credits record doesn't exist, create one with the purchased credits
+      if (!currentCredits) {
+        // User credits record doesn't exist, create one
         console.log('➕ Creating new user credits record');
         newBalance = 100 + creditsToAdd; // Default 100 + purchased credits
-        const { error: insertError } = await supabase
+        
+        const { data: newCredits, error: insertError } = await supabase
           .from('user_credits')
           .insert({
-            user_id: customData.user_id,
+            user_id: userId,
             balance: newBalance,
             total_spent: 0,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
-          });
+          })
+          .select()
+          .single();
 
         if (insertError) {
           console.error('❌ Error creating user credits:', insertError);
-          return new Response('Error creating credits', { 
+          return new Response('Error creating credits: ' + insertError.message, { 
             status: 500,
             headers: corsHeaders 
           });
         }
-      } else if (fetchError) {
-        console.error('❌ Error fetching current credits:', fetchError);
-        return new Response('Error fetching credits', { 
-          status: 500,
-          headers: corsHeaders 
-        });
+
+        console.log('✅ Created user credits:', newCredits);
       } else {
         // Update existing credits
-        console.log('🔄 Updating existing credits');
+        console.log('🔄 Updating existing credits. Current balance:', currentCredits.balance);
         newBalance = currentCredits.balance + creditsToAdd;
-        const { error: creditsError } = await supabase
+        
+        const { data: updatedCredits, error: creditsError } = await supabase
           .from('user_credits')
           .update({ 
             balance: newBalance,
             updated_at: new Date().toISOString()
           })
-          .eq('user_id', customData.user_id);
+          .eq('user_id', userId)
+          .select()
+          .single();
 
         if (creditsError) {
           console.error('❌ Error updating credits:', creditsError);
-          return new Response('Error updating credits', { 
+          return new Response('Error updating credits: ' + creditsError.message, { 
             status: 500,
             headers: corsHeaders 
           });
         }
+
+        console.log('✅ Updated user credits:', updatedCredits);
       }
 
-      console.log(`🎉 SUCCESS: Added ${creditsToAdd} credits to user ${customData.user_id}`);
+      console.log(`🎉 SUCCESS: Added ${creditsToAdd} credits to user ${userId}`);
       console.log(`💰 New balance: ${newBalance}`);
       
       // Send success response
@@ -203,7 +251,8 @@ serve(async (req) => {
         success: true,
         credits_added: creditsToAdd,
         new_balance: newBalance,
-        transaction_id: transaction.id
+        transaction_id: transaction.id,
+        user_id: userId
       }), { 
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -221,7 +270,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('💥 Webhook error:', error);
     console.error('📜 Error stack:', error.stack);
-    return new Response('Internal error', { 
+    return new Response('Internal error: ' + error.message, { 
       status: 500,
       headers: corsHeaders 
     });
