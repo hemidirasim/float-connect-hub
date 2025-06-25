@@ -22,7 +22,8 @@ serve(async (req) => {
       hasSignature: !!signature,
       bodyLength: body.length,
       timestamp: new Date().toISOString(),
-      headers: Object.fromEntries(req.headers.entries())
+      headers: Object.fromEntries(req.headers.entries()),
+      rawBody: body.substring(0, 500) // Log first 500 chars for debugging
     });
 
     // Parse the webhook data
@@ -32,6 +33,7 @@ serve(async (req) => {
       console.log('📋 Parsed webhook data:', JSON.stringify(webhookData, null, 2));
     } catch (parseError) {
       console.error('❌ Failed to parse webhook body:', parseError);
+      console.error('Raw body was:', body);
       return new Response('Invalid JSON', { status: 400, headers: corsHeaders });
     }
     
@@ -41,8 +43,36 @@ serve(async (req) => {
       customer_email: webhookData.data?.customer?.email,
       custom_data: webhookData.data?.custom_data,
       amount: webhookData.data?.details?.totals?.grand_total || webhookData.data?.amount,
-      currency: webhookData.data?.currency_code
+      currency: webhookData.data?.currency_code,
+      status: webhookData.data?.status
     });
+    
+    // Create service role client
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    console.log('🔧 Supabase client created with:', {
+      url: Deno.env.get('SUPABASE_URL') ? 'Set' : 'Missing',
+      serviceKey: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ? 'Set' : 'Missing'
+    });
+
+    // Test database connection
+    try {
+      const { data: testData, error: testError } = await supabase
+        .from('widgets')
+        .select('count')
+        .limit(1);
+      
+      console.log('🔍 Database connection test:', {
+        success: !testError,
+        error: testError?.message,
+        data: testData
+      });
+    } catch (dbTestError) {
+      console.error('❌ Database connection failed:', dbTestError);
+    }
     
     // Process both completed and paid transactions
     if (webhookData.event_type === 'transaction.completed' || webhookData.event_type === 'transaction.paid') {
@@ -59,12 +89,6 @@ serve(async (req) => {
         items: transaction.items
       });
       
-      // Create service role client
-      const supabase = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-      );
-
       let userId = customData.user_id;
       let creditsToAdd = parseInt(customData.credits || '0');
 
@@ -81,20 +105,23 @@ serve(async (req) => {
         }
 
         // Find user by email using service role
+        console.log('🔍 Searching for user with email:', transaction.customer.email);
         const { data: users, error: usersError } = await supabase.auth.admin.listUsers();
         
         if (usersError) {
           console.error('❌ Error fetching users:', usersError);
-          return new Response('Error fetching users', { 
+          return new Response('Error fetching users: ' + usersError.message, { 
             status: 500,
             headers: corsHeaders 
           });
         }
 
+        console.log('👥 Found users count:', users?.users?.length || 0);
         const foundUser = users?.users?.find(u => u.email === transaction.customer.email);
         
         if (!foundUser) {
           console.error('❌ Could not find user with email:', transaction.customer.email);
+          console.log('Available users:', users?.users?.map(u => u.email));
           return new Response('User not found', { 
             status: 400,
             headers: corsHeaders 
@@ -165,6 +192,12 @@ serve(async (req) => {
 
       if (transactionError) {
         console.error('❌ Error recording transaction:', transactionError);
+        console.error('❌ Transaction error details:', {
+          message: transactionError.message,
+          details: transactionError.details,
+          hint: transactionError.hint,
+          code: transactionError.code
+        });
         return new Response('Database error: ' + transactionError.message, { 
           status: 500,
           headers: corsHeaders 
@@ -210,6 +243,12 @@ serve(async (req) => {
 
         if (insertError) {
           console.error('❌ Error creating user credits:', insertError);
+          console.error('❌ Credits insert error details:', {
+            message: insertError.message,
+            details: insertError.details,
+            hint: insertError.hint,
+            code: insertError.code
+          });
           return new Response('Error creating credits: ' + insertError.message, { 
             status: 500,
             headers: corsHeaders 
@@ -234,6 +273,12 @@ serve(async (req) => {
 
         if (creditsError) {
           console.error('❌ Error updating credits:', creditsError);
+          console.error('❌ Credits update error details:', {
+            message: creditsError.message,
+            details: creditsError.details,
+            hint: creditsError.hint,
+            code: creditsError.code
+          });
           return new Response('Error updating credits: ' + creditsError.message, { 
             status: 500,
             headers: corsHeaders 
@@ -260,16 +305,20 @@ serve(async (req) => {
       
     } else {
       console.log('ℹ️ Ignoring webhook event type:', webhookData.event_type);
+      return new Response('Event type ignored', { 
+        status: 200,
+        headers: corsHeaders 
+      });
     }
-
-    return new Response('OK', { 
-      status: 200,
-      headers: corsHeaders 
-    });
 
   } catch (error) {
     console.error('💥 Webhook error:', error);
     console.error('📜 Error stack:', error.stack);
+    console.error('🔍 Error details:', {
+      name: error.name,
+      message: error.message,
+      cause: error.cause
+    });
     return new Response('Internal error: ' + error.message, { 
       status: 500,
       headers: corsHeaders 
