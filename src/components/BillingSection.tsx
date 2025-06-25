@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Plus, History } from 'lucide-react';
+import { CreditCard, Plus, History, RefreshCw } from 'lucide-react';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -53,6 +53,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
   const [loading, setLoading] = useState(false);
   const [paddleLoaded, setPaddleLoaded] = useState(false);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -92,6 +93,20 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
     }
   };
 
+  const handleRefreshCredits = async () => {
+    setRefreshing(true);
+    try {
+      // Force refresh credits from database
+      await onCreditsUpdate();
+      toast.success('Credits refreshed successfully!');
+    } catch (error) {
+      console.error('Error refreshing credits:', error);
+      toast.error('Failed to refresh credits');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const initializePaddle = async () => {
     try {
       if (window.Paddle) {
@@ -125,14 +140,17 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
   const handleCheckoutCompleted = async (data: any) => {
     try {
       console.log('Checkout completed:', data);
-      toast.success('Payment completed successfully! Your credit balance will be updated.');
-      setTimeout(() => {
-        onCreditsUpdate();
-        fetchTransactions();
-      }, 2000);
+      toast.success('Payment completed successfully! Please wait while we update your credits...');
+      
+      // Wait a bit for webhook processing
+      setTimeout(async () => {
+        await onCreditsUpdate();
+        await fetchTransactions();
+        toast.success('Credits updated successfully!');
+      }, 3000);
     } catch (error) {
       console.error('Error handling checkout completion:', error);
-      toast.error('Payment was completed, but credits were not added. Please contact support.');
+      toast.error('Payment was completed, but there was an issue updating credits. Please contact support if credits are not reflected within 5 minutes.');
     } finally {
       setLoading(false);
     }
@@ -154,7 +172,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
         return;
       }
 
-      console.log('Opening Paddle checkout for:', { credits, price, productId });
+      console.log('Opening Paddle checkout for:', { credits, price, productId, userId: user.id, userEmail: user.email });
 
       window.Paddle.Checkout.open({
         items: [{
@@ -171,7 +189,8 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
         },
         customData: {
           user_id: user.id,
-          credits: credits.toString()
+          credits: credits.toString(),
+          user_email: user.email
         }
       });
 
@@ -194,6 +213,16 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
           <CardTitle className="flex items-center gap-2">
             <CreditCard className="w-5 h-5 text-blue-600" />
             Balance
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleRefreshCredits}
+              disabled={refreshing}
+              className="ml-auto"
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -244,6 +273,19 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
               Payment system loading...
             </div>
           )}
+          
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+            <h4 className="font-medium text-blue-800 mb-2">Payment Issue?</h4>
+            <p className="text-sm text-blue-700 mb-2">
+              If your payment was successful but credits haven't been added, please:
+            </p>
+            <ul className="text-sm text-blue-700 list-disc list-inside space-y-1">
+              <li>Wait 2-3 minutes for processing</li>
+              <li>Click the "Refresh" button above</li>
+              <li>Check your email for payment confirmation</li>
+              <li>Contact support if issue persists</li>
+            </ul>
+          </div>
         </CardContent>
       </Card>
 
