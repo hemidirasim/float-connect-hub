@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +28,12 @@ interface BillingSectionProps {
 
 const creditPackages = [
   { 
+    credits: 10, 
+    price: 1, 
+    productId: 'pri_01jygks56v6vpvncqxn5harqae',
+    popular: false 
+  },
+  { 
     credits: 200, 
     price: 10, 
     productId: 'pri_01jrmk0bq3y6cfd8w2gsbh9fax',
@@ -46,12 +51,6 @@ const creditPackages = [
     productId: 'pri_01js1kg2d3q6cf947hz5v6eqjy',
     popular: false 
   },
-  { 
-    credits: 10, 
-    price: 1, 
-    productId: 'pri_01jygks56v6vpvncqxn5harqae',
-    popular: false 
-  },
 ];
 
 declare global {
@@ -67,43 +66,101 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js';
-    script.async = true;
-    script.onload = () => {
-      console.log('Paddle script loaded');
-      initializePaddle();
-    };
-    script.onerror = () => {
-      console.error('Failed to load Paddle script');
-      toast.error('Payment system failed to load');
-    };
-    document.head.appendChild(script);
-
-    // Fetch transaction history
+    initializePaddle();
     fetchTransactions();
-
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
-    };
   }, []);
+
+  const initializePaddle = async () => {
+    try {
+      // Load Paddle script if not already loaded
+      if (!window.Paddle) {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js';
+        script.async = true;
+        
+        script.onload = () => {
+          setupPaddle();
+        };
+        
+        script.onerror = () => {
+          console.error('Failed to load Paddle script');
+          toast.error('Payment system failed to load');
+        };
+        
+        document.head.appendChild(script);
+      } else {
+        setupPaddle();
+      }
+    } catch (error) {
+      console.error('Error initializing Paddle:', error);
+      toast.error('Failed to initialize payment system');
+    }
+  };
+
+  const setupPaddle = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        console.error('No authenticated user found');
+        return;
+      }
+
+      console.log('Setting up Paddle for user:', user.email);
+
+      // Initialize Paddle with latest API
+      window.Paddle.Environment.set("production");
+      window.Paddle.Initialize({
+        token: "live_c780f029236977ad3ae72c25114",
+        eventCallback: function(event: any) {
+          console.log('🏓 Paddle event:', event);
+          
+          if (event.name === "checkout.completed") {
+            handleCheckoutCompleted(event.data);
+          }
+          
+          if (event.name === "checkout.closed") {
+            setLoading(false);
+          }
+        }
+      });
+
+      setPaddleLoaded(true);
+      console.log('✅ Paddle initialized successfully');
+    } catch (error) {
+      console.error('❌ Paddle setup error:', error);
+      toast.error('Failed to setup payment system');
+    }
+  };
+
+  const handleCheckoutCompleted = async (data: any) => {
+    try {
+      console.log('✅ Checkout completed:', data);
+      toast.success('Payment completed! Processing your credits...');
+      
+      // Wait for webhook processing
+      setTimeout(async () => {
+        await onCreditsUpdate();
+        await fetchTransactions();
+        toast.success('Credits added successfully!');
+      }, 5000); // Increased wait time for webhook processing
+    } catch (error) {
+      console.error('Error handling checkout completion:', error);
+      toast.error('Payment completed but there was an issue updating credits. Please refresh or contact support.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchTransactions = async () => {
     try {
-      console.log('Fetching transactions...');
       const { data, error } = await supabase
         .from('payment_transactions')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) {
-        console.error('Error fetching transactions:', error);
-        throw error;
-      }
+      if (error) throw error;
       
-      console.log('Fetched transactions:', data);
       setTransactions(data || []);
     } catch (err) {
       console.error('Error fetching transactions:', err);
@@ -114,10 +171,9 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
   const handleRefreshCredits = async () => {
     setRefreshing(true);
     try {
-      // Force refresh credits from database
       await onCreditsUpdate();
       await fetchTransactions();
-      toast.success('Credits and transactions refreshed successfully!');
+      toast.success('Credits refreshed successfully!');
     } catch (error) {
       console.error('Error refreshing credits:', error);
       toast.error('Failed to refresh credits');
@@ -126,60 +182,9 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
     }
   };
 
-  const initializePaddle = async () => {
-    try {
-      if (window.Paddle) {
-        window.Paddle.Environment.set("production");
-        const { data: { user } } = await supabase.auth.getUser();
-
-        console.log('Initializing Paddle for user:', user?.email);
-
-        window.Paddle.Initialize({
-          token: "live_c780f029236977ad3ae72c25114",
-          eventCallback: function(event: any) {
-            console.log('Paddle event:', event);
-            
-            if (event.name === "checkout.completed") {
-              handleCheckoutCompleted(event.data);
-            }
-            
-            if (event.name === "checkout.closed") {
-              setLoading(false);
-            }
-          }
-        });
-
-        setPaddleLoaded(true);
-        console.log('Paddle initialized successfully');
-      }
-    } catch (error) {
-      console.error('Paddle initialization error:', error);
-      toast.error('Failed to initialize the payment system');
-    }
-  };
-
-  const handleCheckoutCompleted = async (data: any) => {
-    try {
-      console.log('Checkout completed:', data);
-      toast.success('Payment completed successfully! Please wait while we update your credits...');
-      
-      // Wait a bit for webhook processing
-      setTimeout(async () => {
-        await onCreditsUpdate();
-        await fetchTransactions();
-        toast.success('Credits updated successfully!');
-      }, 3000);
-    } catch (error) {
-      console.error('Error handling checkout completion:', error);
-      toast.error('Payment was completed, but there was an issue updating credits. Please contact support if credits are not reflected within 5 minutes.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handlePurchaseCredits = async (credits: number, price: number, productId: string) => {
     if (!paddleLoaded || !window.Paddle) {
-      toast.error('The payment system has not loaded yet, please wait');
+      toast.error('Payment system is still loading, please wait...');
       return;
     }
 
@@ -188,29 +193,24 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) {
-        toast.error('You have to login');
+        toast.error('Please log in to purchase credits');
         setLoading(false);
         return;
       }
 
-      console.log('Opening Paddle checkout for:', { 
+      console.log('🛒 Opening Paddle checkout:', { 
         credits, 
         price, 
         productId, 
-        userId: user.id, 
         userEmail: user.email 
       });
 
+      // Open Paddle checkout with latest API format
       window.Paddle.Checkout.open({
         items: [{
           priceId: productId,
           quantity: 1
         }],
-        settings: {
-          theme: "light",
-          displayMode: "overlay",
-          allowLogout: false
-        },
         customer: {
           email: user.email
         },
@@ -218,19 +218,23 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
           user_id: user.id,
           credits: credits.toString(),
           user_email: user.email
+        },
+        settings: {
+          theme: "light",
+          displayMode: "overlay",
+          allowLogout: false
         }
       });
 
     } catch (error: any) {
-      console.error('Error opening Paddle checkout:', error);
-      toast.error('Failed to open the payment page: ' + error.message);
+      console.error('❌ Error opening checkout:', error);
+      toast.error('Failed to open payment page: ' + error.message);
       setLoading(false);
     }
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    return new Date(dateString).toLocaleString();
   };
 
   return (
@@ -304,16 +308,16 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
           <div className="mt-4 p-4 bg-blue-50 rounded-lg">
             <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
               <AlertCircle className="w-4 h-4" />
-              Payment Issue?
+              Payment Processing
             </h4>
             <p className="text-sm text-blue-700 mb-2">
-              If your payment was successful but credits haven't been added, please:
+              After successful payment:
             </p>
             <ul className="text-sm text-blue-700 list-disc list-inside space-y-1">
-              <li>Wait 2-3 minutes for processing</li>
-              <li>Click the "Refresh" button above</li>
-              <li>Check your email for payment confirmation</li>
-              <li>Contact support if issue persists</li>
+              <li>Wait 3-5 minutes for processing</li>
+              <li>Click "Refresh" button to update credits</li>
+              <li>Check transaction history below</li>
+              <li>Contact support if credits don't appear within 10 minutes</li>
             </ul>
           </div>
         </CardContent>
