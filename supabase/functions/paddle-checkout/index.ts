@@ -51,7 +51,7 @@ serve(async (req) => {
       throw new Error('Paddle API token not configured');
     }
 
-    // Use Paddle Transactions API (v1) for production
+    // Use Paddle Transactions API (v2) for production
     const paddleApiUrl = 'https://api.paddle.com/transactions';
 
     console.log('Using Paddle API URL:', paddleApiUrl);
@@ -62,7 +62,7 @@ serve(async (req) => {
       userId: user.id
     });
 
-    // Create Paddle transaction using v1 API format
+    // Create Paddle transaction using v2 API format
     const requestBody = {
       items: [{
         price_id: productId,
@@ -77,7 +77,7 @@ serve(async (req) => {
         product_id: productId
       },
       checkout: {
-        success_url: `https://hiclient.co/dashboard?success=true`
+        success_url: `${Deno.env.get('SITE_URL') || 'https://hiclient.co'}/dashboard?success=true`
       }
     };
 

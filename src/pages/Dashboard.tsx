@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { SupportTickets } from "@/components/SupportTickets";
 import { ProfileSettings } from "@/components/ProfileSettings";
 import { BillingSection } from "@/components/BillingSection";
+import { TransactionHistory } from "@/components/TransactionHistory";
 import { useNavigate } from "react-router-dom";
 
 interface Widget {
@@ -401,7 +402,10 @@ const Dashboard = () => {
           </TabsContent>
 
           <TabsContent value="billing">
-            <BillingSection userCredits={userCredits} onCreditsUpdate={fetchUserCredits} />
+            <div className="space-y-6">
+              <BillingSection userCredits={userCredits} onCreditsUpdate={fetchUserCredits} />
+              <TransactionHistory />
+            </div>
           </TabsContent>
 
           <TabsContent value="profile">

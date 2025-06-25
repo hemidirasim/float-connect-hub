@@ -166,14 +166,20 @@ serve(async (req) => {
         });
       }
 
-      // Check for duplicate transaction
+      // Check for duplicate transaction in both tables
       const { data: existingTransaction } = await supabase
         .from('payment_transactions')
         .select('id')
         .eq('paddle_transaction_id', transactionId)
         .maybeSingle();
+        
+      const { data: existingNewTransaction } = await supabase
+        .from('transactions')
+        .select('id')
+        .eq('transaction_id', transactionId)
+        .maybeSingle();
 
-      if (existingTransaction) {
+      if (existingTransaction || existingNewTransaction) {
         console.log('⚠️ Transaction already processed:', transactionId);
         return new Response('Transaction already processed', { 
           status: 200, 
@@ -181,36 +187,78 @@ serve(async (req) => {
         });
       }
 
-      // Record transaction
-      const transactionRecord = {
+      // Record transaction in new transactions table
+      const newTransactionRecord = {
         user_id: user.id,
-        paddle_transaction_id: transactionId,
-        product_id: transaction.items?.[0]?.price?.product?.id || customData.product_id || '',
+        transaction_id: transactionId,
+        email: customerEmail,
         amount: amountInDollars,
         currency: transaction.currency_code || 'USD',
-        credits_purchased: creditsToAdd,
         status: 'completed',
-        paddle_checkout_id: transaction.checkout_id || customData.checkout_id || null,
-        paddle_subscription_id: transaction.subscription_id || null
+        product_id: transaction.items?.[0]?.price?.product?.id || customData.product_id || '',
+        credits_added: creditsToAdd,
+        metadata: {
+          checkout_id: transaction.checkout_id || customData.checkout_id,
+          subscription_id: transaction.subscription_id,
+          custom_data: customData,
+          raw_event: webhookData.event_type
+        }
       };
 
-      console.log('💾 Inserting transaction record:', transactionRecord);
+      console.log('💾 Inserting transaction record to new table:', newTransactionRecord);
 
-      const { data: insertedTransaction, error: transactionError } = await supabase
-        .from('payment_transactions')
-        .insert(transactionRecord)
+      const { data: insertedNewTransaction, error: newTransactionError } = await supabase
+        .from('transactions')
+        .insert(newTransactionRecord)
         .select()
         .single();
 
-      if (transactionError) {
-        console.error('❌ Error inserting transaction:', transactionError);
-        return new Response('Database error: ' + transactionError.message, { 
-          status: 500, 
-          headers: corsHeaders 
-        });
-      }
+      if (newTransactionError) {
+        console.error('❌ Error inserting to new transactions table:', newTransactionError);
+        
+        // If the new table doesn't exist yet, fall back to the old table
+        if (newTransactionError.message.includes('relation "transactions" does not exist')) {
+          console.log('⚠️ New transactions table not found, falling back to payment_transactions');
+          
+          // Record transaction in old payment_transactions table
+          const transactionRecord = {
+            user_id: user.id,
+            paddle_transaction_id: transactionId,
+            product_id: transaction.items?.[0]?.price?.product?.id || customData.product_id || '',
+            amount: amountInDollars,
+            currency: transaction.currency_code || 'USD',
+            credits_purchased: creditsToAdd,
+            status: 'completed',
+            paddle_checkout_id: transaction.checkout_id || customData.checkout_id || null,
+            paddle_subscription_id: transaction.subscription_id || null
+          };
 
-      console.log('✅ Transaction recorded:', insertedTransaction.id);
+          console.log('💾 Inserting transaction record to old table:', transactionRecord);
+
+          const { data: insertedTransaction, error: transactionError } = await supabase
+            .from('payment_transactions')
+            .insert(transactionRecord)
+            .select()
+            .single();
+
+          if (transactionError) {
+            console.error('❌ Error inserting transaction to old table:', transactionError);
+            return new Response('Database error: ' + transactionError.message, { 
+              status: 500, 
+              headers: corsHeaders 
+            });
+          }
+
+          console.log('✅ Transaction recorded in old table:', insertedTransaction.id);
+        } else {
+          return new Response('Database error: ' + newTransactionError.message, { 
+            status: 500, 
+            headers: corsHeaders 
+          });
+        }
+      } else {
+        console.log('✅ Transaction recorded in new table:', insertedNewTransaction.id);
+      }
 
       // Update user credits
       const { data: currentCredits } = await supabase
@@ -339,45 +387,84 @@ serve(async (req) => {
         });
       }
       
-      // Check for duplicate transaction
-      const { data: existingTransaction } = await supabase
-        .from('payment_transactions')
-        .select('id')
-        .eq('paddle_transaction_id', transactionId)
-        .maybeSingle();
+      // Try to insert into new transactions table first
+      try {
+        const newTransactionRecord = {
+          user_id: user.id,
+          transaction_id: transactionId,
+          email: customerEmail,
+          amount: amountInDollars,
+          currency: webhookData.currency || 'USD',
+          status: 'completed',
+          product_id: productId || '',
+          credits_added: creditsToAdd,
+          metadata: {
+            checkout_id: webhookData.checkout_id,
+            subscription_id: webhookData.subscription_id,
+            raw_event: webhookData.alert_name
+          }
+        };
+        
+        const { data: insertedNewTransaction, error: newTransactionError } = await supabase
+          .from('transactions')
+          .insert(newTransactionRecord)
+          .select()
+          .single();
+          
+        if (!newTransactionError) {
+          console.log('✅ Legacy transaction recorded in new table:', insertedNewTransaction.id);
+        } else {
+          console.log('⚠️ Could not insert into new table, falling back to old table');
+          
+          // Check for duplicate transaction
+          const { data: existingTransaction } = await supabase
+            .from('payment_transactions')
+            .select('id')
+            .eq('paddle_transaction_id', transactionId)
+            .maybeSingle();
 
-      if (existingTransaction) {
-        console.log('⚠️ Legacy transaction already processed:', transactionId);
-        return new Response('Transaction already processed', { 
-          status: 200, 
-          headers: corsHeaders 
-        });
-      }
-      
-      // Record transaction
-      const transactionRecord = {
-        user_id: user.id,
-        paddle_transaction_id: transactionId,
-        product_id: productId || '',
-        amount: amountInDollars,
-        currency: webhookData.currency || 'USD',
-        credits_purchased: creditsToAdd,
-        status: 'completed',
-        paddle_checkout_id: webhookData.checkout_id || null,
-        paddle_subscription_id: webhookData.subscription_id || null
-      };
-      
-      console.log('💾 Inserting legacy transaction record:', transactionRecord);
-      
-      const { data: insertedTransaction, error: transactionError } = await supabase
-        .from('payment_transactions')
-        .insert(transactionRecord)
-        .select()
-        .single();
+          if (existingTransaction) {
+            console.log('⚠️ Legacy transaction already processed:', transactionId);
+            return new Response('Transaction already processed', { 
+              status: 200, 
+              headers: corsHeaders 
+            });
+          }
+          
+          // Record transaction
+          const transactionRecord = {
+            user_id: user.id,
+            paddle_transaction_id: transactionId,
+            product_id: productId || '',
+            amount: amountInDollars,
+            currency: webhookData.currency || 'USD',
+            credits_purchased: creditsToAdd,
+            status: 'completed',
+            paddle_checkout_id: webhookData.checkout_id || null,
+            paddle_subscription_id: webhookData.subscription_id || null
+          };
+          
+          console.log('💾 Inserting legacy transaction record:', transactionRecord);
+          
+          const { data: insertedTransaction, error: transactionError } = await supabase
+            .from('payment_transactions')
+            .insert(transactionRecord)
+            .select()
+            .single();
 
-      if (transactionError) {
-        console.error('❌ Error inserting legacy transaction:', transactionError);
-        return new Response('Database error: ' + transactionError.message, { 
+          if (transactionError) {
+            console.error('❌ Error inserting legacy transaction:', transactionError);
+            return new Response('Database error: ' + transactionError.message, { 
+              status: 500, 
+              headers: corsHeaders 
+            });
+          }
+          
+          console.log('✅ Legacy transaction recorded in old table:', insertedTransaction.id);
+        }
+      } catch (error) {
+        console.error('❌ Error handling legacy transaction:', error);
+        return new Response('Error handling legacy transaction: ' + error.message, { 
           status: 500, 
           headers: corsHeaders 
         });

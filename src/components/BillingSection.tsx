@@ -2,13 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Plus, History, RefreshCw, AlertCircle } from 'lucide-react';
+import { CreditCard, Plus, History, RefreshCw, AlertCircle, Info, Zap } from 'lucide-react';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 interface UserCredits {
   balance: number;
   total_spent: number;
+}
+
+interface Transaction {
+  id: string;
+  amount: number;
+  currency: string;
+  credits_added: number;
+  status: string;
+  created_at: string;
+  transaction_id: string;
+  email: string;
 }
 
 interface PaymentTransaction {
@@ -62,7 +73,7 @@ declare global {
 export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onCreditsUpdate }) => {
   const [loading, setLoading] = useState(false);
   const [paddleLoaded, setPaddleLoaded] = useState(false);
-  const [transactions, setTransactions] = useState<PaymentTransaction[]>([]);
+  const [transactions, setTransactions] = useState<(Transaction | PaymentTransaction)[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -154,6 +165,19 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
 
   const fetchTransactions = async () => {
     try {
+      // Try to fetch from new transactions table first
+      const { data: newTransactions, error: newError } = await supabase
+        .from('transactions')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (!newError && newTransactions && newTransactions.length > 0) {
+        setTransactions(newTransactions);
+        console.log('Transactions loaded from new table:', newTransactions.length);
+        return;
+      }
+      
+      // Fall back to old payment_transactions table
       const { data, error } = await supabase
         .from('payment_transactions')
         .select('*')
@@ -162,7 +186,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
       if (error) throw error;
       
       setTransactions(data || []);
-      console.log('Transactions loaded:', data?.length || 0);
+      console.log('Transactions loaded from old table:', data?.length || 0);
     } catch (err) {
       console.error('Error fetching transactions:', err);
       toast.error('Failed to load transaction history');
@@ -218,8 +242,8 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
         customData: {
           user_id: user.id,
           credits: credits.toString(),
-          user_email: user.email,
-          product_id: productId
+          product_id: productId,
+          user_email: user.email
         },
         settings: {
           theme: "light",
@@ -237,6 +261,25 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
+  };
+
+  // Function to determine if a transaction is from the new or old table
+  const isNewTransaction = (transaction: any): transaction is Transaction => {
+    return 'transaction_id' in transaction && 'credits_added' in transaction;
+  };
+
+  // Get transaction ID based on transaction type
+  const getTransactionId = (transaction: Transaction | PaymentTransaction) => {
+    return isNewTransaction(transaction) 
+      ? transaction.transaction_id 
+      : (transaction as PaymentTransaction).paddle_transaction_id;
+  };
+
+  // Get credits from transaction based on transaction type
+  const getCredits = (transaction: Transaction | PaymentTransaction) => {
+    return isNewTransaction(transaction) 
+      ? transaction.credits_added 
+      : (transaction as PaymentTransaction).credits_purchased;
   };
 
   return (
@@ -338,9 +381,9 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
               {transactions.map((transaction) => (
                 <div key={transaction.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                   <div>
-                    <div className="font-medium">{transaction.credits_purchased} credits</div>
+                    <div className="font-medium">{getCredits(transaction)} credits</div>
                     <div className="text-sm text-gray-600">{formatDate(transaction.created_at)}</div>
-                    <div className="text-xs text-gray-500">ID: {transaction.paddle_transaction_id}</div>
+                    <div className="text-xs text-gray-500">ID: {getTransactionId(transaction)}</div>
                   </div>
                   <div className="text-right">
                     <Badge variant="outline" className="text-green-600 mb-1">
@@ -362,7 +405,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <History className="w-5 h-5 text-gray-600" />
+            <Zap className="w-5 h-5 text-gray-600" />
             Credit cost
           </CardTitle>
         </CardHeader>
