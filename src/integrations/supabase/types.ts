@@ -221,6 +221,51 @@ export type Database = {
           },
         ]
       }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          credits_added: number
+          currency: string
+          email: string
+          id: string
+          metadata: Json | null
+          product_id: string | null
+          status: string
+          transaction_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          credits_added: number
+          currency?: string
+          email: string
+          id?: string
+          metadata?: Json | null
+          product_id?: string | null
+          status?: string
+          transaction_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          credits_added?: number
+          currency?: string
+          email?: string
+          id?: string
+          metadata?: Json | null
+          product_id?: string | null
+          status?: string
+          transaction_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_credits: {
         Row: {
           balance: number | null

@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -24,7 +25,8 @@ serve(async (req) => {
     const body = await req.text();
     console.log('📥 Raw webhook body received:', {
       bodyLength: body.length,
-      bodyPreview: body.substring(0, 500)
+      bodyPreview: body.substring(0, 1000),
+      fullBody: body
     });
 
     // Parse webhook data
@@ -34,13 +36,20 @@ serve(async (req) => {
       console.log('✅ Successfully parsed webhook data:', {
         event_type: webhookData.event_type,
         event_id: webhookData.event_id,
-        data_keys: Object.keys(webhookData.data || {})
+        occurred_at: webhookData.occurred_at,
+        data_keys: Object.keys(webhookData.data || {}),
+        full_data: JSON.stringify(webhookData, null, 2)
       });
     } catch (parseError) {
       console.error('❌ Failed to parse webhook JSON:', parseError.message);
-      return new Response('Invalid JSON payload', { 
+      console.error('Raw body that failed to parse:', body);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Invalid JSON payload',
+        received_body: body 
+      }), { 
         status: 400, 
-        headers: corsHeaders 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
@@ -50,14 +59,18 @@ serve(async (req) => {
     
     console.log('🔧 Environment check:', {
       hasSupabaseUrl: !!supabaseUrl,
-      hasServiceKey: !!supabaseServiceKey
+      hasServiceKey: !!supabaseServiceKey,
+      supabaseUrl: supabaseUrl
     });
 
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error('❌ Missing Supabase environment variables');
-      return new Response('Server configuration error', { 
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Server configuration error'
+      }), { 
         status: 500, 
-        headers: corsHeaders 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
@@ -66,19 +79,20 @@ serve(async (req) => {
     // Test database connection
     try {
       const { data: testData, error: testError } = await supabase
-        .from('user_credits')
+        .from('transactions')
         .select('count')
         .limit(1);
       
       console.log('🔍 Database connection test:', {
         success: !testError,
-        error: testError?.message
+        error: testError?.message,
+        testData: testData
       });
     } catch (dbError) {
       console.error('❌ Database connection failed:', dbError);
     }
 
-    // Handle transaction completed events (latest Paddle API)
+    // Handle transaction completed events
     if (webhookData.event_type === 'transaction.completed') {
       console.log('💳 Processing transaction.completed event');
       
@@ -89,61 +103,112 @@ serve(async (req) => {
         id: transactionId,
         status: transaction.status,
         customer_id: transaction.customer_id,
+        customer: transaction.customer,
         billing_details: transaction.billing_details,
-        items: transaction.items?.length || 0,
-        custom_data: transaction.custom_data
+        items: transaction.items,
+        custom_data: transaction.custom_data,
+        currency_code: transaction.currency_code,
+        details: transaction.details,
+        full_transaction: JSON.stringify(transaction, null, 2)
       });
 
-      // Extract customer info
-      const customerEmail = transaction.customer?.email || transaction.billing_details?.email;
+      // Extract customer info - try multiple fields
+      let customerEmail = null;
+      if (transaction.customer?.email) {
+        customerEmail = transaction.customer.email;
+      } else if (transaction.billing_details?.email) {
+        customerEmail = transaction.billing_details.email;
+      } else if (transaction.customer_email) {
+        customerEmail = transaction.customer_email;
+      }
+      
       const customData = transaction.custom_data || {};
       
+      console.log('👤 Customer info extracted:', {
+        email: customerEmail,
+        customData: customData,
+        customer_object: transaction.customer,
+        billing_details: transaction.billing_details
+      });
+
       if (!customerEmail) {
         console.error('❌ No customer email found in transaction');
-        return new Response('Missing customer email', { 
+        console.error('Available customer data:', {
+          customer: transaction.customer,
+          billing_details: transaction.billing_details,
+          raw_transaction: JSON.stringify(transaction, null, 2)
+        });
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Missing customer email',
+          transaction_data: transaction
+        }), { 
           status: 400, 
-          headers: corsHeaders 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
-
-      console.log('👤 Customer info:', {
-        email: customerEmail,
-        customData: customData
-      });
 
       // Find user by email
       const { data: users, error: usersError } = await supabase.auth.admin.listUsers();
       
       if (usersError) {
         console.error('❌ Error fetching users:', usersError);
-        return new Response('Error fetching users', { 
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Error fetching users: ' + usersError.message
+        }), { 
           status: 500, 
-          headers: corsHeaders 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
+
+      console.log('👥 Users search:', {
+        totalUsers: users.users.length,
+        searchingForEmail: customerEmail,
+        availableEmails: users.users.map(u => u.email)
+      });
 
       const user = users.users.find(u => u.email === customerEmail);
       
       if (!user) {
-        console.error('❌ User not found:', customerEmail);
-        return new Response('User not found', { 
+        console.error('❌ User not found for email:', customerEmail);
+        console.error('Available users:', users.users.map(u => ({ id: u.id, email: u.email })));
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'User not found for email: ' + customerEmail,
+          available_users: users.users.map(u => u.email)
+        }), { 
           status: 404, 
-          headers: corsHeaders 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
 
       console.log('✅ Found user:', { id: user.id, email: user.email });
 
       // Calculate total amount and credits
-      const totalAmount = transaction.details?.totals?.total || '0';
-      const amountInDollars = parseInt(totalAmount) / 100;
+      let totalAmount = 0;
+      let amountInDollars = 0;
+
+      if (transaction.details?.totals?.total) {
+        totalAmount = transaction.details.totals.total;
+        amountInDollars = parseInt(totalAmount) / 100;
+      } else if (transaction.amount) {
+        amountInDollars = parseFloat(transaction.amount);
+        totalAmount = amountInDollars * 100;
+      } else if (transaction.totals?.total) {
+        totalAmount = transaction.totals.total;
+        amountInDollars = parseInt(totalAmount) / 100;
+      }
       
       console.log('💰 Amount calculation:', {
         totalCents: totalAmount,
-        totalDollars: amountInDollars
+        totalDollars: amountInDollars,
+        details_totals: transaction.details?.totals,
+        direct_amount: transaction.amount,
+        totals_total: transaction.totals?.total
       });
 
-      // Determine credits based on amount or from custom_data
+      // Determine credits based on custom_data or amount
       let creditsToAdd = 0;
       
       if (customData.credits) {
@@ -155,39 +220,46 @@ serve(async (req) => {
         else if (amountInDollars >= 20) creditsToAdd = 500;
         else if (amountInDollars >= 10) creditsToAdd = 200;
         else if (amountInDollars >= 1) creditsToAdd = 10;
-        console.log('🎯 Credits calculated from amount:', creditsToAdd);
+        console.log('🎯 Credits calculated from amount:', {
+          amount: amountInDollars,
+          credits: creditsToAdd
+        });
       }
 
       if (creditsToAdd === 0) {
         console.warn('⚠️ No credits determined for amount:', amountInDollars);
-        return new Response('No credits to add', { 
+        console.warn('Full transaction for debugging:', JSON.stringify(transaction, null, 2));
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'No credits to add',
+          amount: amountInDollars,
+          custom_data: customData
+        }), { 
           status: 400, 
-          headers: corsHeaders 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
 
-      // Check for duplicate transaction in both tables
+      // Check for duplicate transaction
       const { data: existingTransaction } = await supabase
-        .from('payment_transactions')
-        .select('id')
-        .eq('paddle_transaction_id', transactionId)
-        .maybeSingle();
-        
-      const { data: existingNewTransaction } = await supabase
         .from('transactions')
         .select('id')
         .eq('transaction_id', transactionId)
         .maybeSingle();
 
-      if (existingTransaction || existingNewTransaction) {
+      if (existingTransaction) {
         console.log('⚠️ Transaction already processed:', transactionId);
-        return new Response('Transaction already processed', { 
+        return new Response(JSON.stringify({
+          success: true,
+          message: 'Transaction already processed',
+          transaction_id: transactionId
+        }), { 
           status: 200, 
-          headers: corsHeaders 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
 
-      // Record transaction in new transactions table
+      // Record transaction
       const newTransactionRecord = {
         user_id: user.id,
         transaction_id: transactionId,
@@ -201,64 +273,32 @@ serve(async (req) => {
           checkout_id: transaction.checkout_id || customData.checkout_id,
           subscription_id: transaction.subscription_id,
           custom_data: customData,
-          raw_event: webhookData.event_type
+          raw_event: webhookData.event_type,
+          full_webhook_data: webhookData
         }
       };
 
-      console.log('💾 Inserting transaction record to new table:', newTransactionRecord);
+      console.log('💾 Inserting transaction record:', JSON.stringify(newTransactionRecord, null, 2));
 
-      const { data: insertedNewTransaction, error: newTransactionError } = await supabase
+      const { data: insertedTransaction, error: transactionError } = await supabase
         .from('transactions')
         .insert(newTransactionRecord)
         .select()
         .single();
 
-      if (newTransactionError) {
-        console.error('❌ Error inserting to new transactions table:', newTransactionError);
-        
-        // If the new table doesn't exist yet, fall back to the old table
-        if (newTransactionError.message.includes('relation "transactions" does not exist')) {
-          console.log('⚠️ New transactions table not found, falling back to payment_transactions');
-          
-          // Record transaction in old payment_transactions table
-          const transactionRecord = {
-            user_id: user.id,
-            paddle_transaction_id: transactionId,
-            product_id: transaction.items?.[0]?.price?.product?.id || customData.product_id || '',
-            amount: amountInDollars,
-            currency: transaction.currency_code || 'USD',
-            credits_purchased: creditsToAdd,
-            status: 'completed',
-            paddle_checkout_id: transaction.checkout_id || customData.checkout_id || null,
-            paddle_subscription_id: transaction.subscription_id || null
-          };
-
-          console.log('💾 Inserting transaction record to old table:', transactionRecord);
-
-          const { data: insertedTransaction, error: transactionError } = await supabase
-            .from('payment_transactions')
-            .insert(transactionRecord)
-            .select()
-            .single();
-
-          if (transactionError) {
-            console.error('❌ Error inserting transaction to old table:', transactionError);
-            return new Response('Database error: ' + transactionError.message, { 
-              status: 500, 
-              headers: corsHeaders 
-            });
-          }
-
-          console.log('✅ Transaction recorded in old table:', insertedTransaction.id);
-        } else {
-          return new Response('Database error: ' + newTransactionError.message, { 
-            status: 500, 
-            headers: corsHeaders 
-          });
-        }
-      } else {
-        console.log('✅ Transaction recorded in new table:', insertedNewTransaction.id);
+      if (transactionError) {
+        console.error('❌ Error inserting transaction:', transactionError);
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Database error: ' + transactionError.message,
+          transaction_data: newTransactionRecord
+        }), { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
       }
+
+      console.log('✅ Transaction recorded:', insertedTransaction.id);
 
       // Update user credits
       const { data: currentCredits } = await supabase
@@ -266,6 +306,8 @@ serve(async (req) => {
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
+
+      console.log('💳 Current user credits:', currentCredits);
 
       let newBalance;
       if (!currentCredits) {
@@ -282,9 +324,12 @@ serve(async (req) => {
 
         if (insertError) {
           console.error('❌ Error creating user credits:', insertError);
-          return new Response('Error creating credits', { 
+          return new Response(JSON.stringify({
+            success: false,
+            error: 'Error creating credits: ' + insertError.message
+          }), { 
             status: 500, 
-            headers: corsHeaders 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
         }
 
@@ -303,9 +348,12 @@ serve(async (req) => {
 
         if (updateError) {
           console.error('❌ Error updating user credits:', updateError);
-          return new Response('Error updating credits', { 
+          return new Response(JSON.stringify({
+            success: false,
+            error: 'Error updating credits: ' + updateError.message
+          }), { 
             status: 500, 
-            headers: corsHeaders 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
         }
 
@@ -316,225 +364,32 @@ serve(async (req) => {
       
       return new Response(JSON.stringify({
         success: true,
+        message: 'Payment processed successfully',
         transaction_id: transactionId,
         user_id: user.id,
         credits_added: creditsToAdd,
-        new_balance: newBalance
-      }), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    } 
-    // Handle legacy Paddle webhook format
-    else if (webhookData.alert_name === 'payment_succeeded') {
-      console.log('💳 Processing legacy payment_succeeded event');
-      
-      const transactionId = webhookData.p_order_id || webhookData.order_id;
-      const customerEmail = webhookData.email || webhookData.customer_email;
-      const productId = webhookData.p_product_id || webhookData.product_id;
-      const amountInDollars = parseFloat(webhookData.p_sale_gross || webhookData.amount);
-      
-      console.log('📋 Legacy transaction details:', {
-        id: transactionId,
-        email: customerEmail,
-        product_id: productId,
-        amount: amountInDollars
-      });
-      
-      if (!customerEmail) {
-        console.error('❌ No customer email found in legacy transaction');
-        return new Response('Missing customer email', { 
-          status: 400, 
-          headers: corsHeaders 
-        });
-      }
-      
-      // Find user by email
-      const { data: users, error: usersError } = await supabase.auth.admin.listUsers();
-      
-      if (usersError) {
-        console.error('❌ Error fetching users:', usersError);
-        return new Response('Error fetching users', { 
-          status: 500, 
-          headers: corsHeaders 
-        });
-      }
-
-      const user = users.users.find(u => u.email === customerEmail);
-      
-      if (!user) {
-        console.error('❌ User not found:', customerEmail);
-        return new Response('User not found', { 
-          status: 404, 
-          headers: corsHeaders 
-        });
-      }
-      
-      // Determine credits based on amount
-      let creditsToAdd = 0;
-      if (amountInDollars >= 30) creditsToAdd = 800;
-      else if (amountInDollars >= 20) creditsToAdd = 500;
-      else if (amountInDollars >= 10) creditsToAdd = 200;
-      else if (amountInDollars >= 1) creditsToAdd = 10;
-      
-      console.log('🎯 Legacy credits calculation:', creditsToAdd);
-      
-      if (creditsToAdd === 0) {
-        console.warn('⚠️ No credits determined for legacy amount:', amountInDollars);
-        return new Response('No credits to add', { 
-          status: 400, 
-          headers: corsHeaders 
-        });
-      }
-      
-      // Try to insert into new transactions table first
-      try {
-        const newTransactionRecord = {
-          user_id: user.id,
-          transaction_id: transactionId,
-          email: customerEmail,
+        new_balance: newBalance,
+        debug_info: {
+          webhook_event: webhookData.event_type,
+          customer_email: customerEmail,
           amount: amountInDollars,
-          currency: webhookData.currency || 'USD',
-          status: 'completed',
-          product_id: productId || '',
-          credits_added: creditsToAdd,
-          metadata: {
-            checkout_id: webhookData.checkout_id,
-            subscription_id: webhookData.subscription_id,
-            raw_event: webhookData.alert_name
-          }
-        };
-        
-        const { data: insertedNewTransaction, error: newTransactionError } = await supabase
-          .from('transactions')
-          .insert(newTransactionRecord)
-          .select()
-          .single();
-          
-        if (!newTransactionError) {
-          console.log('✅ Legacy transaction recorded in new table:', insertedNewTransaction.id);
-        } else {
-          console.log('⚠️ Could not insert into new table, falling back to old table');
-          
-          // Check for duplicate transaction
-          const { data: existingTransaction } = await supabase
-            .from('payment_transactions')
-            .select('id')
-            .eq('paddle_transaction_id', transactionId)
-            .maybeSingle();
-
-          if (existingTransaction) {
-            console.log('⚠️ Legacy transaction already processed:', transactionId);
-            return new Response('Transaction already processed', { 
-              status: 200, 
-              headers: corsHeaders 
-            });
-          }
-          
-          // Record transaction
-          const transactionRecord = {
-            user_id: user.id,
-            paddle_transaction_id: transactionId,
-            product_id: productId || '',
-            amount: amountInDollars,
-            currency: webhookData.currency || 'USD',
-            credits_purchased: creditsToAdd,
-            status: 'completed',
-            paddle_checkout_id: webhookData.checkout_id || null,
-            paddle_subscription_id: webhookData.subscription_id || null
-          };
-          
-          console.log('💾 Inserting legacy transaction record:', transactionRecord);
-          
-          const { data: insertedTransaction, error: transactionError } = await supabase
-            .from('payment_transactions')
-            .insert(transactionRecord)
-            .select()
-            .single();
-
-          if (transactionError) {
-            console.error('❌ Error inserting legacy transaction:', transactionError);
-            return new Response('Database error: ' + transactionError.message, { 
-              status: 500, 
-              headers: corsHeaders 
-            });
-          }
-          
-          console.log('✅ Legacy transaction recorded in old table:', insertedTransaction.id);
+          credits: creditsToAdd
         }
-      } catch (error) {
-        console.error('❌ Error handling legacy transaction:', error);
-        return new Response('Error handling legacy transaction: ' + error.message, { 
-          status: 500, 
-          headers: corsHeaders 
-        });
-      }
-      
-      // Update user credits
-      const { data: currentCredits } = await supabase
-        .from('user_credits')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      let newBalance;
-      if (!currentCredits) {
-        // Create new credits record
-        newBalance = 100 + creditsToAdd; // Default 100 + purchased
-        
-        const { error: insertError } = await supabase
-          .from('user_credits')
-          .insert({
-            user_id: user.id,
-            balance: newBalance,
-            total_spent: 0
-          });
-
-        if (insertError) {
-          console.error('❌ Error creating user credits for legacy payment:', insertError);
-          return new Response('Error creating credits', { 
-            status: 500, 
-            headers: corsHeaders 
-          });
-        }
-      } else {
-        // Update existing credits
-        newBalance = currentCredits.balance + creditsToAdd;
-        
-        const { error: updateError } = await supabase
-          .from('user_credits')
-          .update({ 
-            balance: newBalance,
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', user.id);
-
-        if (updateError) {
-          console.error('❌ Error updating user credits for legacy payment:', updateError);
-          return new Response('Error updating credits', { 
-            status: 500, 
-            headers: corsHeaders 
-          });
-        }
-      }
-      
-      console.log('🎉 SUCCESS: Legacy payment processed successfully');
-      
-      return new Response(JSON.stringify({
-        success: true,
-        transaction_id: transactionId,
-        user_id: user.id,
-        credits_added: creditsToAdd,
-        new_balance: newBalance
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     } else {
-      console.log('ℹ️ Ignoring event type:', webhookData.event_type || webhookData.alert_name);
-      return new Response('Event type not handled', { 
+      console.log('ℹ️ Ignoring event type:', webhookData.event_type);
+      console.log('📋 Full webhook data for ignored event:', JSON.stringify(webhookData, null, 2));
+      
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Event type not handled: ' + webhookData.event_type,
+        event_data: webhookData
+      }), { 
         status: 200, 
-        headers: corsHeaders 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
@@ -545,9 +400,13 @@ serve(async (req) => {
       stack: error.stack
     });
     
-    return new Response('Internal server error: ' + error.message, { 
-      status: 500, 
-      headers: corsHeaders 
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: 'Internal server error: ' + error.message,
+      stack: error.stack
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500,
     });
   }
 });

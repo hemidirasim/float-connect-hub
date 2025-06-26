@@ -117,20 +117,32 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
         return;
       }
 
-      console.log('Setting up Paddle for user:', user.email);
+      console.log('🔧 Setting up Paddle for user:', user.email);
 
       // Initialize Paddle with latest API
       window.Paddle.Environment.set("production");
       window.Paddle.Initialize({
         token: "live_c780f029236977ad3ae72c25114",
         eventCallback: function(event: any) {
-          console.log('🏓 Paddle event:', event);
+          console.log('🏓 Paddle event received:', {
+            eventName: event.name,
+            eventData: event.data,
+            timestamp: new Date().toISOString()
+          });
           
           if (event.name === "checkout.completed") {
+            console.log('✅ Checkout completed, processing...');
             handleCheckoutCompleted(event.data);
           }
           
           if (event.name === "checkout.closed") {
+            console.log('❌ Checkout closed');
+            setLoading(false);
+          }
+
+          if (event.name === "checkout.error") {
+            console.error('❌ Checkout error:', event.data);
+            toast.error('Payment failed: ' + (event.data?.message || 'Unknown error'));
             setLoading(false);
           }
         }
@@ -146,17 +158,49 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
 
   const handleCheckoutCompleted = async (data: any) => {
     try {
-      console.log('✅ Checkout completed:', data);
+      console.log('💳 Processing checkout completion:', {
+        transactionId: data.transaction_id,
+        checkoutId: data.id,
+        status: data.status,
+        customer: data.customer,
+        customData: data.custom_data,
+        fullData: data
+      });
+      
       toast.success('Payment completed! Processing your credits...');
       
-      // Wait for webhook processing
+      // Add detailed logging for webhook data
+      console.log('📊 Transaction details for webhook:', {
+        id: data.transaction_id,
+        customer_email: data.customer?.email,
+        amount: data.totals?.total,
+        custom_data: data.custom_data,
+        items: data.items
+      });
+      
+      // Wait for webhook processing with longer timeout
       setTimeout(async () => {
+        console.log('🔄 Refreshing credits and transactions...');
         await onCreditsUpdate();
         await fetchTransactions();
-        toast.success('Credits added successfully!');
-      }, 5000); // Increased wait time for webhook processing
+        
+        // Check if transaction was processed
+        const { data: recentTransactions } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('transaction_id', data.transaction_id)
+          .maybeSingle();
+          
+        if (recentTransactions) {
+          console.log('✅ Transaction found in database:', recentTransactions);
+          toast.success(`Credits added successfully! +${recentTransactions.credits_added} credits`);
+        } else {
+          console.warn('⚠️ Transaction not found in database yet');
+          toast.info('Payment processed, credits may take a few minutes to appear');
+        }
+      }, 8000); // Increased wait time for webhook processing
     } catch (error) {
-      console.error('Error handling checkout completion:', error);
+      console.error('❌ Error handling checkout completion:', error);
       toast.error('Payment completed but there was an issue updating credits. Please refresh or contact support.');
     } finally {
       setLoading(false);
@@ -173,7 +217,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
       
       if (!newError && newTransactions && newTransactions.length > 0) {
         setTransactions(newTransactions);
-        console.log('Transactions loaded from new table:', newTransactions.length);
+        console.log('📊 Transactions loaded from new table:', newTransactions.length);
         return;
       }
       
@@ -186,9 +230,9 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
       if (error) throw error;
       
       setTransactions(data || []);
-      console.log('Transactions loaded from old table:', data?.length || 0);
+      console.log('📊 Transactions loaded from old table:', data?.length || 0);
     } catch (err) {
-      console.error('Error fetching transactions:', err);
+      console.error('❌ Error fetching transactions:', err);
       toast.error('Failed to load transaction history');
     }
   };
@@ -230,7 +274,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
         userEmail: user.email 
       });
 
-      // Open Paddle checkout with latest API format
+      // Open Paddle checkout with comprehensive custom data
       window.Paddle.Checkout.open({
         items: [{
           priceId: productId,
@@ -243,7 +287,9 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
           user_id: user.id,
           credits: credits.toString(),
           product_id: productId,
-          user_email: user.email
+          user_email: user.email,
+          package_price: price.toString(),
+          timestamp: new Date().toISOString()
         },
         settings: {
           theme: "light",
@@ -263,19 +309,16 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
     return new Date(dateString).toLocaleString();
   };
 
-  // Function to determine if a transaction is from the new or old table
   const isNewTransaction = (transaction: any): transaction is Transaction => {
     return 'transaction_id' in transaction && 'credits_added' in transaction;
   };
 
-  // Get transaction ID based on transaction type
   const getTransactionId = (transaction: Transaction | PaymentTransaction) => {
     return isNewTransaction(transaction) 
       ? transaction.transaction_id 
       : (transaction as PaymentTransaction).paddle_transaction_id;
   };
 
-  // Get credits from transaction based on transaction type
   const getCredits = (transaction: Transaction | PaymentTransaction) => {
     return isNewTransaction(transaction) 
       ? transaction.credits_added 
@@ -353,16 +396,17 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
           <div className="mt-4 p-4 bg-blue-50 rounded-lg">
             <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
               <AlertCircle className="w-4 h-4" />
-              Payment Processing
+              Debugging Information
             </h4>
             <p className="text-sm text-blue-700 mb-2">
-              After successful payment:
+              If payments are not working:
             </p>
             <ul className="text-sm text-blue-700 list-disc list-inside space-y-1">
-              <li>Wait 3-5 minutes for processing</li>
+              <li>Check browser console for errors</li>
+              <li>Ensure webhook URL is configured in Paddle dashboard</li>
+              <li>Webhook URL: https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/paddle-webhook</li>
+              <li>Wait 5-10 minutes after payment</li>
               <li>Click "Refresh" button to update credits</li>
-              <li>Check transaction history below</li>
-              <li>Contact support if credits don't appear within 10 minutes</li>
             </ul>
           </div>
         </CardContent>
