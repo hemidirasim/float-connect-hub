@@ -34,7 +34,8 @@ serve(async (req) => {
       webhookData = JSON.parse(body);
       console.log('✅ Successfully parsed webhook data:', {
         event_type: webhookData.event_type,
-        event_id: webhookData.event_id
+        event_id: webhookData.event_id,
+        data_structure: webhookData.data ? Object.keys(webhookData.data) : 'no data'
       });
     } catch (parseError) {
       console.error('❌ Failed to parse webhook JSON:', parseError.message);
@@ -71,33 +72,55 @@ serve(async (req) => {
       const transaction = webhookData.data;
       const transactionId = transaction.id;
       
-      console.log('📋 Transaction details:', {
+      console.log('📋 Full transaction structure:', {
         id: transactionId,
         status: transaction.status,
         customer: transaction.customer,
-        amount: transaction.details?.totals?.total || transaction.totals?.total
+        billing_details: transaction.billing_details,
+        items: transaction.items,
+        custom_data: transaction.custom_data,
+        full_transaction: transaction
       });
 
-      // Extract customer email
+      // Extract customer email - try multiple possible locations
       let customerEmail = null;
+      
+      // Try customer.email first
       if (transaction.customer?.email) {
         customerEmail = transaction.customer.email;
-      } else if (transaction.billing_details?.email) {
+        console.log('📧 Found email in customer.email:', customerEmail);
+      }
+      // Try billing_details.email
+      else if (transaction.billing_details?.email) {
         customerEmail = transaction.billing_details.email;
+        console.log('📧 Found email in billing_details.email:', customerEmail);
+      }
+      // Try items[0].billing_details.email
+      else if (transaction.items?.[0]?.billing_details?.email) {
+        customerEmail = transaction.items[0].billing_details.email;
+        console.log('📧 Found email in items[0].billing_details.email:', customerEmail);
+      }
+      // Try custom_data.user_email
+      else if (transaction.custom_data?.user_email) {
+        customerEmail = transaction.custom_data.user_email;
+        console.log('📧 Found email in custom_data.user_email:', customerEmail);
       }
       
       const customData = transaction.custom_data || {};
       
-      console.log('👤 Customer info:', {
+      console.log('👤 Customer info extracted:', {
         email: customerEmail,
-        customData: customData
+        customData: customData,
+        customer_object: transaction.customer,
+        billing_details: transaction.billing_details
       });
 
       if (!customerEmail) {
-        console.error('❌ No customer email found');
+        console.error('❌ No customer email found in any location');
+        console.error('Full transaction for debugging:', JSON.stringify(transaction, null, 2));
         return new Response(JSON.stringify({
           success: false,
-          error: 'Missing customer email'
+          error: 'Missing customer email - please check transaction data structure'
         }), { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
