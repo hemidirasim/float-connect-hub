@@ -2,10 +2,21 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   console.log('🚀 Webhook received:', {
     method: req.method,
     url: req.url,
+    headers: Object.fromEntries(req.headers.entries()),
     timestamp: new Date().toISOString()
   });
 
@@ -32,7 +43,7 @@ serve(async (req) => {
         error: 'Invalid JSON payload'
       }), { 
         status: 400, 
-        headers: { 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
@@ -45,7 +56,10 @@ serve(async (req) => {
       return new Response(JSON.stringify({
         success: false,
         error: 'Server configuration error'
-      }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+      }), { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      });
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -84,7 +98,10 @@ serve(async (req) => {
         return new Response(JSON.stringify({
           success: false,
           error: 'Missing customer email'
-        }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }), { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        });
       }
 
       // Find user by email
@@ -95,7 +112,10 @@ serve(async (req) => {
         return new Response(JSON.stringify({
           success: false,
           error: 'Error fetching users'
-        }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }), { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        });
       }
 
       const user = users.users.find(u => u.email === customerEmail);
@@ -105,7 +125,10 @@ serve(async (req) => {
         return new Response(JSON.stringify({
           success: false,
           error: 'User not found for email: ' + customerEmail
-        }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+        }), { 
+          status: 404, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        });
       }
 
       console.log('✅ Found user:', { id: user.id, email: user.email });
@@ -147,7 +170,10 @@ serve(async (req) => {
         return new Response(JSON.stringify({
           success: false,
           error: 'No credits to add'
-        }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }), { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        });
       }
 
       // Check for duplicate transaction
@@ -162,7 +188,10 @@ serve(async (req) => {
         return new Response(JSON.stringify({
           success: true,
           message: 'Transaction already processed'
-        }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }), { 
+          status: 200, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
       }
 
       // Record transaction
@@ -195,7 +224,10 @@ serve(async (req) => {
         return new Response(JSON.stringify({
           success: false,
           error: 'Database error: ' + transactionError.message
-        }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        }), { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        });
       }
 
       console.log('✅ Transaction recorded:', insertedTransaction.id);
@@ -225,7 +257,10 @@ serve(async (req) => {
           return new Response(JSON.stringify({
             success: false,
             error: 'Error creating credits'
-          }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+          }), { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          });
         }
 
         console.log('✅ Created new user credits:', newBalance);
@@ -246,7 +281,10 @@ serve(async (req) => {
           return new Response(JSON.stringify({
             success: false,
             error: 'Error updating credits'
-          }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+          }), { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          });
         }
 
         console.log('✅ Updated user credits to:', newBalance);
@@ -262,7 +300,7 @@ serve(async (req) => {
         new_balance: newBalance
       }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     } else {
       console.log('ℹ️ Ignoring event type:', webhookData.event_type);
@@ -270,7 +308,10 @@ serve(async (req) => {
       return new Response(JSON.stringify({
         success: true,
         message: 'Event type not handled: ' + webhookData.event_type
-      }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }), { 
+        status: 200, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
   } catch (error) {
@@ -280,7 +321,7 @@ serve(async (req) => {
       success: false, 
       error: 'Internal server error: ' + error.message
     }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });
   }
