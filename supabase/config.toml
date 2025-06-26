@@ -1,3 +1,4 @@
+
 project_id = "ttzioshkresaqmsodhfb"
 
 [api]
@@ -7,24 +8,16 @@ schemas = ["public", "storage", "graphql_public"]
 extra_search_path = ["public", "extensions"]
 max_rows = 1000
 
-[auth]
+[db]
 enabled = true
-port = 9999
-site_url = "https://monumental-bonbon-88b744.netlify.app"
-additional_redirect_urls = [
-  "https://ttzioshkresaqmsodhfb.supabase.co",
-  "https://hiclient.co",
-  "http://localhost:8080",
-  "https://ttzioshkresaqmsodhfb.functions.supabase.co",
-  "http://localhost:3000",
-  "http://localhost:5173",
-  "http://127.0.0.1:8080",
-  "http://127.0.0.1:3000",
-  "http://127.0.0.1:5173",
-  "https://monumental-bonbon-88b744.netlify.app"
-]
-jwt_expiry = 3600
-refresh_token_rotation_enabled = true
-security_update_password_require_reauthentication = true
-email_template_fetch_url = "https://monumental-bonbon-88b744.netlify.app/email-templates"
-email_template_override_path = "email-templates"
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://127.0.0.1:54321"
+
+[functions.paddle-webhook]
+verify_jwt = false
