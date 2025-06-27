@@ -116,7 +116,7 @@ const BlogPost = () => {
             <Link to="/blogs">
               <Button variant="ghost" className="mb-6">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Blog
+                Bloq siyahısına qayıt
               </Button>
             </Link>
 
@@ -161,14 +161,14 @@ const BlogPost = () => {
                   </header>
                   
                   <div 
-                    className="prose prose-lg max-w-none"
+                    className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900"
                     dangerouslySetInnerHTML={{ __html: blog.content }}
                   />
                 </div>
               </article>
             ) : (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">Blog post not found.</p>
+                <p className="text-gray-500 text-lg">Bloq məqaləsi tapılmadı.</p>
               </div>
             )}
           </div>

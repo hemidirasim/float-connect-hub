@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Header } from "@/components/FloatingWidgetBuilder/Header";
@@ -7,7 +8,7 @@ import { AuthModal } from "@/components/AuthModal";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User } from 'lucide-react';
+import { Calendar, User, Image } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface Blog {
@@ -105,8 +106,22 @@ const Blogs = () => {
                 {blogs.map((blog) => (
                   <Link key={blog.id} to={`/${blog.slug}/`}>
                     <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
-                      {blog.featured_image && (
-                        <div className="h-48 bg-gradient-to-r from-blue-500 to-purple-600 rounded-t-lg"></div>
+                      {blog.featured_image ? (
+                        <div className="h-48 overflow-hidden rounded-t-lg">
+                          <img 
+                            src={blog.featured_image} 
+                            alt={blog.title}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.parentElement!.classList.add('bg-gradient-to-r', 'from-blue-500', 'to-purple-600');
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-48 bg-gradient-to-r from-blue-500 to-purple-600 rounded-t-lg flex items-center justify-center">
+                          <Image className="w-12 h-12 text-white/80" />
+                        </div>
                       )}
                       <CardHeader>
                         <CardTitle className="line-clamp-2">{blog.title}</CardTitle>
@@ -132,7 +147,7 @@ const Blogs = () => {
 
             {!blogsLoading && blogs.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">No blog posts available yet.</p>
+                <p className="text-gray-500 text-lg">Hələ heç bir bloq məqaləsi yoxdur.</p>
               </div>
             )}
           </div>
