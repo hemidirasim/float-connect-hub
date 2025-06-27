@@ -1,23 +1,33 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Channel, FormData } from './types';
 
-// Import template definitions from the same source as edge function
-import { getDefaultTemplate } from '../../../supabase/functions/widget-js/default-template';
-import { getDarkTemplate } from '../../../supabase/functions/widget-js/templates/dark-template';
-import { getMinimalTemplate } from '../../../supabase/functions/widget-js/templates/minimal-template';
-import { getModernTemplate } from '../../../supabase/functions/widget-js/templates/modern-template';
-import { getElegantTemplate } from '../../../supabase/functions/widget-js/templates/elegant-template';
-
-// Import the SAME template renderer as edge functions
-import { WidgetTemplateRenderer } from '../../../supabase/functions/widget-js/template-generator';
-
-// Use the same template registry as edge functions
+// Template definitions matching server-side templates
 const TEMPLATE_REGISTRY = {
-  'default': getDefaultTemplate,
-  'dark': getDarkTemplate,
-  'minimal': getMinimalTemplate,
-  'modern': getModernTemplate,
-  'elegant': getElegantTemplate
+  'default': {
+    id: 'default',
+    name: 'Modern Clean Template',
+    description: 'Modern and clean floating widget with green accent'
+  },
+  'dark': {
+    id: 'dark', 
+    name: 'Dark Theme',
+    description: 'Dark themed widget with modern styling'
+  },
+  'minimal': {
+    id: 'minimal',
+    name: 'Minimal',
+    description: 'Clean and minimal widget design'
+  },
+  'modern': {
+    id: 'modern',
+    name: 'Modern',
+    description: 'Modern widget with contemporary styling'
+  },
+  'elegant': {
+    id: 'elegant',
+    name: 'Elegant',
+    description: 'Elegant widget with sophisticated design'
+  }
 } as const;
 
 interface TemplatePreviewProps {
@@ -35,14 +45,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 }) => {
   const [previewHtml, setPreviewHtml] = useState<string>('');
 
-  // Memoize template getter to prevent infinite re-renders
-  const getTemplate = useCallback((templateId: string) => {
-    const templateFunction = TEMPLATE_REGISTRY[templateId as keyof typeof TEMPLATE_REGISTRY] || TEMPLATE_REGISTRY['default'];
-    const template = templateFunction();
-    return template;
-  }, []);
-
-  // Generate preview HTML when template or config changes - USE SAME SYSTEM AS EDGE FUNCTION
+  // Generate preview HTML - simplified version for preview only
   useEffect(() => {
     if (!showWidget) {
       setPreviewHtml('');
@@ -50,104 +53,63 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     }
 
     const templateId = formData.templateId || 'default';
-    const template = getTemplate(templateId);
+    const template = TEMPLATE_REGISTRY[templateId as keyof typeof TEMPLATE_REGISTRY] || TEMPLATE_REGISTRY['default'];
 
-    console.log('Generating floating widget preview with SAME template system:', {
-      templateId,
-      templateName: template.name,
-      channels: channels.length,
-      buttonColor: formData.buttonColor,
-      position: formData.position,
-      greetingMessage: formData.greetingMessage
-    });
-
-    // Use EXACT SAME config structure as edge function template-generator.ts
-    const templateConfig = {
-      channels,
-      buttonColor: formData.buttonColor,
-      position: formData.position,
-      tooltip: formData.tooltip,
-      tooltipDisplay: formData.tooltipDisplay,
-      tooltipPosition: formData.tooltipPosition,
-      greetingMessage: formData.greetingMessage,
-      customIconUrl: formData.customIcon === 'custom' ? formData.customIconUrl : null,
-      videoEnabled: Boolean(formData.videoUrl),
-      videoUrl: formData.videoUrl || editingWidget?.video_url,
-      videoHeight: formData.videoHeight,
-      videoAlignment: formData.videoAlignment,
-      useVideoPreview: formData.useVideoPreview,
-      buttonSize: formData.buttonSize,
-      previewVideoHeight: formData.previewVideoHeight
-    };
-
-    // Use SAME renderer as edge function
-    const renderer = new WidgetTemplateRenderer(template, templateConfig);
-    const completeScript = renderer.generateWidgetScript();
+    // Generate a simple preview HTML for demonstration
+    const previewHtml = `
+      <style>
+        #widget-preview-button {
+          position: fixed;
+          bottom: 20px;
+          ${formData.position === 'left' ? 'left: 20px;' : 'right: 20px;'}
+          width: ${formData.buttonSize || 60}px;
+          height: ${formData.buttonSize || 60}px;
+          background: ${formData.buttonColor || '#25d366'};
+          border-radius: 50%;
+          cursor: pointer;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+        }
+        #widget-preview-button:hover {
+          transform: scale(1.1);
+          box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        #widget-preview-tooltip {
+          position: absolute;
+          bottom: ${(formData.buttonSize || 60) + 10}px;
+          ${formData.position === 'left' ? 'left: 0;' : 'right: 0;'}
+          background: #2d3748;
+          color: white;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 12px;
+          white-space: nowrap;
+          display: none;
+          z-index: 10000;
+        }
+        #widget-preview-button:hover #widget-preview-tooltip {
+          display: block;
+        }
+      </style>
+      <div id="widget-preview-button" data-widget-preview="true">
+        <div style="color: white; font-size: 24px;">💬</div>
+        <div id="widget-preview-tooltip">${formData.tooltip || 'Contact us!'}</div>
+      </div>
+    `;
     
-    // Parse and clean the generated script to extract HTML, CSS, and JS
-    const htmlMatch = completeScript.match(/widgetDiv\.innerHTML = `([^`]+)`/);
-    const cssMatch = completeScript.match(/style\.textContent = `([^`]+)`/);
-    const jsMatch = completeScript.match(/\/\/ Execute JavaScript\s*([\s\S]*?)(?=\}\)\(\);)/);
-    
-    let finalHtml = '';
-    
-    if (htmlMatch && cssMatch) {
-      const html = htmlMatch[1]
-        .replace(/\\n/g, '\n')
-        .replace(/\\t/g, '\t')
-        .replace(/\\'/g, "'")
-        .replace(/\\"/g, '"');
-      
-      const css = cssMatch[1]
-        .replace(/\\n/g, '\n')
-        .replace(/\\t/g, '\t')
-        .replace(/\\'/g, "'")
-        .replace(/\\"/g, '"');
-      
-      let js = '';
-      if (jsMatch) {
-        js = jsMatch[1]
-          .replace(/\\n/g, '\n')
-          .replace(/\\t/g, '\t')
-          .replace(/\\'/g, "'")
-          .replace(/\\"/g, '"');
-      }
-      
-      finalHtml = `
-        <style>${css}</style>
-        ${html}
-        <script>
-          (function() {
-            ${js}
-          })();
-        </script>
-      `;
-    } else {
-      // Fallback - use the complete script
-      finalHtml = `<div id="temp-container"></div><script>${completeScript}</script>`;
-    }
-    
-    setPreviewHtml(finalHtml);
-    console.log('Floating widget preview generated using SAME system as edge function');
+    setPreviewHtml(previewHtml);
   }, [
     showWidget,
     formData.templateId,
     formData.buttonColor,
     formData.position,
     formData.tooltip,
-    formData.tooltipDisplay,
-    formData.tooltipPosition,
-    formData.greetingMessage,
-    formData.customIconUrl,
-    formData.videoUrl,
-    formData.videoHeight,
-    formData.videoAlignment,
-    formData.useVideoPreview,
     formData.buttonSize,
-    formData.previewVideoHeight,
-    channels,
-    editingWidget?.video_url,
-    getTemplate
+    channels
   ]);
 
   // Execute inline scripts after HTML is inserted
@@ -169,25 +131,6 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
             element.setAttribute('data-widget-preview', 'true');
             document.body.appendChild(element);
           });
-
-          // Wait a bit for DOM to be ready, then execute any inline scripts
-          setTimeout(() => {
-            // Find and execute script tags
-            const scripts = document.querySelectorAll('script[data-widget-preview]');
-            scripts.forEach(script => {
-              if (script.textContent && script.textContent.trim()) {
-                console.log('Executing widget script for preview...');
-                try {
-                  // Create a new function from the script content and execute it
-                  const scriptContent = script.textContent;
-                  const scriptFunction = new Function(scriptContent);
-                  scriptFunction();
-                } catch (e) {
-                  console.error('Script execution error:', e);
-                }
-              }
-            });
-          }, 100);
 
         } catch (error) {
           console.error('Error rendering floating widget:', error);

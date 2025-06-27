@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Edit, Trash2, Eye, Settings, CreditCard, MessageSquare, BarChart3, Coins, Globe, Smartphone, Monitor, Code, Home, LogOut, User } from 'lucide-react';
-import { supabase } from "@/integrations/supabase/client";
+// Removed Supabase import - now using API endpoints
 import { toast } from "sonner";
 import { SupportTickets } from "@/components/SupportTickets";
 import { ProfileSettings } from "@/components/ProfileSettings";
@@ -39,7 +39,7 @@ interface UserCredits {
 }
 
 const Dashboard = () => {
-  const { user, loading } = useAuth();
+  const { user, session, loading } = useAuth();
   const navigate = useNavigate();
   const [widgets, setWidgets] = useState<Widget[]>([]);
   const [userCredits, setUserCredits] = useState<UserCredits>({ balance: 0, total_spent: 0 });
@@ -54,12 +54,17 @@ const Dashboard = () => {
 
   const fetchWidgets = async () => {
     try {
-      const { data, error } = await supabase
-        .from('widgets')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const response = await fetch('/api/widgets', {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`
+        }
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error('Failed to fetch widgets');
+      }
+
+      const data = await response.json();
       setWidgets(data || []);
     } catch (error) {
       console.error('Error fetching widgets:', error);
@@ -71,54 +76,39 @@ const Dashboard = () => {
 
   const fetchUserCredits = async () => {
     try {
-      const { data, error } = await supabase
-        .from('user_credits')
-        .select('*')
-        .single();
-
-      if (error && error.code === 'PGRST116') {
-        // No user credits record found, create one
-        console.log('No user credits found, creating default record...');
-        const { data: newCredits, error: insertError } = await supabase
-          .from('user_credits')
-          .insert({
-            user_id: user?.id,
-            balance: 100,
-            total_spent: 0
-          })
-          .select()
-          .single();
-
-        if (insertError) {
-          console.error('Error creating user credits:', insertError);
-          toast.error('Error initializing credits');
-          setUserCredits({ balance: 100, total_spent: 0 });
-        } else {
-          console.log('Created new user credits record:', newCredits);
-          setUserCredits(newCredits || { balance: 100, total_spent: 0 });
-          toast.success('Credits account initialized');
+      const response = await fetch('/api/user-credits', {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`
         }
-      } else if (error) {
-        console.error('Error fetching credits:', error);
-        toast.error('Error loading credits');
-        setUserCredits({ balance: 100, total_spent: 0 });
-      } else {
-        setUserCredits(data || { balance: 100, total_spent: 0 });
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user credits');
       }
+
+      const data = await response.json();
+      setUserCredits(data);
     } catch (error) {
-      console.error('Unexpected error fetching credits:', error);
-      setUserCredits({ balance: 100, total_spent: 0 });
+      console.error('Error fetching user credits:', error);
+      setUserCredits({ balance: 0, total_spent: 0 });
     }
   };
 
   const handleToggleActive = async (widgetId: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('widgets')
-        .update({ is_active: !currentStatus })
-        .eq('id', widgetId);
+      const response = await fetch(`/api/widgets/${widgetId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        },
+        body: JSON.stringify({ is_active: !currentStatus })
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error('Failed to update widget status');
+      }
+
       toast.success(`Widget ${!currentStatus ? 'activated' : 'deactivated'}`);
       fetchWidgets();
     } catch (error) {
@@ -131,12 +121,17 @@ const Dashboard = () => {
     if (!confirm(`Are you sure you want to delete "${widgetName}" widget?`)) return;
 
     try {
-      const { error } = await supabase
-        .from('widgets')
-        .delete()
-        .eq('id', widgetId);
+      const response = await fetch(`/api/widgets/${widgetId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`
+        }
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error('Failed to delete widget');
+      }
+
       toast.success('Widget deleted');
       fetchWidgets();
     } catch (error) {
@@ -153,7 +148,8 @@ const Dashboard = () => {
   };
 
   const generateWidgetCode = (widget: Widget) => {
-    let scriptCode = `<script src="https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/widget-js/${widget.id}"></script>`;
+    const baseUrl = window.location.origin;
+    let scriptCode = `<script src="${baseUrl}/api/widget/${widget.id}.js"></script>`;
     return scriptCode;
   };
 
@@ -165,7 +161,17 @@ const Dashboard = () => {
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+      }
+      
+      localStorage.removeItem('auth_token');
       toast.success('Signed out successfully!');
       navigate('/');
     } catch (error) {
