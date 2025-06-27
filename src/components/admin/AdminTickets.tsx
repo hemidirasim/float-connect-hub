@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { MessageSquare, Reply, Eye } from 'lucide-react';
+import { MessageSquare, Reply, Eye, Clock, CheckCircle, XCircle } from 'lucide-react';
 
 interface Ticket {
   id: string;
@@ -30,8 +30,21 @@ interface TicketReply {
   user_id: string;
 }
 
+interface TicketStats {
+  totalTickets: number;
+  openTickets: number;
+  repliedTickets: number;
+  closedTickets: number;
+}
+
 export const AdminTickets = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [stats, setStats] = useState<TicketStats>({
+    totalTickets: 0,
+    openTickets: 0,
+    repliedTickets: 0,
+    closedTickets: 0
+  });
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [replies, setReplies] = useState<TicketReply[]>([]);
   const [replyMessage, setReplyMessage] = useState('');
@@ -63,6 +76,16 @@ export const AdminTickets = () => {
       })) || [];
 
       setTickets(ticketsWithEmails);
+
+      // Calculate stats
+      const stats = {
+        totalTickets: ticketsWithEmails.length,
+        openTickets: ticketsWithEmails.filter(t => t.status === 'open').length,
+        repliedTickets: ticketsWithEmails.filter(t => t.status === 'replied').length,
+        closedTickets: ticketsWithEmails.filter(t => t.status === 'closed').length,
+      };
+      setStats(stats);
+
     } catch (error) {
       console.error('Error fetching tickets:', error);
       toast({
@@ -137,7 +160,7 @@ export const AdminTickets = () => {
         .from('ticket_replies')
         .insert({
           ticket_id: selectedTicket.id,
-          user_id: selectedTicket.user_id, // This should be the current admin user id in production
+          user_id: selectedTicket.user_id,
           message: replyMessage,
           is_admin: true
         });
@@ -152,7 +175,6 @@ export const AdminTickets = () => {
       setReplyMessage('');
       await fetchReplies(selectedTicket.id);
       
-      // Update ticket status to 'replied' if it was 'open'
       if (selectedTicket.status === 'open') {
         await updateTicketStatus(selectedTicket.id, 'replied');
       }
@@ -192,6 +214,19 @@ export const AdminTickets = () => {
     }
   };
 
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'open':
+        return <Clock className="w-4 h-4" />;
+      case 'replied':
+        return <Reply className="w-4 h-4" />;
+      case 'closed':
+        return <CheckCircle className="w-4 h-4" />;
+      default:
+        return <XCircle className="w-4 h-4" />;
+    }
+  };
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
@@ -220,101 +255,164 @@ export const AdminTickets = () => {
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5" />
-            Dəstək Ticketləri
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Yüklənir...</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <div className="grid md:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="animate-pulse bg-gray-800 border-gray-700">
+              <CardContent className="p-6">
+                <div className="h-4 bg-gray-600 rounded w-1/2 mb-2"></div>
+                <div className="h-8 bg-gray-600 rounded w-3/4"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card className="bg-gray-800 border-gray-700">
+          <CardContent className="p-6">
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto"></div>
+              <p className="mt-2 text-gray-400">Yüklənir...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5" />
-            Dəstək Ticketləri ({tickets.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Mövzu</TableHead>
-                  <TableHead>İstifadəçi</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Prioritet</TableHead>
-                  <TableHead>Tarix</TableHead>
-                  <TableHead>Əməliyyatlar</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {tickets.map((ticket) => (
-                  <TableRow key={ticket.id}>
-                    <TableCell className="font-medium">{ticket.subject}</TableCell>
-                    <TableCell>{ticket.user_email}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusColor(ticket.status)}>
-                        {getStatusText(ticket.status)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getPriorityColor(ticket.priority)}>
-                        {getPriorityText(ticket.priority)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{new Date(ticket.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openTicketDialog(ticket)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Select
-                          value={ticket.status}
-                          onValueChange={(value) => updateTicketStatus(ticket.id, value)}
-                        >
-                          <SelectTrigger className="w-24">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="open">Açıq</SelectItem>
-                            <SelectItem value="replied">Cavablandı</SelectItem>
-                            <SelectItem value="closed">Bağlandı</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </TableCell>
+      <div className="space-y-6">
+        {/* Stats Cards */}
+        <div className="grid md:grid-cols-4 gap-6">
+          <Card className="bg-gray-800 border-gray-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400">Ümumi Ticket</p>
+                  <p className="text-2xl font-bold text-blue-400">{stats.totalTickets}</p>
+                </div>
+                <MessageSquare className="w-8 h-8 text-blue-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-800 border-gray-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400">Açıq Ticket</p>
+                  <p className="text-2xl font-bold text-red-400">{stats.openTickets}</p>
+                </div>
+                <Clock className="w-8 h-8 text-red-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-800 border-gray-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400">Cavablandı</p>
+                  <p className="text-2xl font-bold text-yellow-400">{stats.repliedTickets}</p>
+                </div>
+                <Reply className="w-8 h-8 text-yellow-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-800 border-gray-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400">Bağlandı</p>
+                  <p className="text-2xl font-bold text-green-400">{stats.closedTickets}</p>
+                </div>
+                <CheckCircle className="w-8 h-8 text-green-500" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tickets Table */}
+        <Card className="bg-gray-800 border-gray-700">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-white">
+              <MessageSquare className="w-5 h-5" />
+              Dəstək Ticketləri ({tickets.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-gray-700">
+                    <TableHead className="text-gray-300">Mövzu</TableHead>
+                    <TableHead className="text-gray-300">İstifadəçi</TableHead>
+                    <TableHead className="text-gray-300">Status</TableHead>
+                    <TableHead className="text-gray-300">Prioritet</TableHead>
+                    <TableHead className="text-gray-300">Tarix</TableHead>
+                    <TableHead className="text-gray-300">Əməliyyatlar</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {tickets.map((ticket) => (
+                    <TableRow key={ticket.id} className="border-gray-700 hover:bg-gray-750">
+                      <TableCell className="font-medium text-white">{ticket.subject}</TableCell>
+                      <TableCell className="text-gray-300">{ticket.user_email}</TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusColor(ticket.status)} className="flex items-center gap-1 w-fit">
+                          {getStatusIcon(ticket.status)}
+                          {getStatusText(ticket.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getPriorityColor(ticket.priority)}>
+                          {getPriorityText(ticket.priority)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-gray-300">{new Date(ticket.created_at).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openTicketDialog(ticket)}
+                            className="border-gray-600 text-white hover:bg-gray-700"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Select
+                            value={ticket.status}
+                            onValueChange={(value) => updateTicketStatus(ticket.id, value)}
+                          >
+                            <SelectTrigger className="w-28 bg-gray-700 border-gray-600 text-white">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-gray-800 border-gray-700">
+                              <SelectItem value="open" className="text-white">Açıq</SelectItem>
+                              <SelectItem value="replied" className="text-white">Cavablandı</SelectItem>
+                              <SelectItem value="closed" className="text-white">Bağlandı</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Ticket Detail Dialog */}
       {selectedTicket && (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-gray-800 border-gray-700 text-white">
             <DialogHeader>
-              <DialogTitle className="flex items-center justify-between">
+              <DialogTitle className="flex items-center justify-between text-white">
                 <span>{selectedTicket.subject}</span>
-                <Badge variant={getStatusColor(selectedTicket.status)}>
+                <Badge variant={getStatusColor(selectedTicket.status)} className="flex items-center gap-1">
+                  {getStatusIcon(selectedTicket.status)}
                   {getStatusText(selectedTicket.status)}
                 </Badge>
               </DialogTitle>
@@ -322,14 +420,14 @@ export const AdminTickets = () => {
             
             <div className="space-y-4">
               {/* Original Message */}
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="bg-gray-700 p-4 rounded-lg">
                 <div className="flex justify-between items-start mb-2">
-                  <span className="font-medium">{selectedTicket.user_email}</span>
-                  <span className="text-sm text-gray-500">
+                  <span className="font-medium text-white">{selectedTicket.user_email}</span>
+                  <span className="text-sm text-gray-400">
                     {new Date(selectedTicket.created_at).toLocaleString()}
                   </span>
                 </div>
-                <p className="text-gray-700">{selectedTicket.message}</p>
+                <p className="text-gray-300">{selectedTicket.message}</p>
               </div>
 
               {/* Replies */}
@@ -337,34 +435,43 @@ export const AdminTickets = () => {
                 <div
                   key={reply.id}
                   className={`p-4 rounded-lg ${
-                    reply.is_admin ? 'bg-blue-50 ml-8' : 'bg-gray-50 mr-8'
+                    reply.is_admin ? 'bg-red-900/20 ml-8 border-l-4 border-red-500' : 'bg-gray-700 mr-8'
                   }`}
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <span className="font-medium">
+                    <span className="font-medium text-white">
                       {reply.is_admin ? 'Admin' : selectedTicket.user_email}
                     </span>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-400">
                       {new Date(reply.created_at).toLocaleString()}
                     </span>
                   </div>
-                  <p className="text-gray-700">{reply.message}</p>
+                  <p className="text-gray-300">{reply.message}</p>
                 </div>
               ))}
 
               {/* Reply Form */}
-              <div className="border-t pt-4">
+              <div className="border-t border-gray-600 pt-4">
                 <Textarea
                   placeholder="Cavabınızı yazın..."
                   value={replyMessage}
                   onChange={(e) => setReplyMessage(e.target.value)}
                   rows={4}
+                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                 />
                 <div className="flex justify-end gap-2 mt-2">
-                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                    className="border-gray-600 text-white hover:bg-gray-700"
+                  >
                     Bağla
                   </Button>
-                  <Button onClick={sendReply} disabled={!replyMessage.trim()}>
+                  <Button 
+                    onClick={sendReply} 
+                    disabled={!replyMessage.trim()}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
                     <Reply className="w-4 h-4 mr-2" />
                     Cavab Göndər
                   </Button>
