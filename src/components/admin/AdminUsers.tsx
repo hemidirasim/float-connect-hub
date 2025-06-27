@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,31 +43,44 @@ export const AdminUsers = () => {
 
   const fetchUsers = async () => {
     try {
+      console.log('Fetching users...');
+      
+      // Get all profiles first
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
-          id,
-          email,
-          full_name,
-          created_at
-        `);
+        .select('*');
 
-      if (profilesError) throw profilesError;
+      console.log('Profiles data:', profiles);
+      console.log('Profiles error:', profilesError);
+
+      if (profilesError) {
+        console.error('Profiles error:', profilesError);
+        throw profilesError;
+      }
 
       // Get user roles
-      const { data: roles } = await supabase
+      const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
-        .select('user_id, role');
+        .select('*');
+
+      console.log('Roles data:', roles);
+      console.log('Roles error:', rolesError);
 
       // Get user credits
-      const { data: credits } = await supabase
+      const { data: credits, error: creditsError } = await supabase
         .from('user_credits')
-        .select('user_id, balance, total_spent');
+        .select('*');
+
+      console.log('Credits data:', credits);
+      console.log('Credits error:', creditsError);
 
       // Get widget counts per user
-      const { data: widgetCounts } = await supabase
+      const { data: widgetCounts, error: widgetsError } = await supabase
         .from('widgets')
         .select('user_id');
+
+      console.log('Widgets data:', widgetCounts);
+      console.log('Widgets error:', widgetsError);
 
       // Count widgets per user
       const widgetCountMap = widgetCounts?.reduce((acc, widget) => {
@@ -84,6 +96,7 @@ export const AdminUsers = () => {
         total_widgets: widgetCountMap[user.id] || 0,
       })) || [];
 
+      console.log('Final users data:', usersWithRoles);
       setUsers(usersWithRoles);
 
       // Calculate stats
@@ -101,7 +114,7 @@ export const AdminUsers = () => {
       console.error('Error fetching users:', error);
       toast({
         title: "Xəta",
-        description: "İstifadəçilər yüklənərkən xəta baş verdi",
+        description: "İstifadəçilər yüklənərkən xəta baş verdi: " + error,
         variant: "destructive",
       });
     } finally {
