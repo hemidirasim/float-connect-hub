@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard, Users, TrendingUp } from 'lucide-react';
+import { CreditCard, Users, TrendingUp, DollarSign } from 'lucide-react';
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 interface Transaction {
@@ -104,22 +104,22 @@ export const AdminPayments = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="grid md:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse bg-gray-800 border-gray-700">
+            <Card key={i} className="animate-pulse bg-gray-800/60 backdrop-blur-sm border-gray-700/50">
               <CardContent className="p-6">
-                <div className="h-4 bg-gray-600 rounded w-1/2 mb-2"></div>
+                <div className="h-4 bg-gray-600 rounded w-1/2 mb-3"></div>
                 <div className="h-8 bg-gray-600 rounded w-3/4"></div>
               </CardContent>
             </Card>
           ))}
         </div>
-        <Card className="bg-gray-800 border-gray-700">
-          <CardContent className="p-6">
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto"></div>
-              <p className="mt-2 text-gray-400">Yüklənir...</p>
+        <Card className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50">
+          <CardContent className="p-8">
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-red-500 border-opacity-75 mx-auto"></div>
+              <p className="mt-4 text-gray-400 font-medium">Ödənişlər yüklənir...</p>
             </div>
           </CardContent>
         </Card>
@@ -129,11 +129,11 @@ export const AdminPayments = () => {
 
   if (!adminUser) {
     return (
-      <Card className="bg-gray-800 border-gray-700">
-        <CardContent className="p-6">
-          <div className="text-center py-8">
-            <CreditCard className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <p className="text-gray-400">Admin girişi tələb olunur</p>
+      <Card className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50">
+        <CardContent className="p-8">
+          <div className="text-center py-12">
+            <CreditCard className="w-16 h-16 text-red-500 mx-auto mb-6" />
+            <p className="text-xl text-gray-300 font-medium">Admin girişi tələb olunur</p>
           </div>
         </CardContent>
       </Card>
@@ -141,82 +141,90 @@ export const AdminPayments = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Stats Cards */}
       <div className="grid md:grid-cols-3 gap-6">
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-gradient-to-br from-green-900/30 to-green-800/20 backdrop-blur-sm border-green-700/30">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400">Ümumi Gəlir</p>
-                <p className="text-2xl font-bold text-green-400">${stats.totalRevenue.toFixed(2)}</p>
+                <p className="text-sm text-green-300/80">Ümumi Gəlir</p>
+                <p className="text-3xl font-bold text-green-400">${stats.totalRevenue.toFixed(2)}</p>
               </div>
-              <TrendingUp className="w-8 h-8 text-green-500" />
+              <div className="p-3 bg-green-500/20 rounded-xl">
+                <TrendingUp className="w-8 h-8 text-green-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-gradient-to-br from-blue-900/30 to-blue-800/20 backdrop-blur-sm border-blue-700/30">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400">Ümumi Əməliyyat</p>
-                <p className="text-2xl font-bold text-blue-400">{stats.totalTransactions}</p>
+                <p className="text-sm text-blue-300/80">Ümumi Əməliyyat</p>
+                <p className="text-3xl font-bold text-blue-400">{stats.totalTransactions}</p>
               </div>
-              <CreditCard className="w-8 h-8 text-blue-500" />
+              <div className="p-3 bg-blue-500/20 rounded-xl">
+                <CreditCard className="w-8 h-8 text-blue-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-gradient-to-br from-purple-900/30 to-purple-800/20 backdrop-blur-sm border-purple-700/30">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400">Satılan Kredit</p>
-                <p className="text-2xl font-bold text-purple-400">{stats.totalCredits}</p>
+                <p className="text-sm text-purple-300/80">Satılan Kredit</p>
+                <p className="text-3xl font-bold text-purple-400">{stats.totalCredits}</p>
               </div>
-              <Users className="w-8 h-8 text-purple-500" />
+              <div className="p-3 bg-purple-500/20 rounded-xl">
+                <Users className="w-8 h-8 text-purple-400" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Transactions Table */}
-      <Card className="bg-gray-800 border-gray-700">
+      <Card className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white">
-            <CreditCard className="w-5 h-5" />
+          <CardTitle className="flex items-center gap-3 text-white text-xl">
+            <div className="p-2 bg-red-500/20 rounded-lg">
+              <CreditCard className="w-6 h-6 text-red-400" />
+            </div>
             Ödənişlər ({transactions.length})
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-gray-700">
-                  <TableHead className="text-gray-300">Email</TableHead>
-                  <TableHead className="text-gray-300">Məbləğ</TableHead>
-                  <TableHead className="text-gray-300">Valyuta</TableHead>
-                  <TableHead className="text-gray-300">Kreditlər</TableHead>
-                  <TableHead className="text-gray-300">Status</TableHead>
-                  <TableHead className="text-gray-300">Tarix</TableHead>
-                  <TableHead className="text-gray-300">Əməliyyat ID</TableHead>
+                <TableRow className="border-gray-700/50 hover:bg-gray-700/20">
+                  <TableHead className="text-gray-300 font-semibold">Email</TableHead>
+                  <TableHead className="text-gray-300 font-semibold">Məbləğ</TableHead>
+                  <TableHead className="text-gray-300 font-semibold">Valyuta</TableHead>
+                  <TableHead className="text-gray-300 font-semibold">Kreditlər</TableHead>
+                  <TableHead className="text-gray-300 font-semibold">Status</TableHead>
+                  <TableHead className="text-gray-300 font-semibold">Tarix</TableHead>
+                  <TableHead className="text-gray-300 font-semibold">Əməliyyat ID</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {transactions.map((transaction) => (
-                  <TableRow key={transaction.id} className="border-gray-700 hover:bg-gray-750">
+                  <TableRow key={transaction.id} className="border-gray-700/50 hover:bg-gray-700/20 transition-colors">
                     <TableCell className="font-medium text-white">{transaction.email}</TableCell>
-                    <TableCell className="text-gray-300">${Number(transaction.amount).toFixed(2)}</TableCell>
-                    <TableCell className="text-gray-300">{transaction.currency}</TableCell>
-                    <TableCell className="text-gray-300">{transaction.credits_added}</TableCell>
+                    <TableCell className="text-green-400 font-semibold">${Number(transaction.amount).toFixed(2)}</TableCell>
+                    <TableCell className="text-gray-300 uppercase">{transaction.currency}</TableCell>
+                    <TableCell className="text-purple-400 font-semibold">{transaction.credits_added}</TableCell>
                     <TableCell>
-                      <Badge variant={getStatusColor(transaction.status)}>
+                      <Badge variant={getStatusColor(transaction.status)} className="font-medium">
                         {getStatusText(transaction.status)}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-gray-300">{new Date(transaction.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell className="font-mono text-sm text-gray-300">{transaction.transaction_id}</TableCell>
+                    <TableCell className="text-gray-300">{new Date(transaction.created_at).toLocaleDateString('az-AZ')}</TableCell>
+                    <TableCell className="font-mono text-xs text-gray-400">{transaction.transaction_id}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

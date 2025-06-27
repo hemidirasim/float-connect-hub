@@ -38,10 +38,10 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-500 mx-auto"></div>
-          <p className="mt-4 text-gray-300">Yüklənir...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-red-500 border-opacity-75 mx-auto"></div>
+          <p className="mt-6 text-lg text-gray-300 font-medium">Admin paneli yüklənir...</p>
         </div>
       </div>
     );
@@ -49,41 +49,41 @@ const AdminDashboard = () => {
 
   if (!adminUser) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <p className="text-gray-300">Admin girişi tələb olunur</p>
+          <Shield className="w-20 h-20 text-red-500 mx-auto mb-6" />
+          <p className="text-xl text-gray-300 font-medium">Admin girişi tələb olunur</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Admin Header */}
-      <div className="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+      <div className="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50 sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-lg">
+                <Shield className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">Admin Panel</h1>
-                <p className="text-sm text-gray-400">Sistem İdarəetmə</p>
+                <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
+                <p className="text-sm text-gray-400">Sistem İdarəetmə Paneli</p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6">
               <div className="text-right">
-                <p className="text-sm text-gray-300">{adminUser.full_name || adminUser.email}</p>
-                <p className="text-xs text-red-400">Administrator</p>
+                <p className="text-sm font-medium text-gray-200">{adminUser.full_name || adminUser.email}</p>
+                <p className="text-xs text-red-400 font-medium">Administrator</p>
               </div>
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={handleSignOut}
-                className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+                className="bg-gray-700/50 border-gray-600 text-white hover:bg-gray-600/70 transition-all duration-200"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Çıxış
@@ -93,63 +93,63 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-gray-800 border border-gray-700">
+      <div className="container mx-auto px-6 py-8">
+        <Tabs defaultValue="users" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-5 bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 rounded-xl p-1.5">
             <TabsTrigger 
               value="users" 
-              className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white text-gray-300"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white text-gray-300 rounded-lg transition-all duration-200 font-medium"
             >
               <Users className="w-4 h-4" />
               İstifadəçilər
             </TabsTrigger>
             <TabsTrigger 
               value="blogs" 
-              className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white text-gray-300"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white text-gray-300 rounded-lg transition-all duration-200 font-medium"
             >
               <FileText className="w-4 h-4" />
               Bloqlar
             </TabsTrigger>
             <TabsTrigger 
               value="payments" 
-              className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white text-gray-300"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white text-gray-300 rounded-lg transition-all duration-200 font-medium"
             >
               <CreditCard className="w-4 h-4" />
               Ödənişlər
             </TabsTrigger>
             <TabsTrigger 
               value="tickets" 
-              className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white text-gray-300"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white text-gray-300 rounded-lg transition-all duration-200 font-medium"
             >
               <MessageSquare className="w-4 h-4" />
               Ticketlər
             </TabsTrigger>
             <TabsTrigger 
               value="widgets" 
-              className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white text-gray-300"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-600 data-[state=active]:to-red-700 data-[state=active]:text-white text-gray-300 rounded-lg transition-all duration-200 font-medium"
             >
               <Settings className="w-4 h-4" />
               Widget-lər
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="users">
+          <TabsContent value="users" className="mt-8">
             <AdminUsers />
           </TabsContent>
 
-          <TabsContent value="blogs">
+          <TabsContent value="blogs" className="mt-8">
             <AdminBlogs />
           </TabsContent>
 
-          <TabsContent value="payments">
+          <TabsContent value="payments" className="mt-8">
             <AdminPayments />
           </TabsContent>
 
-          <TabsContent value="tickets">
+          <TabsContent value="tickets" className="mt-8">
             <AdminTickets />
           </TabsContent>
 
-          <TabsContent value="widgets">
+          <TabsContent value="widgets" className="mt-8">
             <AdminWidgets />
           </TabsContent>
         </Tabs>
