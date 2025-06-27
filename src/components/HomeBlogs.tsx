@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,16 @@ interface Blog {
   excerpt: string;
   created_at: string;
 }
+
+// Function to generate SEO-friendly URL slug from title
+const generateSeoSlug = (title: string): string => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .trim();
+};
 
 export const HomeBlogs: React.FC = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -80,22 +91,25 @@ export const HomeBlogs: React.FC = () => {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8 mb-8">
-            {blogs.map((blog) => (
-              <Link key={blog.id} to={`/blog/${blog.slug}`}>
-                <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardHeader>
-                    <CardTitle className="line-clamp-2 text-lg">{blog.title}</CardTitle>
-                    <div className="flex items-center gap-1 text-sm text-gray-500">
-                      <Calendar className="w-4 h-4" />
-                      {new Date(blog.created_at).toLocaleDateString()}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 line-clamp-3">{blog.excerpt}</p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+            {blogs.map((blog) => {
+              const seoSlug = generateSeoSlug(blog.title);
+              return (
+                <Link key={blog.id} to={`/${seoSlug}/`}>
+                  <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <CardTitle className="line-clamp-2 text-lg">{blog.title}</CardTitle>
+                      <div className="flex items-center gap-1 text-sm text-gray-500">
+                        <Calendar className="w-4 h-4" />
+                        {new Date(blog.created_at).toLocaleDateString()}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 line-clamp-3">{blog.excerpt}</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
 
           <div className="text-center">
