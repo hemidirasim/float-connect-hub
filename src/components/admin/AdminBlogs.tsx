@@ -9,8 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Plus, Settings, Trash2 } from 'lucide-react';
-import { RichTextEditor } from './RichTextEditor';
+import { FileText, Plus, Settings, Trash2, Image } from 'lucide-react';
+import { CKEditorComponent } from './CKEditor';
 
 interface Blog {
   id: string;
@@ -19,6 +19,7 @@ interface Blog {
   excerpt: string;
   content: string;
   status: string;
+  featured_image: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -35,6 +36,7 @@ export const AdminBlogs = () => {
     slug: '',
     excerpt: '',
     content: '',
+    featured_image: '',
     status: 'draft' as 'draft' | 'published'
   });
 
@@ -118,6 +120,7 @@ export const AdminBlogs = () => {
             slug,
             excerpt: formData.excerpt.trim() || null,
             content: formData.content,
+            featured_image: formData.featured_image.trim() || null,
             status: formData.status,
             updated_at: new Date().toISOString()
           })
@@ -140,6 +143,7 @@ export const AdminBlogs = () => {
             slug,
             excerpt: formData.excerpt.trim() || null,
             content: formData.content,
+            featured_image: formData.featured_image.trim() || null,
             status: formData.status
           });
 
@@ -200,6 +204,7 @@ export const AdminBlogs = () => {
       slug: '',
       excerpt: '',
       content: '',
+      featured_image: '',
       status: 'draft'
     });
     setEditingBlog(null);
@@ -212,6 +217,7 @@ export const AdminBlogs = () => {
       slug: blog.slug,
       excerpt: blog.excerpt || '',
       content: blog.content,
+      featured_image: blog.featured_image || '',
       status: blog.status as 'draft' | 'published'
     });
     setIsDialogOpen(true);
@@ -257,7 +263,7 @@ export const AdminBlogs = () => {
               Yeni Bloq
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-800 border-gray-700 text-white">
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-gray-800 border-gray-700 text-white">
             <DialogHeader>
               <DialogTitle className="text-white text-xl">
                 {editingBlog ? 'Bloqu Redaktə Et' : 'Yeni Bloq Yarat'}
@@ -288,6 +294,31 @@ export const AdminBlogs = () => {
                   />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <Image className="w-4 h-4 inline mr-1" />
+                  Featured Image URL
+                </label>
+                <Input
+                  placeholder="https://example.com/image.jpg"
+                  value={formData.featured_image}
+                  onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
+                  className="bg-gray-700 border-gray-600 text-white"
+                />
+                {formData.featured_image && (
+                  <div className="mt-2">
+                    <img 
+                      src={formData.featured_image} 
+                      alt="Featured image preview" 
+                      className="max-w-xs h-32 object-cover rounded border"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -306,7 +337,7 @@ export const AdminBlogs = () => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Məzmun *
                 </label>
-                <RichTextEditor
+                <CKEditorComponent
                   content={formData.content}
                   onChange={(content) => setFormData({ ...formData, content })}
                   placeholder="Bloq məzmununu yazın..."
@@ -347,6 +378,7 @@ export const AdminBlogs = () => {
               <TableRow className="border-gray-700/50 hover:bg-gray-700/20">
                 <TableHead className="text-gray-300 font-semibold">Başlıq</TableHead>
                 <TableHead className="text-gray-300 font-semibold">Status</TableHead>
+                <TableHead className="text-gray-300 font-semibold">Featured Image</TableHead>
                 <TableHead className="text-gray-300 font-semibold">Yaradılma Tarixi</TableHead>
                 <TableHead className="text-gray-300 font-semibold">Yenilənmə Tarixi</TableHead>
                 <TableHead className="text-gray-300 font-semibold">Əməliyyatlar</TableHead>
@@ -360,6 +392,22 @@ export const AdminBlogs = () => {
                     <Badge variant={blog.status === 'published' ? 'default' : 'secondary'}>
                       {blog.status === 'published' ? 'Dərc edilmiş' : 'Qaralama'}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {blog.featured_image ? (
+                      <img 
+                        src={blog.featured_image} 
+                        alt="Featured" 
+                        className="w-16 h-10 object-cover rounded"
+                        onError={(e) => {
+                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA2NCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjQwIiBmaWxsPSIjMzc0MTUxIi8+CjxwYXRoIGQ9Ik0yNCAyMEwyNCAyOEwyOCAyNEwzMiAyOEwzNiAyNEw0MCAyOEw0MCAyMEgyNFoiIGZpbGw9IiM2QjcyODAiLz4KPC9zdmc+';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-16 h-10 bg-gray-600 rounded flex items-center justify-center">
+                        <Image className="w-4 h-4 text-gray-400" />
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell className="text-gray-300">{new Date(blog.created_at).toLocaleDateString('az-AZ')}</TableCell>
                   <TableCell className="text-gray-300">{new Date(blog.updated_at).toLocaleDateString('az-AZ')}</TableCell>

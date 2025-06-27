@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -13,6 +14,7 @@ interface BlogPost {
   id: string;
   title: string;
   content: string;
+  featured_image: string | null;
   created_at: string;
   author_id: string | null;
 }
@@ -65,6 +67,7 @@ const BlogPost = () => {
             <meta property="og:description" content={blog.content.replace(/<[^>]*>/g, '').substring(0, 160) + '...'} />
             <meta property="og:url" content={`https://hiclient.co/${slug}/`} />
             <meta property="og:type" content="article" />
+            {blog.featured_image && <meta property="og:image" content={blog.featured_image} />}
             <meta property="article:published_time" content={blog.created_at} />
             <meta property="article:author" content="Hiclient Team" />
             
@@ -74,6 +77,7 @@ const BlogPost = () => {
                 "@type": "BlogPosting",
                 "headline": blog.title,
                 "description": blog.content.replace(/<[^>]*>/g, '').substring(0, 160),
+                "image": blog.featured_image || undefined,
                 "author": {
                   "@type": "Organization",
                   "name": "Hiclient Team"
@@ -127,25 +131,40 @@ const BlogPost = () => {
                 </div>
               </div>
             ) : blog ? (
-              <article className="bg-white rounded-lg shadow-sm p-8">
-                <header className="mb-8">
-                  <h1 className="text-4xl font-bold text-gray-900 mb-4">{blog.title}</h1>
-                  <div className="flex items-center gap-4 text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      {new Date(blog.created_at).toLocaleDateString()}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <User className="w-4 h-4" />
-                      Hiclient Team
-                    </div>
+              <article className="bg-white rounded-lg shadow-sm overflow-hidden">
+                {blog.featured_image && (
+                  <div className="w-full h-64 md:h-80 mb-8">
+                    <img 
+                      src={blog.featured_image} 
+                      alt={blog.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
                   </div>
-                </header>
+                )}
                 
-                <div 
-                  className="prose prose-lg max-w-none"
-                  dangerouslySetInnerHTML={{ __html: blog.content }}
-                />
+                <div className="p-8">
+                  <header className="mb-8">
+                    <h1 className="text-4xl font-bold text-gray-900 mb-4">{blog.title}</h1>
+                    <div className="flex items-center gap-4 text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        {new Date(blog.created_at).toLocaleDateString()}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <User className="w-4 h-4" />
+                        Hiclient Team
+                      </div>
+                    </div>
+                  </header>
+                  
+                  <div 
+                    className="prose prose-lg max-w-none"
+                    dangerouslySetInnerHTML={{ __html: blog.content }}
+                  />
+                </div>
               </article>
             ) : (
               <div className="text-center py-12">
