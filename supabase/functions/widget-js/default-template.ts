@@ -23,7 +23,7 @@ const defaultJavaScriptLogic = `
 
   function getChannelIcon(channel) {
     var icons = {
-      whatsapp: '📷',
+      whatsapp: '📱',
       telegram: '✈️',
       instagram: '📷',
       messenger: '💬',
