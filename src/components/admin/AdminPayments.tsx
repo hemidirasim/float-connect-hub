@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard, Users, Settings } from 'lucide-react';
+import { CreditCard, Users, TrendingUp } from 'lucide-react';
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 interface Transaction {
   id: string;
@@ -34,29 +35,35 @@ export const AdminPayments = () => {
   });
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { adminUser } = useAdminAuth();
 
   useEffect(() => {
-    fetchTransactions();
-  }, []);
+    if (adminUser) {
+      fetchTransactions();
+    }
+  }, [adminUser]);
 
   const fetchTransactions = async () => {
+    if (!adminUser) return;
+
     try {
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Transactions error:', error);
+      } else {
+        setTransactions(data || []);
 
-      setTransactions(data || []);
-
-      // Calculate stats
-      const stats = {
-        totalRevenue: data?.reduce((sum, t) => sum + Number(t.amount), 0) || 0,
-        totalTransactions: data?.length || 0,
-        totalCredits: data?.reduce((sum, t) => sum + t.credits_added, 0) || 0
-      };
-      setStats(stats);
+        const stats = {
+          totalRevenue: data?.reduce((sum, t) => sum + Number(t.amount), 0) || 0,
+          totalTransactions: data?.length || 0,
+          totalCredits: data?.reduce((sum, t) => sum + t.credits_added, 0) || 0
+        };
+        setStats(stats);
+      }
     } catch (error) {
       console.error('Error fetching transactions:', error);
       toast({
@@ -120,6 +127,19 @@ export const AdminPayments = () => {
     );
   }
 
+  if (!adminUser) {
+    return (
+      <Card className="bg-gray-800 border-gray-700">
+        <CardContent className="p-6">
+          <div className="text-center py-8">
+            <CreditCard className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <p className="text-gray-400">Admin girişi tələb olunur</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
@@ -131,7 +151,7 @@ export const AdminPayments = () => {
                 <p className="text-sm text-gray-400">Ümumi Gəlir</p>
                 <p className="text-2xl font-bold text-green-400">${stats.totalRevenue.toFixed(2)}</p>
               </div>
-              <Users className="w-8 h-8 text-green-500" />
+              <TrendingUp className="w-8 h-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
@@ -155,7 +175,7 @@ export const AdminPayments = () => {
                 <p className="text-sm text-gray-400">Satılan Kredit</p>
                 <p className="text-2xl font-bold text-purple-400">{stats.totalCredits}</p>
               </div>
-              <Settings className="w-8 h-8 text-purple-500" />
+              <Users className="w-8 h-8 text-purple-500" />
             </div>
           </CardContent>
         </Card>

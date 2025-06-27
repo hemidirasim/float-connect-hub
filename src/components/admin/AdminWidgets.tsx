@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Trash2, Users, User } from 'lucide-react';
+import { Settings, Trash2, Eye, User } from 'lucide-react';
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 interface Widget {
   id: string;
@@ -25,31 +26,37 @@ export const AdminWidgets = () => {
   const [widgets, setWidgets] = useState<Widget[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { adminUser } = useAdminAuth();
 
   useEffect(() => {
-    fetchWidgets();
-  }, []);
+    if (adminUser) {
+      fetchWidgets();
+    }
+  }, [adminUser]);
 
   const fetchWidgets = async () => {
+    if (!adminUser) return;
+
     try {
       const { data: widgetsData, error: widgetsError } = await supabase
         .from('widgets')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (widgetsError) throw widgetsError;
+      if (widgetsError) {
+        console.error('Widgets error:', widgetsError);
+      } else {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, email');
 
-      // Get user emails
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, email');
+        const widgetsWithEmails = widgetsData?.map(widget => ({
+          ...widget,
+          user_email: profiles?.find(p => p.id === widget.user_id)?.email || 'Bilinmir'
+        })) || [];
 
-      const widgetsWithEmails = widgetsData?.map(widget => ({
-        ...widget,
-        user_email: profiles?.find(p => p.id === widget.user_id)?.email || 'Bilinmir'
-      })) || [];
-
-      setWidgets(widgetsWithEmails);
+        setWidgets(widgetsWithEmails);
+      }
     } catch (error) {
       console.error('Error fetching widgets:', error);
       toast({
@@ -96,13 +103,11 @@ export const AdminWidgets = () => {
     }
 
     try {
-      // First delete related widget views
       await supabase
         .from('widget_views')
         .delete()
         .eq('widget_id', widgetId);
 
-      // Then delete the widget
       const { error } = await supabase
         .from('widgets')
         .delete()
@@ -139,6 +144,19 @@ export const AdminWidgets = () => {
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto"></div>
             <p className="mt-2 text-gray-400">Yüklənir...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!adminUser) {
+    return (
+      <Card className="bg-gray-800 border-gray-700">
+        <CardContent className="p-6">
+          <div className="text-center py-8">
+            <Settings className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <p className="text-gray-400">Admin girişi tələb olunur</p>
           </div>
         </CardContent>
       </Card>
@@ -209,7 +227,7 @@ export const AdminWidgets = () => {
                         onClick={() => window.open(widget.website_url, '_blank')}
                         className="border-gray-600 text-white hover:bg-gray-700"
                       >
-                        <User className="w-4 h-4" />
+                        <Eye className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="destructive"

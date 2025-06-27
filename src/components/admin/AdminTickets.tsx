@@ -6,10 +6,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { MessageSquare, Reply, Eye, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { MessageSquare, Reply, Eye, Clock, CheckCircle } from 'lucide-react';
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 interface Ticket {
   id: string;
@@ -51,41 +52,45 @@ export const AdminTickets = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { adminUser } = useAdminAuth();
 
   useEffect(() => {
-    fetchTickets();
-  }, []);
+    if (adminUser) {
+      fetchTickets();
+    }
+  }, [adminUser]);
 
   const fetchTickets = async () => {
+    if (!adminUser) return;
+
     try {
       const { data: ticketsData, error: ticketsError } = await supabase
         .from('support_tickets')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (ticketsError) throw ticketsError;
+      if (ticketsError) {
+        console.error('Tickets error:', ticketsError);
+      } else {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, email');
 
-      // Get user emails
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, email');
+        const ticketsWithEmails = ticketsData?.map(ticket => ({
+          ...ticket,
+          user_email: profiles?.find(p => p.id === ticket.user_id)?.email || 'Bilinmir'
+        })) || [];
 
-      const ticketsWithEmails = ticketsData?.map(ticket => ({
-        ...ticket,
-        user_email: profiles?.find(p => p.id === ticket.user_id)?.email || 'Bilinmir'
-      })) || [];
+        setTickets(ticketsWithEmails);
 
-      setTickets(ticketsWithEmails);
-
-      // Calculate stats
-      const stats = {
-        totalTickets: ticketsWithEmails.length,
-        openTickets: ticketsWithEmails.filter(t => t.status === 'open').length,
-        repliedTickets: ticketsWithEmails.filter(t => t.status === 'replied').length,
-        closedTickets: ticketsWithEmails.filter(t => t.status === 'closed').length,
-      };
-      setStats(stats);
-
+        const stats = {
+          totalTickets: ticketsWithEmails.length,
+          openTickets: ticketsWithEmails.filter(t => t.status === 'open').length,
+          repliedTickets: ticketsWithEmails.filter(t => t.status === 'replied').length,
+          closedTickets: ticketsWithEmails.filter(t => t.status === 'closed').length,
+        };
+        setStats(stats);
+      }
     } catch (error) {
       console.error('Error fetching tickets:', error);
       toast({
@@ -223,7 +228,7 @@ export const AdminTickets = () => {
       case 'closed':
         return <CheckCircle className="w-4 h-4" />;
       default:
-        return <XCircle className="w-4 h-4" />;
+        return null;
     }
   };
 
@@ -275,6 +280,19 @@ export const AdminTickets = () => {
           </CardContent>
         </Card>
       </div>
+    );
+  }
+
+  if (!adminUser) {
+    return (
+      <Card className="bg-gray-800 border-gray-700">
+        <CardContent className="p-6">
+          <div className="text-center py-8">
+            <MessageSquare className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <p className="text-gray-400">Admin girişi tələb olunur</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 

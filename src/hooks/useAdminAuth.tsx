@@ -14,7 +14,10 @@ export const useAdminAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if admin is logged in
+    checkAdminAuth();
+  }, []);
+
+  const checkAdminAuth = async () => {
     const storedAdmin = localStorage.getItem('admin_user');
     if (storedAdmin) {
       try {
@@ -25,11 +28,10 @@ export const useAdminAuth = () => {
       }
     }
     setLoading(false);
-  }, []);
+  };
 
   const signIn = async (email: string, password: string) => {
     try {
-      // Verify admin credentials
       const { data, error } = await supabase
         .rpc('verify_admin_login', {
           p_email: email,
@@ -43,7 +45,6 @@ export const useAdminAuth = () => {
         setAdminUser(admin);
         localStorage.setItem('admin_user', JSON.stringify(admin));
         
-        // Update last login
         await supabase.rpc('update_admin_last_login', {
           p_admin_id: admin.admin_id
         });

@@ -18,7 +18,6 @@ interface User {
   balance?: number;
   total_spent?: number;
   total_widgets?: number;
-  last_login?: string;
 }
 
 interface UserStats {
@@ -48,85 +47,44 @@ export const AdminUsers = () => {
 
   const fetchUsers = async () => {
     if (!adminUser) return;
-    
+
     try {
-      console.log('Admin fetching users...');
-      
-      // Admin olaraq bütün məlumatları almaq üçün service role istifadə edək
-      // Və ya RLS-i bypass edək
-      
-      // Get all profiles
+      // Service role ilə bütün məlumatları al
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*');
 
-      console.log('Profiles result:', { profiles, profilesError });
-
       if (profilesError) {
         console.error('Profiles error:', profilesError);
-        // Əgər RLS problemi varsa, məlumatları başqa yolla almağa çalışaq
-        toast({
-          title: "Məlumat",
-          description: "İstifadəçi məlumatları yüklənmir. RLS siyasətləri yoxlanılır...",
-          variant: "default",
-        });
-        
-        // Dummy data for testing
-        const dummyUsers = [
-          {
-            id: '1',
-            email: 'user1@example.com',
-            full_name: 'Test User 1',
-            created_at: new Date().toISOString(),
-            role: 'user',
-            balance: 100,
-            total_spent: 50,
-            total_widgets: 2,
-          },
-          {
-            id: '2', 
-            email: 'user2@example.com',
-            full_name: 'Test User 2',
-            created_at: new Date().toISOString(),
-            role: 'moderator',
-            balance: 200,
-            total_spent: 30,
-            total_widgets: 1,
-          }
-        ];
-        
-        setUsers(dummyUsers);
-        setStats({
-          totalUsers: 2,
-          activeUsers: 2,
-          adminUsers: 1,
-          totalCredits: 300
-        });
+        setLoading(false);
         return;
       }
 
-      // Əgər profillər alındısa, digər məlumatları da almağa çalışaq
-      const { data: roles } = await supabase
+      // User roles
+      const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('*');
 
-      const { data: credits } = await supabase
+      // User credits
+      const { data: credits, error: creditsError } = await supabase
         .from('user_credits')
         .select('*');
 
-      const { data: widgetCounts } = await supabase
+      // Widget counts
+      const { data: widgets, error: widgetsError } = await supabase
         .from('widgets')
         .select('user_id');
 
-      console.log('Additional data:', { roles, credits, widgetCounts });
+      if (rolesError) console.error('Roles error:', rolesError);
+      if (creditsError) console.error('Credits error:', creditsError);
+      if (widgetsError) console.error('Widgets error:', widgetsError);
 
-      // Count widgets per user
-      const widgetCountMap = widgetCounts?.reduce((acc, widget) => {
+      const widgetCountMap = widgets?.reduce((acc, widget) => {
         acc[widget.user_id] = (acc[widget.user_id] || 0) + 1;
         return acc;
       }, {} as Record<string, number>) || {};
 
-      const usersWithRoles = profiles?.map(user => ({
+      const usersWithDetails = profiles?.map(user => ({
         ...user,
         role: roles?.find(r => r.user_id === user.id)?.role || 'user',
         balance: credits?.find(c => c.user_id === user.id)?.balance || 0,
@@ -134,16 +92,15 @@ export const AdminUsers = () => {
         total_widgets: widgetCountMap[user.id] || 0,
       })) || [];
 
-      console.log('Final users data:', usersWithRoles);
-      setUsers(usersWithRoles);
+      setUsers(usersWithDetails);
 
       // Calculate stats
       const totalCredits = credits?.reduce((sum, c) => sum + (c.balance || 0), 0) || 0;
       const adminCount = roles?.filter(r => r.role === 'admin').length || 0;
       
       setStats({
-        totalUsers: usersWithRoles.length,
-        activeUsers: usersWithRoles.filter(u => u.balance > 0 || u.total_widgets > 0).length,
+        totalUsers: usersWithDetails.length,
+        activeUsers: usersWithDetails.filter(u => u.balance > 0 || u.total_widgets > 0).length,
         adminUsers: adminCount,
         totalCredits
       });
@@ -165,14 +122,12 @@ export const AdminUsers = () => {
     
     try {
       if (newRole === 'user') {
-        // Remove admin/moderator role
         await supabase
           .from('user_roles')
           .delete()
           .eq('user_id', userId)
           .in('role', ['admin', 'moderator']);
       } else {
-        // Upsert new role
         await supabase
           .from('user_roles')
           .upsert({
@@ -194,28 +149,6 @@ export const AdminUsers = () => {
         description: "İstifadəçi rolu yenilənərkən xəta baş verdi",
         variant: "destructive",
       });
-    }
-  };
-
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return 'destructive';
-      case 'moderator':
-        return 'secondary';
-      default:
-        return 'default';
-    }
-  };
-
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return <Shield className="w-3 h-3" />;
-      case 'moderator':
-        return <Users className="w-3 h-3" />;
-      default:
-        return <User className="w-3 h-3" />;
     }
   };
 
