@@ -30,12 +30,14 @@ const AdminDashboard = () => {
   useEffect(() => {
     console.log('AdminDashboard - loading:', loading, 'adminUser:', adminUser);
     
+    // Yalnız loading false olduqda və adminUser yoxdursa redirect et
     if (!loading && !adminUser) {
       console.log('Redirecting to admin login');
       navigate('/admin/login');
     }
   }, [adminUser, loading, navigate]);
 
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
@@ -47,6 +49,7 @@ const AdminDashboard = () => {
     );
   }
 
+  // Admin user yoxdursa
   if (!adminUser) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">

@@ -34,6 +34,7 @@ export const useAdminAuth = () => {
         if (error && error.code !== 'PGRST116') {
           console.error('Admin role check error:', error);
           setAdminUser(null);
+          setLoading(false);
           return;
         }
 
@@ -63,6 +64,10 @@ export const useAdminAuth = () => {
         if (mounted) {
           setAdminUser(null);
         }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -71,15 +76,16 @@ export const useAdminAuth = () => {
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         
+        if (!mounted) return;
+
+        setLoading(true);
+        
         if (session?.user) {
           setUser(session.user);
           await checkAdminRole(session.user);
         } else {
           setUser(null);
           setAdminUser(null);
-        }
-        
-        if (mounted) {
           setLoading(false);
         }
       }
@@ -96,10 +102,11 @@ export const useAdminAuth = () => {
           console.log('Existing session found for:', session.user.email);
           setUser(session.user);
           await checkAdminRole(session.user);
+        } else {
+          setLoading(false);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
-      } finally {
         if (mounted) {
           setLoading(false);
         }
@@ -117,6 +124,7 @@ export const useAdminAuth = () => {
   const signIn = async (email: string, password: string) => {
     try {
       console.log('Attempting sign in for:', email);
+      setLoading(true);
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -125,6 +133,7 @@ export const useAdminAuth = () => {
 
       if (error) {
         console.error('Sign in error:', error);
+        setLoading(false);
         return { error: error.message };
       }
 
@@ -142,6 +151,7 @@ export const useAdminAuth = () => {
         if (!roleData) {
           console.log('User does not have admin role, signing out');
           await supabase.auth.signOut();
+          setLoading(false);
           return { error: 'Bu hesabın admin girişi yoxdur' };
         }
 
@@ -149,17 +159,21 @@ export const useAdminAuth = () => {
         return { success: true };
       }
 
+      setLoading(false);
       return { error: 'Giriş uğursuz oldu' };
     } catch (error: any) {
       console.error('Sign in exception:', error);
+      setLoading(false);
       return { error: error.message };
     }
   };
 
   const signOut = async () => {
+    setLoading(true);
     await supabase.auth.signOut();
     setAdminUser(null);
     setUser(null);
+    setLoading(false);
   };
 
   return {
