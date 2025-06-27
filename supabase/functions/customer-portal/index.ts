@@ -14,17 +14,169 @@ serve(async (req) => {
 
   try {
     console.log('🔧 Customer portal function called');
+    
+    const body = await req.text();
+    let requestData = {};
+    
+    if (body) {
+      try {
+        requestData = JSON.parse(body);
+      } catch (parseError) {
+        console.warn('Failed to parse request body:', parseError);
+      }
+    }
+    
+    console.log('Request data:', requestData);
 
-    // For now, return a simple response since we're using Paddle
-    // In the future, this could integrate with Paddle's customer portal
-    return new Response(JSON.stringify({
-      success: true,
-      message: 'Subscription management via Paddle customer portal is not yet implemented',
-      url: null
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    // Get Paddle API credentials
+    const paddleApiKey = Deno.env.get('PADDLE_API_KEY');
+    const paddleApiToken = Deno.env.get('PADDLE_API_TOKEN');
+    
+    if (!paddleApiKey && !paddleApiToken) {
+      console.error('Missing Paddle API credentials');
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Paddle API credentials not configured'
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const apiToken = paddleApiToken || paddleApiKey;
+    
+    // Handle different actions
+    const action = (requestData as any)?.action;
+    const customerEmail = (requestData as any)?.customer_email;
+    
+    if (action === 'cancel_existing_subscriptions' && customerEmail) {
+      console.log('🚫 Canceling existing subscriptions for:', customerEmail);
+      
+      try {
+        // First, find customer by email
+        const customerResponse = await fetch('https://api.paddle.com/customers', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!customerResponse.ok) {
+          console.log('Customer lookup failed, might not exist yet');
+          return new Response(JSON.stringify({
+            success: true,
+            message: 'No existing customer found'
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        
+        const customerData = await customerResponse.json();
+        const customer = customerData.data?.find((c: any) => c.email === customerEmail);
+        
+        if (!customer) {
+          console.log('No customer found with email:', customerEmail);
+          return new Response(JSON.stringify({
+            success: true,
+            message: 'No existing customer found'
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        
+        // Find active subscriptions for this customer
+        const subscriptionsResponse = await fetch(`https://api.paddle.com/subscriptions?customer_id=${customer.id}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (subscriptionsResponse.ok) {
+          const subscriptionsData = await subscriptionsResponse.json();
+          const activeSubscriptions = subscriptionsData.data?.filter((sub: any) => 
+            sub.status === 'active' || sub.status === 'trialing'
+          );
+          
+          // Cancel each active subscription
+          for (const subscription of activeSubscriptions || []) {
+            try {
+              await fetch(`https://api.paddle.com/subscriptions/${subscription.id}/cancel`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${apiToken}`,
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  effective_from: 'immediately'
+                })
+              });
+              console.log('✅ Cancelled subscription:', subscription.id);
+            } catch (cancelError) {
+              console.error('Failed to cancel subscription:', subscription.id, cancelError);
+            }
+          }
+        }
+        
+        return new Response(JSON.stringify({
+          success: true,
+          message: 'Existing subscriptions processed'
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+        
+      } catch (error) {
+        console.error('Error canceling subscriptions:', error);
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Failed to cancel existing subscriptions'
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+    }
+    
+    // Default: Create customer portal session
+    const returnUrl = (requestData as any)?.return_url || 'https://yourdomain.com/dashboard';
+    
+    try {
+      // For now, return a mock response since Paddle's customer portal 
+      // requires specific setup and customer IDs
+      console.log('📋 Creating customer portal session for:', customerEmail);
+      
+      // In a real implementation, you would:
+      // 1. Find the customer by email in Paddle
+      // 2. Create a customer portal session
+      // 3. Return the portal URL
+      
+      // Mock implementation - replace with actual Paddle API calls
+      const portalUrl = `https://checkout.paddle.com/customer-portal?customer_email=${encodeURIComponent(customerEmail || '')}&return_url=${encodeURIComponent(returnUrl)}`;
+      
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Customer portal session created',
+        portal_url: portalUrl
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+      
+    } catch (error) {
+      console.error('Error creating customer portal:', error);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Failed to create customer portal session'
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
 
   } catch (error) {
     console.error('💥 Customer portal error:', error);

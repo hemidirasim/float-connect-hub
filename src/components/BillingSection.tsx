@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -75,7 +76,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
   const [paddleLoaded, setPaddleLoaded] = useState(false);
   const [transactions, setTransactions] = useState<(Transaction | PaymentTransaction)[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [cancellingSubscription, setCancellingSubscription] = useState(false);
+  const [managingSubscription, setManagingSubscription] = useState(false);
 
   useEffect(() => {
     initializePaddle();
@@ -254,7 +255,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
 
   const handleManageSubscription = async () => {
     try {
-      setCancellingSubscription(true);
+      setManagingSubscription(true);
       
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -263,25 +264,32 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
       }
 
       // Call edge function to create customer portal session
-      const { data, error } = await supabase.functions.invoke('customer-portal');
+      const { data, error } = await supabase.functions.invoke('customer-portal', {
+        body: {
+          customer_email: user.email,
+          return_url: window.location.origin + '/dashboard'
+        }
+      });
       
       if (error) {
         console.error('Error creating customer portal session:', error);
-        toast.error('Failed to open subscription management');
+        toast.error('Failed to open subscription management. Please try again or contact support.');
         return;
       }
 
-      if (data?.url) {
+      if (data?.success && data?.portal_url) {
         // Open customer portal in new tab
-        window.open(data.url, '_blank');
+        window.open(data.portal_url, '_blank');
+        toast.success('Customer portal opened in new tab');
       } else {
-        toast.error('No portal URL received');
+        console.error('No portal URL received:', data);
+        toast.error('Subscription management is not available at the moment. Please contact support.');
       }
     } catch (error) {
       console.error('Error managing subscription:', error);
       toast.error('Failed to open subscription management');
     } finally {
-      setCancellingSubscription(false);
+      setManagingSubscription(false);
     }
   };
 
@@ -307,6 +315,19 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
         productId, 
         userEmail: user.email 
       });
+
+      // Before opening checkout, cancel any existing subscriptions for this email
+      try {
+        await supabase.functions.invoke('customer-portal', {
+          body: {
+            action: 'cancel_existing_subscriptions',
+            customer_email: user.email
+          }
+        });
+      } catch (cancelError) {
+        console.warn('Failed to cancel existing subscriptions:', cancelError);
+        // Continue with purchase even if cancellation fails
+      }
 
       // Open Paddle checkout with comprehensive custom data
       window.Paddle.Checkout.open({
@@ -394,29 +415,6 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
 
       <Card>
         <CardHeader>
-          <CardTitle>Subscription Management</CardTitle>
-          <CardDescription>Manage your subscription and billing</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <div>
-              <h4 className="font-medium">Manage Subscription</h4>
-              <p className="text-sm text-gray-600">Cancel, update payment method, or view billing history</p>
-            </div>
-            <Button
-              onClick={handleManageSubscription}
-              disabled={cancellingSubscription}
-              variant="outline"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              {cancellingSubscription ? 'Opening...' : 'Manage'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
           <CardTitle>Credit packages</CardTitle>
           <CardDescription>Buy credits for widget views</CardDescription>
         </CardHeader>
@@ -465,6 +463,29 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
               <li>Wait 5-10 minutes after payment</li>
               <li>Click "Refresh" button to update credits</li>
             </ul>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Subscription Management</CardTitle>
+          <CardDescription>Manage your subscription and billing</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div>
+              <h4 className="font-medium">Manage Subscription</h4>
+              <p className="text-sm text-gray-600">Cancel, update payment method, or view billing history</p>
+            </div>
+            <Button
+              onClick={handleManageSubscription}
+              disabled={managingSubscription}
+              variant="outline"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              {managingSubscription ? 'Opening...' : 'Manage'}
+            </Button>
           </div>
         </CardContent>
       </Card>
