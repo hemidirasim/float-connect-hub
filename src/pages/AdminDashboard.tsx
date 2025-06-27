@@ -18,8 +18,8 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSignOut = () => {
-    signOut();
+  const handleSignOut = async () => {
+    await signOut();
     toast({
       title: "Çıxış",
       description: "Admin paneldən çıxış edildi",

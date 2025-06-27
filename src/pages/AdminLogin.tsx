@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +14,15 @@ const AdminLogin = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAdminAuth();
+  const { signIn, adminUser } = useAdminAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (adminUser) {
+      navigate('/admin');
+    }
+  }, [adminUser, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,6 +128,12 @@ const AdminLogin = () => {
               {loading ? 'Giriş edilir...' : 'Admin Girişi'}
             </Button>
           </form>
+          
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-400">
+              Admin hesabınız yoxdursa, əvvəlcə adi hesab yaradın və admin tərəfindən rol veriləcək.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

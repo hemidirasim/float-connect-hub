@@ -551,6 +551,15 @@ export type Database = {
           is_active: boolean
         }[]
       }
+      verify_user_admin_login: {
+        Args: { p_email: string; p_password: string }
+        Returns: {
+          user_id: string
+          email: string
+          full_name: string
+          is_admin: boolean
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
