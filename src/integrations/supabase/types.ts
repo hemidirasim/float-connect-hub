@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admins: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          is_active: boolean
+          last_login: string | null
+          password_hash: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          last_login?: string | null
+          password_hash: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          last_login?: string | null
+          password_hash?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blogs: {
         Row: {
           author_id: string | null
@@ -486,6 +519,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_admin: {
+        Args: { p_email: string; p_password: string; p_full_name?: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _user_id: string
@@ -500,6 +537,19 @@ export type Database = {
           p_user_agent?: string
         }
         Returns: Json
+      }
+      update_admin_last_login: {
+        Args: { p_admin_id: string }
+        Returns: undefined
+      }
+      verify_admin_login: {
+        Args: { p_email: string; p_password: string }
+        Returns: {
+          admin_id: string
+          email: string
+          full_name: string
+          is_active: boolean
+        }[]
       }
     }
     Enums: {

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from 'react-router-dom';
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, CreditCard, MessageSquare, Settings, Shield, LogOut } from 'lucide-react';
@@ -14,51 +14,26 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 
 const AdminDashboard = () => {
-  const { user, loading, signOut } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [checking, setChecking] = useState(true);
+  const { adminUser, loading, signOut } = useAdminAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSignOut = async () => {
-    await signOut();
+  const handleSignOut = () => {
+    signOut();
+    toast({
+      title: "Çıxış",
+      description: "Admin paneldən çıxış edildi",
+    });
+    navigate('/admin/login');
   };
 
   useEffect(() => {
-    const checkAdminRole = async () => {
-      if (!user) {
-        setChecking(false);
-        return;
-      }
+    if (!loading && !adminUser) {
+      navigate('/admin/login');
+    }
+  }, [adminUser, loading, navigate]);
 
-      try {
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .single();
-
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error checking admin role:', error);
-          toast({
-            title: "Xəta",
-            description: "Admin icazəsi yoxlanılarkən xəta baş verdi",
-            variant: "destructive",
-          });
-        }
-
-        setIsAdmin(!!data);
-      } catch (error) {
-        console.error('Error checking admin role:', error);
-      } finally {
-        setChecking(false);
-      }
-    };
-
-    checkAdminRole();
-  }, [user, toast]);
-
-  if (loading || checking) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
@@ -69,28 +44,8 @@ const AdminDashboard = () => {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-900 text-white">
-        <div className="container mx-auto px-4 py-16 text-center">
-          <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-white mb-4">Admin Panel</h1>
-          <p className="text-gray-300 mb-8">Bu səhifəyə daxil olmaq üçün admin hesabı ilə giriş etməlisiniz.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-gray-900 text-white">
-        <div className="container mx-auto px-4 py-16 text-center">
-          <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-red-400 mb-4">Giriş Qadağandır</h1>
-          <p className="text-gray-300">Bu səhifəyə yalnız admin istifadəçiləri daxil ola bilər.</p>
-        </div>
-      </div>
-    );
+  if (!adminUser) {
+    return null; // Will redirect to login
   }
 
   return (
@@ -111,7 +66,7 @@ const AdminDashboard = () => {
             
             <div className="flex items-center space-x-4">
               <div className="text-right">
-                <p className="text-sm text-gray-300">{user.email}</p>
+                <p className="text-sm text-gray-300">{adminUser.full_name || adminUser.email}</p>
                 <p className="text-xs text-red-400">Administrator</p>
               </div>
               <Button 
