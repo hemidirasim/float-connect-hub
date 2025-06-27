@@ -122,12 +122,6 @@ const AdminLogin = () => {
               {loading ? 'Giriş edilir...' : 'Admin Girişi'}
             </Button>
           </form>
-          
-          <div className="mt-6 p-4 bg-gray-700 rounded-lg">
-            <p className="text-sm text-gray-300 font-medium mb-2">Demo Admin Hesabı:</p>
-            <p className="text-xs text-gray-400">Email: admin@hiclient.co</p>
-            <p className="text-xs text-gray-400">Şifrə: AdminPass2024!</p>
-          </div>
         </CardContent>
       </Card>
     </div>
