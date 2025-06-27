@@ -28,7 +28,10 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
+    console.log('AdminDashboard - loading:', loading, 'adminUser:', adminUser);
+    
     if (!loading && !adminUser) {
+      console.log('Redirecting to admin login');
       navigate('/admin/login');
     }
   }, [adminUser, loading, navigate]);
@@ -45,7 +48,14 @@ const AdminDashboard = () => {
   }
 
   if (!adminUser) {
-    return null; // Will redirect to login
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <p className="text-gray-300">Admin girişi tələb olunur</p>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -16,9 +16,61 @@ export const useAdminAuth = () => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+
+    const checkAdminRole = async (user: User) => {
+      try {
+        console.log('Checking admin role for user:', user.id);
+        
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'admin')
+          .single();
+
+        if (!mounted) return;
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Admin role check error:', error);
+          setAdminUser(null);
+          return;
+        }
+
+        if (data) {
+          console.log('User has admin role');
+          // İstifadəçi admin roluna malikdir
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', user.id)
+            .single();
+
+          if (!mounted) return;
+
+          setAdminUser({
+            user_id: user.id,
+            email: user.email || '',
+            full_name: profile?.full_name || user.email?.split('@')[0] || '',
+            is_admin: true
+          });
+        } else {
+          console.log('User does not have admin role');
+          setAdminUser(null);
+        }
+      } catch (error) {
+        console.error('Error checking admin role:', error);
+        if (mounted) {
+          setAdminUser(null);
+        }
+      }
+    };
+
     // Auth state dinləyicisini quraq
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
+        
         if (session?.user) {
           setUser(session.user);
           await checkAdminRole(session.user);
@@ -26,74 +78,58 @@ export const useAdminAuth = () => {
           setUser(null);
           setAdminUser(null);
         }
-        setLoading(false);
+        
+        if (mounted) {
+          setLoading(false);
+        }
       }
     );
 
     // Mövcud sessiyonu yoxlayaq
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(session.user);
-        checkAdminRole(session.user);
-      } else {
-        setLoading(false);
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+        
+        if (session?.user) {
+          console.log('Existing session found for:', session.user.email);
+          setUser(session.user);
+          await checkAdminRole(session.user);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
-    });
+    };
 
-    return () => subscription.unsubscribe();
+    initializeAuth();
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
-
-  const checkAdminRole = async (user: User) => {
-    try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Admin role check error:', error);
-        setAdminUser(null);
-        return;
-      }
-
-      if (data) {
-        // İstifadəçi admin roluna malikdir
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', user.id)
-          .single();
-
-        setAdminUser({
-          user_id: user.id,
-          email: user.email || '',
-          full_name: profile?.full_name || user.email?.split('@')[0] || '',
-          is_admin: true
-        });
-      } else {
-        setAdminUser(null);
-      }
-    } catch (error) {
-      console.error('Error checking admin role:', error);
-      setAdminUser(null);
-    }
-  };
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log('Attempting sign in for:', email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
+        console.error('Sign in error:', error);
         return { error: error.message };
       }
 
       if (data.user) {
-        await checkAdminRole(data.user);
+        console.log('Sign in successful, checking admin role');
         
         // Admin rolunu yoxlayaq
         const { data: roleData } = await supabase
@@ -104,15 +140,18 @@ export const useAdminAuth = () => {
           .single();
 
         if (!roleData) {
+          console.log('User does not have admin role, signing out');
           await supabase.auth.signOut();
           return { error: 'Bu hesabın admin girişi yoxdur' };
         }
 
+        console.log('Admin role confirmed');
         return { success: true };
       }
 
       return { error: 'Giriş uğursuz oldu' };
     } catch (error: any) {
+      console.error('Sign in exception:', error);
       return { error: error.message };
     }
   };
