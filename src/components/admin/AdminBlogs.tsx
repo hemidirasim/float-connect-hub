@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Plus, Settings, Trash2 } from 'lucide-react';
+import { RichTextEditor } from './RichTextEditor';
 
 interface Blog {
   id: string;
@@ -72,64 +73,95 @@ export const AdminBlogs = () => {
   };
 
   const handleSave = async () => {
-    if (!formData.title || !formData.content) {
-      toast({
-        title: "Xəta",
-        description: "Başlıq və məzmun sahələri tələb olunur",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const slug = formData.slug || generateSlug(formData.title);
-
     try {
+      if (!formData.title.trim()) {
+        toast({
+          title: "Xəta",
+          description: "Başlıq sahəsi tələb olunur",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!formData.content.trim()) {
+        toast({
+          title: "Xəta",
+          description: "Məzmun sahəsi tələb olunur",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const slug = formData.slug.trim() || generateSlug(formData.title);
+
+      // Check if slug already exists (only when creating new or changing slug)
+      const { data: existingBlog } = await supabase
+        .from('blogs')
+        .select('id')
+        .eq('slug', slug)
+        .neq('id', editingBlog?.id || '');
+
+      if (existingBlog && existingBlog.length > 0) {
+        toast({
+          title: "Xəta",
+          description: "Bu URL slug artıq mövcuddur",
+          variant: "destructive",
+        });
+        return;
+      }
+
       if (editingBlog) {
         const { error } = await supabase
           .from('blogs')
           .update({
-            title: formData.title,
+            title: formData.title.trim(),
             slug,
-            excerpt: formData.excerpt,
+            excerpt: formData.excerpt.trim() || null,
             content: formData.content,
             status: formData.status,
             updated_at: new Date().toISOString()
           })
           .eq('id', editingBlog.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
 
         toast({
           title: "Uğurlu",
-          description: "Bloq yeniləndi",
+          description: "Bloq uğurla yeniləndi",
         });
       } else {
         const { error } = await supabase
           .from('blogs')
           .insert({
-            title: formData.title,
+            title: formData.title.trim(),
             slug,
-            excerpt: formData.excerpt,
+            excerpt: formData.excerpt.trim() || null,
             content: formData.content,
             status: formData.status
           });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
+        }
 
         toast({
           title: "Uğurlu",
-          description: "Yeni bloq yaradıldı",
+          description: "Yeni bloq uğurla yaradıldı",
         });
       }
 
       setIsDialogOpen(false);
       resetForm();
       fetchBlogs();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving blog:', error);
       toast({
         title: "Xəta",
-        description: "Bloq saxlanılarkən xəta baş verdi",
+        description: error.message || "Bloq saxlanılarkən xəta baş verdi",
         variant: "destructive",
       });
     }
@@ -210,10 +242,12 @@ export const AdminBlogs = () => {
   }
 
   return (
-    <Card className="bg-gray-800 border-gray-700">
+    <Card className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2 text-white">
-          <FileText className="w-5 h-5" />
+        <CardTitle className="flex items-center gap-3 text-white text-xl">
+          <div className="p-2 bg-red-500/20 rounded-lg border border-red-500/30">
+            <FileText className="w-6 h-6 text-red-400" />
+          </div>
           Bloqlar ({blogs.length})
         </CardTitle>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -223,49 +257,78 @@ export const AdminBlogs = () => {
               Yeni Bloq
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-gray-800 border-gray-700 text-white">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-800 border-gray-700 text-white">
             <DialogHeader>
-              <DialogTitle className="text-white">
+              <DialogTitle className="text-white text-xl">
                 {editingBlog ? 'Bloqu Redaktə Et' : 'Yeni Bloq Yarat'}
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <Input
-                placeholder="Bloq başlığı"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="bg-gray-700 border-gray-600 text-white"
-              />
-              <Input
-                placeholder="URL slug (avtomatik yaradılacaq)"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                className="bg-gray-700 border-gray-600 text-white"
-              />
-              <Textarea
-                placeholder="Qısa təsvir"
-                value={formData.excerpt}
-                onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                rows={3}
-                className="bg-gray-700 border-gray-600 text-white"
-              />
-              <Textarea
-                placeholder="Bloq məzmunu (HTML dəstəklənir)"
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                rows={10}
-                className="bg-gray-700 border-gray-600 text-white"
-              />
-              <Select value={formData.status} onValueChange={(value: 'draft' | 'published') => setFormData({ ...formData, status: value })}>
-                <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
-                  <SelectItem value="draft" className="text-white">Qaralama</SelectItem>
-                  <SelectItem value="published" className="text-white">Dərc edilmiş</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="flex justify-end gap-2">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Bloq başlığı *
+                  </label>
+                  <Input
+                    placeholder="Bloq başlığı"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    URL slug
+                  </label>
+                  <Input
+                    placeholder="URL slug (avtomatik yaradılacaq)"
+                    value={formData.slug}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                    className="bg-gray-700 border-gray-600 text-white"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Qısa təsvir
+                </label>
+                <Textarea
+                  placeholder="Bloqin qısa təsviri"
+                  value={formData.excerpt}
+                  onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                  rows={3}
+                  className="bg-gray-700 border-gray-600 text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Məzmun *
+                </label>
+                <RichTextEditor
+                  content={formData.content}
+                  onChange={(content) => setFormData({ ...formData, content })}
+                  placeholder="Bloq məzmununu yazın..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Status
+                </label>
+                <Select value={formData.status} onValueChange={(value: 'draft' | 'published') => setFormData({ ...formData, status: value })}>
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    <SelectItem value="draft" className="text-white">Qaralama</SelectItem>
+                    <SelectItem value="published" className="text-white">Dərc edilmiş</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-6 border-t border-gray-700">
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="border-gray-600 text-white hover:bg-gray-700">
                   Ləğv et
                 </Button>
@@ -277,29 +340,29 @@ export const AdminBlogs = () => {
           </DialogContent>
         </Dialog>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="border-gray-700">
-                <TableHead className="text-gray-300">Başlıq</TableHead>
-                <TableHead className="text-gray-300">Status</TableHead>
-                <TableHead className="text-gray-300">Yaradılma Tarixi</TableHead>
-                <TableHead className="text-gray-300">Yenilənmə Tarixi</TableHead>
-                <TableHead className="text-gray-300">Əməliyyatlar</TableHead>
+              <TableRow className="border-gray-700/50 hover:bg-gray-700/20">
+                <TableHead className="text-gray-300 font-semibold">Başlıq</TableHead>
+                <TableHead className="text-gray-300 font-semibold">Status</TableHead>
+                <TableHead className="text-gray-300 font-semibold">Yaradılma Tarixi</TableHead>
+                <TableHead className="text-gray-300 font-semibold">Yenilənmə Tarixi</TableHead>
+                <TableHead className="text-gray-300 font-semibold">Əməliyyatlar</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {blogs.map((blog) => (
-                <TableRow key={blog.id} className="border-gray-700 hover:bg-gray-750">
-                  <TableCell className="font-medium text-white">{blog.title}</TableCell>
+                <TableRow key={blog.id} className="border-gray-700/50 hover:bg-gray-700/20 transition-colors">
+                  <TableCell className="font-medium text-gray-200">{blog.title}</TableCell>
                   <TableCell>
                     <Badge variant={blog.status === 'published' ? 'default' : 'secondary'}>
                       {blog.status === 'published' ? 'Dərc edilmiş' : 'Qaralama'}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-gray-300">{new Date(blog.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-gray-300">{new Date(blog.updated_at).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-gray-300">{new Date(blog.created_at).toLocaleDateString('az-AZ')}</TableCell>
+                  <TableCell className="text-gray-300">{new Date(blog.updated_at).toLocaleDateString('az-AZ')}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
