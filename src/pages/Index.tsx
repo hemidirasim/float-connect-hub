@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { HeroSection } from "@/components/FloatingWidgetBuilder/HeroSection";
 import { WidgetForm } from "@/components/FloatingWidgetBuilder/WidgetForm";
 import { CodePreview } from "@/components/FloatingWidgetBuilder/CodePreview";
@@ -235,60 +236,92 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      <Header 
-        user={user} 
-        loading={loading} 
-        onSignOut={handleSignOut}
-        onOpenAuth={() => setAuthModalOpen(true)}
-      />
-      
-      <main>
-        <HeroSection />
+    <>
+      <Helmet>
+        <title>Hiclient - Saytınız üçün İnteraktiv Floating Widget Yaradın | Müştəri Məmnuniyyəti Platforması</title>
+        <meta name="description" content="Saytınız üçün peşəkar floating widget-lər yaradın. Video inteqrasiyası, çoxkanal dəstəyi (WhatsApp, Telegram, Email). Asan quraşdırma, kodlaşdırma tələb olunmur. Müştəri məmnuniyyətini artırın." />
+        <meta name="keywords" content="floating widget, website widget, müştəri məmnuniyyəti, whatsapp widget, telegram widget, video widget, website popup, əlaqə widget, müştəri dəstəyi widget, live chat alternativ" />
+        <link rel="canonical" href="https://hiclient.co/" />
         
-        <section className="py-20 bg-white/30 backdrop-blur-sm" id="widget-form">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto space-y-6">
-              <WidgetForm
-                websiteName={websiteName}
-                websiteUrl={websiteUrl}
-                channels={channels}
-                formData={formData}
-                editingWidget={editingWidget}
-                saving={saving}
-                uploading={uploading}
-                onWebsiteNameChange={setWebsiteName}
-                onWebsiteUrlChange={setWebsiteUrl}
-                onChannelsChange={setChannels}
-                onVideoUpload={handleVideoUpload}
-                onVideoRemove={handleVideoRemove}
-                onFormDataChange={handleFormDataChange}
-                onCreateWidget={handleCreateWidgetWrapper}
-                onCustomIconUpload={handleCustomIconUpload}
-              />
-              
-              {generatedCode && (
-                <CodePreview
-                  generatedCode={generatedCode}
-                  copied={copied}
-                  onCopy={handleCopyCode}
-                />
-              )}
-            </div>
-          </div>
-        </section>
+        <meta property="og:title" content="Hiclient - Saytınız üçün İnteraktiv Floating Widget Yaradın" />
+        <meta property="og:description" content="Saytınız üçün peşəkar floating widget-lər yaradın. Video inteqrasiyası, çoxkanal dəstəyi (WhatsApp, Telegram, Email). Asan quraşdırma, kodlaşdırma tələb olunmur." />
+        <meta property="og:url" content="https://hiclient.co/" />
+        <meta property="og:type" content="website" />
+        
+        <meta name="twitter:title" content="Hiclient - Saytınız üçün İnteraktiv Floating Widget Yaradın" />
+        <meta name="twitter:description" content="Saytınız üçün peşəkar floating widget-lər yaradın. Video inteqrasiyası, çoxkanal dəstəyi (WhatsApp, Telegram, Email). Asan quraşdırma, kodlaşdırma tələb olunmur." />
 
-        <HomeBlogs />
-        <HomeFAQ />
-      </main>
-
-      <Footer />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Hiclient",
+            "url": "https://hiclient.co",
+            "description": "Saytınız üçün peşəkar floating widget-lər yaradın",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://hiclient.co/search?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          })}
+        </script>
+      </Helmet>
       
-      <AuthModal 
-        open={authModalOpen}
-        onOpenChange={setAuthModalOpen}
-      />
-    </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+        <Header 
+          user={user} 
+          loading={loading} 
+          onSignOut={handleSignOut}
+          onOpenAuth={() => setAuthModalOpen(true)}
+        />
+        
+        <main>
+          <HeroSection />
+          
+          <section className="py-20 bg-white/30 backdrop-blur-sm" id="widget-form">
+            <div className="container mx-auto px-4">
+              <div className="max-w-4xl mx-auto space-y-6">
+                <WidgetForm
+                  websiteName={websiteName}
+                  websiteUrl={websiteUrl}
+                  channels={channels}
+                  formData={formData}
+                  editingWidget={editingWidget}
+                  saving={saving}
+                  uploading={uploading}
+                  onWebsiteNameChange={setWebsiteName}
+                  onWebsiteUrlChange={setWebsiteUrl}
+                  onChannelsChange={setChannels}
+                  onVideoUpload={handleVideoUpload}
+                  onVideoRemove={handleVideoRemove}
+                  onFormDataChange={handleFormDataChange}
+                  onCreateWidget={handleCreateWidgetWrapper}
+                  onCustomIconUpload={handleCustomIconUpload}
+                />
+                
+                {generatedCode && (
+                  <CodePreview
+                    generatedCode={generatedCode}
+                    copied={copied}
+                    onCopy={handleCopyCode}
+                  />
+                )}
+              </div>
+            </div>
+          </section>
+
+          <HomeBlogs />
+          <HomeFAQ />
+        </main>
+
+        <Footer />
+        
+        <AuthModal 
+          open={authModalOpen}
+          onOpenChange={setAuthModalOpen}
+        />
+      </div>
+    </>
   );
 };
 

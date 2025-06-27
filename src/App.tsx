@@ -25,6 +25,9 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/blogs" element={<Blogs />} />
+          {/* New SEO-friendly blog URL structure */}
+          <Route path="/:slug/" element={<BlogPost />} />
+          {/* Keep old structure for backward compatibility */}
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />

@@ -1,8 +1,21 @@
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://hiclient.co/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1
+
+# Specific rules for major search engines
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Twitterbot
 Allow: /
@@ -10,5 +23,11 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
+# Block admin areas
+Disallow: /admin/
+Disallow: /dashboard/private/
+Disallow: /*.json$
+
+# Allow important files
+Allow: /sitemap.xml
+Allow: /robots.txt
