@@ -14,7 +14,7 @@ export const useAdminAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if admin is logged in and create a session
+    // Check if admin is logged in
     const storedAdmin = localStorage.getItem('admin_user');
     if (storedAdmin) {
       try {
@@ -29,7 +29,7 @@ export const useAdminAuth = () => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      // First verify admin credentials
+      // Verify admin credentials
       const { data, error } = await supabase
         .rpc('verify_admin_login', {
           p_email: email,
@@ -40,22 +40,6 @@ export const useAdminAuth = () => {
 
       if (data && data.length > 0) {
         const admin = data[0];
-        
-        // Create a dummy auth session for the admin
-        // This is needed for RLS policies to work
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email: 'admin@system.internal',
-          password: 'dummy_password'
-        });
-
-        // If auth fails, try to sign up a dummy user
-        if (authError) {
-          await supabase.auth.signUp({
-            email: 'admin@system.internal',
-            password: 'dummy_password'
-          });
-        }
-
         setAdminUser(admin);
         localStorage.setItem('admin_user', JSON.stringify(admin));
         
@@ -76,8 +60,6 @@ export const useAdminAuth = () => {
   const signOut = async () => {
     setAdminUser(null);
     localStorage.removeItem('admin_user');
-    // Sign out from Supabase auth as well
-    await supabase.auth.signOut();
   };
 
   return {
