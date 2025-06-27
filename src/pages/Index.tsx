@@ -5,6 +5,16 @@ import { HomeFAQ } from "@/components/HomeFAQ";
 import { Helmet } from 'react-helmet-async';
 
 const Index = () => {
+  const handleSave = () => {
+    // Handle save action - could redirect to dashboard or show success message
+    console.log('Widget saved');
+  };
+
+  const handleCancel = () => {
+    // Handle cancel action - could reset form or show confirmation
+    console.log('Widget creation cancelled');
+  };
+
   return (
     <>
       <Helmet>
@@ -38,7 +48,7 @@ const Index = () => {
       </Helmet>
       
       <div className="min-h-screen">
-        <WidgetCreator />
+        <WidgetCreator onSave={handleSave} onCancel={handleCancel} />
         <HomeBlogs />
         <HomeFAQ />
       </div>
