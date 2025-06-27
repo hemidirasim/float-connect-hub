@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
-import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { CreditBalance } from './billing/CreditBalance';
 import { CreditPackages } from './billing/CreditPackages';
 import { SubscriptionManager } from './billing/SubscriptionManager';
@@ -50,7 +50,6 @@ declare global {
 }
 
 export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onCreditsUpdate }) => {
-  const { user, session } = useAuth();
   const [loading, setLoading] = useState(false);
   const [paddleLoaded, setPaddleLoaded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -89,6 +88,8 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
 
   const setupPaddle = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+
       if (!user) {
         console.error('No authenticated user found');
         return;
@@ -161,13 +162,11 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
         await onCreditsUpdate();
         
         // Check if transaction was processed
-        const response = await fetch(`/api/transactions/${data.transaction_id}`, {
-          headers: {
-            'Authorization': `Bearer ${session?.access_token}`
-          }
-        });
-        
-        const recentTransactions = response.ok ? await response.json() : null;
+        const { data: recentTransactions } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('transaction_id', data.transaction_id)
+          .maybeSingle();
           
         if (recentTransactions) {
           console.log('✅ Transaction found in database:', recentTransactions);
@@ -202,29 +201,25 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
     try {
       setManagingSubscription(true);
       
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast.error('Please log in to manage subscription');
         return;
       }
 
-      // Call API to create customer portal session
-      const response = await fetch('/api/customer-portal', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`
-        },
-        body: JSON.stringify({
+      // Call edge function to create customer portal session
+      const { data, error } = await supabase.functions.invoke('customer-portal', {
+        body: {
           customer_email: user.email,
           return_url: window.location.origin + '/dashboard'
-        })
+        }
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to create customer portal session');
+      
+      if (error) {
+        console.error('Error creating customer portal session:', error);
+        toast.error('Failed to open subscription management. Please try again or contact support.');
+        return;
       }
-
-      const data = await response.json();
 
       if (data?.success && data?.portal_url) {
         // Open customer portal in new tab
@@ -251,7 +246,8 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
     setLoading(true);
 
     try {
-      if (!user) {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
         toast.error('Please log in to purchase credits');
         setLoading(false);
         return;
@@ -266,16 +262,11 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
 
       // Before opening checkout, cancel any existing subscriptions for this email
       try {
-        await fetch('/api/customer-portal', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.access_token}`
-          },
-          body: JSON.stringify({
+        await supabase.functions.invoke('customer-portal', {
+          body: {
             action: 'cancel_existing_subscriptions',
             customer_email: user.email
-          })
+          }
         });
       } catch (cancelError) {
         console.warn('Failed to cancel existing subscriptions:', cancelError);

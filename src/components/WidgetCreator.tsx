@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, GripVertical, Upload, Circle, Square, Heart, Star, MessageCircle, Mail, Phone, Instagram, Send } from 'lucide-react';
 import { toast } from "sonner";
-import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableChannelItem } from "@/components/SortableChannelItem";
@@ -59,7 +59,6 @@ const buttonStyles = [
 ];
 
 export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, onCancel }) => {
-  const { session } = useAuth();
   const [formData, setFormData] = useState<Widget>({
     name: widget?.name || 'My Widget',
     website_url: widget?.website_url || '',
@@ -175,37 +174,20 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
 
       if (widget?.id) {
         // Update existing widget
-        const response = await fetch(`/api/widgets/${widget.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.access_token}`
-          },
-          body: JSON.stringify(widgetData)
-        });
+        const { error } = await supabase
+          .from('widgets')
+          .update(widgetData)
+          .eq('id', widget.id);
 
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to update widget');
-        }
-        
+        if (error) throw error;
         toast.success('Widget yeniləndi!');
       } else {
         // Create new widget
-        const response = await fetch('/api/widgets', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.access_token}`
-          },
-          body: JSON.stringify(widgetData)
-        });
+        const { error } = await supabase
+          .from('widgets')
+          .insert([widgetData]);
 
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to create widget');
-        }
-        
+        if (error) throw error;
         toast.success('Widget yaradıldı!');
       }
 
