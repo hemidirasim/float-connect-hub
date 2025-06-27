@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Eye, Trash2, Power, PowerOff } from 'lucide-react';
+import { Settings, Trash2, Users, User } from 'lucide-react';
 
 interface Widget {
   id: string;
@@ -128,17 +128,17 @@ export const AdminWidgets = () => {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white">
             <Settings className="w-5 h-5" />
             Widget-lər
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Yüklənir...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto"></div>
+            <p className="mt-2 text-gray-400">Yüklənir...</p>
           </div>
         </CardContent>
       </Card>
@@ -146,9 +146,9 @@ export const AdminWidgets = () => {
   }
 
   return (
-    <Card>
+    <Card className="bg-gray-800 border-gray-700">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-white">
           <Settings className="w-5 h-5" />
           Widget-lər ({widgets.length})
         </CardTitle>
@@ -157,32 +157,32 @@ export const AdminWidgets = () => {
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Ad</TableHead>
-                <TableHead>Sayt</TableHead>
-                <TableHead>İstifadəçi</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Video</TableHead>
-                <TableHead>Baxışlar</TableHead>
-                <TableHead>Yaradılma Tarixi</TableHead>
-                <TableHead>Əməliyyatlar</TableHead>
+              <TableRow className="border-gray-700">
+                <TableHead className="text-gray-300">Ad</TableHead>
+                <TableHead className="text-gray-300">Sayt</TableHead>
+                <TableHead className="text-gray-300">İstifadəçi</TableHead>
+                <TableHead className="text-gray-300">Status</TableHead>
+                <TableHead className="text-gray-300">Video</TableHead>
+                <TableHead className="text-gray-300">Baxışlar</TableHead>
+                <TableHead className="text-gray-300">Yaradılma Tarixi</TableHead>
+                <TableHead className="text-gray-300">Əməliyyatlar</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {widgets.map((widget) => (
-                <TableRow key={widget.id}>
-                  <TableCell className="font-medium">{widget.name}</TableCell>
+                <TableRow key={widget.id} className="border-gray-700 hover:bg-gray-750">
+                  <TableCell className="font-medium text-white">{widget.name}</TableCell>
                   <TableCell>
                     <a 
                       href={widget.website_url} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="text-blue-400 hover:underline"
                     >
                       {widget.website_url}
                     </a>
                   </TableCell>
-                  <TableCell>{widget.user_email}</TableCell>
+                  <TableCell className="text-gray-300">{widget.user_email}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Switch
@@ -199,23 +199,17 @@ export const AdminWidgets = () => {
                       {widget.video_enabled ? 'Var' : 'Yox'}
                     </Badge>
                   </TableCell>
-                  <TableCell>{widget.total_views}</TableCell>
-                  <TableCell>{new Date(widget.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-gray-300">{widget.total_views}</TableCell>
+                  <TableCell className="text-gray-300">{new Date(widget.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => window.open(widget.website_url, '_blank')}
+                        className="border-gray-600 text-white hover:bg-gray-700"
                       >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant={widget.is_active ? 'secondary' : 'default'}
-                        size="sm"
-                        onClick={() => toggleWidgetStatus(widget.id, widget.is_active)}
-                      >
-                        {widget.is_active ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
+                        <User className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="destructive"

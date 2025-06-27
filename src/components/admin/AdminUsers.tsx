@@ -4,10 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Users, UserCheck, UserX, Crown } from 'lucide-react';
+import { Users, Shield, User } from 'lucide-react';
 
 interface User {
   id: string;
@@ -120,27 +119,27 @@ export const AdminUsers = () => {
   const getRoleIcon = (role: string) => {
     switch (role) {
       case 'admin':
-        return <Crown className="w-3 h-3" />;
+        return <Shield className="w-3 h-3" />;
       case 'moderator':
-        return <UserCheck className="w-3 h-3" />;
+        return <Users className="w-3 h-3" />;
       default:
-        return <UserX className="w-3 h-3" />;
+        return <User className="w-3 h-3" />;
     }
   };
 
   if (loading) {
     return (
-      <Card>
+      <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white">
             <Users className="w-5 h-5" />
             İstifadəçilər
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Yüklənir...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto"></div>
+            <p className="mt-2 text-gray-400">Yüklənir...</p>
           </div>
         </CardContent>
       </Card>
@@ -148,9 +147,9 @@ export const AdminUsers = () => {
   }
 
   return (
-    <Card>
+    <Card className="bg-gray-800 border-gray-700">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-white">
           <Users className="w-5 h-5" />
           İstifadəçilər ({users.length})
         </CardTitle>
@@ -159,42 +158,42 @@ export const AdminUsers = () => {
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Ad</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Rol</TableHead>
-                <TableHead>Balans</TableHead>
-                <TableHead>Xərclənən</TableHead>
-                <TableHead>Qeydiyyat Tarixi</TableHead>
-                <TableHead>Əməliyyatlar</TableHead>
+              <TableRow className="border-gray-700">
+                <TableHead className="text-gray-300">Ad</TableHead>
+                <TableHead className="text-gray-300">Email</TableHead>
+                <TableHead className="text-gray-300">Rol</TableHead>
+                <TableHead className="text-gray-300">Balans</TableHead>
+                <TableHead className="text-gray-300">Xərclənən</TableHead>
+                <TableHead className="text-gray-300">Qeydiyyat Tarixi</TableHead>
+                <TableHead className="text-gray-300">Əməliyyatlar</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.full_name || 'Ad yoxdur'}</TableCell>
-                  <TableCell>{user.email}</TableCell>
+                <TableRow key={user.id} className="border-gray-700 hover:bg-gray-750">
+                  <TableCell className="font-medium text-white">{user.full_name || 'Ad yoxdur'}</TableCell>
+                  <TableCell className="text-gray-300">{user.email}</TableCell>
                   <TableCell>
                     <Badge variant={getRoleColor(user.role!)} className="flex items-center gap-1 w-fit">
                       {getRoleIcon(user.role!)}
                       {user.role}
                     </Badge>
                   </TableCell>
-                  <TableCell>{user.balance} kredit</TableCell>
-                  <TableCell>{user.total_spent} kredit</TableCell>
-                  <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-gray-300">{user.balance} kredit</TableCell>
+                  <TableCell className="text-gray-300">{user.total_spent} kredit</TableCell>
+                  <TableCell className="text-gray-300">{new Date(user.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <Select
                       value={user.role}
                       onValueChange={(value) => updateUserRole(user.id, value)}
                     >
-                      <SelectTrigger className="w-32">
+                      <SelectTrigger className="w-32 bg-gray-700 border-gray-600 text-white">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="user">User</SelectItem>
-                        <SelectItem value="moderator">Moderator</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
+                      <SelectContent className="bg-gray-800 border-gray-700">
+                        <SelectItem value="user" className="text-white">User</SelectItem>
+                        <SelectItem value="moderator" className="text-white">Moderator</SelectItem>
+                        <SelectItem value="admin" className="text-white">Admin</SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>

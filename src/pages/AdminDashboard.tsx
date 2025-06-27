@@ -2,22 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { Header } from "@/components/FloatingWidgetBuilder/Header";
-import { Footer } from "@/components/FloatingWidgetBuilder/Footer";
-import { AuthModal } from "@/components/AuthModal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, FileText, CreditCard, MessageSquare, Settings } from 'lucide-react';
+import { Users, FileText, CreditCard, MessageSquare, Settings, Shield, LogOut } from 'lucide-react';
 import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminBlogs } from "@/components/admin/AdminBlogs";
 import { AdminPayments } from "@/components/admin/AdminPayments";
 import { AdminTickets } from "@/components/admin/AdminTickets";
 import { AdminWidgets } from "@/components/admin/AdminWidgets";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 const AdminDashboard = () => {
   const { user, loading, signOut } = useAuth();
-  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [checking, setChecking] = useState(true);
   const { toast } = useToast();
@@ -63,10 +60,10 @@ const AdminDashboard = () => {
 
   if (loading || checking) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Yüklənir...</p>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-500 mx-auto"></div>
+          <p className="mt-4 text-gray-300">Yüklənir...</p>
         </div>
       </div>
     );
@@ -74,81 +71,98 @@ const AdminDashboard = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <Header 
-          user={user}
-          loading={loading}
-          onSignOut={handleSignOut}
-          onOpenAuth={() => setAuthModalOpen(true)}
-        />
+      <div className="min-h-screen bg-gray-900 text-white">
         <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Admin Dashboard</h1>
-          <p className="text-gray-600 mb-8">Bu səhifəyə daxil olmaq üçün giriş etməlisiniz.</p>
-          <button
-            onClick={() => setAuthModalOpen(true)}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Giriş Et
-          </button>
+          <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h1 className="text-3xl font-bold text-white mb-4">Admin Panel</h1>
+          <p className="text-gray-300 mb-8">Bu səhifəyə daxil olmaq üçün admin hesabı ilə giriş etməlisiniz.</p>
         </div>
-        <Footer />
-        <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
       </div>
     );
   }
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <Header 
-          user={user}
-          loading={loading}
-          onSignOut={handleSignOut}
-          onOpenAuth={() => setAuthModalOpen(true)}
-        />
+      <div className="min-h-screen bg-gray-900 text-white">
         <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Giriş Qadağandır</h1>
-          <p className="text-gray-600">Bu səhifəyə yalnız admin istifadəçiləri daxil ola bilər.</p>
+          <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h1 className="text-3xl font-bold text-red-400 mb-4">Giriş Qadağandır</h1>
+          <p className="text-gray-300">Bu səhifəyə yalnız admin istifadəçiləri daxil ola bilər.</p>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <Header 
-        user={user}
-        loading={loading}
-        onSignOut={handleSignOut}
-        onOpenAuth={() => setAuthModalOpen(true)}
-      />
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* Admin Header */}
+      <div className="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
+                <Shield className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Admin Panel</h1>
+                <p className="text-sm text-gray-400">Sistem İdarəetmə</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="text-right">
+                <p className="text-sm text-gray-300">{user.email}</p>
+                <p className="text-xs text-red-400">Administrator</p>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleSignOut}
+                className="bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Çıxış
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-          <p className="text-gray-600">Sistem idarəetmə paneli</p>
-        </div>
-
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="users" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-5 bg-gray-800 border border-gray-700">
+            <TabsTrigger 
+              value="users" 
+              className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white text-gray-300"
+            >
               <Users className="w-4 h-4" />
               İstifadəçilər
             </TabsTrigger>
-            <TabsTrigger value="blogs" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="blogs" 
+              className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white text-gray-300"
+            >
               <FileText className="w-4 h-4" />
               Bloqlar
             </TabsTrigger>
-            <TabsTrigger value="payments" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="payments" 
+              className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white text-gray-300"
+            >
               <CreditCard className="w-4 h-4" />
               Ödənişlər
             </TabsTrigger>
-            <TabsTrigger value="tickets" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="tickets" 
+              className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white text-gray-300"
+            >
               <MessageSquare className="w-4 h-4" />
               Ticketlər
             </TabsTrigger>
-            <TabsTrigger value="widgets" className="flex items-center gap-2">
+            <TabsTrigger 
+              value="widgets" 
+              className="flex items-center gap-2 data-[state=active]:bg-red-600 data-[state=active]:text-white text-gray-300"
+            >
               <Settings className="w-4 h-4" />
               Widget-lər
             </TabsTrigger>
@@ -175,9 +189,6 @@ const AdminDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
-
-      <Footer />
-      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </div>
   );
 };

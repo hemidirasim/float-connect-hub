@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { FileText, Plus, Settings, Trash2 } from 'lucide-react';
 
 interface Blog {
   id: string;
@@ -193,17 +192,17 @@ export const AdminBlogs = () => {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white">
             <FileText className="w-5 h-5" />
             Bloqlar
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Yüklənir...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto"></div>
+            <p className="mt-2 text-gray-400">Yüklənir...</p>
           </div>
         </CardContent>
       </Card>
@@ -211,22 +210,22 @@ export const AdminBlogs = () => {
   }
 
   return (
-    <Card>
+    <Card className="bg-gray-800 border-gray-700">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-white">
           <FileText className="w-5 h-5" />
           Bloqlar ({blogs.length})
         </CardTitle>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={openCreateDialog}>
+            <Button onClick={openCreateDialog} className="bg-red-600 hover:bg-red-700">
               <Plus className="w-4 h-4 mr-2" />
               Yeni Bloq
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-gray-800 border-gray-700 text-white">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-white">
                 {editingBlog ? 'Bloqu Redaktə Et' : 'Yeni Bloq Yarat'}
               </DialogTitle>
             </DialogHeader>
@@ -235,38 +234,42 @@ export const AdminBlogs = () => {
                 placeholder="Bloq başlığı"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="bg-gray-700 border-gray-600 text-white"
               />
               <Input
                 placeholder="URL slug (avtomatik yaradılacaq)"
                 value={formData.slug}
                 onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                className="bg-gray-700 border-gray-600 text-white"
               />
               <Textarea
                 placeholder="Qısa təsvir"
                 value={formData.excerpt}
                 onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
                 rows={3}
+                className="bg-gray-700 border-gray-600 text-white"
               />
               <Textarea
                 placeholder="Bloq məzmunu (HTML dəstəklənir)"
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                 rows={10}
+                className="bg-gray-700 border-gray-600 text-white"
               />
               <Select value={formData.status} onValueChange={(value: 'draft' | 'published') => setFormData({ ...formData, status: value })}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Qaralama</SelectItem>
-                  <SelectItem value="published">Dərc edilmiş</SelectItem>
+                <SelectContent className="bg-gray-800 border-gray-700">
+                  <SelectItem value="draft" className="text-white">Qaralama</SelectItem>
+                  <SelectItem value="published" className="text-white">Dərc edilmiş</SelectItem>
                 </SelectContent>
               </Select>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="border-gray-600 text-white hover:bg-gray-700">
                   Ləğv et
                 </Button>
-                <Button onClick={handleSave}>
+                <Button onClick={handleSave} className="bg-red-600 hover:bg-red-700">
                   {editingBlog ? 'Yenilə' : 'Yarat'}
                 </Button>
               </div>
@@ -278,40 +281,34 @@ export const AdminBlogs = () => {
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Başlıq</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Yaradılma Tarixi</TableHead>
-                <TableHead>Yenilənmə Tarixi</TableHead>
-                <TableHead>Əməliyyatlar</TableHead>
+              <TableRow className="border-gray-700">
+                <TableHead className="text-gray-300">Başlıq</TableHead>
+                <TableHead className="text-gray-300">Status</TableHead>
+                <TableHead className="text-gray-300">Yaradılma Tarixi</TableHead>
+                <TableHead className="text-gray-300">Yenilənmə Tarixi</TableHead>
+                <TableHead className="text-gray-300">Əməliyyatlar</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {blogs.map((blog) => (
-                <TableRow key={blog.id}>
-                  <TableCell className="font-medium">{blog.title}</TableCell>
+                <TableRow key={blog.id} className="border-gray-700 hover:bg-gray-750">
+                  <TableCell className="font-medium text-white">{blog.title}</TableCell>
                   <TableCell>
                     <Badge variant={blog.status === 'published' ? 'default' : 'secondary'}>
                       {blog.status === 'published' ? 'Dərc edilmiş' : 'Qaralama'}
                     </Badge>
                   </TableCell>
-                  <TableCell>{new Date(blog.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell>{new Date(blog.updated_at).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-gray-300">{new Date(blog.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-gray-300">{new Date(blog.updated_at).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(`/${blog.slug}/`, '_blank')}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
                         onClick={() => openEditDialog(blog)}
+                        className="border-gray-600 text-white hover:bg-gray-700"
                       >
-                        <Edit className="w-4 h-4" />
+                        <Settings className="w-4 h-4" />
                       </Button>
                       <Button
                         variant="destructive"
