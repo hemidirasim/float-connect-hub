@@ -144,43 +144,46 @@ export const AdminPayments = () => {
     <div className="space-y-8">
       {/* Stats Cards */}
       <div className="grid md:grid-cols-3 gap-6">
-        <Card className="bg-gradient-to-br from-green-900/30 to-green-800/20 backdrop-blur-sm border-green-700/30">
-          <CardContent className="p-6">
+        <Card className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-700/20 to-gray-800/20"></div>
+          <CardContent className="p-6 relative">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-green-300/80">Ümumi Gəlir</p>
-                <p className="text-3xl font-bold text-green-400">${stats.totalRevenue.toFixed(2)}</p>
+                <p className="text-sm text-gray-400">Ümumi Gəlir</p>
+                <p className="text-3xl font-bold text-gray-100">${stats.totalRevenue.toFixed(2)}</p>
               </div>
-              <div className="p-3 bg-green-500/20 rounded-xl">
-                <TrendingUp className="w-8 h-8 text-green-400" />
+              <div className="p-3 bg-gray-600/30 rounded-xl border border-gray-600/40">
+                <TrendingUp className="w-8 h-8 text-gray-300" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-900/30 to-blue-800/20 backdrop-blur-sm border-blue-700/30">
-          <CardContent className="p-6">
+        <Card className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-700/20 to-gray-800/20"></div>
+          <CardContent className="p-6 relative">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-300/80">Ümumi Əməliyyat</p>
-                <p className="text-3xl font-bold text-blue-400">{stats.totalTransactions}</p>
+                <p className="text-sm text-gray-400">Ümumi Əməliyyat</p>
+                <p className="text-3xl font-bold text-gray-100">{stats.totalTransactions}</p>
               </div>
-              <div className="p-3 bg-blue-500/20 rounded-xl">
-                <CreditCard className="w-8 h-8 text-blue-400" />
+              <div className="p-3 bg-gray-600/30 rounded-xl border border-gray-600/40">
+                <CreditCard className="w-8 h-8 text-gray-300" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-900/30 to-purple-800/20 backdrop-blur-sm border-purple-700/30">
-          <CardContent className="p-6">
+        <Card className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-700/20 to-gray-800/20"></div>
+          <CardContent className="p-6 relative">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-purple-300/80">Satılan Kredit</p>
-                <p className="text-3xl font-bold text-purple-400">{stats.totalCredits}</p>
+                <p className="text-sm text-gray-400">Satılan Kredit</p>
+                <p className="text-3xl font-bold text-gray-100">{stats.totalCredits}</p>
               </div>
-              <div className="p-3 bg-purple-500/20 rounded-xl">
-                <Users className="w-8 h-8 text-purple-400" />
+              <div className="p-3 bg-gray-600/30 rounded-xl border border-gray-600/40">
+                <Users className="w-8 h-8 text-gray-300" />
               </div>
             </div>
           </CardContent>
@@ -191,7 +194,7 @@ export const AdminPayments = () => {
       <Card className="bg-gray-800/60 backdrop-blur-sm border-gray-700/50">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-white text-xl">
-            <div className="p-2 bg-red-500/20 rounded-lg">
+            <div className="p-2 bg-red-500/20 rounded-lg border border-red-500/30">
               <CreditCard className="w-6 h-6 text-red-400" />
             </div>
             Ödənişlər ({transactions.length})
@@ -214,10 +217,10 @@ export const AdminPayments = () => {
               <TableBody>
                 {transactions.map((transaction) => (
                   <TableRow key={transaction.id} className="border-gray-700/50 hover:bg-gray-700/20 transition-colors">
-                    <TableCell className="font-medium text-white">{transaction.email}</TableCell>
-                    <TableCell className="text-green-400 font-semibold">${Number(transaction.amount).toFixed(2)}</TableCell>
+                    <TableCell className="font-medium text-gray-200">{transaction.email}</TableCell>
+                    <TableCell className="text-gray-100 font-semibold">${Number(transaction.amount).toFixed(2)}</TableCell>
                     <TableCell className="text-gray-300 uppercase">{transaction.currency}</TableCell>
-                    <TableCell className="text-purple-400 font-semibold">{transaction.credits_added}</TableCell>
+                    <TableCell className="text-gray-100 font-semibold">{transaction.credits_added}</TableCell>
                     <TableCell>
                       <Badge variant={getStatusColor(transaction.status)} className="font-medium">
                         {getStatusText(transaction.status)}
