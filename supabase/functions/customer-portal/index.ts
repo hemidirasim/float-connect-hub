@@ -102,10 +102,10 @@ serve(async (req) => {
             sub.status === 'active' || sub.status === 'trialing'
           );
           
-          // Cancel each active subscription
+          // Cancel each active subscription using the correct format
           for (const subscription of activeSubscriptions || []) {
             try {
-              await fetch(`https://api.paddle.com/subscriptions/${subscription.id}/cancel`, {
+              const cancelResponse = await fetch(`https://api.paddle.com/subscriptions/${subscription.id}/cancel`, {
                 method: 'POST',
                 headers: {
                   'Authorization': `Bearer ${apiToken}`,
@@ -115,9 +115,15 @@ serve(async (req) => {
                   effective_from: 'immediately'
                 })
               });
-              console.log('✅ Cancelled subscription:', subscription.id);
+              
+              if (cancelResponse.ok) {
+                console.log('✅ Successfully cancelled subscription:', subscription.id);
+              } else {
+                const errorData = await cancelResponse.text();
+                console.error('❌ Failed to cancel subscription:', subscription.id, errorData);
+              }
             } catch (cancelError) {
-              console.error('Failed to cancel subscription:', subscription.id, cancelError);
+              console.error('❌ Error canceling subscription:', subscription.id, cancelError);
             }
           }
         }
@@ -146,22 +152,73 @@ serve(async (req) => {
     const returnUrl = (requestData as any)?.return_url || 'https://yourdomain.com/dashboard';
     
     try {
-      // For now, return a mock response since Paddle's customer portal 
-      // requires specific setup and customer IDs
       console.log('📋 Creating customer portal session for:', customerEmail);
       
-      // In a real implementation, you would:
-      // 1. Find the customer by email in Paddle
-      // 2. Create a customer portal session
-      // 3. Return the portal URL
+      // First, try to find the customer by email
+      const customerResponse = await fetch('https://api.paddle.com/customers', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
-      // Mock implementation - replace with actual Paddle API calls
-      const portalUrl = `https://checkout.paddle.com/customer-portal?customer_email=${encodeURIComponent(customerEmail || '')}&return_url=${encodeURIComponent(returnUrl)}`;
+      if (!customerResponse.ok) {
+        console.error('Failed to fetch customers:', await customerResponse.text());
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Failed to find customer'
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      const customerData = await customerResponse.json();
+      const customer = customerData.data?.find((c: any) => c.email === customerEmail);
+      
+      if (!customer) {
+        console.log('No customer found for portal session');
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'No customer found. Please make a purchase first.'
+        }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      // Create customer portal session
+      const portalResponse = await fetch('https://api.paddle.com/customer-portal-sessions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          customer_id: customer.id,
+          return_url: returnUrl
+        })
+      });
+      
+      if (!portalResponse.ok) {
+        const errorText = await portalResponse.text();
+        console.error('Failed to create portal session:', errorText);
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Failed to create customer portal session'
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      
+      const portalData = await portalResponse.json();
       
       return new Response(JSON.stringify({
         success: true,
         message: 'Customer portal session created',
-        portal_url: portalUrl
+        portal_url: portalData.data?.url
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
