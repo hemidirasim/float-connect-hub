@@ -1,5 +1,4 @@
 
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -50,15 +49,22 @@ serve(async (req) => {
     const action = (requestData as any)?.action;
     const customerEmail = (requestData as any)?.customer_email;
     
-    if (action === 'cancel_existing_subscriptions' && customerEmail) {
+    if (!customerEmail) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Customer email is required'
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+    
+    if (action === 'cancel_existing_subscriptions') {
       console.log('🚫 Canceling existing subscriptions for:', customerEmail);
       
       try {
-        // First, find customer by email - using query parameters instead of fetching all customers
-        const customersUrl = new URL('https://api.paddle.com/customers');
-        customersUrl.searchParams.append('email', customerEmail);
-        
-        const customerResponse = await fetch(customersUrl.toString(), {
+        // Find customer by email
+        const customerResponse = await fetch('https://api.paddle.com/customers', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${apiToken}`,
@@ -67,7 +73,7 @@ serve(async (req) => {
         });
         
         if (!customerResponse.ok) {
-          console.log('Customer lookup failed, might not exist yet:', await customerResponse.text());
+          console.log('Customer lookup failed, might not exist yet');
           return new Response(JSON.stringify({
             success: true,
             message: 'No existing customer found'
@@ -93,11 +99,7 @@ serve(async (req) => {
         }
         
         // Find active subscriptions for this customer
-        const subscriptionsUrl = new URL('https://api.paddle.com/subscriptions');
-        subscriptionsUrl.searchParams.append('customer_id', customer.id);
-        subscriptionsUrl.searchParams.append('status', 'active');
-        
-        const subscriptionsResponse = await fetch(subscriptionsUrl.toString(), {
+        const subscriptionsResponse = await fetch('https://api.paddle.com/subscriptions', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${apiToken}`,
@@ -107,9 +109,12 @@ serve(async (req) => {
         
         if (subscriptionsResponse.ok) {
           const subscriptionsData = await subscriptionsResponse.json();
-          const activeSubscriptions = subscriptionsData.data || [];
+          const allSubscriptions = subscriptionsData.data || [];
+          const activeSubscriptions = allSubscriptions.filter((sub: any) => 
+            sub.customer_id === customer.id && sub.status === 'active'
+          );
           
-          // Cancel each active subscription using the correct format
+          // Cancel each active subscription
           for (const subscription of activeSubscriptions) {
             try {
               const cancelResponse = await fetch(`https://api.paddle.com/subscriptions/${subscription.id}/cancel`, {
@@ -158,24 +163,11 @@ serve(async (req) => {
     // Default: Create customer portal session
     const returnUrl = (requestData as any)?.return_url || 'https://hiclient.co/dashboard';
     
-    if (!customerEmail) {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Customer email is required'
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-    
     try {
       console.log('📋 Creating customer portal session for:', customerEmail);
       
-      // Find the customer by email using query parameters
-      const customersUrl = new URL('https://api.paddle.com/customers');
-      customersUrl.searchParams.append('email', customerEmail);
-      
-      const customerResponse = await fetch(customersUrl.toString(), {
+      // Find the customer by email
+      const customerResponse = await fetch('https://api.paddle.com/customers', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${apiToken}`,
@@ -212,7 +204,7 @@ serve(async (req) => {
       
       console.log('Found customer:', customer.id);
       
-      // Create customer portal session
+      // Create customer portal session - using correct endpoint
       const portalResponse = await fetch('https://api.paddle.com/customer-portal-sessions', {
         method: 'POST',
         headers: {
@@ -283,4 +275,3 @@ serve(async (req) => {
     });
   }
 });
-
