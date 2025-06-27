@@ -1,36 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { CreditCard, Plus, History, RefreshCw, AlertCircle, Info, Zap, Settings } from 'lucide-react';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { CreditBalance } from './billing/CreditBalance';
+import { CreditPackages } from './billing/CreditPackages';
+import { SubscriptionManager } from './billing/SubscriptionManager';
+import { CreditCostInfo } from './billing/CreditCostInfo';
 
 interface UserCredits {
   balance: number;
   total_spent: number;
-}
-
-interface Transaction {
-  id: string;
-  amount: number;
-  currency: string;
-  credits_added: number;
-  status: string;
-  created_at: string;
-  transaction_id: string;
-  email: string;
-}
-
-interface PaymentTransaction {
-  id: string;
-  amount: number;
-  currency: string;
-  credits_purchased: number;
-  status: string;
-  created_at: string;
-  paddle_transaction_id: string;
 }
 
 interface BillingSectionProps {
@@ -74,13 +52,11 @@ declare global {
 export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onCreditsUpdate }) => {
   const [loading, setLoading] = useState(false);
   const [paddleLoaded, setPaddleLoaded] = useState(false);
-  const [transactions, setTransactions] = useState<(Transaction | PaymentTransaction)[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [managingSubscription, setManagingSubscription] = useState(false);
 
   useEffect(() => {
     initializePaddle();
-    fetchTransactions();
   }, []);
 
   const initializePaddle = async () => {
@@ -184,7 +160,6 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
       setTimeout(async () => {
         console.log('🔄 Refreshing credits and transactions...');
         await onCreditsUpdate();
-        await fetchTransactions();
         
         // Check if transaction was processed
         const { data: recentTransactions } = await supabase
@@ -209,41 +184,10 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
     }
   };
 
-  const fetchTransactions = async () => {
-    try {
-      // Try to fetch from new transactions table first
-      const { data: newTransactions, error: newError } = await supabase
-        .from('transactions')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (!newError && newTransactions && newTransactions.length > 0) {
-        setTransactions(newTransactions);
-        console.log('📊 Transactions loaded from new table:', newTransactions.length);
-        return;
-      }
-      
-      // Fall back to old payment_transactions table
-      const { data, error } = await supabase
-        .from('payment_transactions')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      setTransactions(data || []);
-      console.log('📊 Transactions loaded from old table:', data?.length || 0);
-    } catch (err) {
-      console.error('❌ Error fetching transactions:', err);
-      toast.error('Failed to load transaction history');
-    }
-  };
-
   const handleRefreshCredits = async () => {
     setRefreshing(true);
     try {
       await onCreditsUpdate();
-      await fetchTransactions();
       toast.success('Credits refreshed successfully!');
     } catch (error) {
       console.error('Error refreshing credits:', error);
@@ -360,196 +304,27 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
-  };
-
-  const isNewTransaction = (transaction: any): transaction is Transaction => {
-    return 'transaction_id' in transaction && 'credits_added' in transaction;
-  };
-
-  const getTransactionId = (transaction: Transaction | PaymentTransaction) => {
-    return isNewTransaction(transaction) 
-      ? transaction.transaction_id 
-      : (transaction as PaymentTransaction).paddle_transaction_id;
-  };
-
-  const getCredits = (transaction: Transaction | PaymentTransaction) => {
-    return isNewTransaction(transaction) 
-      ? transaction.credits_added 
-      : (transaction as PaymentTransaction).credits_purchased;
-  };
-
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-blue-600" />
-            Balance
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleRefreshCredits}
-              disabled={refreshing}
-              className="ml-auto"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-              <div className="text-3xl font-bold text-blue-600 mb-2">{userCredits.balance}</div>
-              <div className="text-sm text-gray-600">Current credit</div>
-            </div>
-            <div className="text-center p-6 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg">
-              <div className="text-3xl font-bold text-orange-600 mb-2">{userCredits.total_spent}</div>
-              <div className="text-sm text-gray-600">Spent credit</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <CreditBalance 
+        userCredits={userCredits}
+        onRefresh={handleRefreshCredits}
+        refreshing={refreshing}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Credit packages</CardTitle>
-          <CardDescription>Buy credits for widget views</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {creditPackages.map((pkg, index) => (
-              <Card key={index} className={`relative ${pkg.popular ? 'border-blue-500 shadow-lg' : 'border-gray-200'}`}>
-                {pkg.popular && (
-                  <Badge className="absolute -top-2 left-4 bg-blue-600">Popular</Badge>
-                )}
-                <CardContent className="p-6 text-center">
-                  <div className="text-2xl font-bold text-blue-600 mb-2">{pkg.credits}</div>
-                  <div className="text-sm text-gray-600 mb-4">credits</div>
-                  <div className="text-xl font-semibold mb-4">${pkg.price}</div>
-                  <Button 
-                    className="w-full" 
-                    onClick={() => handlePurchaseCredits(pkg.credits, pkg.price, pkg.productId)}
-                    disabled={loading || !paddleLoaded}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    {loading ? 'Loading...' : 'Buy'}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+      <CreditPackages
+        creditPackages={creditPackages}
+        onPurchase={handlePurchaseCredits}
+        loading={loading}
+        paddleLoaded={paddleLoaded}
+      />
 
-          {!paddleLoaded && (
-            <div className="text-center mt-4 text-sm text-gray-500">
-              Payment system loading...
-            </div>
-          )}
-          
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-medium text-blue-800 mb-2 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4" />
-              Debugging Information
-            </h4>
-            <p className="text-sm text-blue-700 mb-2">
-              If payments are not working:
-            </p>
-            <ul className="text-sm text-blue-700 list-disc list-inside space-y-1">
-              <li>Check browser console for errors</li>
-              <li>Ensure webhook URL is configured in Paddle dashboard</li>
-              <li>Webhook URL: https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/paddle-webhook</li>
-              <li>Wait 5-10 minutes after payment</li>
-              <li>Click "Refresh" button to update credits</li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
+      <SubscriptionManager
+        onManageSubscription={handleManageSubscription}
+        managingSubscription={managingSubscription}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Subscription Management</CardTitle>
-          <CardDescription>Manage your subscription and billing</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <div>
-              <h4 className="font-medium">Manage Subscription</h4>
-              <p className="text-sm text-gray-600">Cancel, update payment method, or view billing history</p>
-            </div>
-            <Button
-              onClick={handleManageSubscription}
-              disabled={managingSubscription}
-              variant="outline"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              {managingSubscription ? 'Opening...' : 'Manage'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <History className="w-5 h-5 text-gray-600" />
-            Transaction History
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {transactions.length > 0 ? (
-            <div className="space-y-3">
-              {transactions.map((transaction) => (
-                <div key={transaction.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <div className="font-medium">{getCredits(transaction)} credits</div>
-                    <div className="text-sm text-gray-600">{formatDate(transaction.created_at)}</div>
-                    <div className="text-xs text-gray-500">ID: {getTransactionId(transaction)}</div>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant="outline" className="text-green-600 mb-1">
-                      ${transaction.amount} {transaction.currency}
-                    </Badge>
-                    <div className="text-xs text-gray-500 capitalize">{transaction.status}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-4 text-gray-500">
-              No transaction history available
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-gray-600" />
-            Credit cost
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-              <div>
-                <div className="font-medium">Standard widget display</div>
-                <div className="text-sm text-gray-600">Non-video widgets</div>
-              </div>
-              <Badge variant="outline">1 credit</Badge>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-              <div>
-                <div className="font-medium">Video widget display</div>
-                <div className="text-sm text-gray-600">Widgets with video</div>
-              </div>
-              <Badge variant="outline" className="text-purple-600">2 credits</Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <CreditCostInfo />
     </div>
   );
 };
