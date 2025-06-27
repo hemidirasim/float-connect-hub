@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,6 @@ import { ChannelManager } from './ChannelManager';
 import { VideoUpload } from './VideoUpload';
 import { CustomizationOptions } from './CustomizationOptions';
 import { Channel, FormData } from './types';
-import { TemplateSelector } from './TemplateSelector';
 import { TemplatePreview } from './TemplatePreview';
 
 interface WidgetFormProps {
@@ -87,15 +85,6 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Template Selector */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium">Choose Template</h3>
-            <TemplateSelector
-              selectedTemplateId={formData.templateId || ''}
-              onTemplateChange={(templateId) => onFormDataChange('templateId', templateId)}
-            />
-          </div>
-
           {/* Video Upload & Icon Settings */}
           <VideoUpload
             video={formData.video}

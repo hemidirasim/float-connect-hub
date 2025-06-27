@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Plus, History, RefreshCw, AlertCircle, Info, Zap } from 'lucide-react';
+import { CreditCard, Plus, History, RefreshCw, AlertCircle, Info, Zap, Settings } from 'lucide-react';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -75,6 +75,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
   const [paddleLoaded, setPaddleLoaded] = useState(false);
   const [transactions, setTransactions] = useState<(Transaction | PaymentTransaction)[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [cancellingSubscription, setCancellingSubscription] = useState(false);
 
   useEffect(() => {
     initializePaddle();
@@ -251,6 +252,39 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
     }
   };
 
+  const handleManageSubscription = async () => {
+    try {
+      setCancellingSubscription(true);
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Please log in to manage subscription');
+        return;
+      }
+
+      // Call edge function to create customer portal session
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) {
+        console.error('Error creating customer portal session:', error);
+        toast.error('Failed to open subscription management');
+        return;
+      }
+
+      if (data?.url) {
+        // Open customer portal in new tab
+        window.open(data.url, '_blank');
+      } else {
+        toast.error('No portal URL received');
+      }
+    } catch (error) {
+      console.error('Error managing subscription:', error);
+      toast.error('Failed to open subscription management');
+    } finally {
+      setCancellingSubscription(false);
+    }
+  };
+
   const handlePurchaseCredits = async (credits: number, price: number, productId: string) => {
     if (!paddleLoaded || !window.Paddle) {
       toast.error('Payment system is still loading, please wait...');
@@ -354,6 +388,29 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
               <div className="text-3xl font-bold text-orange-600 mb-2">{userCredits.total_spent}</div>
               <div className="text-sm text-gray-600">Spent credit</div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Subscription Management</CardTitle>
+          <CardDescription>Manage your subscription and billing</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div>
+              <h4 className="font-medium">Manage Subscription</h4>
+              <p className="text-sm text-gray-600">Cancel, update payment method, or view billing history</p>
+            </div>
+            <Button
+              onClick={handleManageSubscription}
+              disabled={cancellingSubscription}
+              variant="outline"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              {cancellingSubscription ? 'Opening...' : 'Manage'}
+            </Button>
           </div>
         </CardContent>
       </Card>

@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -173,20 +172,23 @@ serve(async (req) => {
         totalDollars: amountInDollars
       });
 
-      // Determine credits
+      // Determine credits - FIXED to prevent double crediting
       let creditsToAdd = 0;
       
       if (customData.credits) {
+        // Use credits from custom data if available
         creditsToAdd = parseInt(customData.credits, 10);
+        console.log('🎯 Using credits from custom_data:', creditsToAdd);
       } else {
-        // Fallback to amount-based calculation
+        // Fallback to amount-based calculation but ensure no double crediting
         if (amountInDollars >= 30) creditsToAdd = 800;
         else if (amountInDollars >= 20) creditsToAdd = 500;
         else if (amountInDollars >= 10) creditsToAdd = 200;
         else if (amountInDollars >= 1) creditsToAdd = 10;
+        console.log('🎯 Using amount-based credits calculation:', creditsToAdd);
       }
 
-      console.log('🎯 Credits to add:', creditsToAdd);
+      console.log('🎯 Final credits to add:', creditsToAdd);
 
       if (creditsToAdd === 0) {
         console.warn('⚠️ No credits determined');
