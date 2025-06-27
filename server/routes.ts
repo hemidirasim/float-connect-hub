@@ -391,6 +391,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Customer portal for subscription management
+  app.post("/api/customer-portal", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const { customer_email, return_url, action } = req.body;
+      
+      // For now, return a mock response since Paddle integration needs API keys
+      // In production, this would integrate with Paddle's customer portal API
+      res.json({
+        success: true,
+        message: "Subscription management is currently being set up",
+        portal_url: null
+      });
+    } catch (error) {
+      console.error("Error creating customer portal session:", error);
+      res.status(500).json({ error: "Failed to create customer portal session" });
+    }
+  });
+
+  // Transaction lookup by transaction ID
+  app.get("/api/transactions/:transactionId", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const { transactionId } = req.params;
+      const transaction = await storage.getTransactionByTxId(transactionId);
+      
+      if (!transaction) {
+        return res.status(404).json({ error: "Transaction not found" });
+      }
+      
+      res.json(transaction);
+    } catch (error) {
+      console.error("Error fetching transaction:", error);
+      res.status(500).json({ error: "Failed to fetch transaction" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
