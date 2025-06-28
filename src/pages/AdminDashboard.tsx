@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -27,36 +28,46 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    console.log('AdminDashboard - loading:', loading, 'adminUser:', adminUser);
+    console.log('AdminDashboard state:', { loading, adminUser: !!adminUser });
     
-    // Loading tamamlandıqdan sonra admin user yoxdursa redirect et
+    // Maksimum 10 saniyə gözlə, sonra redirect et
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.log('Loading timeout reached, redirecting to login');
+        navigate('/admin/login', { replace: true });
+      }
+    }, 10000);
+
+    // Loading bitib admin user yoxdursa redirect et
     if (!loading && !adminUser) {
-      console.log('Redirecting to admin login - no admin user found');
+      console.log('No admin user found, redirecting to login');
       navigate('/admin/login', { replace: true });
     }
+
+    return () => clearTimeout(timeoutId);
   }, [adminUser, loading, navigate]);
 
-  // Loading state - maksimum 5 saniyə göstər
+  // Loading state - maksimum 10 saniyə
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-red-500 border-opacity-75 mx-auto"></div>
-          <p className="mt-6 text-lg text-gray-300 font-medium">Yüklənir...</p>
-          <p className="mt-2 text-sm text-gray-400">Admin paneli yoxlanılır</p>
+          <p className="mt-6 text-lg text-gray-300 font-medium">Admin paneli yüklənir...</p>
+          <p className="mt-2 text-sm text-gray-400">Giriş məlumatları yoxlanılır</p>
         </div>
       </div>
     );
   }
 
-  // Admin user yoxdursa və loading bitibsə, navigate işləyəcək
+  // Admin user yoxdursa və loading bitibsə
   if (!adminUser) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <div className="text-center">
           <Shield className="w-20 h-20 text-red-500 mx-auto mb-6" />
           <p className="text-xl text-gray-300 font-medium">Admin girişi tələb olunur</p>
-          <p className="text-sm text-gray-400 mt-2">Yönləndirilir...</p>
+          <p className="text-sm text-gray-400 mt-2">Login səhifəsinə yönləndirilirsiniz...</p>
         </div>
       </div>
     );

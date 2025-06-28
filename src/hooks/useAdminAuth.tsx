@@ -58,9 +58,11 @@ export const useAdminAuth = () => {
 
   useEffect(() => {
     let isMounted = true;
+    let authSubscription: any = null;
 
     const initializeAuth = async () => {
       try {
+        console.log('Initializing admin auth...');
         setLoading(true);
         
         // İlk olaraq mövcud sessiya yoxlanılır
@@ -70,8 +72,6 @@ export const useAdminAuth = () => {
         
         if (error) {
           console.error('Session error:', error);
-          // Xətalı sessiya təmizlənir
-          await supabase.auth.signOut();
           setUser(null);
           setAdminUser(null);
           setLoading(false);
@@ -79,89 +79,97 @@ export const useAdminAuth = () => {
         }
         
         if (session?.user) {
-          console.log('Existing session found for:', session.user.email);
+          console.log('Found existing session for:', session.user.email);
           setUser(session.user);
           
           // Admin rolunu yoxla
           const adminData = await checkAdminRole(session.user);
           if (isMounted) {
             setAdminUser(adminData);
+            setLoading(false);
           }
         } else {
-          console.log('No existing session');
+          console.log('No existing session found');
           setUser(null);
           setAdminUser(null);
+          setLoading(false);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
-        // Hər hansı xəta olduqda təmizlə
         if (isMounted) {
-          await supabase.auth.signOut();
           setUser(null);
           setAdminUser(null);
-        }
-      } finally {
-        if (isMounted) {
           setLoading(false);
         }
       }
     };
 
-    // Auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
-        
-        if (!isMounted) return;
-
-        // SIGNED_OUT halında dərhal təmizlə
-        if (event === 'SIGNED_OUT' || !session?.user) {
-          setUser(null);
-          setAdminUser(null);
-          setLoading(false);
-          return;
-        }
-
-        // SIGNED_IN və ya TOKEN_REFRESHED halında
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          setLoading(true);
-          setUser(session.user);
+    // Auth state listener qur
+    const setupAuthListener = () => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          console.log('Auth state changed:', event);
           
-          try {
-            const adminData = await checkAdminRole(session.user);
-            if (isMounted) {
-              setAdminUser(adminData);
-            }
-          } catch (error) {
-            console.error('Error in auth state change:', error);
-            if (isMounted) {
-              setAdminUser(null);
-            }
-          } finally {
-            if (isMounted) {
-              setLoading(false);
+          if (!isMounted) return;
+
+          if (event === 'SIGNED_OUT' || !session?.user) {
+            console.log('User signed out or no session');
+            setUser(null);
+            setAdminUser(null);
+            setLoading(false);
+            return;
+          }
+
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            console.log('User signed in or token refreshed');
+            setLoading(true);
+            setUser(session.user);
+            
+            try {
+              const adminData = await checkAdminRole(session.user);
+              if (isMounted) {
+                setAdminUser(adminData);
+                setLoading(false);
+              }
+            } catch (error) {
+              console.error('Error in auth state change:', error);
+              if (isMounted) {
+                setAdminUser(null);
+                setLoading(false);
+              }
             }
           }
         }
-      }
-    );
+      );
+      
+      authSubscription = subscription;
+    };
 
-    // Auth-u işə sal
-    initializeAuth();
+    // İlk auth yoxlanması
+    initializeAuth().then(() => {
+      if (isMounted) {
+        setupAuthListener();
+      }
+    });
 
     return () => {
       isMounted = false;
-      subscription.unsubscribe();
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+      }
     };
   }, [checkAdminRole]);
 
   const signIn = async (email: string, password: string) => {
     try {
-      console.log('Attempting sign in for:', email);
+      console.log('Starting admin sign in for:', email);
       setLoading(true);
       
-      // Əvvəlcə mövcud sessiyanı təmizlə
+      // Mövcud sessiyanı təmizlə
       await supabase.auth.signOut();
+      
+      // Kiçik gecikməni gözlə
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -177,6 +185,7 @@ export const useAdminAuth = () => {
       if (data.user) {
         console.log('Sign in successful, checking admin role');
         
+        // Admin rolunu yoxla
         const { data: roleData } = await supabase
           .from('user_roles')
           .select('role')
@@ -192,6 +201,7 @@ export const useAdminAuth = () => {
         }
 
         console.log('Admin role confirmed');
+        // Loading false auth listener-dən edəcək
         return { success: true };
       }
 
@@ -206,16 +216,20 @@ export const useAdminAuth = () => {
 
   const signOut = async () => {
     try {
+      console.log('Signing out admin user');
       setLoading(true);
+      
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Sign out error:', error);
       }
+      
+      // State-ləri təmizlə
       setAdminUser(null);
       setUser(null);
+      setLoading(false);
     } catch (error) {
       console.error('Sign out exception:', error);
-    } finally {
       setLoading(false);
     }
   };
