@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -9,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Calendar, User, ArrowLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useSEO } from "@/hooks/useSEO";
+import { generateBlogSEOConfig } from "@/utils/seoGenerator";
 
 interface BlogPost {
   id: string;
@@ -55,47 +57,17 @@ const BlogPost = () => {
     }
   };
 
-  // SEO configuration
-  const seoConfig = blog ? {
-    title: `${blog.title} | Hiclient Bloq`,
-    description: blog.content.replace(/<[^>]*>/g, '').substring(0, 160) + '...',
-    keywords: 'floating widget, müştəri məmnuniyyəti, website widget, sayt optimizasiyası, müştəri dəstəyi',
-    canonicalUrl: `https://hiclient.co/${slug}/`,
-    ogTitle: `${blog.title} | Hiclient Bloq`,
-    ogDescription: blog.content.replace(/<[^>]*>/g, '').substring(0, 160) + '...',
-    ogImage: blog.featured_image || undefined,
-    ogType: 'article',
-    structuredData: {
-      "@context": "https://schema.org",
-      "@type": "BlogPosting",
-      "headline": blog.title,
-      "description": blog.content.replace(/<[^>]*>/g, '').substring(0, 160),
-      "image": blog.featured_image || undefined,
-      "author": {
-        "@type": "Organization",
-        "name": "Hiclient Team"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Hiclient",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://hiclient.co/logo.png"
-        }
-      },
-      "datePublished": blog.created_at,
-      "dateModified": blog.updated_at || blog.created_at,
-      "url": `https://hiclient.co/${slug}/`,
-      "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": `https://hiclient.co/${slug}/`
-      },
-      "articleSection": "Technology",
-      "keywords": "floating widget, müştəri məmnuniyyəti, website optimization"
-    }
-  } : {
-    title: 'Yüklənir... | Hiclient Bloq',
-    description: 'Floating widget və müştəri məmnuniyyəti haqqında məqalə yüklənir',
+  // Generate SEO configuration automatically
+  const seoConfig = blog ? generateBlogSEOConfig({
+    title: blog.title,
+    content: blog.content,
+    slug: slug!,
+    featured_image: blog.featured_image,
+    created_at: blog.created_at,
+    updated_at: blog.updated_at
+  }) : {
+    title: 'Loading... | Hiclient Blog',
+    description: 'Loading blog post about floating widgets and customer satisfaction',
     canonicalUrl: `https://hiclient.co/${slug}/`
   };
 
@@ -118,7 +90,7 @@ const BlogPost = () => {
             <Link to="/blogs">
               <Button variant="ghost" className="mb-6 hover:bg-blue-100">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Bloq siyahısına qayıt
+                Back to Blog List
               </Button>
             </Link>
 
@@ -153,7 +125,7 @@ const BlogPost = () => {
                     <div className="flex items-center gap-6 text-gray-500 text-sm">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
-                        <span>{new Date(blog.created_at).toLocaleDateString('az-AZ', {
+                        <span>{new Date(blog.created_at).toLocaleDateString('en-US', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric'
@@ -189,7 +161,7 @@ const BlogPost = () => {
               </article>
             ) : (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">Bloq məqaləsi tapılmadı.</p>
+                <p className="text-gray-500 text-lg">Blog post not found.</p>
               </div>
             )}
           </div>
