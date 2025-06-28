@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -9,6 +8,7 @@ import { AuthModal } from "@/components/AuthModal";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar, User, ArrowLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { useSEO } from "@/hooks/useSEO";
 
 interface BlogPost {
   id: string;
@@ -16,6 +16,7 @@ interface BlogPost {
   content: string;
   featured_image: string | null;
   created_at: string;
+  updated_at: string | null;
   author_id: string | null;
 }
 
@@ -54,54 +55,55 @@ const BlogPost = () => {
     }
   };
 
+  // SEO configuration
+  const seoConfig = blog ? {
+    title: `${blog.title} | Hiclient Bloq`,
+    description: blog.content.replace(/<[^>]*>/g, '').substring(0, 160) + '...',
+    keywords: 'floating widget, müştəri məmnuniyyəti, website widget, sayt optimizasiyası, müştəri dəstəyi',
+    canonicalUrl: `https://hiclient.co/${slug}/`,
+    ogTitle: `${blog.title} | Hiclient Bloq`,
+    ogDescription: blog.content.replace(/<[^>]*>/g, '').substring(0, 160) + '...',
+    ogImage: blog.featured_image || undefined,
+    ogType: 'article',
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": blog.title,
+      "description": blog.content.replace(/<[^>]*>/g, '').substring(0, 160),
+      "image": blog.featured_image || undefined,
+      "author": {
+        "@type": "Organization",
+        "name": "Hiclient Team"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Hiclient",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://hiclient.co/logo.png"
+        }
+      },
+      "datePublished": blog.created_at,
+      "dateModified": blog.updated_at || blog.created_at,
+      "url": `https://hiclient.co/${slug}/`,
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": `https://hiclient.co/${slug}/`
+      },
+      "articleSection": "Technology",
+      "keywords": "floating widget, müştəri məmnuniyyəti, website optimization"
+    }
+  } : {
+    title: 'Yüklənir... | Hiclient Bloq',
+    description: 'Floating widget və müştəri məmnuniyyəti haqqında məqalə yüklənir',
+    canonicalUrl: `https://hiclient.co/${slug}/`
+  };
+
+  const { helmet } = useSEO(seoConfig);
+
   return (
     <>
-      <Helmet>
-        <title>{blog ? `${blog.title} | Hiclient Bloq` : 'Yüklənir... | Hiclient Bloq'}</title>
-        <meta name="description" content={blog ? blog.content.replace(/<[^>]*>/g, '').substring(0, 160) + '...' : 'Floating widget və müştəri məmnuniyyəti haqqında məqalə'} />
-        <link rel="canonical" href={`https://hiclient.co/${slug}/`} />
-        
-        {blog && (
-          <>
-            <meta property="og:title" content={`${blog.title} | Hiclient Bloq`} />
-            <meta property="og:description" content={blog.content.replace(/<[^>]*>/g, '').substring(0, 160) + '...'} />
-            <meta property="og:url" content={`https://hiclient.co/${slug}/`} />
-            <meta property="og:type" content="article" />
-            {blog.featured_image && <meta property="og:image" content={blog.featured_image} />}
-            <meta property="article:published_time" content={blog.created_at} />
-            <meta property="article:author" content="Hiclient Team" />
-            
-            <script type="application/ld+json">
-              {JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "BlogPosting",
-                "headline": blog.title,
-                "description": blog.content.replace(/<[^>]*>/g, '').substring(0, 160),
-                "image": blog.featured_image || undefined,
-                "author": {
-                  "@type": "Organization",
-                  "name": "Hiclient Team"
-                },
-                "publisher": {
-                  "@type": "Organization",
-                  "name": "Hiclient",
-                  "logo": {
-                    "@type": "ImageObject",
-                    "url": "https://hiclient.co/logo.png"
-                  }
-                },
-                "datePublished": blog.created_at,
-                "dateModified": blog.created_at,
-                "url": `https://hiclient.co/${slug}/`,
-                "mainEntityOfPage": {
-                  "@type": "WebPage",
-                  "@id": `https://hiclient.co/${slug}/`
-                }
-              })}
-            </script>
-          </>
-        )}
-      </Helmet>
+      {helmet}
 
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <Header 

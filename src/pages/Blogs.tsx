@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Header } from "@/components/FloatingWidgetBuilder/Header";
@@ -10,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Calendar, User, Image } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useSEO } from "@/hooks/useSEO";
 
 interface Blog {
   id: string;
@@ -52,19 +52,44 @@ const Blogs = () => {
     }
   };
 
+  // SEO configuration
+  const seoConfig = {
+    title: 'Bloq - Hiclient | Widget və Müştəri Məmnuniyyəti Məqalələri',
+    description: 'Floating widget-lər, müştəri məmnuniyyəti və sayt optimizasiyası haqqında faydalı məqalələr. Biznesinizi inkişaf etdirin və müştərilərinizlə əlaqəni gücləndirin.',
+    keywords: 'floating widget məqalələri, müştəri məmnuniyyəti, sayt optimizasiyası, whatsapp widget, telegram widget, video popup, müştəri dəstəyi',
+    canonicalUrl: 'https://hiclient.co/blogs',
+    ogTitle: 'Bloq - Hiclient | Widget və Müştəri Məmnuniyyəti Məqalələri',
+    ogDescription: 'Floating widget-lər, müştəri məmnuniyyəti və sayt optimizasiyası haqqında faydalı məqalələr.',
+    ogType: 'website',
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "Blog",
+      "name": "Hiclient Blog",
+      "description": "Floating widget-lər və müştəri məmnuniyyəti haqqında məqalələr",
+      "url": "https://hiclient.co/blogs",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Hiclient",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://hiclient.co/logo.png"
+        }
+      },
+      "blogPost": blogs.map(blog => ({
+        "@type": "BlogPosting",
+        "headline": blog.title,
+        "url": `https://hiclient.co/${blog.slug}/`,
+        "datePublished": blog.created_at,
+        "description": blog.excerpt
+      }))
+    }
+  };
+
+  const { helmet } = useSEO(seoConfig);
+
   return (
     <>
-      <Helmet>
-        <title>Bloq - Hiclient | Widget və Müştəri Məmnuniyyəti Məqalələri</title>
-        <meta name="description" content="Floating widget-lər, müştəri məmnuniyyəti və sayt optimizasiyası haqqında faydalı məqalələr. Biznesinizi inkişaf etdirin və müştərilərinizlə əlaqəni gücləndirin." />
-        <meta name="keywords" content="floating widget məqalələri, müştəri məmnuniyyəti, sayt optimizasiyası, whatsapp widget, telegram widget, video popup" />
-        <link rel="canonical" href="https://hiclient.co/blogs" />
-        
-        <meta property="og:title" content="Bloq - Hiclient | Widget və Müştəri Məmnuniyyəti Məqalələri" />
-        <meta property="og:description" content="Floating widget-lər, müştəri məmnuniyyəti və sayt optimizasiyası haqqında faydalı məqalələr." />
-        <meta property="og:url" content="https://hiclient.co/blogs" />
-        <meta property="og:type" content="blog" />
-      </Helmet>
+      {helmet}
 
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <Header 

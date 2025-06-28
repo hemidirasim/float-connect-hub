@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useWidgetState } from "@/hooks/useWidgetState";
 import { useWidgetActions } from "@/components/FloatingWidgetBuilder/WidgetActions";
 import { generateWidgetCode } from "@/utils/codeGenerator";
+import { useSEO } from "@/hooks/useSEO";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -215,6 +216,41 @@ const Index = () => {
     setSaving(false);
   };
 
+  // SEO configuration
+  const seoConfig = {
+    title: 'Hiclient - Saytınız üçün İnteraktiv Floating Widget Yaradın | Müştəri Məmnuniyyəti Platforması',
+    description: 'Saytınız üçün peşəkar floating widget-lər yaradın. Video inteqrasiyası, çoxkanal dəstəyi (WhatsApp, Telegram, Email). Asan quraşdırma, kodlaşdırma tələb olunmur. Müştəri məmnuniyyətini artırın.',
+    keywords: 'floating widget, website widget, müştəri məmnuniyyəti, whatsapp widget, telegram widget, video widget, website popup, əlaqə widget, müştəri dəstəyi widget, live chat alternativ',
+    canonicalUrl: 'https://hiclient.co/',
+    ogTitle: 'Hiclient - Saytınız üçün İnteraktiv Floating Widget Yaradın',
+    ogDescription: 'Saytınız üçün peşəkar floating widget-lər yaradın. Video inteqrasiyası, çoxkanal dəstəyi (WhatsApp, Telegram, Email). Asan quraşdırma, kodlaşdırma tələb olunmur.',
+    ogType: 'website',
+    twitterTitle: 'Hiclient - Saytınız üçün İnteraktiv Floating Widget Yaradın',
+    twitterDescription: 'Saytınız üçün peşəkar floating widget-lər yaradın. Video inteqrasiyası, çoxkanal dəstəyi (WhatsApp, Telegram, Email). Asan quraşdırma, kodlaşdırma tələb olunmur.',
+    structuredData: {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Hiclient",
+      "url": "https://hiclient.co",
+      "description": "Saytınız üçün peşəkar floating widget-lər yaradın",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://hiclient.co/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Hiclient",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://hiclient.co/logo.png"
+        }
+      }
+    }
+  };
+
+  const { helmet } = useSEO(seoConfig);
+
   // Generate widget code - now includes the widget ID from editingWidget
   useEffect(() => {
     const code = generateWidgetCode(
@@ -237,35 +273,7 @@ const Index = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Hiclient - Saytınız üçün İnteraktiv Floating Widget Yaradın | Müştəri Məmnuniyyəti Platforması</title>
-        <meta name="description" content="Saytınız üçün peşəkar floating widget-lər yaradın. Video inteqrasiyası, çoxkanal dəstəyi (WhatsApp, Telegram, Email). Asan quraşdırma, kodlaşdırma tələb olunmur. Müştəri məmnuniyyətini artırın." />
-        <meta name="keywords" content="floating widget, website widget, müştəri məmnuniyyəti, whatsapp widget, telegram widget, video widget, website popup, əlaqə widget, müştəri dəstəyi widget, live chat alternativ" />
-        <link rel="canonical" href="https://hiclient.co/" />
-        
-        <meta property="og:title" content="Hiclient - Saytınız üçün İnteraktiv Floating Widget Yaradın" />
-        <meta property="og:description" content="Saytınız üçün peşəkar floating widget-lər yaradın. Video inteqrasiyası, çoxkanal dəstəyi (WhatsApp, Telegram, Email). Asan quraşdırma, kodlaşdırma tələb olunmur." />
-        <meta property="og:url" content="https://hiclient.co/" />
-        <meta property="og:type" content="website" />
-        
-        <meta name="twitter:title" content="Hiclient - Saytınız üçün İnteraktiv Floating Widget Yaradın" />
-        <meta name="twitter:description" content="Saytınız üçün peşəkar floating widget-lər yaradın. Video inteqrasiyası, çoxkanal dəstəyi (WhatsApp, Telegram, Email). Asan quraşdırma, kodlaşdırma tələb olunmur." />
-
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "name": "Hiclient",
-            "url": "https://hiclient.co",
-            "description": "Saytınız üçün peşəkar floating widget-lər yaradın",
-            "potentialAction": {
-              "@type": "SearchAction",
-              "target": "https://hiclient.co/search?q={search_term_string}",
-              "query-input": "required name=search_term_string"
-            }
-          })}
-        </script>
-      </Helmet>
+      {helmet}
       
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
         <Header 
