@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from "@/hooks/useAdminAuth";
@@ -37,13 +36,14 @@ const AdminDashboard = () => {
     }
   }, [adminUser, loading, navigate]);
 
-  // Loading state - daha qısa müddət göstər
+  // Loading state - maksimum 5 saniyə göstər
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-red-500 border-opacity-75 mx-auto"></div>
           <p className="mt-6 text-lg text-gray-300 font-medium">Yüklənir...</p>
+          <p className="mt-2 text-sm text-gray-400">Admin paneli yoxlanılır</p>
         </div>
       </div>
     );
@@ -55,7 +55,8 @@ const AdminDashboard = () => {
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <div className="text-center">
           <Shield className="w-20 h-20 text-red-500 mx-auto mb-6" />
-          <p className="text-xl text-gray-300 font-medium">Yönləndirilir...</p>
+          <p className="text-xl text-gray-300 font-medium">Admin girişi tələb olunur</p>
+          <p className="text-sm text-gray-400 mt-2">Yönləndirilir...</p>
         </div>
       </div>
     );

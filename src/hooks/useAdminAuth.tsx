@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -15,64 +15,63 @@ export const useAdminAuth = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
+  // Admin rolunu yoxlayan funksiya
+  const checkAdminRole = useCallback(async (currentUser: User) => {
+    try {
+      console.log('Checking admin role for user:', currentUser.id);
+      
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', currentUser.id)
+        .eq('role', 'admin')
+        .maybeSingle();
 
-    const checkAdminRole = async (user: User) => {
-      try {
-        console.log('Checking admin role for user:', user.id);
-        
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
+      if (error) {
+        console.error('Admin role check error:', error);
+        return null;
+      }
+
+      if (data) {
+        console.log('User has admin role');
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', currentUser.id)
           .maybeSingle();
 
-        if (!mounted) return;
-
-        if (error) {
-          console.error('Admin role check error:', error);
-          setAdminUser(null);
-          return;
-        }
-
-        if (data) {
-          console.log('User has admin role');
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('full_name')
-            .eq('id', user.id)
-            .maybeSingle();
-
-          if (!mounted) return;
-
-          setAdminUser({
-            user_id: user.id,
-            email: user.email || '',
-            full_name: profile?.full_name || user.email?.split('@')[0] || '',
-            is_admin: true
-          });
-        } else {
-          console.log('User does not have admin role');
-          setAdminUser(null);
-        }
-      } catch (error) {
-        console.error('Error checking admin role:', error);
-        if (mounted) {
-          setAdminUser(null);
-        }
+        return {
+          user_id: currentUser.id,
+          email: currentUser.email || '',
+          full_name: profile?.full_name || currentUser.email?.split('@')[0] || '',
+          is_admin: true
+        };
+      } else {
+        console.log('User does not have admin role');
+        return null;
       }
-    };
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+      return null;
+    }
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
 
     const initializeAuth = async () => {
       try {
+        setLoading(true);
+        
+        // İlk olaraq mövcud sessiya yoxlanılır
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (!mounted) return;
+        if (!isMounted) return;
         
         if (error) {
           console.error('Session error:', error);
+          // Xətalı sessiya təmizlənir
+          await supabase.auth.signOut();
           setUser(null);
           setAdminUser(null);
           setLoading(false);
@@ -82,7 +81,12 @@ export const useAdminAuth = () => {
         if (session?.user) {
           console.log('Existing session found for:', session.user.email);
           setUser(session.user);
-          await checkAdminRole(session.user);
+          
+          // Admin rolunu yoxla
+          const adminData = await checkAdminRole(session.user);
+          if (isMounted) {
+            setAdminUser(adminData);
+          }
         } else {
           console.log('No existing session');
           setUser(null);
@@ -90,12 +94,14 @@ export const useAdminAuth = () => {
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
-        if (mounted) {
+        // Hər hansı xəta olduqda təmizlə
+        if (isMounted) {
+          await supabase.auth.signOut();
           setUser(null);
           setAdminUser(null);
         }
       } finally {
-        if (mounted) {
+        if (isMounted) {
           setLoading(false);
         }
       }
@@ -106,8 +112,9 @@ export const useAdminAuth = () => {
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         
-        if (!mounted) return;
+        if (!isMounted) return;
 
+        // SIGNED_OUT halında dərhal təmizlə
         if (event === 'SIGNED_OUT' || !session?.user) {
           setUser(null);
           setAdminUser(null);
@@ -115,28 +122,46 @@ export const useAdminAuth = () => {
           return;
         }
 
+        // SIGNED_IN və ya TOKEN_REFRESHED halında
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           setLoading(true);
           setUser(session.user);
-          await checkAdminRole(session.user);
-          setLoading(false);
+          
+          try {
+            const adminData = await checkAdminRole(session.user);
+            if (isMounted) {
+              setAdminUser(adminData);
+            }
+          } catch (error) {
+            console.error('Error in auth state change:', error);
+            if (isMounted) {
+              setAdminUser(null);
+            }
+          } finally {
+            if (isMounted) {
+              setLoading(false);
+            }
+          }
         }
       }
     );
 
-    // Initialize auth
+    // Auth-u işə sal
     initializeAuth();
 
     return () => {
-      mounted = false;
+      isMounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [checkAdminRole]);
 
   const signIn = async (email: string, password: string) => {
     try {
       console.log('Attempting sign in for:', email);
       setLoading(true);
+      
+      // Əvvəlcə mövcud sessiyanı təmizlə
+      await supabase.auth.signOut();
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
