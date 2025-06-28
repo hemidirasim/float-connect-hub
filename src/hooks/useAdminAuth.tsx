@@ -27,11 +27,11 @@ export const useAdminAuth = () => {
           .select('role')
           .eq('user_id', user.id)
           .eq('role', 'admin')
-          .single();
+          .maybeSingle();
 
         if (!mounted) return;
 
-        if (error && error.code !== 'PGRST116') {
+        if (error) {
           console.error('Admin role check error:', error);
           setAdminUser(null);
           setLoading(false);
@@ -40,12 +40,11 @@ export const useAdminAuth = () => {
 
         if (data) {
           console.log('User has admin role');
-          // İstifadəçi admin roluna malikdir
           const { data: profile } = await supabase
             .from('profiles')
             .select('full_name')
             .eq('id', user.id)
-            .single();
+            .maybeSingle();
 
           if (!mounted) return;
 
@@ -71,49 +70,64 @@ export const useAdminAuth = () => {
       }
     };
 
-    // Auth state dinləyicisini quraq
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
         
         if (!mounted) return;
-
-        setLoading(true);
         
-        if (session?.user) {
-          setUser(session.user);
-          await checkAdminRole(session.user);
-        } else {
+        if (error) {
+          console.error('Session error:', error);
           setUser(null);
           setAdminUser(null);
           setLoading(false);
+          return;
         }
-      }
-    );
-
-    // Mövcud sessiyonu yoxlayaq
-    const initializeAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!mounted) return;
         
         if (session?.user) {
           console.log('Existing session found for:', session.user.email);
           setUser(session.user);
           await checkAdminRole(session.user);
         } else {
+          console.log('No existing session');
+          setUser(null);
+          setAdminUser(null);
           setLoading(false);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
         if (mounted) {
+          setUser(null);
+          setAdminUser(null);
           setLoading(false);
         }
       }
     };
 
+    // İlk olaraq mövcud sessiyonu yoxla
     initializeAuth();
+
+    // Auth state dinləyicisini qur
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
+        
+        if (!mounted) return;
+
+        if (event === 'SIGNED_OUT' || !session?.user) {
+          setUser(null);
+          setAdminUser(null);
+          setLoading(false);
+          return;
+        }
+
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          setLoading(true);
+          setUser(session.user);
+          await checkAdminRole(session.user);
+        }
+      }
+    );
 
     return () => {
       mounted = false;
@@ -140,13 +154,12 @@ export const useAdminAuth = () => {
       if (data.user) {
         console.log('Sign in successful, checking admin role');
         
-        // Admin rolunu yoxlayaq
         const { data: roleData } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', data.user.id)
           .eq('role', 'admin')
-          .single();
+          .maybeSingle();
 
         if (!roleData) {
           console.log('User does not have admin role, signing out');
@@ -169,11 +182,19 @@ export const useAdminAuth = () => {
   };
 
   const signOut = async () => {
-    setLoading(true);
-    await supabase.auth.signOut();
-    setAdminUser(null);
-    setUser(null);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error:', error);
+      }
+      setAdminUser(null);
+      setUser(null);
+    } catch (error) {
+      console.error('Sign out exception:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {

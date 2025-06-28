@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,32 +30,32 @@ const AdminDashboard = () => {
   useEffect(() => {
     console.log('AdminDashboard - loading:', loading, 'adminUser:', adminUser);
     
-    // Yalnız loading false olduqda və adminUser yoxdursa redirect et
+    // Loading tamamlandıqdan sonra admin user yoxdursa redirect et
     if (!loading && !adminUser) {
-      console.log('Redirecting to admin login');
-      navigate('/admin/login');
+      console.log('Redirecting to admin login - no admin user found');
+      navigate('/admin/login', { replace: true });
     }
   }, [adminUser, loading, navigate]);
 
-  // Loading state
+  // Loading state - daha qısa müddət göstər
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-red-500 border-opacity-75 mx-auto"></div>
-          <p className="mt-6 text-lg text-gray-300 font-medium">Admin paneli yüklənir...</p>
+          <p className="mt-6 text-lg text-gray-300 font-medium">Yüklənir...</p>
         </div>
       </div>
     );
   }
 
-  // Admin user yoxdursa
+  // Admin user yoxdursa və loading bitibsə, navigate işləyəcək
   if (!adminUser) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <div className="text-center">
           <Shield className="w-20 h-20 text-red-500 mx-auto mb-6" />
-          <p className="text-xl text-gray-300 font-medium">Admin girişi tələb olunur</p>
+          <p className="text-xl text-gray-300 font-medium">Yönləndirilir...</p>
         </div>
       </div>
     );
