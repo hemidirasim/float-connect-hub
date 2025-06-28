@@ -179,7 +179,7 @@ const BlogPost = () => {
         </div>
 
         <Footer />
-        <AuthModal open={authModalOpen} onOpenChange={setAuthModal} />
+        <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
       </div>
     </>
   );
