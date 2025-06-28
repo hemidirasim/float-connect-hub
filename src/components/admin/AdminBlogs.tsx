@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -272,7 +271,7 @@ export const AdminBlogs = () => {
               Yeni Bloq
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-gray-800 border-gray-700 text-white">
+          <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto bg-gray-800 border-gray-700 text-white">
             <DialogHeader>
               <DialogTitle className="text-white text-xl">
                 {editingBlog ? 'Bloqu Redaktə Et' : 'Yeni Bloq Yarat'}
@@ -331,7 +330,7 @@ export const AdminBlogs = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Məzmun *
+                  Məzmun * - Rich Text Editor
                 </label>
                 <SafeCKEditor
                   content={formData.content}
