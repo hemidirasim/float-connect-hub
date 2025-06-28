@@ -13,10 +13,6 @@ export const SitemapRenderer = () => {
         document.write(sitemapContent);
         document.close();
         
-        // Set content type
-        if (document.contentType) {
-          document.contentType = 'application/xml';
-        }
       } catch (error) {
         console.error('Error serving sitemap:', error);
         document.open();
