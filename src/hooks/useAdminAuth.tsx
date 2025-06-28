@@ -34,7 +34,6 @@ export const useAdminAuth = () => {
         if (error) {
           console.error('Admin role check error:', error);
           setAdminUser(null);
-          setLoading(false);
           return;
         }
 
@@ -63,10 +62,6 @@ export const useAdminAuth = () => {
         if (mounted) {
           setAdminUser(null);
         }
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
       }
     };
 
@@ -92,22 +87,21 @@ export const useAdminAuth = () => {
           console.log('No existing session');
           setUser(null);
           setAdminUser(null);
-          setLoading(false);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
         if (mounted) {
           setUser(null);
           setAdminUser(null);
+        }
+      } finally {
+        if (mounted) {
           setLoading(false);
         }
       }
     };
 
-    // İlk olaraq mövcud sessiyonu yoxla
-    initializeAuth();
-
-    // Auth state dinləyicisini qur
+    // Auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
@@ -125,9 +119,13 @@ export const useAdminAuth = () => {
           setLoading(true);
           setUser(session.user);
           await checkAdminRole(session.user);
+          setLoading(false);
         }
       }
     );
+
+    // Initialize auth
+    initializeAuth();
 
     return () => {
       mounted = false;

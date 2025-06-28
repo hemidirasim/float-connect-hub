@@ -74,10 +74,9 @@ const Dashboard = () => {
       const { data, error } = await supabase
         .from('user_credits')
         .select('*')
-        .single();
+        .maybeSingle();
 
       if (error && error.code === 'PGRST116') {
-        // No user credits record found, create one
         console.log('No user credits found, creating default record...');
         const { data: newCredits, error: insertError } = await supabase
           .from('user_credits')
@@ -146,19 +145,12 @@ const Dashboard = () => {
   };
 
   const handleCustomize = (widgetId: string) => {
-    // Store widget ID in localStorage to edit on main page
     localStorage.setItem('editWidgetId', widgetId);
-    // Navigate to main page with a hash to scroll to the widget form
     navigate('/#widget-form');
   };
 
-  const generateWidgetCode = (widget: Widget) => {
-    let scriptCode = `<script src="https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/widget-js/${widget.id}"></script>`;
-    return scriptCode;
-  };
-
   const copyCode = (widget: Widget) => {
-    const code = generateWidgetCode(widget);
+    const code = `<script src="https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/widget-js/${widget.id}"></script>`;
     navigator.clipboard.writeText(code);
     toast.success('Code copied!');
   };
