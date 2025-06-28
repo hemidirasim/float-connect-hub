@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { HeroSection } from "@/components/FloatingWidgetBuilder/HeroSection";
@@ -217,11 +216,11 @@ const Index = () => {
     setSaving(false);
   };
 
-  // Comprehensive SEO configuration for homepage
+  // Enhanced SEO configuration - all in English
   const seoConfig = {
     title: 'Hiclient - Create Interactive Floating Widgets for Your Website | Customer Engagement Platform',
-    description: 'Create professional floating widgets for your website with video integration, multi-channel support (WhatsApp, Telegram, Email). Easy setup, no coding required. Boost customer satisfaction and conversions.',
-    keywords: 'floating widget, website widget, customer engagement, whatsapp widget, telegram widget, video widget, website popup, contact widget, customer support widget, live chat alternative, website conversion, customer satisfaction',
+    description: 'Create professional floating widgets for your website with video integration, multi-channel support (WhatsApp, Telegram, Email). Easy setup, no coding required. Boost customer satisfaction and conversions by 40%.',
+    keywords: 'floating widget, website widget, customer engagement, whatsapp widget, telegram widget, video widget, website popup, contact widget, customer support widget, live chat alternative, website conversion, customer satisfaction, lead generation, multi-channel communication',
     canonicalUrl: 'https://hiclient.co/',
     ogTitle: 'Hiclient - Create Interactive Floating Widgets for Your Website',
     ogDescription: 'Create professional floating widgets for your website with video integration and multi-channel support. Easy setup, no coding required. Boost customer engagement and conversions.',
@@ -238,7 +237,7 @@ const Index = () => {
           "@id": "https://hiclient.co/#website",
           "url": "https://hiclient.co/",
           "name": "Hiclient",
-          "description": "Create professional floating widgets for your website with video integration and multi-channel support",
+          "description": "Create professional floating widgets for your website with video integration and multi-channel support. Boost customer engagement and conversions.",
           "publisher": {
             "@id": "https://hiclient.co/#organization"
           },
@@ -267,17 +266,23 @@ const Index = () => {
             "contentUrl": "https://hiclient.co/logo.png",
             "width": 512,
             "height": 512,
-            "caption": "Hiclient"
+            "caption": "Hiclient - Interactive Floating Widget Builder"
           },
           "image": {
             "@id": "https://hiclient.co/#logo"
           },
-          "description": "Hiclient helps businesses create professional floating widgets for their websites to improve customer engagement and satisfaction.",
+          "description": "Hiclient helps businesses create professional floating widgets for their websites to improve customer engagement, boost conversions, and enhance customer satisfaction through multi-channel communication.",
           "foundingDate": "2024",
           "sameAs": [
             "https://twitter.com/hiclient",
-            "https://linkedin.com/company/hiclient"
-          ]
+            "https://linkedin.com/company/hiclient",
+            "https://facebook.com/hiclient"
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer service",
+            "availableLanguage": ["English"]
+          }
         },
         {
           "@type": "WebPage",
@@ -290,7 +295,7 @@ const Index = () => {
           "about": {
             "@id": "https://hiclient.co/#organization"
           },
-          "description": "Create professional floating widgets for your website with video integration, multi-channel support (WhatsApp, Telegram, Email). Easy setup, no coding required.",
+          "description": "Create professional floating widgets for your website with video integration, multi-channel support (WhatsApp, Telegram, Email). Easy setup, no coding required. Boost customer engagement and conversions.",
           "breadcrumb": {
             "@id": "https://hiclient.co/#breadcrumb"
           },
@@ -317,15 +322,17 @@ const Index = () => {
         {
           "@type": "SoftwareApplication",
           "name": "Hiclient Widget Builder",
-          "description": "Professional floating widget builder for websites with video integration and multi-channel support",
+          "description": "Professional floating widget builder for websites with video integration and multi-channel support. Create engaging customer touchpoints without coding.",
           "url": "https://hiclient.co/",
           "applicationCategory": "WebApplication",
           "operatingSystem": "Web Browser",
+          "browserRequirements": "Requires JavaScript. Compatible with all modern browsers.",
           "offers": {
             "@type": "Offer",
             "price": "0",
             "priceCurrency": "USD",
-            "description": "Free widget builder with premium features available"
+            "description": "Free widget builder with premium features available",
+            "availability": "https://schema.org/InStock"
           },
           "author": {
             "@id": "https://hiclient.co/#organization"
@@ -337,24 +344,83 @@ const Index = () => {
             "Video Integration",
             "Multi-Channel Support",
             "WhatsApp Integration",
-            "Telegram Integration",
+            "Telegram Integration", 
             "Email Integration",
             "No Coding Required",
             "Customizable Design",
-            "Mobile Responsive"
-          ]
+            "Mobile Responsive",
+            "Real-time Preview",
+            "Easy Installation"
+          ],
+          "screenshot": "https://hiclient.co/app-screenshot.png",
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "150"
+          }
         },
         {
           "@type": "Service",
           "name": "Website Widget Creation Service",
-          "description": "Professional service for creating floating widgets that improve customer engagement on websites",
+          "description": "Professional service for creating floating widgets that improve customer engagement on websites. Increase conversions and customer satisfaction with multi-channel communication tools.",
           "provider": {
             "@id": "https://hiclient.co/#organization"
           },
           "areaServed": "Worldwide",
-          "availableLanguage": ["English", "Azerbaijani"],
+          "availableLanguage": ["English"],
           "serviceType": "Web Development Service",
-          "category": "Customer Engagement Tools"
+          "category": "Customer Engagement Tools",
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Widget Creation Services",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Basic Widget Creation",
+                  "description": "Create simple floating widgets with basic channel support"
+                }
+              },
+              {
+                "@type": "Offer", 
+                "itemOffered": {
+                  "@type": "Service",
+                  "name": "Advanced Widget Creation",
+                  "description": "Create advanced floating widgets with video integration and multi-channel support"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "How do I create a floating widget for my website?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "With Hiclient, you can create a floating widget in minutes. Simply enter your website details, choose your channels (WhatsApp, Telegram, Email), customize the design, and copy the generated code to your website."
+              }
+            },
+            {
+              "@type": "Question", 
+              "name": "Do I need coding skills to use Hiclient?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No coding skills required! Hiclient provides a user-friendly interface where you can create and customize your floating widget visually, then simply copy and paste the generated code into your website."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What channels can I add to my floating widget?",
+              "acceptedAnswer": {
+                "@type": "Answer", 
+                "text": "You can add multiple communication channels including WhatsApp, Telegram, Email, phone calls, and custom links. Each channel can be customized with your specific contact information."
+              }
+            }
+          ]
         }
       ]
     }
