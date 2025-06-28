@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { HeroSection } from "@/components/FloatingWidgetBuilder/HeroSection";
@@ -72,13 +73,13 @@ const Index = () => {
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
-      toast.success('Uğurla çıxış edildi!', {
-        description: 'Hesabınızdan çıxış etdiniz'
+      toast.success('Successfully signed out!', {
+        description: 'You have been logged out of your account'
       });
     } catch (error) {
       console.error('Error signing out:', error);
-      toast.error('Çıxış zamanı xəta baş verdi', {
-        description: 'Zəhmət olmasa yenidən cəhd edin'
+      toast.error('Error signing out', {
+        description: 'Please try again'
       });
     }
   };
@@ -88,15 +89,15 @@ const Index = () => {
     if (!file) return;
 
     if (file.size > 10 * 1024 * 1024) {
-      toast.error('Video fayl 10MB-dan kiçik olmalıdır', {
-        description: 'Zəhmət olmasa daha kiçik fayl seçin'
+      toast.error('Video file must be smaller than 10MB', {
+        description: 'Please select a smaller file'
       });
       return;
     }
 
     if (!user) {
-      toast.error('Video yükləmək üçün daxil olmalısınız', {
-        description: 'Zəhmət olmasa hesabınıza daxil olun'
+      toast.error('You must be logged in to upload videos', {
+        description: 'Please sign in to your account'
       });
       setAuthModalOpen(true);
       return;
@@ -127,13 +128,13 @@ const Index = () => {
         videoUrl: publicUrl
       }));
 
-      toast.success('Video uğurla yükləndi!', {
-        description: 'Video sizin widget-ə əlavə edildi'
+      toast.success('Video uploaded successfully!', {
+        description: 'Video has been added to your widget'
       });
     } catch (error) {
       console.error('Error uploading video:', error);
-      toast.error('Video yükləmədə xəta', {
-        description: 'Zəhmət olmasa yenidən cəhd edin'
+      toast.error('Error uploading video', {
+        description: 'Please try again'
       });
     } finally {
       setUploading(false);
@@ -161,8 +162,8 @@ const Index = () => {
       video: null,
       videoUrl: undefined
     }));
-    toast.success('Video silindi!', {
-      description: 'Video widget-dən çıxarıldı'
+    toast.success('Video removed!', {
+      description: 'Video has been removed from widget'
     });
   };
 
@@ -175,8 +176,8 @@ const Index = () => {
         customIcon: 'custom',
         customIconUrl: url
       }));
-      toast.success('Xüsusi ikon yükləndi!', {
-        description: 'Widget-dən istifadə edə bilərsiniz'
+      toast.success('Custom icon uploaded!', {
+        description: 'You can now use it in your widget'
       });
     }
   };
@@ -216,36 +217,146 @@ const Index = () => {
     setSaving(false);
   };
 
-  // SEO configuration
+  // Comprehensive SEO configuration for homepage
   const seoConfig = {
-    title: 'Hiclient - Saytınız üçün İnteraktiv Floating Widget Yaradın | Müştəri Məmnuniyyəti Platforması',
-    description: 'Saytınız üçün peşəkar floating widget-lər yaradın. Video inteqrasiyası, çoxkanal dəstəyi (WhatsApp, Telegram, Email). Asan quraşdırma, kodlaşdırma tələb olunmur. Müştəri məmnuniyyətini artırın.',
-    keywords: 'floating widget, website widget, müştəri məmnuniyyəti, whatsapp widget, telegram widget, video widget, website popup, əlaqə widget, müştəri dəstəyi widget, live chat alternativ',
+    title: 'Hiclient - Create Interactive Floating Widgets for Your Website | Customer Engagement Platform',
+    description: 'Create professional floating widgets for your website with video integration, multi-channel support (WhatsApp, Telegram, Email). Easy setup, no coding required. Boost customer satisfaction and conversions.',
+    keywords: 'floating widget, website widget, customer engagement, whatsapp widget, telegram widget, video widget, website popup, contact widget, customer support widget, live chat alternative, website conversion, customer satisfaction',
     canonicalUrl: 'https://hiclient.co/',
-    ogTitle: 'Hiclient - Saytınız üçün İnteraktiv Floating Widget Yaradın',
-    ogDescription: 'Saytınız üçün peşəkar floating widget-lər yaradın. Video inteqrasiyası, çoxkanal dəstəyi (WhatsApp, Telegram, Email). Asan quraşdırma, kodlaşdırma tələb olunmur.',
+    ogTitle: 'Hiclient - Create Interactive Floating Widgets for Your Website',
+    ogDescription: 'Create professional floating widgets for your website with video integration and multi-channel support. Easy setup, no coding required. Boost customer engagement and conversions.',
+    ogImage: 'https://hiclient.co/og-image.png',
     ogType: 'website',
-    twitterTitle: 'Hiclient - Saytınız üçün İnteraktiv Floating Widget Yaradın',
-    twitterDescription: 'Saytınız üçün peşəkar floating widget-lər yaradın. Video inteqrasiyası, çoxkanal dəstəyi (WhatsApp, Telegram, Email). Asan quraşdırma, kodlaşdırma tələb olunmur.',
+    twitterTitle: 'Hiclient - Create Interactive Floating Widgets for Your Website',
+    twitterDescription: 'Create professional floating widgets with video integration and multi-channel support. Easy setup, no coding required.',
+    twitterImage: 'https://hiclient.co/twitter-image.png',
     structuredData: {
       "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Hiclient",
-      "url": "https://hiclient.co",
-      "description": "Saytınız üçün peşəkar floating widget-lər yaradın",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://hiclient.co/search?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Hiclient",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://hiclient.co/logo.png"
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://hiclient.co/#website",
+          "url": "https://hiclient.co/",
+          "name": "Hiclient",
+          "description": "Create professional floating widgets for your website with video integration and multi-channel support",
+          "publisher": {
+            "@id": "https://hiclient.co/#organization"
+          },
+          "potentialAction": [
+            {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://hiclient.co/search?q={search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
+            }
+          ],
+          "inLanguage": "en-US"
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://hiclient.co/#organization",
+          "name": "Hiclient",
+          "url": "https://hiclient.co/",
+          "logo": {
+            "@type": "ImageObject",
+            "@id": "https://hiclient.co/#logo",
+            "inLanguage": "en-US",
+            "url": "https://hiclient.co/logo.png",
+            "contentUrl": "https://hiclient.co/logo.png",
+            "width": 512,
+            "height": 512,
+            "caption": "Hiclient"
+          },
+          "image": {
+            "@id": "https://hiclient.co/#logo"
+          },
+          "description": "Hiclient helps businesses create professional floating widgets for their websites to improve customer engagement and satisfaction.",
+          "foundingDate": "2024",
+          "sameAs": [
+            "https://twitter.com/hiclient",
+            "https://linkedin.com/company/hiclient"
+          ]
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://hiclient.co/#webpage",
+          "url": "https://hiclient.co/",
+          "name": "Hiclient - Create Interactive Floating Widgets for Your Website",
+          "isPartOf": {
+            "@id": "https://hiclient.co/#website"
+          },
+          "about": {
+            "@id": "https://hiclient.co/#organization"
+          },
+          "description": "Create professional floating widgets for your website with video integration, multi-channel support (WhatsApp, Telegram, Email). Easy setup, no coding required.",
+          "breadcrumb": {
+            "@id": "https://hiclient.co/#breadcrumb"
+          },
+          "inLanguage": "en-US",
+          "potentialAction": [
+            {
+              "@type": "ReadAction",
+              "target": ["https://hiclient.co/"]
+            }
+          ]
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://hiclient.co/#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://hiclient.co/"
+            }
+          ]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "Hiclient Widget Builder",
+          "description": "Professional floating widget builder for websites with video integration and multi-channel support",
+          "url": "https://hiclient.co/",
+          "applicationCategory": "WebApplication",
+          "operatingSystem": "Web Browser",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free widget builder with premium features available"
+          },
+          "author": {
+            "@id": "https://hiclient.co/#organization"
+          },
+          "publisher": {
+            "@id": "https://hiclient.co/#organization"
+          },
+          "featureList": [
+            "Video Integration",
+            "Multi-Channel Support",
+            "WhatsApp Integration",
+            "Telegram Integration",
+            "Email Integration",
+            "No Coding Required",
+            "Customizable Design",
+            "Mobile Responsive"
+          ]
+        },
+        {
+          "@type": "Service",
+          "name": "Website Widget Creation Service",
+          "description": "Professional service for creating floating widgets that improve customer engagement on websites",
+          "provider": {
+            "@id": "https://hiclient.co/#organization"
+          },
+          "areaServed": "Worldwide",
+          "availableLanguage": ["English", "Azerbaijani"],
+          "serviceType": "Web Development Service",
+          "category": "Customer Engagement Tools"
         }
-      }
+      ]
     }
   };
 
@@ -265,8 +376,8 @@ const Index = () => {
   const handleCopyCode = () => {
     navigator.clipboard.writeText(generatedCode);
     setCopied(true);
-    toast.success('Kod kopyalandı!', {
-      description: 'Widget kodu panoya köçürüldü'
+    toast.success('Code copied!', {
+      description: 'Widget code has been copied to clipboard'
     });
     setTimeout(() => setCopied(false), 2000);
   };
