@@ -114,7 +114,7 @@ const BlogPost = () => {
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto">
             <Link to="/blogs">
-              <Button variant="ghost" className="mb-6">
+              <Button variant="ghost" className="mb-6 hover:bg-blue-100">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Bloq siyahısına qayıt
               </Button>
@@ -131,9 +131,9 @@ const BlogPost = () => {
                 </div>
               </div>
             ) : blog ? (
-              <article className="bg-white rounded-lg shadow-sm overflow-hidden">
+              <article className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
                 {blog.featured_image && (
-                  <div className="w-full h-64 md:h-80 mb-8">
+                  <div className="w-full h-64 md:h-80 mb-0">
                     <img 
                       src={blog.featured_image} 
                       alt={blog.title}
@@ -145,23 +145,37 @@ const BlogPost = () => {
                   </div>
                 )}
                 
-                <div className="p-8">
-                  <header className="mb-8">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">{blog.title}</h1>
-                    <div className="flex items-center gap-4 text-gray-500">
-                      <div className="flex items-center gap-1">
+                <div className="p-8 md:p-12">
+                  <header className="mb-10">
+                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">{blog.title}</h1>
+                    <div className="flex items-center gap-6 text-gray-500 text-sm">
+                      <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
-                        {new Date(blog.created_at).toLocaleDateString()}
+                        <span>{new Date(blog.created_at).toLocaleDateString('az-AZ', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}</span>
                       </div>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-2">
                         <User className="w-4 h-4" />
-                        Hiclient Team
+                        <span>Hiclient Team</span>
                       </div>
                     </div>
                   </header>
                   
                   <div 
-                    className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900"
+                    className="blog-content prose prose-lg max-w-none
+                      prose-headings:text-gray-900 prose-headings:font-semibold prose-headings:mb-4 prose-headings:mt-8 
+                      prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-p:text-justify
+                      prose-a:text-blue-600 prose-a:hover:text-blue-800 prose-a:no-underline hover:prose-a:underline
+                      prose-strong:text-gray-900 prose-strong:font-semibold
+                      prose-ul:my-6 prose-ul:text-gray-700 prose-li:mb-2
+                      prose-ol:my-6 prose-ol:text-gray-700
+                      prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:py-2 prose-blockquote:bg-blue-50 prose-blockquote:italic
+                      prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm
+                      prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-6 prose-pre:rounded-lg prose-pre:overflow-x-auto
+                      prose-img:rounded-lg prose-img:shadow-md"
                     dangerouslySetInnerHTML={{ __html: blog.content }}
                   />
                 </div>
