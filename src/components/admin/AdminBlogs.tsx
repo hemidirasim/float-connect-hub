@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Plus, Settings, Trash2, Image } from 'lucide-react';
-import { CKEditorComponent } from './CKEditor';
+import { SafeCKEditor } from './SafeCKEditor';
+import { ImageUpload } from './ImageUpload';
 
 interface Blog {
   id: string;
@@ -29,6 +31,7 @@ export const AdminBlogs = () => {
   const [loading, setLoading] = useState(true);
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -75,7 +78,11 @@ export const AdminBlogs = () => {
   };
 
   const handleSave = async () => {
+    if (saving) return;
+
     try {
+      setSaving(true);
+
       if (!formData.title.trim()) {
         toast({
           title: "Xəta",
@@ -168,6 +175,8 @@ export const AdminBlogs = () => {
         description: error.message || "Bloq saxlanılarkən xəta baş verdi",
         variant: "destructive",
       });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -298,26 +307,13 @@ export const AdminBlogs = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   <Image className="w-4 h-4 inline mr-1" />
-                  Featured Image URL
+                  Featured Image
                 </label>
-                <Input
-                  placeholder="https://example.com/image.jpg"
+                <ImageUpload
                   value={formData.featured_image}
-                  onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
-                  className="bg-gray-700 border-gray-600 text-white"
+                  onChange={(url) => setFormData({ ...formData, featured_image: url })}
+                  placeholder="Şəkil yükləyin və ya URL daxil edin"
                 />
-                {formData.featured_image && (
-                  <div className="mt-2">
-                    <img 
-                      src={formData.featured_image} 
-                      alt="Featured image preview" 
-                      className="max-w-xs h-32 object-cover rounded border"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  </div>
-                )}
               </div>
               
               <div>
@@ -337,7 +333,7 @@ export const AdminBlogs = () => {
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Məzmun *
                 </label>
-                <CKEditorComponent
+                <SafeCKEditor
                   content={formData.content}
                   onChange={(content) => setFormData({ ...formData, content })}
                   placeholder="Bloq məzmununu yazın..."
@@ -360,11 +356,20 @@ export const AdminBlogs = () => {
               </div>
 
               <div className="flex justify-end gap-3 pt-6 border-t border-gray-700">
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="border-gray-600 text-white hover:bg-gray-700">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsDialogOpen(false)} 
+                  className="border-gray-600 text-white hover:bg-gray-700"
+                  disabled={saving}
+                >
                   Ləğv et
                 </Button>
-                <Button onClick={handleSave} className="bg-red-600 hover:bg-red-700">
-                  {editingBlog ? 'Yenilə' : 'Yarat'}
+                <Button 
+                  onClick={handleSave} 
+                  className="bg-red-600 hover:bg-red-700"
+                  disabled={saving}
+                >
+                  {saving ? 'Saxlanılır...' : (editingBlog ? 'Yenilə' : 'Yarat')}
                 </Button>
               </div>
             </div>
