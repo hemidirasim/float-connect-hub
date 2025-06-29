@@ -1,3 +1,4 @@
+
 import type { WidgetTemplate } from './template-types.ts'
 import type { TemplateConfig } from './renderer/types.ts'
 import { getPositionStyle, getTooltipPositionStyle } from './renderer/position-utils.ts'
@@ -29,6 +30,14 @@ function escapeTemplateContent(content: string): string {
     .replace(/\${/g, '\\${');  // Escape template literal expressions
 }
 
+// Better string replacement that handles quotes properly
+function safeStringReplace(template: string, placeholder: string, value: string): string {
+  const regex = new RegExp(placeholder.replace(/[{}]/g, '\\$&'), 'g')
+  // If the value contains quotes, make sure they're properly escaped for JavaScript context
+  const safeValue = typeof value === 'string' ? escapeJavaScriptString(value) : String(value)
+  return template.replace(regex, safeValue)
+}
+
 export class WidgetTemplateRenderer {
   constructor(private template: WidgetTemplate, private config: TemplateConfig) {}
 
@@ -52,22 +61,18 @@ export class WidgetTemplateRenderer {
     const mobileChannelGap = Math.max(6, channelGap - 2)
     const mobileTooltipRightOffset = Math.max(50, tooltipRightOffset - 5)
 
-    // Escape user input values that will be used in JavaScript strings
-    const escapedTooltip = escapeJavaScriptString(this.config.tooltip || '')
-    const escapedGreetingMessage = escapeJavaScriptString(this.config.greetingMessage || 'Hi 👋\\nHow can we help you today?')
-
-    // Replace placeholders - templates now generate their own channels
+    // Create replacements object with properly escaped values
     const replacements = {
       '{{POSITION_STYLE}}': getPositionStyle(this.config.position),
       '{{TOOLTIP_POSITION_STYLE}}': getTooltipPositionStyle(this.config),
       '{{BUTTON_COLOR}}': this.config.buttonColor,
       '{{BUTTON_SIZE}}': buttonSize.toString(),
-      '{{TOOLTIP_TEXT}}': escapedTooltip,
+      '{{TOOLTIP_TEXT}}': this.config.tooltip || '',
       '{{TOOLTIP_DISPLAY}}': this.config.tooltipDisplay,
       '{{TOOLTIP_POSITION}}': this.config.tooltipPosition || 'top',
-      '{{GREETING_MESSAGE}}': escapedGreetingMessage,
+      '{{GREETING_MESSAGE}}': this.config.greetingMessage || 'Hi 👋\\nHow can we help you today?',
       '{{BUTTON_ICON}}': buttonIcon,
-      '{{CHANNELS_DATA}}': JSON.stringify(this.config.channels), // Pass channel data to templates
+      '{{CHANNELS_DATA}}': JSON.stringify(this.config.channels),
       '{{VIDEO_CONTENT}}': videoContent,
       '{{CHANNELS_COUNT}}': this.config.channels.length.toString(),
       '{{POSITION}}': this.config.position,
@@ -78,12 +83,20 @@ export class WidgetTemplateRenderer {
       '{{MOBILE_TOOLTIP_RIGHT_OFFSET}}': mobileTooltipRightOffset.toString()
     }
 
-    // Apply replacements
+    // Apply replacements with safe string handling
     Object.entries(replacements).forEach(([placeholder, value]) => {
-      const regex = new RegExp(placeholder.replace(/[{}]/g, '\\$&'), 'g')
-      html = html.replace(regex, value)
-      css = css.replace(regex, value)
-      js = js.replace(regex, value)
+      if (placeholder === '{{GREETING_MESSAGE}}' || placeholder === '{{TOOLTIP_TEXT}}') {
+        // These are used in JavaScript strings, so escape them properly
+        html = safeStringReplace(html, placeholder, value)
+        css = safeStringReplace(css, placeholder, value)
+        js = safeStringReplace(js, placeholder, value)
+      } else {
+        // Regular replacement for other values
+        const regex = new RegExp(placeholder.replace(/[{}]/g, '\\$&'), 'g')
+        html = html.replace(regex, value)
+        css = css.replace(regex, value)
+        js = js.replace(regex, value)
+      }
     })
 
     // Escape content for template literals to prevent syntax errors

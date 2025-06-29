@@ -1,9 +1,10 @@
+
 import type { WidgetTemplate } from './template-types.ts'
 import { defaultHtmlTemplate } from './templates/default/html-template.ts'
 import { defaultCssStyles } from './templates/default/css-styles.ts'
 import { getChannelUrl, getChannelIcon, getChannelColor } from './templates/default/utility-functions.ts'
 
-// JavaScript logic with proper utility injection
+// JavaScript logic with proper utility injection and fixed string escaping
 const defaultJavaScriptLogic = `
   // Utility functions
   function getChannelUrl(channel) {
@@ -126,7 +127,7 @@ const defaultJavaScriptLogic = `
         html += '<div style="display: flex; align-items: center; border: 1px solid #e2e8f0; border-radius: 12px; background: white; transition: all 0.3s ease;">';
         
         // Changed to a div instead of an anchor to prevent direct navigation
-        html += '<div class="parent-channel" style="border: none; margin: 0; flex: 1; cursor: pointer;" onclick="toggleDropdown(\\'' + dropdownId + '\\')">';
+        html += '<div class="parent-channel" style="border: none; margin: 0; flex: 1; cursor: pointer;" onclick="toggleDropdown(\'' + dropdownId + '\')">';
         html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="channel-info">';
         html += '<div class="channel-label">' + escapeHtml(channel.label) + '</div>';
@@ -134,7 +135,7 @@ const defaultJavaScriptLogic = `
         html += '</div>';
         html += '</div>';
         
-        html += '<button class="dropdown-toggle" onclick="toggleDropdown(\\'' + dropdownId + '\\')">';
+        html += '<button class="dropdown-toggle" onclick="toggleDropdown(\'' + dropdownId + '\')">';
         html += '<svg class="dropdown-arrow" data-dropdown="' + dropdownId + '" viewBox="0 0 24 24" fill="currentColor">';
         html += '<path d="M7 10l5 5 5-5z"/>';
         html += '</svg>';
