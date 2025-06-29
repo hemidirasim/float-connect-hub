@@ -78,12 +78,13 @@ const AuthCallback = () => {
           return;
         }
         
-        // Handle password recovery - this is the key fix
+        // Handle password recovery - show password reset form immediately
         if (type === 'recovery') {
           console.log("Password recovery flow detected");
           
           if (code) {
             try {
+              // Exchange the recovery code for a session
               const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
               if (exchangeError) {
                 console.error('Error exchanging recovery code:', exchangeError);
@@ -93,21 +94,24 @@ const AuthCallback = () => {
               }
               
               // Successfully exchanged recovery code, show password reset form
+              console.log('Recovery code exchanged successfully, showing password reset form');
               setStatus('reset_password');
               setMessage('Yeni şifrənizi təyin edin');
+              return; // Important: return here to prevent further processing
             } catch (error) {
               console.error('Recovery code exchange error:', error);
               setStatus('error');
               setMessage('Şifrə sıfırlama zamanı xəta baş verdi.');
+              return;
             }
           } else {
             setStatus('error');
             setMessage('Şifrə sıfırlama kodu tapılmadı.');
+            return;
           }
-          return;
         }
         
-        // Handle email confirmation and login
+        // Handle email confirmation and login (only if not recovery)
         if (code && type !== 'recovery') {
           console.log("Exchanging code for session");
           try {
