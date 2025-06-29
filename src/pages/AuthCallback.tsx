@@ -77,13 +77,13 @@ const AuthCallback = () => {
           return;
         }
         
-        // Handle password recovery - FIRST PRIORITY
+        // CRITICAL: Check type FIRST before doing anything with the code
         if (type === 'recovery') {
-          console.log("Password recovery flow detected - showing password reset form immediately");
+          console.log("Password recovery type detected - showing reset form immediately");
           setStatus('reset_password');
           setMessage('Yeni şifrənizi təyin edin');
           
-          // Exchange recovery code in background if present
+          // Only exchange code if present, but don't redirect anywhere
           if (code) {
             try {
               const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
@@ -93,7 +93,7 @@ const AuthCallback = () => {
                 setMessage('Şifrə sıfırlama linkinin müddəti bitib və ya etibarsızdır.');
                 return;
               }
-              console.log('Recovery code exchanged successfully');
+              console.log('Recovery code exchanged successfully - staying on reset form');
             } catch (error) {
               console.error('Recovery code exchange error:', error);
               setStatus('error');
@@ -101,13 +101,13 @@ const AuthCallback = () => {
               return;
             }
           }
-          // IMPORTANT: Always return here to prevent any other processing
+          // STOP HERE - do not process any other logic for recovery
           return;
         }
         
-        // Handle email confirmation and login (only if NOT recovery)
+        // Handle email confirmation and regular login (only if NOT recovery)
         if (code) {
-          console.log("Exchanging code for session");
+          console.log("Exchanging code for session (non-recovery)");
           try {
             const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
             
