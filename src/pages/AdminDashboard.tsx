@@ -100,7 +100,7 @@ const AdminDashboard = () => {
             variant={activeTab === 'seo' ? 'default' : 'outline'}
             onClick={() => setActiveTab('seo')}
             className={activeTab === 'seo' ? 'bg-green-600 hover:bg-green-700' : 'border-gray-600 text-white hover:bg-gray-700'}
-            >
+          >
             <Search className="w-4 h-4 mr-2" />
             SEO
           </Button>
