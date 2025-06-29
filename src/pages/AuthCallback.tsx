@@ -61,23 +61,31 @@ const AuthCallback = () => {
         console.log("Location search:", location.search);
         console.log("Location hash:", window.location.hash);
         
-        // Parse both URL search params and hash params for complete coverage
+        // Parse URL parameters from different sources
+        const fullUrl = window.location.href;
+        const urlParams = new URL(fullUrl);
         const searchParams = new URLSearchParams(location.search);
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         
-        // Check both sources for parameters
-        const code = searchParams.get('code') || hashParams.get('code');
-        const type = searchParams.get('type') || hashParams.get('type');
-        const error = searchParams.get('error') || hashParams.get('error');
-        const errorDescription = searchParams.get('error_description') || hashParams.get('error_description');
+        // Check for type parameter from all possible sources
+        const typeFromUrl = urlParams.searchParams.get('type');
+        const typeFromSearch = searchParams.get('type');
+        const typeFromHash = hashParams.get('type');
+        const type = typeFromUrl || typeFromSearch || typeFromHash;
+        
+        // Check for other parameters
+        const code = urlParams.searchParams.get('code') || searchParams.get('code') || hashParams.get('code');
+        const error = urlParams.searchParams.get('error') || searchParams.get('error') || hashParams.get('error');
+        const errorDescription = urlParams.searchParams.get('error_description') || searchParams.get('error_description') || hashParams.get('error_description');
         
         console.log("Parsed parameters:", { 
+          type,
+          typeFromUrl,
+          typeFromSearch,
+          typeFromHash,
           code: !!code, 
-          type, 
           error, 
-          errorDescription,
-          fromSearch: !!searchParams.get('type'),
-          fromHash: !!hashParams.get('type')
+          errorDescription
         });
         
         // Handle error parameters first
@@ -88,13 +96,13 @@ const AuthCallback = () => {
           return;
         }
         
-        // ABSOLUTE PRIORITY: Check for recovery type IMMEDIATELY
+        // CRITICAL: Check for recovery type FIRST and BLOCK all other processing
         if (type === 'recovery') {
-          console.log("🔐 PASSWORD RECOVERY DETECTED - Blocking all other flows");
+          console.log("🔐 PASSWORD RECOVERY DETECTED - Setting password reset state");
           setStatus('reset_password');
           setMessage('Yeni şifrənizi təyin edin');
           
-          // Handle code exchange for recovery if present
+          // If there's a code, exchange it but DON'T redirect
           if (code) {
             try {
               console.log("Exchanging recovery code...");
@@ -105,7 +113,7 @@ const AuthCallback = () => {
                 setMessage('Şifrə sıfırlama linkinin müddəti bitib və ya etibarsızdır.');
                 return;
               }
-              console.log('✅ Recovery code exchanged - staying on password reset form');
+              console.log('✅ Recovery code exchanged successfully - showing password reset form');
             } catch (error) {
               console.error('Recovery code exchange exception:', error);
               setStatus('error');
@@ -115,7 +123,7 @@ const AuthCallback = () => {
           }
           
           // CRITICAL: Return here to prevent ANY other processing
-          console.log("🛑 STOPPING HERE - Recovery flow complete");
+          console.log("🛑 RECOVERY FLOW COMPLETE - NOT PROCEEDING TO OTHER FLOWS");
           return;
         }
         
