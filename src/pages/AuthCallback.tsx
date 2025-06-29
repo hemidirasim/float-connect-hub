@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -56,79 +55,90 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        console.log("Auth callback handling started");
-        console.log("Current URL:", window.location.href);
-        console.log("Location search:", location.search);
-        console.log("Location hash:", window.location.hash);
+        console.log("🚀 Auth callback handling started");
+        console.log("📍 Current URL:", window.location.href);
+        console.log("📍 Location search:", location.search);
+        console.log("📍 Location hash:", window.location.hash);
         
-        // Parse URL parameters from different sources
+        // Parse ALL possible URL parameters
         const fullUrl = window.location.href;
-        const urlParams = new URL(fullUrl);
+        console.log("🔗 Full URL being parsed:", fullUrl);
+        
+        // Multiple parsing approaches
+        const urlObj = new URL(fullUrl);
         const searchParams = new URLSearchParams(location.search);
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         
-        // Check for type parameter from all possible sources
-        const typeFromUrl = urlParams.searchParams.get('type');
+        // Extract type from all sources
+        const typeFromUrl = urlObj.searchParams.get('type');
         const typeFromSearch = searchParams.get('type');
         const typeFromHash = hashParams.get('type');
         const type = typeFromUrl || typeFromSearch || typeFromHash;
         
-        // Check for other parameters
-        const code = urlParams.searchParams.get('code') || searchParams.get('code') || hashParams.get('code');
-        const error = urlParams.searchParams.get('error') || searchParams.get('error') || hashParams.get('error');
-        const errorDescription = urlParams.searchParams.get('error_description') || searchParams.get('error_description') || hashParams.get('error_description');
+        // Extract other parameters
+        const code = urlObj.searchParams.get('code') || searchParams.get('code') || hashParams.get('code');
+        const token = urlObj.searchParams.get('token') || searchParams.get('token') || hashParams.get('token');
+        const error = urlObj.searchParams.get('error') || searchParams.get('error') || hashParams.get('error');
+        const errorDescription = urlObj.searchParams.get('error_description') || searchParams.get('error_description') || hashParams.get('error_description');
         
-        console.log("Parsed parameters:", { 
+        console.log("🔍 Detailed parameter extraction:", {
           type,
           typeFromUrl,
-          typeFromSearch,
+          typeFromSearch, 
           typeFromHash,
-          code: !!code, 
-          error, 
-          errorDescription
+          code: code ? 'present' : 'missing',
+          token: token ? 'present' : 'missing',
+          error,
+          errorDescription,
+          fullUrlParams: Object.fromEntries(urlObj.searchParams),
+          searchParamsEntries: Object.fromEntries(searchParams),
+          hashParamsEntries: Object.fromEntries(hashParams)
         });
         
         // Handle error parameters first
         if (error) {
-          console.error('OAuth error:', error, errorDescription);
+          console.error('❌ OAuth error detected:', error, errorDescription);
           setStatus('error');
           setMessage(`Giriş xətası: ${errorDescription || error}`);
           return;
         }
         
-        // CRITICAL: Check for recovery type FIRST and BLOCK all other processing
+        // CRITICAL CHECK: Is this a password recovery?
+        console.log("🔐 Checking if this is a recovery flow...");
+        console.log("🔐 Type parameter value:", type);
+        console.log("🔐 Is type === 'recovery'?", type === 'recovery');
+        
         if (type === 'recovery') {
-          console.log("🔐 PASSWORD RECOVERY DETECTED - Setting password reset state");
+          console.log("🔐✅ PASSWORD RECOVERY CONFIRMED - Setting up password reset form");
           setStatus('reset_password');
           setMessage('Yeni şifrənizi təyin edin');
           
-          // If there's a code, exchange it but DON'T redirect
-          if (code) {
+          // If there's a code or token, try to exchange it
+          const authCode = code || token;
+          if (authCode) {
             try {
-              console.log("Exchanging recovery code...");
-              const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+              console.log("🔐🔄 Attempting to exchange recovery code/token...");
+              const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(authCode);
               if (exchangeError) {
-                console.error('Recovery code exchange error:', exchangeError);
+                console.error('❌ Recovery code exchange failed:', exchangeError);
                 setStatus('error');
                 setMessage('Şifrə sıfırlama linkinin müddəti bitib və ya etibarsızdır.');
                 return;
               }
-              console.log('✅ Recovery code exchanged successfully - showing password reset form');
+              console.log('✅ Recovery code exchanged successfully');
             } catch (error) {
-              console.error('Recovery code exchange exception:', error);
+              console.error('❌ Exception during recovery code exchange:', error);
               setStatus('error');
               setMessage('Şifrə sıfırlama zamanı xəta baş verdi.');
               return;
             }
           }
           
-          // CRITICAL: Return here to prevent ANY other processing
-          console.log("🛑 RECOVERY FLOW COMPLETE - NOT PROCEEDING TO OTHER FLOWS");
-          return;
+          console.log("🔐🛑 RECOVERY FLOW SETUP COMPLETE - Staying on password reset page");
+          return; // STOP HERE - don't process any other flows
         }
         
-        // Only proceed with other flows if NOT recovery
-        console.log("Not a recovery flow - proceeding with normal auth callback");
+        console.log("ℹ️ Not a recovery flow, proceeding with normal authentication...");
         
         if (code) {
           console.log("Exchanging code for session (non-recovery)");
@@ -242,7 +252,7 @@ const AuthCallback = () => {
         }
         
       } catch (error) {
-        console.error('General error in auth callback:', error);
+        console.error('❌ General error in auth callback:', error);
         
         try {
           const { data: { session } } = await supabase.auth.getSession();
