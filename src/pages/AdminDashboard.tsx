@@ -6,10 +6,11 @@ import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminSettings } from "@/components/admin/AdminSettings";
 import { AdminSupport } from "@/components/admin/AdminSupport";
 import { AdminSEO } from "@/components/admin/AdminSEO";
+import { AdminWidgets } from "@/components/admin/AdminWidgets";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, User, Settings, MessageSquare, Search } from 'lucide-react';
+import { FileText, User, Settings, MessageSquare, Search, Widget } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('blogs');
@@ -73,6 +74,14 @@ const AdminDashboard = () => {
             Bloqlar
           </Button>
           <Button
+            variant={activeTab === 'widgets' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('widgets')}
+            className={activeTab === 'widgets' ? 'bg-purple-600 hover:bg-purple-700' : 'border-gray-600 text-white hover:bg-gray-700'}
+          >
+            <Widget className="w-4 h-4 mr-2" />
+            Widget-lər
+          </Button>
+          <Button
             variant={activeTab === 'users' ? 'default' : 'outline'}
             onClick={() => setActiveTab('users')}
             className={activeTab === 'users' ? 'bg-blue-600 hover:bg-blue-700' : 'border-gray-600 text-white hover:bg-gray-700'}
@@ -91,7 +100,7 @@ const AdminDashboard = () => {
           <Button
             variant={activeTab === 'support' ? 'default' : 'outline'}
             onClick={() => setActiveTab('support')}
-            className={activeTab === 'support' ? 'bg-purple-600 hover:bg-purple-700' : 'border-gray-600 text-white hover:bg-gray-700'}
+            className={activeTab === 'support' ? 'bg-green-600 hover:bg-green-700' : 'border-gray-600 text-white hover:bg-gray-700'}
           >
             <MessageSquare className="w-4 h-4 mr-2" />
             Dəstək
@@ -99,7 +108,7 @@ const AdminDashboard = () => {
           <Button
             variant={activeTab === 'seo' ? 'default' : 'outline'}
             onClick={() => setActiveTab('seo')}
-            className={activeTab === 'seo' ? 'bg-green-600 hover:bg-green-700' : 'border-gray-600 text-white hover:bg-gray-700'}
+            className={activeTab === 'seo' ? 'bg-teal-600 hover:bg-teal-700' : 'border-gray-600 text-white hover:bg-gray-700'}
           >
             <Search className="w-4 h-4 mr-2" />
             SEO
@@ -107,6 +116,7 @@ const AdminDashboard = () => {
         </div>
 
         {activeTab === 'blogs' && <AdminBlogs />}
+        {activeTab === 'widgets' && <AdminWidgets />}
         {activeTab === 'users' && <AdminUsers />}
         {activeTab === 'settings' && <AdminSettings />}
         {activeTab === 'support' && <AdminSupport />}
