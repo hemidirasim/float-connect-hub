@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { User, Mail, Save } from 'lucide-react';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { PasswordSettings } from "./PasswordSettings";
 
 interface Profile {
   full_name: string;
@@ -45,12 +47,10 @@ export const ProfileSettings: React.FC = () => {
         });
       }
     } catch (error) {
-      // Only log and show error for non-PGRST116 errors
       if (error.code !== 'PGRST116') {
         console.error('Error fetching profile:', error);
         toast.error('Error loading profile');
       }
-      // For PGRST116 (no rows found), silently use default values
     } finally {
       setLoadingProfile(false);
     }
@@ -142,6 +142,8 @@ export const ProfileSettings: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      <PasswordSettings />
 
       <Card>
         <CardHeader>
