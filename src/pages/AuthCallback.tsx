@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -60,14 +61,24 @@ const AuthCallback = () => {
         console.log("Location search:", location.search);
         console.log("Location hash:", window.location.hash);
         
-        // Get URL parameters
-        const urlParams = new URLSearchParams(location.search);
-        const code = urlParams.get('code');
-        const type = urlParams.get('type');
-        const error = urlParams.get('error');
-        const errorDescription = urlParams.get('error_description');
+        // Parse both URL search params and hash params for complete coverage
+        const searchParams = new URLSearchParams(location.search);
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
         
-        console.log("URL parameters:", { code: !!code, type, error, errorDescription });
+        // Check both sources for parameters
+        const code = searchParams.get('code') || hashParams.get('code');
+        const type = searchParams.get('type') || hashParams.get('type');
+        const error = searchParams.get('error') || hashParams.get('error');
+        const errorDescription = searchParams.get('error_description') || hashParams.get('error_description');
+        
+        console.log("Parsed parameters:", { 
+          code: !!code, 
+          type, 
+          error, 
+          errorDescription,
+          fromSearch: !!searchParams.get('type'),
+          fromHash: !!hashParams.get('type')
+        });
         
         // Handle error parameters first
         if (error) {
@@ -77,35 +88,40 @@ const AuthCallback = () => {
           return;
         }
         
-        // CRITICAL: Check type FIRST before doing anything with the code
+        // ABSOLUTE PRIORITY: Check for recovery type IMMEDIATELY
         if (type === 'recovery') {
-          console.log("Password recovery type detected - showing reset form immediately");
+          console.log("🔐 PASSWORD RECOVERY DETECTED - Blocking all other flows");
           setStatus('reset_password');
           setMessage('Yeni şifrənizi təyin edin');
           
-          // Only exchange code if present, but don't redirect anywhere
+          // Handle code exchange for recovery if present
           if (code) {
             try {
+              console.log("Exchanging recovery code...");
               const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
               if (exchangeError) {
-                console.error('Error exchanging recovery code:', exchangeError);
+                console.error('Recovery code exchange error:', exchangeError);
                 setStatus('error');
                 setMessage('Şifrə sıfırlama linkinin müddəti bitib və ya etibarsızdır.');
                 return;
               }
-              console.log('Recovery code exchanged successfully - staying on reset form');
+              console.log('✅ Recovery code exchanged - staying on password reset form');
             } catch (error) {
-              console.error('Recovery code exchange error:', error);
+              console.error('Recovery code exchange exception:', error);
               setStatus('error');
               setMessage('Şifrə sıfırlama zamanı xəta baş verdi.');
               return;
             }
           }
-          // STOP HERE - do not process any other logic for recovery
+          
+          // CRITICAL: Return here to prevent ANY other processing
+          console.log("🛑 STOPPING HERE - Recovery flow complete");
           return;
         }
         
-        // Handle email confirmation and regular login (only if NOT recovery)
+        // Only proceed with other flows if NOT recovery
+        console.log("Not a recovery flow - proceeding with normal auth callback");
+        
         if (code) {
           console.log("Exchanging code for session (non-recovery)");
           try {
@@ -129,10 +145,8 @@ const AuthCallback = () => {
               // Handle specific PKCE errors more gracefully
               if (exchangeError.message.includes('code verifier') || 
                   exchangeError.message.includes('pkce')) {
-                // PKCE error but check if user is confirmed
                 console.log('PKCE error detected, checking user status...');
                 
-                // Wait a moment and check session again
                 setTimeout(async () => {
                   const { data: { session } } = await supabase.auth.getSession();
                   if (session) {
@@ -166,7 +180,6 @@ const AuthCallback = () => {
               setStatus('success');
               setMessage('Hesabınız uğurla təsdiqləndi!');
               
-              // Redirect to dashboard after a short delay
               setTimeout(() => {
                 navigate('/dashboard');
               }, 2000);
@@ -177,7 +190,6 @@ const AuthCallback = () => {
           } catch (error) {
             console.error('Unexpected error during code exchange:', error);
             
-            // Even if code exchange fails, check if user is authenticated
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
               console.log('User authenticated despite error');
@@ -224,7 +236,6 @@ const AuthCallback = () => {
       } catch (error) {
         console.error('General error in auth callback:', error);
         
-        // Final fallback - check if user is authenticated
         try {
           const { data: { session } } = await supabase.auth.getSession();
           if (session) {
@@ -244,7 +255,6 @@ const AuthCallback = () => {
       }
     };
 
-    // Add a small delay to ensure DOM is ready
     const timer = setTimeout(handleAuthCallback, 100);
     return () => clearTimeout(timer);
   }, [navigate, location.search]);
@@ -282,7 +292,6 @@ const AuthCallback = () => {
         setStatus('success');
         setMessage('Şifrəniz uğurla yeniləndi!');
         
-        // Redirect to dashboard after 2 seconds
         setTimeout(() => {
           navigate('/dashboard');
         }, 2000);
