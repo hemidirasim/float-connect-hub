@@ -10,7 +10,7 @@ import { AdminWidgets } from "@/components/admin/AdminWidgets";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, User, Settings, MessageSquare, Search, Widget } from 'lucide-react';
+import { FileText, User, Settings, MessageSquare, Search, Package } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('blogs');
@@ -78,7 +78,7 @@ const AdminDashboard = () => {
             onClick={() => setActiveTab('widgets')}
             className={activeTab === 'widgets' ? 'bg-purple-600 hover:bg-purple-700' : 'border-gray-600 text-white hover:bg-gray-700'}
           >
-            <Widget className="w-4 h-4 mr-2" />
+            <Package className="w-4 h-4 mr-2" />
             Widget-lər
           </Button>
           <Button
