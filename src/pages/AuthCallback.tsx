@@ -78,7 +78,7 @@ const AuthCallback = () => {
           return;
         }
         
-        // Handle password recovery
+        // Handle password recovery - this is the key fix
         if (type === 'recovery') {
           console.log("Password recovery flow detected");
           
@@ -92,6 +92,7 @@ const AuthCallback = () => {
                 return;
               }
               
+              // Successfully exchanged recovery code, show password reset form
               setStatus('reset_password');
               setMessage('Yeni şifrənizi təyin edin');
             } catch (error) {
@@ -107,7 +108,7 @@ const AuthCallback = () => {
         }
         
         // Handle email confirmation and login
-        if (code) {
+        if (code && type !== 'recovery') {
           console.log("Exchanging code for session");
           try {
             const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
