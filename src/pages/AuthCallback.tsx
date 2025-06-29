@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -57,123 +58,133 @@ const AuthCallback = () => {
       try {
         console.log("Auth callback handling started");
         console.log("Current URL:", window.location.href);
+        console.log("Location search:", location.search);
+        console.log("Location hash:", window.location.hash);
         
-        // Check for recovery token in URL query parameters
-        const queryParams = new URLSearchParams(location.search);
-        const code = queryParams.get('code');
-        const type = queryParams.get('type');
+        // Get URL parameters
+        const urlParams = new URLSearchParams(location.search);
+        const code = urlParams.get('code');
+        const type = urlParams.get('type');
+        const error = urlParams.get('error');
+        const errorDescription = urlParams.get('error_description');
         
-        console.log("URL parameters:", { code, type });
+        console.log("URL parameters:", { code: !!code, type, error, errorDescription });
         
-        // Check for hash parameters (for older auth flows)
-        const hash = window.location.hash.substring(1);
-        const hashParams = new URLSearchParams(hash);
-        
-        const accessToken = hashParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token');
-        const hashType = hashParams.get('type');
-        
-        console.log("Hash parameters:", { accessToken: !!accessToken, refreshToken: !!refreshToken, hashType });
-        
-        // First, check if this is a recovery flow
-        if (type === 'recovery' || hashType === 'recovery') {
-          console.log("Password recovery flow detected");
-          setStatus('reset_password');
-          setMessage('Yeni şifrənizi təyin edin');
-          
-          // If we have a code, exchange it for a session
-          if (code) {
-            const { error } = await supabase.auth.exchangeCodeForSession(code);
-            if (error) {
-              console.error('Error exchanging recovery code for session:', error);
-              setStatus('error');
-              setMessage('Şifrə sıfırlama zamanı xəta baş verdi: ' + error.message);
-              return;
-            }
-          }
-          
+        // Handle error parameters first
+        if (error) {
+          console.error('OAuth error:', error, errorDescription);
+          setStatus('error');
+          setMessage(`Giriş xətası: ${errorDescription || error}`);
           return;
         }
         
-        // Handle code exchange for other flows
+        // Handle password recovery
+        if (type === 'recovery') {
+          console.log("Password recovery flow detected");
+          
+          if (code) {
+            try {
+              const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+              if (exchangeError) {
+                console.error('Error exchanging recovery code:', exchangeError);
+                setStatus('error');
+                setMessage('Şifrə sıfırlama linkinin müddəti bitib və ya etibarsızdır.');
+                return;
+              }
+              
+              setStatus('reset_password');
+              setMessage('Yeni şifrənizi təyin edin');
+            } catch (error) {
+              console.error('Recovery code exchange error:', error);
+              setStatus('error');
+              setMessage('Şifrə sıfırlama zamanı xəta baş verdi.');
+            }
+          } else {
+            setStatus('error');
+            setMessage('Şifrə sıfırlama kodu tapılmadı.');
+          }
+          return;
+        }
+        
+        // Handle email confirmation and login
         if (code) {
           console.log("Exchanging code for session");
-          const { error } = await supabase.auth.exchangeCodeForSession(code);
-          
-          if (error) {
-            console.error('Error exchanging code for session:', error);
+          try {
+            const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+            
+            if (exchangeError) {
+              console.error('Code exchange error:', exchangeError);
+              
+              // Handle specific PKCE errors
+              if (exchangeError.message.includes('code verifier')) {
+                setStatus('error');
+                setMessage('Email təsdiqində texniki xəta. Zəhmət olmasa yenidən qeydiyyatdan keçin.');
+              } else if (exchangeError.message.includes('expired')) {
+                setStatus('error');
+                setMessage('Email təsdiq linkinin müddəti bitib. Zəhmət olmasa yenidən qeydiyyatdan keçin.');
+              } else {
+                setStatus('error');
+                setMessage('Giriş zamanı xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.');
+              }
+              return;
+            }
+            
+            if (data?.session) {
+              console.log('Session created successfully');
+              setStatus('success');
+              setMessage('Hesabınız uğurla təsdiqləndi!');
+              
+              // Redirect to dashboard after a short delay
+              setTimeout(() => {
+                navigate('/dashboard');
+              }, 2000);
+            } else {
+              setStatus('error');
+              setMessage('Sessiya yaradıla bilmədi. Zəhmət olmasa yenidən daxil olun.');
+            }
+          } catch (error) {
+            console.error('Unexpected error during code exchange:', error);
             setStatus('error');
-            setMessage('Giriş zamanı xəta baş verdi: ' + error.message);
-            return;
+            setMessage('Gözlənilməz xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.');
           }
-          
-          setStatus('success');
-          setMessage('Uğurla daxil oldunuz!');
-          
-          // Redirect to dashboard after 2 seconds
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 2000);
           return;
         }
         
-        // Handle hash-based auth (older flow)
-        if (accessToken && refreshToken) {
-          console.log("Setting session from hash parameters");
-          // Set the session manually
-          const { error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken
-          });
-          
-          if (error) {
-            console.error('Error setting session:', error);
-            setStatus('error');
-            setMessage('Hesab təsdiqlənməsi zamanı xəta baş verdi: ' + error.message);
-            return;
-          }
-          
-          setStatus('success');
-          setMessage('Hesabınız uğurla təsdiqləndi!');
-          
-          // Redirect to dashboard after 2 seconds
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 2000);
-          return;
-        }
+        // If no code parameter, check current session
+        console.log("No code parameter, checking current session");
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        // If we get here, try to get the current session
-        const { data, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Error getting session:', error);
+        if (sessionError) {
+          console.error('Session check error:', sessionError);
           setStatus('error');
-          setMessage('Giriş zamanı xəta baş verdi: ' + error.message);
+          setMessage('Sessiya yoxlanıla bilmədi. Zəhmət olmasa yenidən daxil olun.');
           return;
         }
         
-        if (data.session) {
+        if (session) {
+          console.log('Existing session found');
           setStatus('success');
-          setMessage('Uğurla daxil oldunuz!');
-          
-          // Redirect to dashboard after 2 seconds
+          setMessage('Artıq daxil olmusunuz!');
           setTimeout(() => {
             navigate('/dashboard');
-          }, 2000);
+          }, 1000);
         } else {
+          console.log('No session found');
           setStatus('error');
-          setMessage('Sessiya tapılmadı. Zəhmət olmasa yenidən daxil olun.');
+          setMessage('Təsdiq kodu tapılmadı. Zəhmət olmasa email-dəki linkə yenidən klikləyin.');
         }
+        
       } catch (error) {
-        console.error('Error during auth callback:', error);
+        console.error('General error in auth callback:', error);
         setStatus('error');
         setMessage('Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.');
       }
     };
 
-    handleAuthCallback();
-  }, [navigate, location]);
+    // Add a small delay to ensure DOM is ready
+    const timer = setTimeout(handleAuthCallback, 100);
+    return () => clearTimeout(timer);
+  }, [navigate, location.search]);
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -318,9 +329,18 @@ const AuthCallback = () => {
           )}
           
           {status === 'error' && (
-            <Button onClick={() => navigate('/')}>
-              Ana səhifəyə qayıt
-            </Button>
+            <div className="space-y-3 w-full">
+              <Button onClick={() => navigate('/')} className="w-full">
+                Ana səhifəyə qayıt
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/')} 
+                className="w-full"
+              >
+                Yenidən qeydiyyatdan keç
+              </Button>
+            </div>
           )}
         </CardContent>
       </Card>

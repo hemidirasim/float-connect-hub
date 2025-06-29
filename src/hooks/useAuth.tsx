@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -49,12 +50,11 @@ export const useAuth = () => {
 
   const signUp = async (email: string, password: string) => {
     try {
-      // Enable email confirmation by setting emailRedirectTo
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          // Set redirect URL for email confirmation
+          // Set redirect URL for email confirmation with proper callback
           emailRedirectTo: `${getSiteUrl()}/auth/callback`,
           data: {
             full_name: email.split('@')[0] // Default name from email
