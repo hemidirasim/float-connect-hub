@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -78,13 +77,15 @@ const AuthCallback = () => {
           return;
         }
         
-        // Handle password recovery - show password reset form immediately
+        // Handle password recovery - FIRST PRIORITY
         if (type === 'recovery') {
-          console.log("Password recovery flow detected");
+          console.log("Password recovery flow detected - showing password reset form immediately");
+          setStatus('reset_password');
+          setMessage('Yeni şifrənizi təyin edin');
           
+          // Exchange recovery code in background if present
           if (code) {
             try {
-              // Exchange the recovery code for a session
               const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
               if (exchangeError) {
                 console.error('Error exchanging recovery code:', exchangeError);
@@ -92,27 +93,20 @@ const AuthCallback = () => {
                 setMessage('Şifrə sıfırlama linkinin müddəti bitib və ya etibarsızdır.');
                 return;
               }
-              
-              // Successfully exchanged recovery code, show password reset form
-              console.log('Recovery code exchanged successfully, showing password reset form');
-              setStatus('reset_password');
-              setMessage('Yeni şifrənizi təyin edin');
-              return; // Important: return here to prevent further processing
+              console.log('Recovery code exchanged successfully');
             } catch (error) {
               console.error('Recovery code exchange error:', error);
               setStatus('error');
               setMessage('Şifrə sıfırlama zamanı xəta baş verdi.');
               return;
             }
-          } else {
-            setStatus('error');
-            setMessage('Şifrə sıfırlama kodu tapılmadı.');
-            return;
           }
+          // IMPORTANT: Always return here to prevent any other processing
+          return;
         }
         
-        // Handle email confirmation and login (only if not recovery)
-        if (code && type !== 'recovery') {
+        // Handle email confirmation and login (only if NOT recovery)
+        if (code) {
           console.log("Exchanging code for session");
           try {
             const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
