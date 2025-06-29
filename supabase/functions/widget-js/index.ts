@@ -9,6 +9,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 serve(async (req) => {
   console.log('Widget-js function called:', req.method, req.url)
   
+  // CORS headers for all responses
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -30,13 +31,13 @@ serve(async (req) => {
       })
     }
 
-    // Create Supabase client for template fetching
+    // Create Supabase client - NO auth required for public widget access
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Fetch widget data (template_id now comes from database)
+    // Fetch widget data
     const widget = await getWidget(widgetId)
 
     if (!widget) {
@@ -76,19 +77,21 @@ serve(async (req) => {
       })
     }
 
-    // Record widget view and check credits for GET requests
-    const viewResult = await recordWidgetView(
-      widgetId,
-      req.headers.get('x-forwarded-for') || 'unknown',
-      req.headers.get('user-agent') || 'unknown'
-    )
-
-    if (!viewResult?.success) {
-      console.log('Credits check failed:', viewResult)
-      return new Response('Widget unavailable - insufficient credits', { 
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
-      })
+    // Record widget view - continue even if this fails
+    try {
+      const viewResult = await recordWidgetView(
+        widgetId,
+        req.headers.get('x-forwarded-for') || 'unknown',
+        req.headers.get('user-agent') || 'unknown'
+      )
+      
+      if (!viewResult?.success) {
+        console.log('Credits check failed, but widget will still load:', viewResult)
+        // Don't block widget loading - just log the issue
+      }
+    } catch (viewError) {
+      console.log('View recording failed, but widget will still load:', viewError)
+      // Continue with widget generation even if view recording fails
     }
 
     // Generate widget JavaScript using template_id from database
@@ -116,8 +119,10 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in widget-js function:', error)
-    return new Response(`console.error('Widget load error: ${error.message}');`, { 
-      status: 200, // Return 200 so script loads but shows error
+    // Return valid JavaScript even on error
+    const errorScript = `console.error('Widget load error: ${error.message}');`
+    return new Response(errorScript, { 
+      status: 200, // Return 200 so script loads
       headers: { ...corsHeaders, 'Content-Type': 'application/javascript' }
     })
   }
