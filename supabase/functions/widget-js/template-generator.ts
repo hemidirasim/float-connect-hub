@@ -43,14 +43,22 @@ export class WidgetTemplateRenderer {
 
   generateWidgetScript(): string {
     console.log('Generating widget script for template:', this.template.id)
+    console.log('Template config for video:', {
+      videoEnabled: this.config.videoEnabled,
+      videoUrl: this.config.videoUrl,
+      videoHeight: this.config.videoHeight
+    })
     
     let html = this.template.html
     let css = this.template.css
     let js = this.template.js
 
-    // Generate common content (video, button icon)
+    // Generate common content (video, button icon) - Make sure video is generated
     const videoContent = generateVideoContent(this.config)
     const buttonIcon = generateButtonIcon(this.config.customIconUrl)
+
+    console.log('Generated video content for template:', videoContent ? 'YES' : 'NO')
+    console.log('Video content length:', videoContent.length)
 
     // Calculate responsive values
     const buttonSize = this.config.buttonSize || 60
@@ -73,7 +81,7 @@ export class WidgetTemplateRenderer {
       '{{GREETING_MESSAGE}}': this.config.greetingMessage || 'Hi 👋\\nHow can we help you today?',
       '{{BUTTON_ICON}}': buttonIcon,
       '{{CHANNELS_DATA}}': JSON.stringify(this.config.channels),
-      '{{VIDEO_CONTENT}}': videoContent,
+      '{{VIDEO_CONTENT}}': videoContent, // Make sure this is included
       '{{CHANNELS_COUNT}}': this.config.channels.length.toString(),
       '{{POSITION}}': this.config.position,
       '{{CHANNEL_GAP}}': channelGap.toString(),
@@ -82,6 +90,8 @@ export class WidgetTemplateRenderer {
       '{{MOBILE_CHANNEL_GAP}}': mobileChannelGap.toString(),
       '{{MOBILE_TOOLTIP_RIGHT_OFFSET}}': mobileTooltipRightOffset.toString()
     }
+
+    console.log('Video content in replacements:', replacements['{{VIDEO_CONTENT}}'] ? 'YES' : 'NO')
 
     // Apply replacements with safe string handling
     Object.entries(replacements).forEach(([placeholder, value]) => {
@@ -99,6 +109,8 @@ export class WidgetTemplateRenderer {
       }
     })
 
+    console.log('Final HTML contains video:', html.includes('hiclient-video') ? 'YES' : 'NO')
+
     // Escape content for template literals to prevent syntax errors
     const escapedHtml = escapeTemplateContent(html)
     const escapedCss = escapeTemplateContent(css)
@@ -112,7 +124,7 @@ export class WidgetTemplateRenderer {
     `
 
     // Generate complete script using properly escaped content
-    return `
+    const finalScript = `
 (function() {
   // Inject CSS
   const style = document.createElement('style');
@@ -131,5 +143,8 @@ export class WidgetTemplateRenderer {
   ${escapedJs}
 })();
 `
+
+    console.log('Final script contains video references:', finalScript.includes('hiclient-video') ? 'YES' : 'NO')
+    return finalScript
   }
 }

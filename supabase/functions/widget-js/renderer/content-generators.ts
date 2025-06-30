@@ -13,7 +13,17 @@ export function generateChannelsHtml(config: TemplateConfig, templateId: string)
 }
 
 export function generateVideoContent(config: TemplateConfig): string {
-  if (!config.videoEnabled || !config.videoUrl) return ''
+  console.log('generateVideoContent called with:', {
+    videoEnabled: config.videoEnabled,
+    videoUrl: config.videoUrl,
+    videoHeight: config.videoHeight,
+    videoAlignment: config.videoAlignment
+  })
+
+  if (!config.videoEnabled || !config.videoUrl) {
+    console.log('Video not enabled or no URL provided')
+    return ''
+  }
   
   // Process video URL to ensure it works properly
   let processedVideoUrl = config.videoUrl
@@ -25,15 +35,21 @@ export function generateVideoContent(config: TemplateConfig): string {
     }
   }
   
-  console.log('Generated video content with URL:', processedVideoUrl)
+  const videoHeight = config.videoHeight || 200
+  const videoAlignment = config.videoAlignment || 'center'
   
-  return `<div class="hiclient-video-container" style="text-align: ${config.videoAlignment}; margin-bottom: 20px;">
+  console.log('Generated video content with processed URL:', processedVideoUrl)
+  
+  const videoHtml = `<div class="hiclient-video-container" style="text-align: ${videoAlignment}; margin-bottom: 20px;">
      <video class="hiclient-video-player" src="${processedVideoUrl}" 
-            style="height: ${config.videoHeight}px; width: 100%; border-radius: 12px;" 
+            style="height: ${videoHeight}px; width: 100%; border-radius: 12px;" 
             autoplay muted loop playsinline webkit-playsinline preload="auto">
        Your browser does not support the video tag.
      </video>
    </div>`
+
+  console.log('Final video HTML generated:', videoHtml)
+  return videoHtml
 }
 
 export function generateButtonIcon(customIconUrl?: string): string {
