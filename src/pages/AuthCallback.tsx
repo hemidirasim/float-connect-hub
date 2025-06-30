@@ -15,7 +15,7 @@ const AuthCallback = () => {
   const location = useLocation();
   const { updatePassword } = useAuth();
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'reset_password'>('loading');
-  const [message, setMessage] = useState('Hesabınız təsdiqlənir...');
+  const [message, setMessage] = useState('Your account is being verified...');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordUpdating, setPasswordUpdating] = useState(false);
@@ -27,23 +27,23 @@ const AuthCallback = () => {
       const errors: string[] = [];
       
       if (newPassword.length < 8) {
-        errors.push("Şifrə ən azı 8 simvol olmalıdır");
+        errors.push("Password must be at least 8 characters");
       }
       
       if (!/[A-Z]/.test(newPassword)) {
-        errors.push("Ən azı bir böyük hərf olmalıdır");
+        errors.push("Must include at least one uppercase letter");
       }
       
       if (!/[a-z]/.test(newPassword)) {
-        errors.push("Ən azı bir kiçik hərf olmalıdır");
+        errors.push("Must include at least one lowercase letter");
       }
       
       if (!/[0-9]/.test(newPassword)) {
-        errors.push("Ən azı bir rəqəm olmalıdır");
+        errors.push("Must include at least one number");
       }
       
       if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword)) {
-        errors.push("Ən azı bir xüsusi simvol olmalıdır (!@#$%^&*...)");
+        errors.push("Must include at least one special character (!@#$%^&*...)");
       }
       
       setPasswordErrors(errors);
@@ -99,7 +99,7 @@ const AuthCallback = () => {
         if (error) {
           console.error('❌ OAuth error detected:', error, errorDescription);
           setStatus('error');
-          setMessage(`Giriş xətası: ${errorDescription || error}`);
+          setMessage(`Login error: ${errorDescription || error}`);
           return;
         }
         
@@ -111,7 +111,7 @@ const AuthCallback = () => {
         if (type === 'recovery') {
           console.log("🔐✅ PASSWORD RECOVERY CONFIRMED - Setting up password reset form");
           setStatus('reset_password');
-          setMessage('Yeni şifrənizi təyin edin');
+          setMessage('Set your new password');
           
           // If there's a code or token, try to exchange it
           const authCode = code || token;
@@ -122,14 +122,14 @@ const AuthCallback = () => {
               if (exchangeError) {
                 console.error('❌ Recovery code exchange failed:', exchangeError);
                 setStatus('error');
-                setMessage('Şifrə sıfırlama linkinin müddəti bitib və ya etibarsızdır.');
+                setMessage('Password reset link has expired or is invalid.');
                 return;
               }
               console.log('✅ Recovery code exchanged successfully');
             } catch (error) {
               console.error('❌ Exception during recovery code exchange:', error);
               setStatus('error');
-              setMessage('Şifrə sıfırlama zamanı xəta baş verdi.');
+              setMessage('An error occurred during password reset.');
               return;
             }
           }
@@ -153,7 +153,7 @@ const AuthCallback = () => {
               if (session) {
                 console.log('User is already authenticated despite PKCE error');
                 setStatus('success');
-                setMessage('Hesabınız uğurla təsdiqləndi!');
+                setMessage('Your account has been successfully verified!');
                 setTimeout(() => {
                   navigate('/dashboard');
                 }, 2000);
@@ -170,13 +170,13 @@ const AuthCallback = () => {
                   if (session) {
                     console.log('User confirmed and session exists');
                     setStatus('success');
-                    setMessage('Hesabınız uğurla təsdiqləndi!');
+                    setMessage('Your account has been successfully verified!');
                     setTimeout(() => {
                       navigate('/dashboard');
                     }, 1000);
                   } else {
                     setStatus('success');
-                    setMessage('Email təsdiqləndi! Zəhmət olmasa daxil olun.');
+                    setMessage('Email verified! Please log in.');
                     setTimeout(() => {
                       navigate('/');
                     }, 3000);
@@ -185,10 +185,10 @@ const AuthCallback = () => {
                 return;
               } else if (exchangeError.message.includes('expired')) {
                 setStatus('error');
-                setMessage('Email təsdiq linkinin müddəti bitib. Zəhmət olmasa yenidən qeydiyyatdan keçin.');
+                setMessage('Email verification link has expired. Please register again.');
               } else {
                 setStatus('error');
-                setMessage('Giriş zamanı xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.');
+                setMessage('An error occurred during login. Please try again.');
               }
               return;
             }
@@ -196,14 +196,14 @@ const AuthCallback = () => {
             if (data?.session) {
               console.log('Session created successfully');
               setStatus('success');
-              setMessage('Hesabınız uğurla təsdiqləndi!');
+              setMessage('Your account has been successfully verified!');
               
               setTimeout(() => {
                 navigate('/dashboard');
               }, 2000);
             } else {
               setStatus('error');
-              setMessage('Sessiya yaradıla bilmədi. Zəhmət olmasa yenidən daxil olun.');
+              setMessage('Session could not be created. Please log in again.');
             }
           } catch (error) {
             console.error('Unexpected error during code exchange:', error);
@@ -212,13 +212,13 @@ const AuthCallback = () => {
             if (session) {
               console.log('User authenticated despite error');
               setStatus('success');
-              setMessage('Hesabınız uğurla təsdiqləndi!');
+              setMessage('Your account has been successfully verified!');
               setTimeout(() => {
                 navigate('/dashboard');
               }, 2000);
             } else {
               setStatus('error');
-              setMessage('Gözlənilməz xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.');
+              setMessage('An unexpected error occurred. Please try again.');
             }
           }
           return;
@@ -231,21 +231,21 @@ const AuthCallback = () => {
         if (sessionError) {
           console.error('Session check error:', sessionError);
           setStatus('error');
-          setMessage('Sessiya yoxlanıla bilmədi. Zəhmət olmasa yenidən daxil olun.');
+          setMessage('Session could not be verified. Please log in again.');
           return;
         }
         
         if (session) {
           console.log('Existing session found');
           setStatus('success');
-          setMessage('Artıq daxil olmusunuz!');
+          setMessage('You are already logged in!');
           setTimeout(() => {
             navigate('/dashboard');
           }, 1000);
         } else {
           console.log('No session found');
           setStatus('success');
-          setMessage('Email təsdiqləndi! Zəhmət olmasa daxil olun.');
+          setMessage('Email verified! Please log in.');
           setTimeout(() => {
             navigate('/');
           }, 3000);
@@ -258,17 +258,17 @@ const AuthCallback = () => {
           const { data: { session } } = await supabase.auth.getSession();
           if (session) {
             setStatus('success');
-            setMessage('Hesabınız uğurla təsdiqləndi!');
+            setMessage('Your account has been successfully verified!');
             setTimeout(() => {
               navigate('/dashboard');
             }, 2000);
           } else {
             setStatus('error');
-            setMessage('Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.');
+            setMessage('An error occurred. Please try again.');
           }
         } catch {
           setStatus('error');
-          setMessage('Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.');
+          setMessage('An error occurred. Please try again.');
         }
       }
     };
@@ -281,17 +281,17 @@ const AuthCallback = () => {
     e.preventDefault();
     
     if (!newPassword || !confirmPassword) {
-      toast.error("Bütün sahələri doldurun");
+      toast.error("Fill in all fields");
       return;
     }
     
     if (newPassword !== confirmPassword) {
-      toast.error("Şifrələr uyğun gəlmir");
+      toast.error("Passwords do not match");
       return;
     }
     
     if (passwordErrors.length > 0) {
-      toast.error("Şifrə tələblərə uyğun deyil");
+      toast.error("Password does not meet requirements");
       return;
     }
     
@@ -302,13 +302,13 @@ const AuthCallback = () => {
       
       if (error) {
         console.error('Error updating password:', error);
-        toast.error("Şifrə yeniləmə xətası: " + error.message);
+        toast.error("Password update error: " + error.message);
         setStatus('error');
-        setMessage('Şifrə yeniləmə zamanı xəta baş verdi: ' + error.message);
+        setMessage('An error occurred during password update: ' + error.message);
       } else {
-        toast.success("Şifrəniz uğurla yeniləndi!");
+        toast.success("Your password has been successfully updated!");
         setStatus('success');
-        setMessage('Şifrəniz uğurla yeniləndi!');
+        setMessage('Your password has been successfully updated!');
         
         setTimeout(() => {
           navigate('/dashboard');
@@ -316,9 +316,9 @@ const AuthCallback = () => {
       }
     } catch (error: any) {
       console.error('Error updating password:', error);
-      toast.error("Şifrə yeniləmə zamanı xəta baş verdi");
+      toast.error("An error occurred during password update");
       setStatus('error');
-      setMessage('Şifrə yeniləmə zamanı xəta baş verdi: ' + error.message);
+      setMessage('An error occurred during password update: ' + error.message);
     } finally {
       setPasswordUpdating(false);
     }
@@ -329,10 +329,10 @@ const AuthCallback = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">
-            {status === 'loading' && 'Hesab təsdiqlənir...'}
-            {status === 'success' && 'Təsdiqləndi!'}
-            {status === 'error' && 'Xəta!'}
-            {status === 'reset_password' && 'Şifrəni Yenilə'}
+            {status === 'loading' && 'Account verification in progress...'}
+            {status === 'success' && 'Verified!'}
+            {status === 'error' && 'Error!'}
+            {status === 'reset_password' && 'Reset Password'}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center space-y-4">
@@ -359,11 +359,11 @@ const AuthCallback = () => {
           {status === 'reset_password' && (
             <form onSubmit={handlePasswordUpdate} className="w-full space-y-4">
               <p className="text-center text-gray-700 mb-4">
-                Zəhmət olmasa yeni şifrənizi daxil edin
+                Please enter your new password
               </p>
               
               <div className="space-y-2">
-                <Label htmlFor="new-password">Yeni şifrə</Label>
+                <Label htmlFor="new-password">New Password</Label>
                 <Input
                   id="new-password"
                   type="password"
@@ -375,7 +375,7 @@ const AuthCallback = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="confirm-password">Şifrəni təsdiqlə</Label>
+                <Label htmlFor="confirm-password">Confirm Password</Label>
                 <Input
                   id="confirm-password"
                   type="password"
@@ -390,7 +390,7 @@ const AuthCallback = () => {
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    <div className="text-sm font-medium mb-1">Şifrə tələbləri:</div>
+                    <div className="text-sm font-medium mb-1">Password requirements:</div>
                     <ul className="text-xs list-disc pl-5 space-y-1">
                       {passwordErrors.map((error, index) => (
                         <li key={index}>{error}</li>
@@ -403,7 +403,7 @@ const AuthCallback = () => {
               {newPassword && confirmPassword && newPassword !== confirmPassword && (
                 <Alert variant="destructive">
                   <AlertDescription>
-                    Şifrələr uyğun gəlmir
+                    Passwords do not match
                   </AlertDescription>
                 </Alert>
               )}
@@ -413,7 +413,7 @@ const AuthCallback = () => {
                 className="w-full" 
                 disabled={passwordUpdating || passwordErrors.length > 0 || !newPassword || !confirmPassword || newPassword !== confirmPassword}
               >
-                {passwordUpdating ? 'Yenilənir...' : 'Şifrəni Yenilə'}
+                {passwordUpdating ? 'Updating...' : 'Reset Password'}
               </Button>
             </form>
           )}
@@ -421,14 +421,14 @@ const AuthCallback = () => {
           {status === 'error' && (
             <div className="space-y-3 w-full">
               <Button onClick={() => navigate('/')} className="w-full">
-                Ana səhifəyə qayıt
+                Return to homepage
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => navigate('/')} 
                 className="w-full"
               >
-                Yenidən qeydiyyatdan keç
+                Register again
               </Button>
             </div>
           )}
