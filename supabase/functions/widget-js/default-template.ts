@@ -195,6 +195,34 @@ const defaultJavaScriptLogic = `
       .replace(/'/g, '&#39;');
   }
   
+  function playVideo() {
+    try {
+      var video = document.querySelector('.hiclient-video-player');
+      if (video) {
+        console.log('Starting video playback...');
+        video.currentTime = 0;
+        var playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.then(function() {
+            console.log('Video started playing successfully');
+          }).catch(function(error) {
+            console.log('Video autoplay failed:', error);
+            // Try to play again after user interaction
+            setTimeout(function() {
+              try {
+                video.play();
+              } catch (e) {
+                console.log('Retry video play failed:', e);
+              }
+            }, 1000);
+          });
+        }
+      }
+    } catch (error) {
+      console.log('Error in playVideo function:', error);
+    }
+  }
+  
   function initWidget() {
     console.log('Initializing widget...');
     
@@ -231,6 +259,11 @@ const defaultJavaScriptLogic = `
           modalContent.style.transform = 'translateY(0)';
         }, 50);
       }
+      
+      // Start video playback when modal opens
+      setTimeout(function() {
+        playVideo();
+      }, 200);
     });
     
     if (closeBtn) {
@@ -257,6 +290,17 @@ const defaultJavaScriptLogic = `
     });
     
     function closeModal() {
+      // Pause video when modal closes
+      try {
+        var video = document.querySelector('.hiclient-video-player');
+        if (video && !video.paused) {
+          video.pause();
+          console.log('Video paused');
+        }
+      } catch (error) {
+        console.log('Error pausing video:', error);
+      }
+      
       if (modalContent) {
         modalContent.style.transform = 'translateY(20px)';
       }
@@ -310,6 +354,7 @@ const defaultJavaScriptLogic = `
   
   window.openChannel = openChannel;
   window.toggleDropdown = toggleDropdown;
+  window.playVideo = playVideo;
   
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initWidget);

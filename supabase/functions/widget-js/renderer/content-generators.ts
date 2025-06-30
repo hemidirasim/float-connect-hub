@@ -18,7 +18,8 @@ export function generateVideoContent(config: TemplateConfig): string {
   return `<div class="hiclient-video-container" style="text-align: ${config.videoAlignment}; margin-bottom: 20px;">
      <video class="hiclient-video-player" src="${config.videoUrl}" 
             style="height: ${config.videoHeight}px; width: 100%; border-radius: 12px;" 
-            controls muted>
+            autoplay muted loop playsinline webkit-playsinline>
+       Your browser does not support the video tag.
      </video>
    </div>`
 }

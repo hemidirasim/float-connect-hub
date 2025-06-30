@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,17 @@ export const EditChannelModal: React.FC<EditChannelModalProps> = ({
 
   const handleSave = () => {
     if (channel && value.trim()) {
-      onSave(channel.id, value.trim(), label.trim() || channel.label);
+      // Ensure video URLs are properly formatted for autoplay
+      let processedValue = value.trim();
+      
+      // If it's a video URL, make sure it supports autoplay
+      if (processedValue.includes('youtube.com') || processedValue.includes('youtu.be')) {
+        if (!processedValue.includes('autoplay=1')) {
+          processedValue += processedValue.includes('?') ? '&autoplay=1&mute=1' : '?autoplay=1&mute=1';
+        }
+      }
+      
+      onSave(channel.id, processedValue, label.trim() || channel.label);
       onClose();
     }
   };
