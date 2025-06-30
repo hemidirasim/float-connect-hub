@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { HeroSection } from "@/components/FloatingWidgetBuilder/HeroSection";
@@ -448,6 +449,12 @@ const Index = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Check if we should show code preview - only show if we have meaningful generated code
+  const shouldShowCodePreview = generatedCode && 
+    generatedCode.trim() !== '' && 
+    !generatedCode.includes('console.log(\'Widget config\'') && // Don't show fallback code
+    editingWidget?.id; // Only show when we have a saved widget
+
   return (
     <>
       {helmet}
@@ -484,7 +491,7 @@ const Index = () => {
                   onCustomIconUpload={handleCustomIconUpload}
                 />
                 
-                {generatedCode && (
+                {shouldShowCodePreview && (
                   <CodePreview
                     generatedCode={generatedCode}
                     copied={copied}
