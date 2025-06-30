@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -42,33 +41,33 @@ export const EditChannelModal: React.FC<EditChannelModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Kanal məlumatlarını redaktə et</DialogTitle>
+          <DialogTitle>Edit Channel Information</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <Label htmlFor="edit-value">Əlaqə məlumatı</Label>
+            <Label htmlFor="edit-value">Contact Information</Label>
             <Input
               id="edit-value"
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder="Əlaqə məlumatı daxil edin"
+              placeholder="Enter contact information"
             />
           </div>
           <div>
-            <Label htmlFor="edit-label">Xüsusi ad</Label>
+            <Label htmlFor="edit-label">Custom Name</Label>
             <Input
               id="edit-label"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder="Xüsusi ad (ixtiyari)"
+              placeholder="Custom name (optional)"
             />
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose}>
-              Ləğv et
+              Cancel
             </Button>
             <Button onClick={handleSave} disabled={!value.trim()}>
-              Saxla
+              Save
             </Button>
           </div>
         </div>
