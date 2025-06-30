@@ -17,7 +17,7 @@ export const CodePreview: React.FC<CodePreviewProps> = ({
   onCopy
 }) => {
   // Don't render anything if there's no generated code
-  if (!generatedCode) {
+  if (!generatedCode || generatedCode.trim() === '') {
     return null;
   }
 
