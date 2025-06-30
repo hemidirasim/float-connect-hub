@@ -20,6 +20,7 @@ export function generateVideoContent(config: TemplateConfig): string {
     videoAlignment: config.videoAlignment
   })
 
+  // Check if video is enabled AND has a URL
   if (!config.videoEnabled || !config.videoUrl) {
     console.log('Video not enabled or no URL provided')
     return ''
