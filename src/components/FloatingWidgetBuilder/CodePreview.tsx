@@ -16,6 +16,11 @@ export const CodePreview: React.FC<CodePreviewProps> = ({
   copied,
   onCopy
 }) => {
+  // Don't render anything if there's no generated code
+  if (!generatedCode) {
+    return null;
+  }
+
   return (
     <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
       <CardHeader>
@@ -28,36 +33,29 @@ export const CodePreview: React.FC<CodePreviewProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {generatedCode ? (
-          <div className="space-y-4">
-            <div className="relative">
-              <Textarea
-                value={generatedCode}
-                readOnly
-                className="min-h-[150px] font-mono text-sm bg-gray-50"
-              />
-              <Button
-                onClick={onCopy}
-                size="sm"
-                className="absolute top-2 right-2"
-                variant="outline"
-              >
-                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              </Button>
-            </div>
-            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <h4 className="font-semibold text-blue-800 mb-1 text-sm">Installation:</h4>
-              <p className="text-xs text-blue-700">
-                Paste before closing &lt;/body&gt; tag
-              </p>
-            </div>
+        <div className="space-y-4">
+          <div className="relative">
+            <Textarea
+              value={generatedCode}
+              readOnly
+              className="min-h-[150px] font-mono text-sm bg-gray-50"
+            />
+            <Button
+              onClick={onCopy}
+              size="sm"
+              className="absolute top-2 right-2"
+              variant="outline"
+            >
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            </Button>
           </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            <Copy className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Create widget to see script</p>
+          <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 className="font-semibold text-blue-800 mb-1 text-sm">Installation:</h4>
+            <p className="text-xs text-blue-700">
+              Paste before closing &lt;/body&gt; tag
+            </p>
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
