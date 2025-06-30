@@ -8,9 +8,10 @@ import { Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const PasswordSettings: React.FC = () => {
-  const { updatePassword } = useAuth();
+  const { user } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -54,6 +55,11 @@ export const PasswordSettings: React.FC = () => {
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!currentPassword) {
+      toast.error("Cari şifrənizi daxil edin");
+      return;
+    }
+    
     if (!newPassword || !confirmPassword) {
       toast.error("Bütün sahələri doldurun");
       return;
@@ -72,11 +78,30 @@ export const PasswordSettings: React.FC = () => {
     setLoading(true);
     
     try {
-      const { error } = await updatePassword(newPassword);
+      // First, verify the current password by trying to sign in with it
+      if (!user?.email) {
+        toast.error("İstifadəçi məlumatları tapılmadı");
+        return;
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        toast.error("Cari şifrə səhvdir");
+        return;
+      }
+
+      // If current password is correct, update to new password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword
+      });
       
-      if (error) {
-        console.error('Error updating password:', error);
-        toast.error("Şifrə yeniləmə xətası: " + error.message);
+      if (updateError) {
+        console.error('Error updating password:', updateError);
+        toast.error("Şifrə yeniləmə xətası: " + updateError.message);
       } else {
         toast.success("Şifrəniz uğurla yeniləndi!");
         setCurrentPassword('');
@@ -112,6 +137,7 @@ export const PasswordSettings: React.FC = () => {
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="Cari şifrənizi daxil edin"
                 className="pr-10"
+                required
               />
               <Button
                 type="button"
@@ -210,7 +236,7 @@ export const PasswordSettings: React.FC = () => {
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={loading || passwordErrors.length > 0 || !newPassword || !confirmPassword || newPassword !== confirmPassword}
+            disabled={loading || passwordErrors.length > 0 || !currentPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword}
           >
             {loading ? 'Yenilənir...' : 'Şifrəni Yenilə'}
           </Button>
