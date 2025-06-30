@@ -197,26 +197,44 @@ const defaultJavaScriptLogic = `
   
   function playVideo() {
     try {
-      var video = document.querySelector('.hiclient-video-player');
-      if (video) {
-        console.log('Starting video playback...');
-        video.currentTime = 0;
-        var playPromise = video.play();
-        if (playPromise !== undefined) {
-          playPromise.then(function() {
-            console.log('Video started playing successfully');
-          }).catch(function(error) {
-            console.log('Video autoplay failed:', error);
-            // Try to play again after user interaction
-            setTimeout(function() {
-              try {
-                video.play();
-              } catch (e) {
-                console.log('Retry video play failed:', e);
-              }
-            }, 1000);
-          });
-        }
+      console.log('playVideo function called');
+      var videos = document.querySelectorAll('.hiclient-video-player');
+      console.log('Found videos:', videos.length);
+      
+      if (videos.length > 0) {
+        videos.forEach(function(video, index) {
+          console.log('Processing video', index, 'with src:', video.src);
+          
+          if (video.src && video.src !== '') {
+            video.currentTime = 0;
+            video.muted = true; // Ensure muted for autoplay
+            
+            var playPromise = video.play();
+            if (playPromise !== undefined) {
+              playPromise.then(function() {
+                console.log('Video', index, 'started playing successfully');
+              }).catch(function(error) {
+                console.log('Video', index, 'autoplay failed:', error);
+                // Force play after small delay
+                setTimeout(function() {
+                  try {
+                    video.play().then(function() {
+                      console.log('Video', index, 'started on retry');
+                    }).catch(function(retryError) {
+                      console.log('Video', index, 'retry failed:', retryError);
+                    });
+                  } catch (e) {
+                    console.log('Video', index, 'retry exception:', e);
+                  }
+                }, 500);
+              });
+            }
+          } else {
+            console.log('Video', index, 'has no valid src');
+          }
+        });
+      } else {
+        console.log('No video elements found with class hiclient-video-player');
       }
     } catch (error) {
       console.log('Error in playVideo function:', error);
@@ -260,10 +278,11 @@ const defaultJavaScriptLogic = `
         }, 50);
       }
       
-      // Start video playback when modal opens
+      // Start video playback when modal opens - with delay to ensure DOM is ready
       setTimeout(function() {
+        console.log('Attempting to play video after modal open');
         playVideo();
-      }, 200);
+      }, 300);
     });
     
     if (closeBtn) {
@@ -290,15 +309,17 @@ const defaultJavaScriptLogic = `
     });
     
     function closeModal() {
-      // Pause video when modal closes
+      // Pause all videos when modal closes
       try {
-        var video = document.querySelector('.hiclient-video-player');
-        if (video && !video.paused) {
-          video.pause();
-          console.log('Video paused');
-        }
+        var videos = document.querySelectorAll('.hiclient-video-player');
+        videos.forEach(function(video) {
+          if (video && !video.paused) {
+            video.pause();
+            console.log('Video paused');
+          }
+        });
       } catch (error) {
-        console.log('Error pausing video:', error);
+        console.log('Error pausing videos:', error);
       }
       
       if (modalContent) {
@@ -342,6 +363,17 @@ const defaultJavaScriptLogic = `
     }
     
     console.log('Widget initialized successfully');
+    
+    // Try to preload any videos immediately after init
+    setTimeout(function() {
+      var videos = document.querySelectorAll('.hiclient-video-player');
+      if (videos.length > 0) {
+        console.log('Preloading', videos.length, 'videos');
+        videos.forEach(function(video) {
+          video.load(); // Preload the video
+        });
+      }
+    }, 100);
   }
   
   window.refreshWidget = function() {
