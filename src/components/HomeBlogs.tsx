@@ -75,8 +75,8 @@ export const HomeBlogs: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Ən Son Bloq Yazıları</h2>
-            <p className="text-gray-600">Ən son anlayışlar və məsləhətlərimizlə yenilənin</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Latest Blog Posts</h2>
+            <p className="text-gray-600">Stay updated with our latest insights and tips</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8 mb-8">
@@ -101,7 +101,7 @@ export const HomeBlogs: React.FC = () => {
           <div className="text-center">
             <Link to="/blogs">
               <Button variant="outline">
-                Bütün Yazıları Gör <ArrowRight className="w-4 h-4 ml-2" />
+                View All Posts <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
           </div>
