@@ -427,7 +427,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
                 <Label>Platform</Label>
                 <Select value={selectedChannelType} onValueChange={setSelectedChannelType}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Platform seçin" />
+                    <SelectValue placeholder="Choose platform" />
                   </SelectTrigger>
                   <SelectContent>
                     {platformOptions.map((platform) => (
