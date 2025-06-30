@@ -21,21 +21,47 @@ export function generateVideoContent(config: TemplateConfig): string {
   })
 
   // Check if video is enabled AND has a URL
-  if (!config.videoEnabled || !config.videoUrl) {
-    console.log('Video not enabled or no URL provided')
+  if (!config.videoEnabled || !config.videoUrl || config.videoUrl.trim() === '') {
+    console.log('Video not enabled or no URL provided:', {
+      videoEnabled: config.videoEnabled,
+      hasVideoUrl: Boolean(config.videoUrl && config.videoUrl.trim() !== '')
+    })
     return ''
   }
   
   // Process video URL to ensure it works properly
-  let processedVideoUrl = config.videoUrl
+  let processedVideoUrl = config.videoUrl.trim()
   
-  // Add autoplay parameters for YouTube videos
+  // Handle different video types
   if (processedVideoUrl.includes('youtube.com') || processedVideoUrl.includes('youtu.be')) {
-    if (!processedVideoUrl.includes('autoplay=1')) {
-      processedVideoUrl += processedVideoUrl.includes('?') ? '&autoplay=1&mute=1&loop=1' : '?autoplay=1&mute=1&loop=1'
+    // Convert YouTube URL to embed format
+    let videoId = ''
+    if (processedVideoUrl.includes('youtube.com/watch?v=')) {
+      videoId = processedVideoUrl.split('v=')[1]?.split('&')[0]
+    } else if (processedVideoUrl.includes('youtu.be/')) {
+      videoId = processedVideoUrl.split('youtu.be/')[1]?.split('?')[0]
+    }
+    
+    if (videoId) {
+      // Use iframe for YouTube videos
+      const videoHeight = config.videoHeight || 200
+      const videoAlignment = config.videoAlignment || 'center'
+      
+      const youtubeHtml = `<div class="hiclient-video-container" style="text-align: ${videoAlignment}; margin-bottom: 20px;">
+         <iframe class="hiclient-video-player" 
+                src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}" 
+                style="height: ${videoHeight}px; width: 100%; border-radius: 12px; border: none;" 
+                allow="autoplay; encrypted-media" 
+                allowfullscreen>
+         </iframe>
+       </div>`
+      
+      console.log('Generated YouTube iframe video content')
+      return youtubeHtml
     }
   }
   
+  // For direct video files (mp4, webm, etc.)
   const videoHeight = config.videoHeight || 200
   const videoAlignment = config.videoAlignment || 'center'
   
@@ -44,7 +70,7 @@ export function generateVideoContent(config: TemplateConfig): string {
   const videoHtml = `<div class="hiclient-video-container" style="text-align: ${videoAlignment}; margin-bottom: 20px;">
      <video class="hiclient-video-player" src="${processedVideoUrl}" 
             style="height: ${videoHeight}px; width: 100%; border-radius: 12px;" 
-            autoplay muted loop playsinline webkit-playsinline preload="auto">
+            autoplay muted loop playsinline webkit-playsinline preload="auto" controls>
        Your browser does not support the video tag.
      </video>
    </div>`
