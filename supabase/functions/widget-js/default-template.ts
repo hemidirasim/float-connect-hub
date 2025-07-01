@@ -24,7 +24,7 @@ const defaultJavaScriptLogic = `
 
   function getChannelIcon(channel) {
     var icons = {
-      whatsapp: '<img src="https://byart.az/wp-content/uploads/whatsapp.png" alt="WhatsApp" style="width: 24px; height: 24px;">',
+      whatsapp: '<img src="https://byart.az/wp-content/uploads/whatsapp.png" alt="WhatsApp">',
       telegram: '✈️',
       instagram: '📷',
       messenger: '💬',
