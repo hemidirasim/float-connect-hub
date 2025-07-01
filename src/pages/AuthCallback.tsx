@@ -60,39 +60,25 @@ const AuthCallback = () => {
         console.log("📍 Location search:", location.search);
         console.log("📍 Location hash:", window.location.hash);
         
-        // Parse ALL possible URL parameters
-        const fullUrl = window.location.href;
-        console.log("🔗 Full URL being parsed:", fullUrl);
-        
-        // Multiple parsing approaches
-        const urlObj = new URL(fullUrl);
-        const searchParams = new URLSearchParams(location.search);
+        // Parse URL parameters from multiple sources
+        const urlParams = new URLSearchParams(location.search);
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         
-        // Extract type from all sources
-        const typeFromUrl = urlObj.searchParams.get('type');
-        const typeFromSearch = searchParams.get('type');
-        const typeFromHash = hashParams.get('type');
-        const type = typeFromUrl || typeFromSearch || typeFromHash;
+        // Get parameters from both sources
+        const type = urlParams.get('type') || hashParams.get('type');
+        const token = urlParams.get('token') || hashParams.get('token');
+        const accessToken = urlParams.get('access_token') || hashParams.get('access_token');
+        const refreshToken = urlParams.get('refresh_token') || hashParams.get('refresh_token');
+        const error = urlParams.get('error') || hashParams.get('error');
+        const errorDescription = urlParams.get('error_description') || hashParams.get('error_description');
         
-        // Extract other parameters
-        const code = urlObj.searchParams.get('code') || searchParams.get('code') || hashParams.get('code');
-        const token = urlObj.searchParams.get('token') || searchParams.get('token') || hashParams.get('token');
-        const error = urlObj.searchParams.get('error') || searchParams.get('error') || hashParams.get('error');
-        const errorDescription = urlObj.searchParams.get('error_description') || searchParams.get('error_description') || hashParams.get('error_description');
-        
-        console.log("🔍 Detailed parameter extraction:", {
+        console.log("🔍 Parameters found:", {
           type,
-          typeFromUrl,
-          typeFromSearch, 
-          typeFromHash,
-          code: code ? 'present' : 'missing',
           token: token ? 'present' : 'missing',
+          accessToken: accessToken ? 'present' : 'missing',
+          refreshToken: refreshToken ? 'present' : 'missing',
           error,
-          errorDescription,
-          fullUrlParams: Object.fromEntries(urlObj.searchParams),
-          searchParamsEntries: Object.fromEntries(searchParams),
-          hashParamsEntries: Object.fromEntries(hashParams)
+          errorDescription
         });
         
         // Handle error parameters first
@@ -103,124 +89,74 @@ const AuthCallback = () => {
           return;
         }
         
-        // CRITICAL CHECK: Is this a password recovery?
-        console.log("🔐 Checking if this is a recovery flow...");
-        console.log("🔐 Type parameter value:", type);
-        console.log("🔐 Is type === 'recovery'?", type === 'recovery');
-        
+        // Check if this is a password recovery
         if (type === 'recovery') {
-          console.log("🔐✅ PASSWORD RECOVERY CONFIRMED - Setting up password reset form");
-          setStatus('reset_password');
-          setMessage('Set your new password');
+          console.log("🔐 Password recovery flow detected");
           
-          // If there's a code or token, try to exchange it
-          const authCode = code || token;
-          if (authCode) {
+          // If we have tokens, try to set the session
+          if (accessToken && refreshToken) {
             try {
-              console.log("🔐🔄 Attempting to exchange recovery code/token...");
-              const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(authCode);
-              if (exchangeError) {
-                console.error('❌ Recovery code exchange failed:', exchangeError);
+              console.log("🔐 Setting session with tokens...");
+              const { data, error: sessionError } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken
+              });
+              
+              if (sessionError) {
+                console.error('❌ Session set error:', sessionError);
                 setStatus('error');
                 setMessage('Password reset link has expired or is invalid.');
                 return;
               }
-              console.log('✅ Recovery code exchanged successfully');
+              
+              if (data.session) {
+                console.log('✅ Recovery session established successfully');
+                setStatus('reset_password');
+                setMessage('Set your new password');
+                return;
+              }
             } catch (error) {
-              console.error('❌ Exception during recovery code exchange:', error);
+              console.error('❌ Exception setting session:', error);
               setStatus('error');
-              setMessage('An error occurred during password reset.');
+              setMessage('Password reset link has expired or is invalid.');
               return;
             }
           }
           
-          console.log("🔐🛑 RECOVERY FLOW SETUP COMPLETE - Staying on password reset page");
-          return; // STOP HERE - don't process any other flows
-        }
-        
-        console.log("ℹ️ Not a recovery flow, proceeding with normal authentication...");
-        
-        if (code) {
-          console.log("Exchanging code for session (non-recovery)");
-          try {
-            const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-            
-            if (exchangeError) {
-              console.error('Code exchange error:', exchangeError);
+          // If no tokens but we have a token parameter, try to verify it
+          if (token) {
+            try {
+              console.log("🔐 Verifying recovery token...");
+              const { data, error: verifyError } = await supabase.auth.verifyOtp({
+                token_hash: token,
+                type: 'recovery'
+              });
               
-              // Check if user is already authenticated despite the PKCE error
-              const { data: { session } } = await supabase.auth.getSession();
-              if (session) {
-                console.log('User is already authenticated despite PKCE error');
-                setStatus('success');
-                setMessage('Your account has been successfully verified!');
-                setTimeout(() => {
-                  navigate('/dashboard');
-                }, 2000);
+              if (verifyError) {
+                console.error('❌ Token verification failed:', verifyError);
+                setStatus('error');
+                setMessage('Password reset link has expired or is invalid.');
                 return;
               }
               
-              // Handle specific PKCE errors more gracefully
-              if (exchangeError.message.includes('code verifier') || 
-                  exchangeError.message.includes('pkce')) {
-                console.log('PKCE error detected, checking user status...');
-                
-                setTimeout(async () => {
-                  const { data: { session } } = await supabase.auth.getSession();
-                  if (session) {
-                    console.log('User confirmed and session exists');
-                    setStatus('success');
-                    setMessage('Your account has been successfully verified!');
-                    setTimeout(() => {
-                      navigate('/dashboard');
-                    }, 1000);
-                  } else {
-                    setStatus('success');
-                    setMessage('Email verified! Please log in.');
-                    setTimeout(() => {
-                      navigate('/');
-                    }, 3000);
-                  }
-                }, 1000);
+              if (data.session) {
+                console.log('✅ Recovery token verified successfully');
+                setStatus('reset_password');
+                setMessage('Set your new password');
                 return;
-              } else if (exchangeError.message.includes('expired')) {
-                setStatus('error');
-                setMessage('Email verification link has expired. Please register again.');
-              } else {
-                setStatus('error');
-                setMessage('An error occurred during login. Please try again.');
               }
+            } catch (error) {
+              console.error('❌ Exception verifying token:', error);
+              setStatus('error');
+              setMessage('Password reset link has expired or is invalid.');
               return;
             }
-            
-            if (data?.session) {
-              console.log('Session created successfully');
-              setStatus('success');
-              setMessage('Your account has been successfully verified!');
-              
-              setTimeout(() => {
-                navigate('/dashboard');
-              }, 2000);
-            } else {
-              setStatus('error');
-              setMessage('Session could not be created. Please log in again.');
-            }
-          } catch (error) {
-            console.error('Unexpected error during code exchange:', error);
-            
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-              console.log('User authenticated despite error');
-              setStatus('success');
-              setMessage('Your account has been successfully verified!');
-              setTimeout(() => {
-                navigate('/dashboard');
-              }, 2000);
-            } else {
-              setStatus('error');
-              setMessage('An unexpected error occurred. Please try again.');
-            }
           }
+          
+          // If we reach here, no valid recovery tokens were found
+          console.log("❌ No valid recovery tokens found");
+          setStatus('error');
+          setMessage('Password reset link has expired or is invalid.');
           return;
         }
         

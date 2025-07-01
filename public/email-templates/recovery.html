@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -63,13 +64,15 @@
       <p>Hiclient hesabınızın şifrəsini sıfırlamaq üçün aşağıdakı düyməyə klikləyin:</p>
       
       <div style="text-align: center;">
-        <a href="{{ .RecoveryURL }}" class="button">Şifrəmi Sıfırla</a>
+        <a href="{{ .ConfirmationURL }}" class="button">Şifrəmi Sıfırla</a>
       </div>
       
       <p>Və ya bu linki kopyalayıb brauzerinizə yapışdırın:</p>
-      <p>{{ .RecoveryURL }}</p>
+      <p>{{ .ConfirmationURL }}</p>
       
       <p>Əgər siz şifrə sıfırlaması tələb etməmisinizsə, bu emaili nəzərə almayın.</p>
+      
+      <p>Bu link 24 saat sonra vaxtı bitəcək.</p>
     </div>
     <div class="footer">
       <p>&copy; 2024 Hiclient. Bütün hüquqlar qorunur.</p>
