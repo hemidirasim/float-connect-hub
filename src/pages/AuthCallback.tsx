@@ -73,6 +73,7 @@ const AuthCallback = () => {
         const refreshToken = urlParams.get('refresh_token') || hashParams.get('refresh_token');
         const error = urlParams.get('error') || hashParams.get('error');
         const errorDescription = urlParams.get('error_description') || hashParams.get('error_description');
+        const errorCode = urlParams.get('error_code') || hashParams.get('error_code');
         
         console.log("🔍 All parameters found:", {
           type,
@@ -80,14 +81,24 @@ const AuthCallback = () => {
           accessToken: accessToken ? 'present' : 'missing',
           refreshToken: refreshToken ? 'present' : 'missing',
           error,
+          errorCode,
           errorDescription,
           fullSearchParams: fullUrl.search,
           hashSearchParams: window.location.hash
         });
         
-        // Handle error parameters first
+        // Handle error parameters first - especially for expired recovery links
         if (error) {
           console.error('❌ OAuth error detected:', error, errorDescription);
+          
+          // Special handling for password recovery errors
+          if (type === 'recovery' && (errorCode === 'otp_expired' || error === 'access_denied')) {
+            setStatus('error');
+            setMessage('Password reset link has expired. Please request a new password reset link.');
+            return;
+          }
+          
+          // Generic error handling
           setStatus('error');
           setMessage(`Login error: ${errorDescription || error}`);
           return;
@@ -279,6 +290,10 @@ const AuthCallback = () => {
     }
   };
 
+  const handleRequestNewLink = () => {
+    navigate('/', { state: { showPasswordReset: true } });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -380,7 +395,7 @@ const AuthCallback = () => {
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => navigate('/')} 
+                onClick={handleRequestNewLink} 
                 className="w-full"
               >
                 Request new reset link
