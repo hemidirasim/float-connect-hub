@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -63,22 +64,25 @@ const AuthCallback = () => {
         // Parse URL parameters from multiple sources
         const urlParams = new URLSearchParams(location.search);
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const fullUrl = new URL(window.location.href);
         
-        // Get parameters from both sources
-        const type = urlParams.get('type') || hashParams.get('type');
-        const token = urlParams.get('token') || hashParams.get('token');
+        // Get parameters from all possible sources
+        const type = urlParams.get('type') || hashParams.get('type') || fullUrl.searchParams.get('type');
+        const token = urlParams.get('token') || hashParams.get('token') || fullUrl.searchParams.get('token');
         const accessToken = urlParams.get('access_token') || hashParams.get('access_token');
         const refreshToken = urlParams.get('refresh_token') || hashParams.get('refresh_token');
         const error = urlParams.get('error') || hashParams.get('error');
         const errorDescription = urlParams.get('error_description') || hashParams.get('error_description');
         
-        console.log("🔍 Parameters found:", {
+        console.log("🔍 All parameters found:", {
           type,
           token: token ? 'present' : 'missing',
           accessToken: accessToken ? 'present' : 'missing',
           refreshToken: refreshToken ? 'present' : 'missing',
           error,
-          errorDescription
+          errorDescription,
+          fullSearchParams: fullUrl.search,
+          hashSearchParams: window.location.hash
         });
         
         // Handle error parameters first
@@ -93,10 +97,70 @@ const AuthCallback = () => {
         if (type === 'recovery') {
           console.log("🔐 Password recovery flow detected");
           
-          // If we have tokens, try to set the session
+          // Try to exchange the token for a session
+          if (token) {
+            try {
+              console.log("🔐 Attempting to verify recovery token...");
+              
+              // First try to verify the token
+              const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+                token_hash: token,
+                type: 'recovery'
+              });
+              
+              console.log("🔐 Token verification result:", { 
+                success: !verifyError, 
+                hasSession: !!verifyData?.session,
+                error: verifyError?.message 
+              });
+              
+              if (verifyError) {
+                console.error('❌ Token verification failed:', verifyError);
+                
+                // If direct token verification fails, try session exchange
+                try {
+                  console.log("🔐 Trying session exchange...");
+                  const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(token);
+                  
+                  if (sessionError) {
+                    console.error('❌ Session exchange failed:', sessionError);
+                    setStatus('error');
+                    setMessage('Password reset link has expired or is invalid. Please request a new one.');
+                    return;
+                  }
+                  
+                  if (sessionData.session) {
+                    console.log('✅ Session established via exchange');
+                    setStatus('reset_password');
+                    setMessage('Set your new password');
+                    return;
+                  }
+                } catch (exchangeError) {
+                  console.error('❌ Session exchange exception:', exchangeError);
+                  setStatus('error');
+                  setMessage('Password reset link has expired or is invalid. Please request a new one.');
+                  return;
+                }
+              }
+              
+              if (verifyData?.session) {
+                console.log('✅ Recovery session established successfully');
+                setStatus('reset_password');
+                setMessage('Set your new password');
+                return;
+              }
+            } catch (error) {
+              console.error('❌ Exception during token verification:', error);
+              setStatus('error');
+              setMessage('Password reset link has expired or is invalid. Please request a new one.');
+              return;
+            }
+          }
+          
+          // If we have access and refresh tokens, try to set session directly
           if (accessToken && refreshToken) {
             try {
-              console.log("🔐 Setting session with tokens...");
+              console.log("🔐 Setting session with provided tokens...");
               const { data, error: sessionError } = await supabase.auth.setSession({
                 access_token: accessToken,
                 refresh_token: refreshToken
@@ -105,12 +169,12 @@ const AuthCallback = () => {
               if (sessionError) {
                 console.error('❌ Session set error:', sessionError);
                 setStatus('error');
-                setMessage('Password reset link has expired or is invalid.');
+                setMessage('Password reset link has expired or is invalid. Please request a new one.');
                 return;
               }
               
               if (data.session) {
-                console.log('✅ Recovery session established successfully');
+                console.log('✅ Recovery session established with tokens');
                 setStatus('reset_password');
                 setMessage('Set your new password');
                 return;
@@ -118,50 +182,20 @@ const AuthCallback = () => {
             } catch (error) {
               console.error('❌ Exception setting session:', error);
               setStatus('error');
-              setMessage('Password reset link has expired or is invalid.');
+              setMessage('Password reset link has expired or is invalid. Please request a new one.');
               return;
             }
           }
           
-          // If no tokens but we have a token parameter, try to verify it
-          if (token) {
-            try {
-              console.log("🔐 Verifying recovery token...");
-              const { data, error: verifyError } = await supabase.auth.verifyOtp({
-                token_hash: token,
-                type: 'recovery'
-              });
-              
-              if (verifyError) {
-                console.error('❌ Token verification failed:', verifyError);
-                setStatus('error');
-                setMessage('Password reset link has expired or is invalid.');
-                return;
-              }
-              
-              if (data.session) {
-                console.log('✅ Recovery token verified successfully');
-                setStatus('reset_password');
-                setMessage('Set your new password');
-                return;
-              }
-            } catch (error) {
-              console.error('❌ Exception verifying token:', error);
-              setStatus('error');
-              setMessage('Password reset link has expired or is invalid.');
-              return;
-            }
-          }
-          
-          // If we reach here, no valid recovery tokens were found
-          console.log("❌ No valid recovery tokens found");
+          // If we reach here, no valid recovery method worked
+          console.log("❌ No valid recovery method worked");
           setStatus('error');
-          setMessage('Password reset link has expired or is invalid.');
+          setMessage('Password reset link has expired or is invalid. Please request a new one.');
           return;
         }
         
-        // If no code parameter, check current session
-        console.log("No code parameter, checking current session");
+        // Handle normal auth flow
+        console.log("Checking for existing session...");
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -189,23 +223,8 @@ const AuthCallback = () => {
         
       } catch (error) {
         console.error('❌ General error in auth callback:', error);
-        
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-            setStatus('success');
-            setMessage('Your account has been successfully verified!');
-            setTimeout(() => {
-              navigate('/dashboard');
-            }, 2000);
-          } else {
-            setStatus('error');
-            setMessage('An error occurred. Please try again.');
-          }
-        } catch {
-          setStatus('error');
-          setMessage('An error occurred. Please try again.');
-        }
+        setStatus('error');
+        setMessage('An error occurred. Please try again.');
       }
     };
 
@@ -364,7 +383,7 @@ const AuthCallback = () => {
                 onClick={() => navigate('/')} 
                 className="w-full"
               >
-                Register again
+                Request new reset link
               </Button>
             </div>
           )}
