@@ -38,6 +38,7 @@ const defaultJavaScriptLogic = `
       linkedin: '💼',
       github: '⚡',
       website: '🌐',
+      fiver: '🌐',
       chatbot: '🤖',
       email: '✉️',
       phone: '📞',
