@@ -100,7 +100,7 @@ export const useAuth = () => {
   const resetPassword = async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${getSiteUrl()}/auth/callback?type=recovery`,
+        redirectTo: `${getSiteUrl()}/password-reset`,
       });
       return { error };
     } catch (error) {
