@@ -24,7 +24,7 @@ const defaultJavaScriptLogic = `
 
   function getChannelIcon(channel) {
     var icons = {
-      whatsapp: '📱',
+      whatsapp: '<img src="https://byart.az/wp-content/uploads/whatsapp.png" alt="WhatsApp" style="width: 24px; height: 24px;">',
       telegram: '✈️',
       instagram: '📷',
       messenger: '💬',
@@ -207,7 +207,7 @@ const defaultJavaScriptLogic = `
           
           if (video.src && video.src !== '') {
             video.currentTime = 0;
-            video.muted = false; // Ensure muted for autoplay
+            video.muted = true; // Ensure muted for autoplay
             
             var playPromise = video.play();
             if (playPromise !== undefined) {
