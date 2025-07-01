@@ -206,8 +206,9 @@ const defaultJavaScriptLogic = `
           console.log('Processing video', index, 'with src:', video.src);
           
           if (video.src && video.src !== '') {
+            video.controls = false; // Disable video control buttons
             video.currentTime = 0;
-            video.muted = false; // Ensure muted for autoplay
+            video.muted = true; // Ensure muted for autoplay
             
             var playPromise = video.play();
             if (playPromise !== undefined) {
@@ -239,8 +240,7 @@ const defaultJavaScriptLogic = `
     } catch (error) {
       console.log('Error in playVideo function:', error);
     }
-  }
-  
+}
   function initWidget() {
     console.log('Initializing widget...');
     
