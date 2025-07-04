@@ -7,7 +7,6 @@ import { WebsiteInfoForm } from './WebsiteInfoForm';
 import { ChannelManager } from './ChannelManager';
 import { VideoUpload } from './VideoUpload';
 import { CustomizationOptions } from './CustomizationOptions';
-import { WidgetDimensions } from './WidgetDimensions';
 import { Channel, FormData } from './types';
 import { TemplatePreview } from './TemplatePreview';
 
@@ -87,14 +86,6 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Widget Dimensions */}
-          <WidgetDimensions
-            widgetWidth={formData.widgetWidth}
-            widgetHeight={formData.widgetHeight}
-            onWidgetWidthChange={(width) => onFormDataChange('widgetWidth', width)}
-            onWidgetHeightChange={(height) => onFormDataChange('widgetHeight', height)}
-          />
-
           {/* Video Upload & Icon Settings */}
           <VideoUpload
             video={formData.video}

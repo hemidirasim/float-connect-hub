@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { Channel, FormData } from './types';
 
@@ -81,8 +80,8 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       buttonSize: formData.buttonSize,
       previewVideoHeight: formData.previewVideoHeight,
       templateId: templateId,
-      widgetWidth: formData.widgetWidth,
-      widgetHeight: formData.widgetHeight
+      widgetWidth: 400, // Default value
+      widgetHeight: 600 // Default value
     };
 
     // Use SAME renderer as edge function
@@ -151,8 +150,6 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     formData.useVideoPreview,
     formData.buttonSize,
     formData.previewVideoHeight,
-    formData.widgetWidth,
-    formData.widgetHeight,
     channels,
     editingWidget?.video_url,
     getTemplate

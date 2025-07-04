@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Channel, FormData } from "./types";
@@ -68,7 +67,7 @@ export const useWidgetActions = (
     try {
       console.log('Saving widget to database with channels:', channels);
       
-      // Create widget data including new fields
+      // Create widget data without widget dimensions
       const widgetData = {
         name: websiteName,
         website_url: websiteUrl,
@@ -87,9 +86,7 @@ export const useWidgetActions = (
         button_size: formData.buttonSize,
         preview_video_height: formData.previewVideoHeight,
         template_id: formData.templateId || 'default',
-        widget_width: formData.widgetWidth,
-        widget_height: formData.widgetHeight,
-        channels: channels, // Save channels with both label and value
+        channels: channels,
         user_id: user?.id
       };
 

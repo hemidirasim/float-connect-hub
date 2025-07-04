@@ -34,6 +34,4 @@ export interface FormData {
   buttonSize: number;
   previewVideoHeight: number;
   templateId: string;
-  widgetWidth: number;
-  widgetHeight: number;
 }
