@@ -7,7 +7,6 @@ export const platformOptions = [
   { value: 'instagram', label: 'Instagram', icon: Instagram, color: '#e4405f' },
   { value: 'messenger', label: 'Messenger', icon: MessageSquare, color: '#0084ff' },
   { value: 'viber', label: 'Viber', icon: Phone, color: '#665cac' },
-  { value: 'skype', label: 'Skype', icon: Video, color: '#00aff0' },
   { value: 'discord', label: 'Discord', icon: MessageCircleMore, color: '#5865f2' },
   { value: 'tiktok', label: 'TikTok', icon: Music, color: '#ff0050' },
   { value: 'youtube', label: 'YouTube', icon: Youtube, color: '#ff0000' },
@@ -23,7 +22,6 @@ export const platformOptions = [
   { value: 'fiverr', label: 'Fiverr', icon: Zap, color: '#1dbf73' },
   { value: 'freelancer', label: 'Freelancer', icon: Users, color: '#0e4194' },
   { value: 'website', label: 'Website', icon: Globe, color: '#6b7280' },
-  { value: 'chatbot', label: 'Chatbot', icon: Bot, color: '#8b5cf6' },
   { value: 'email', label: 'Email', icon: Mail, color: '#ea4335' },
   { value: 'phone', label: 'Telefon', icon: Phone, color: '#22c55e' },
   { value: 'custom', label: 'Custom Link', icon: Link, color: '#6b7280' }
