@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Upload, Trash2, MessageCircle, Info, Play, X } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { VideoSettings } from './VideoSettings';
+import { Switch } from "@/components/ui/switch";
 
 interface VideoUploadProps {
   video: File | null;
@@ -36,21 +37,25 @@ interface VideoUploadProps {
 export const VideoUpload: React.FC<VideoUploadProps> = ({
   video,
   videoUrl,
+  useVideoPreview,
   videoHeight,
   videoAlignment,
   videoObjectFit,
   customIcon,
   customIconUrl,
   buttonSize,
+  previewVideoHeight,
   uploading = false,
   onVideoUpload,
   onVideoRemove,
+  onVideoPreviewChange,
   onVideoHeightChange,
   onVideoAlignmentChange,
   onVideoObjectFitChange,
   onCustomIconChange,
   onCustomIconUpload,
-  onButtonSizeChange
+  onButtonSizeChange,
+  onPreviewVideoHeightChange
 }) => {
   const hasVideo = video || videoUrl;
   const [videoModalOpen, setVideoModalOpen] = useState(false);
@@ -238,14 +243,49 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
             </div>
 
             {hasVideo && (
-              <VideoSettings
-                videoHeight={videoHeight}
-                videoAlignment={videoAlignment}
-                videoObjectFit={videoObjectFit}
-                onVideoHeightChange={onVideoHeightChange}
-                onVideoAlignmentChange={onVideoAlignmentChange}
-                onVideoObjectFitChange={onVideoObjectFitChange}
-              />
+              <>
+                <VideoSettings
+                  videoHeight={videoHeight}
+                  videoAlignment={videoAlignment}
+                  videoObjectFit={videoObjectFit}
+                  onVideoHeightChange={onVideoHeightChange}
+                  onVideoAlignmentChange={onVideoAlignmentChange}
+                  onVideoObjectFitChange={onVideoObjectFitChange}
+                />
+
+                {/* Video Preview Option */}
+                <div className="space-y-4 p-4 border rounded-lg bg-blue-50">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base font-medium">Use Video Preview as Button</Label>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Replace the button with a 3-4 second video preview instead of an icon
+                      </p>
+                    </div>
+                    <Switch
+                      checked={useVideoPreview}
+                      onCheckedChange={onVideoPreviewChange}
+                    />
+                  </div>
+
+                  {useVideoPreview && (
+                    <div className="space-y-2">
+                      <Label>Preview Video Height: {previewVideoHeight}px</Label>
+                      <Input
+                        type="range"
+                        min="80"
+                        max="150"
+                        value={previewVideoHeight}
+                        onChange={(e) => onPreviewVideoHeightChange(Number(e.target.value))}
+                        className="w-full"
+                      />
+                      <p className="text-xs text-gray-500">
+                        This will show a looping preview of your video as the floating button
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </CardContent>
