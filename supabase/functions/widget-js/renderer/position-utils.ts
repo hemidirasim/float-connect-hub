@@ -17,63 +17,24 @@ export function getTooltipPositionStyle(config: TemplateConfig): string {
   const buttonSize = config.buttonSize || 60
   const tooltipOffset = 8
   const tooltipPosition = config.tooltipPosition || 'top'
-  const position = config.position
-  
-  // Calculate button offset to adjust tooltip position accordingly
-  const tooltipText = config.tooltip || ''
-  const approximateTooltipWidth = Math.max(120, tooltipText.length * 8)
   
   let adjustedStyle = ''
   
   switch (tooltipPosition) {
     case 'top':
       adjustedStyle = `bottom: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%); margin-bottom: 0;`
-      
-      // Adjust for right tooltip on right-positioned button
-      if (position === 'right') {
-        const offsetX = -(approximateTooltipWidth / 2)
-        adjustedStyle = `bottom: ${buttonSize + tooltipOffset}px; left: calc(50% + ${offsetX}px); transform: translateX(-50%); margin-bottom: 0;`
-      }
-      
-      // Adjust for left tooltip on left-positioned button
-      if (position === 'left') {
-        const offsetX = approximateTooltipWidth / 2
-        adjustedStyle = `bottom: ${buttonSize + tooltipOffset}px; left: calc(50% + ${offsetX}px); transform: translateX(-50%); margin-bottom: 0;`
-      }
       break
       
     case 'bottom':
-      adjustedStyle = `top: ${buttonSize + tooltipOffset - 40}px; left: 50%; transform: translateX(-50%); margin-top: 0;`
-      
-      // Adjust for right tooltip on right-positioned button
-      if (position === 'right') {
-        const offsetX = -(approximateTooltipWidth / 2)
-        adjustedStyle = `top: ${buttonSize + tooltipOffset - 40}px; left: calc(50% + ${offsetX}px); transform: translateX(-50%); margin-top: 0;`
-      }
-      
-      // Adjust for left tooltip on left-positioned button
-      if (position === 'left') {
-        const offsetX = approximateTooltipWidth / 2
-        adjustedStyle = `top: ${buttonSize + tooltipOffset - 40}px; left: calc(50% + ${offsetX}px); transform: translateX(-50%); margin-top: 0;`
-      }
+      adjustedStyle = `top: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%); margin-top: 0;`
       break
       
     case 'left':
-      if (position === 'left') {
-        // When tooltip is on left and button is on left, move tooltip to right side of button
-        adjustedStyle = `left: ${buttonSize + tooltipOffset + approximateTooltipWidth / 2}px; top: 50%; transform: translateY(-50%);`
-      } else {
-        adjustedStyle = `right: ${buttonSize + tooltipOffset}px; top: 50%; transform: translateY(-50%);`
-      }
+      adjustedStyle = `right: ${buttonSize + tooltipOffset}px; top: 50%; transform: translateY(-50%);`
       break
       
     case 'right':
-      if (position === 'right') {
-        // When tooltip is on right and button is on right, move tooltip to left side of button
-        adjustedStyle = `right: ${buttonSize + tooltipOffset + approximateTooltipWidth / 2}px; top: 50%; transform: translateY(-50%);`
-      } else {
-        adjustedStyle = `left: ${buttonSize + tooltipOffset}px; top: 50%; transform: translateY(-50%);`
-      }
+      adjustedStyle = `left: ${buttonSize + tooltipOffset}px; top: 50%; transform: translateY(-50%);`
       break
       
     default:
@@ -83,31 +44,37 @@ export function getTooltipPositionStyle(config: TemplateConfig): string {
   return adjustedStyle
 }
 
-// New function to adjust button position when tooltip might go off-screen
+// Function to adjust button position to prevent tooltip from going off-screen
 export function getButtonOffsetStyle(config: TemplateConfig): string {
   const tooltipPosition = config.tooltipPosition || 'top'
   const position = config.position
   
-  // Calculate approximate tooltip width (rough estimate)
+  // Calculate approximate tooltip width
   const tooltipText = config.tooltip || ''
   const approximateTooltipWidth = Math.max(120, tooltipText.length * 8)
   
   let offsetX = 0
   let offsetY = 0
   
-  // Adjust for right tooltip on right-positioned button
+  // Adjust button position based on tooltip position and widget position
   if (tooltipPosition === 'right' && position === 'right') {
-    offsetX = -(approximateTooltipWidth / 2) // Push button left
+    // Move button left to make space for right tooltip
+    offsetX = -(approximateTooltipWidth / 2 + 10)
   }
   
-  // Adjust for left tooltip on left-positioned button  
   if (tooltipPosition === 'left' && position === 'left') {
-    offsetX = approximateTooltipWidth / 2 // Push button right
+    // Move button right to make space for left tooltip  
+    offsetX = approximateTooltipWidth / 2 + 10
   }
   
-  // Adjust for bottom tooltip
   if (tooltipPosition === 'bottom') {
-    offsetY = -40 // Push button up
+    // Move button up to make space for bottom tooltip
+    offsetY = -50
+  }
+  
+  if (tooltipPosition === 'top' && position === 'center') {
+    // For center position, no horizontal offset needed
+    offsetX = 0
   }
   
   if (offsetX !== 0 || offsetY !== 0) {
