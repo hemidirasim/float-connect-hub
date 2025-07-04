@@ -29,7 +29,6 @@ const defaultJavaScriptLogic = `
       instagram: '<img src="/social-icons/002-instagram.png" alt="Instagram" className="w-8 h-8" />',
       messenger: '<img src="/social-icons/018-messenger.png" alt="Messenger" className="w-8 h-8" />',
       viber: '<img src="/social-icons/011-viber.png" alt="Viber" className="w-8 h-8" />',
-      skype: '💻',
       discord: '<img src="/social-icons/017-discord.png" alt="Discord" className="w-8 h-8" />',
       tiktok: '<img src="/social-icons/004-tiktok.png" alt="Tiktok" className="w-8 h-8" />',
       youtube: '<img src="/social-icons/008-youtube.png" alt="Youtube" className="w-8 h-8" />',
@@ -38,7 +37,6 @@ const defaultJavaScriptLogic = `
       linkedin: '<img src="/social-icons/005-linkedin.png" alt="Linkedin" className="w-8 h-8" />',
       github: '<img src="/social-icons/012-github.png" alt="Github" className="w-8 h-8" />',
       website: '🌐',
-      chatbot: '🤖',
       email: '<img src="/social-icons/019-mail.png" alt="Email" className="w-8 h-8" />',
       phone: '📞',
       custom: '🔗'
@@ -53,7 +51,6 @@ const defaultJavaScriptLogic = `
       instagram: '#e4405f',
       messenger: '#006aff',
       viber: '#665cac',
-      skype: '#00aff0',
       discord: '#7289da',
       tiktok: '#000000',
       youtube: '#ff0000',
@@ -62,7 +59,6 @@ const defaultJavaScriptLogic = `
       linkedin: '#0077b5',
       github: '#333333',
       website: '#6b7280',
-      chatbot: '#3b82f6',
       email: '#ea4335',
       phone: '#34d399',
       custom: '#6b7280'
