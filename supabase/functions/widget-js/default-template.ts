@@ -33,7 +33,7 @@ const defaultJavaScriptLogic = `
       tiktok: '<img src="/social-icons/004-tiktok.png" alt="Tiktok" className="w-8 h-8" />',
       youtube: '<img src="/social-icons/008-youtube.png" alt="Youtube" className="w-8 h-8" />',
       facebook: '<img src="/social-icons/003-facebook.png" alt="Facebook" className="w-8 h-8" />',
-      twitter: '<img src="/social-icons/twitter.png" alt="X" className="w-8 h-8" />',
+      x: '<img src="/social-icons/twitter.png" alt="X" className="w-8 h-8" />',
       linkedin: '<img src="/social-icons/005-linkedin.png" alt="Linkedin" className="w-8 h-8" />',
       github: '<img src="/social-icons/012-github.png" alt="Github" className="w-8 h-8" />',
       behance: '<img src="/social-icons/014-behance.png" alt="Behance" className="w-8 h-8" />',
@@ -41,7 +41,7 @@ const defaultJavaScriptLogic = `
       upwork: '<img src="/social-icons/015-upwork.png" alt="Upwork" className="w-8 h-8" />',
       website: '<img src="/social-icons/internet.png" alt="Website" className="w-8 h-8" />',
       email: '<img src="/social-icons/019-mail.png" alt="Email" className="w-8 h-8" />',
-      phone: '📞',
+      phone: '<img src="/social-icons/telephone.png" alt="Telephone" className="w-8 h-8" />',
       custom: '<img src="/social-icons/link.png" alt="Link" className="w-8 h-8" />'
     };
     return icons[channel.type] || '🔗';
@@ -58,7 +58,7 @@ const defaultJavaScriptLogic = `
       tiktok: '#000000',
       youtube: '#ff0000',
       facebook: '#1877f2',
-      twitter: '#1da1f2',
+      x: '#1da1f2',
       linkedin: '#0077b5',
       github: '#333333',
       website: '#6b7280',
