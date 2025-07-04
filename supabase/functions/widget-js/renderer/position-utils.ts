@@ -34,23 +34,23 @@ export function getTooltipPositionStyle(config: TemplateConfig): string {
 export function getModalPositionStyle(position: string): string {
   switch (position) {
     case 'left':
-      return 'align-items: end; justify-content: flex-start;'
+      return 'align-items: flex-end; justify-content: flex-start;'
     case 'center':
-      return 'align-items: end; justify-content: center;'
+      return 'align-items: flex-end; justify-content: center;'
     case 'right':
     default:
-      return 'align-items: end; justify-content: flex-end;'
+      return 'align-items: flex-end; justify-content: flex-end;'
   }
 }
 
 export function getModalContentPositionStyle(position: string): string {
   switch (position) {
     case 'left':
-      return 'bottom: 20px; left: 14px;'
+      return 'bottom: 20px; left: 20px; position: absolute;'
     case 'center':
-      return 'bottom: 20px; left: 50%; transform: translateX(-50%);'
+      return 'bottom: 20px; position: relative; margin: 0 auto;'
     case 'right':
     default:
-      return 'bottom: 20px; right: 14px;'
+      return 'bottom: 20px; right: 20px; position: absolute;'
   }
 }
