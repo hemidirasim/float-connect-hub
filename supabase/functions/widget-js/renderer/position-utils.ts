@@ -30,3 +30,27 @@ export function getTooltipPositionStyle(config: TemplateConfig): string {
       return `bottom: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%); margin-bottom: 0;`
   }
 }
+
+export function getModalPositionStyle(position: string): string {
+  switch (position) {
+    case 'left':
+      return 'align-items: end; justify-content: flex-start;'
+    case 'center':
+      return 'align-items: end; justify-content: center;'
+    case 'right':
+    default:
+      return 'align-items: end; justify-content: flex-end;'
+  }
+}
+
+export function getModalContentPositionStyle(position: string): string {
+  switch (position) {
+    case 'left':
+      return 'bottom: 20px; left: 14px;'
+    case 'center':
+      return 'bottom: 20px; left: 50%; transform: translateX(-50%);'
+    case 'right':
+    default:
+      return 'bottom: 20px; right: 14px;'
+  }
+}

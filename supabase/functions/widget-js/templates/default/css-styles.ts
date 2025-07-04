@@ -1,3 +1,4 @@
+
 export const defaultCssStyles = `
   #lovable-widget-button {
     border-radius: 50%;
@@ -42,8 +43,7 @@ export const defaultCssStyles = `
     background: rgba(0, 0, 0, 0.7);
     z-index: 100000;
     display: flex;
-    align-items: end;
-    justify-content: flex-end;
+    {{MODAL_ALIGNMENT}}
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     transition: opacity 0.3s ease, visibility 0.3s ease;
   }
@@ -55,8 +55,7 @@ export const defaultCssStyles = `
     max-width: 400px;
     width: 90%;
     max-height: 80vh;
-    bottom: 20px;
-    right: 14px;
+    {{MODAL_CONTENT_POSITION}}
     overflow-y: auto;
     position: relative;
     transition: transform 0.3s ease;

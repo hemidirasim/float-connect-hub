@@ -1,7 +1,7 @@
 
 import type { WidgetTemplate } from './template-types.ts'
 import type { TemplateConfig } from './renderer/types.ts'
-import { getPositionStyle, getTooltipPositionStyle } from './renderer/position-utils.ts'
+import { getPositionStyle, getTooltipPositionStyle, getModalPositionStyle, getModalContentPositionStyle } from './renderer/position-utils.ts'
 import { generateVideoContent, generateButtonIcon } from './renderer/content-generators.ts'
 
 export type { TemplateConfig }
@@ -73,6 +73,8 @@ export class WidgetTemplateRenderer {
     const replacements = {
       '{{POSITION_STYLE}}': getPositionStyle(this.config.position),
       '{{TOOLTIP_POSITION_STYLE}}': getTooltipPositionStyle(this.config),
+      '{{MODAL_ALIGNMENT}}': getModalPositionStyle(this.config.position),
+      '{{MODAL_CONTENT_POSITION}}': getModalContentPositionStyle(this.config.position),
       '{{BUTTON_COLOR}}': this.config.buttonColor,
       '{{BUTTON_SIZE}}': buttonSize.toString(),
       '{{TOOLTIP_TEXT}}': this.config.tooltip || '',
