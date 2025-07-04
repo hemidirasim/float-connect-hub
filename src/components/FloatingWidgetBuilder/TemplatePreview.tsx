@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { Channel, FormData } from './types';
 
@@ -75,9 +76,13 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       videoUrl: formData.videoUrl || editingWidget?.video_url,
       videoHeight: formData.videoHeight,
       videoAlignment: formData.videoAlignment,
+      videoObjectFit: formData.videoObjectFit,
       useVideoPreview: formData.useVideoPreview,
       buttonSize: formData.buttonSize,
-      previewVideoHeight: formData.previewVideoHeight
+      previewVideoHeight: formData.previewVideoHeight,
+      templateId: templateId,
+      widgetWidth: formData.widgetWidth,
+      widgetHeight: formData.widgetHeight
     };
 
     // Use SAME renderer as edge function
@@ -142,9 +147,12 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     formData.videoUrl,
     formData.videoHeight,
     formData.videoAlignment,
+    formData.videoObjectFit,
     formData.useVideoPreview,
     formData.buttonSize,
     formData.previewVideoHeight,
+    formData.widgetWidth,
+    formData.widgetHeight,
     channels,
     editingWidget?.video_url,
     getTemplate

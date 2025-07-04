@@ -6,6 +6,14 @@ export interface Channel {
   label: string;
   color?: string;
   icon?: string;
+  customIcon?: string; // For custom uploaded icons
+  // New grouping properties
+  isGroup?: boolean;
+  groupItems?: Channel[];
+  displayMode?: 'individual' | 'grouped';
+  // New child channels for same type grouping
+  childChannels?: Channel[];
+  parentId?: string; // Reference to parent channel
 }
 
 export interface FormData {
