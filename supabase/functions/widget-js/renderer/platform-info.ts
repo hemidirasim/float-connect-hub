@@ -11,7 +11,6 @@ export const platformConfig: Record<string, PlatformInfo> = {
   instagram: { icon: 'fab fa-instagram', color: '#e4405f', name: 'Instagram' },
   messenger: { icon: 'fab fa-facebook-messenger', color: '#006aff', name: 'Messenger' },
   viber: { icon: 'fab fa-viber', color: '#665cac', name: 'Viber' },
-  skype: { icon: 'fab fa-skype', color: '#00aff0', name: 'Skype' },
   discord: { icon: 'fab fa-discord', color: '#7289da', name: 'Discord' },
   tiktok: { icon: 'fab fa-tiktok', color: '#000000', name: 'TikTok' },
   youtube: { icon: 'fab fa-youtube', color: '#ff0000', name: 'YouTube' },
@@ -20,7 +19,6 @@ export const platformConfig: Record<string, PlatformInfo> = {
   linkedin: { icon: 'fab fa-linkedin', color: '#0077b5', name: 'LinkedIn' },
   github: { icon: 'fab fa-github', color: '#333333', name: 'GitHub' },
   website: { icon: 'fas fa-globe', color: '#6b7280', name: 'Website' },
-  chatbot: { icon: 'fas fa-robot', color: '#3b82f6', name: 'Chatbot' },
   email: { icon: 'fas fa-envelope', color: '#ea4335', name: 'Email' },
   phone: { icon: 'fas fa-phone', color: '#34d399', name: 'Telefon' },
   custom: { icon: 'fas fa-link', color: '#6b7280', name: 'Custom' }

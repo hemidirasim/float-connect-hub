@@ -14,10 +14,8 @@ export function getChannelColor(channelType: string): string {
     tiktok: '#ff0050',
     messenger: '#0084ff',
     viber: '#665cac',
-    skype: '#00aff0',
     discord: '#5865f2',
-    website: '#6b7280',
-    chatbot: '#8b5cf6'
+    website: '#6b7280'
   };
   return colors[channelType as keyof typeof colors] || '#6B7280'
 }
@@ -57,10 +55,8 @@ export function getChannelIcon(channelType: string, customIcon?: string, isMinim
     tiktok: '🎵',
     messenger: '💬',
     viber: '📞',
-    skype: '📹',
     discord: '🎮',
-    website: '🌐',
-    chatbot: '🤖'
+    website: '🌐'
   };
   return icons[channelType as keyof typeof icons] || '💬'
 }
@@ -93,14 +89,10 @@ export function getChannelUrl(channel: any): string {
       return channel.value.startsWith('http') ? channel.value : `https://m.me/${channel.value}`
     case 'viber':
       return `viber://chat?number=${channel.value.replace(/[^0-9]/g, '')}`
-    case 'skype':
-      return `skype:${channel.value}?chat`
     case 'discord':
       return channel.value
     case 'website':
       return channel.value.startsWith('http') ? channel.value : `https://${channel.value}`
-    case 'chatbot':
-      return channel.value
     default:
       return channel.value
   }
