@@ -39,10 +39,10 @@ const defaultJavaScriptLogic = `
       behance: '<img src="/social-icons/014-behance.png" alt="Behance" className="w-8 h-8" />',
       figma: '<img src="/social-icons/016-figma.png" alt="Figma" className="w-8 h-8" />',
       upwork: '<img src="/social-icons/015-upwork.png" alt="Upwork" className="w-8 h-8" />',
-      website: '🌐',
+      website: '<img src="/social-icons/internet.png" alt="Website" className="w-8 h-8" />',
       email: '<img src="/social-icons/019-mail.png" alt="Email" className="w-8 h-8" />',
       phone: '📞',
-      custom: '🔗'
+      custom: '<img src="/social-icons/link.png" alt="Link" className="w-8 h-8" />'
     };
     return icons[channel.type] || '🔗';
   }
