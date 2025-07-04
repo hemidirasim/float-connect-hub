@@ -37,6 +37,7 @@ const defaultJavaScriptLogic = `
       linkedin: '<img src="/social-icons/005-linkedin.png" alt="Linkedin" className="w-8 h-8" />',
       github: '<img src="/social-icons/012-github.png" alt="Github" className="w-8 h-8" />',
       behance: '<img src="/social-icons/014-behance.png" alt="Behance" className="w-8 h-8" />',
+      dribble: '<img src="/social-icons/013-dribble.png" alt="Dribble" className="w-8 h-8" />',
       figma: '<img src="/social-icons/016-figma.png" alt="Figma" className="w-8 h-8" />',
       upwork: '<img src="/social-icons/015-upwork.png" alt="Upwork" className="w-8 h-8" />',
       website: '<img src="/social-icons/internet.png" alt="Website" className="w-8 h-8" />',
