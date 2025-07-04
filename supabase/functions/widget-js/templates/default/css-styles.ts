@@ -54,7 +54,7 @@ export const defaultCssStyles = `
     background: white;
     padding: 24px;
     border-radius: 16px;
-    max-width: 400px;
+    max-width: 2500px;
     width: 90%;
     max-height: 80vh;
     {{MODAL_CONTENT_POSITION}}
