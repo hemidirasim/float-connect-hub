@@ -36,7 +36,7 @@ export const VideoSettings: React.FC<VideoSettingsProps> = ({
         />
       </div>
 
-      {/* Video Alignment */}
+      {/* Video Alignment - Vertical (Top, Center, Bottom) */}
       <div className="space-y-2">
         <Label>Video Alignment</Label>
         <Select value={videoAlignment} onValueChange={onVideoAlignmentChange}>
@@ -44,9 +44,9 @@ export const VideoSettings: React.FC<VideoSettingsProps> = ({
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-white">
-            <SelectItem value="left">Left</SelectItem>
-            <SelectItem value="center">Center</SelectItem>
-            <SelectItem value="right">Right</SelectItem>
+            <SelectItem value="top">Yuxarı (Top)</SelectItem>
+            <SelectItem value="center">Orta (Center)</SelectItem>
+            <SelectItem value="bottom">Aşağı (Bottom)</SelectItem>
           </SelectContent>
         </Select>
       </div>

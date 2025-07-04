@@ -33,6 +33,21 @@ export function generateVideoContent(config: TemplateConfig): string {
   // Process video URL to ensure it works properly
   let processedVideoUrl = config.videoUrl.trim()
   
+  // Determine vertical alignment styles
+  let alignmentStyle = '';
+  switch (config.videoAlignment) {
+    case 'top':
+      alignmentStyle = 'align-items: flex-start;';
+      break;
+    case 'bottom':
+      alignmentStyle = 'align-items: flex-end;';
+      break;
+    case 'center':
+    default:
+      alignmentStyle = 'align-items: center;';
+      break;
+  }
+  
   // Handle different video types
   if (processedVideoUrl.includes('youtube.com') || processedVideoUrl.includes('youtu.be')) {
     // Convert YouTube URL to embed format
@@ -44,11 +59,10 @@ export function generateVideoContent(config: TemplateConfig): string {
     }
     
     if (videoId) {
-      // Use iframe for YouTube videos - remove autoplay, will be triggered by JS
+      // Use iframe for YouTube videos with vertical alignment
       const videoHeight = config.videoHeight || 200
-      const videoAlignment = config.videoAlignment || 'center'
       
-      const youtubeHtml = `<div class="hiclient-video-container" style="text-align: ${videoAlignment}; margin-bottom: 20px;">
+      const youtubeHtml = `<div class="hiclient-video-container" style="display: flex; ${alignmentStyle} justify-content: center; margin-bottom: 20px;">
          <iframe class="hiclient-video-player" 
                 src="https://www.youtube.com/embed/${videoId}?loop=1&playlist=${videoId}&enablejsapi=1" 
                 style="height: ${videoHeight}px; width: 100%; border-radius: 12px; border: none; object-fit: ${config.videoObjectFit || 'cover'};" 
@@ -57,19 +71,18 @@ export function generateVideoContent(config: TemplateConfig): string {
          </iframe>
        </div>`
       
-      console.log('Generated YouTube iframe video content')
+      console.log('Generated YouTube iframe video content with vertical alignment')
       return youtubeHtml
     }
   }
   
-  // For direct video files (mp4, webm, etc.) - remove autoplay, will be triggered by JS
+  // For direct video files (mp4, webm, etc.) with vertical alignment
   const videoHeight = config.videoHeight || 200
-  const videoAlignment = config.videoAlignment || 'center'
   const videoObjectFit = config.videoObjectFit || 'cover'
   
-  console.log('Generated video content with processed URL and object-fit:', processedVideoUrl, videoObjectFit)
+  console.log('Generated video content with vertical alignment and object-fit:', processedVideoUrl, videoObjectFit)
   
-  const videoHtml = `<div class="hiclient-video-container" style="text-align: ${videoAlignment}; margin-bottom: 20px;">
+  const videoHtml = `<div class="hiclient-video-container" style="display: flex; ${alignmentStyle} justify-content: center; margin-bottom: 20px;">
      <video class="hiclient-video-player" src="${processedVideoUrl}" 
             style="height: ${videoHeight}px; width: 100%; border-radius: 12px; object-fit: ${videoObjectFit};" 
             loop playsinline webkit-playsinline preload="metadata">
@@ -77,7 +90,7 @@ export function generateVideoContent(config: TemplateConfig): string {
      </video>
    </div>`
 
-  console.log('Final video HTML generated:', videoHtml)
+  console.log('Final video HTML generated with vertical alignment:', videoHtml)
   return videoHtml
 }
 
