@@ -180,7 +180,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
         return '@username';
       case 'facebook':
         return 'https://facebook.com/username';
-      case 'twitter':
+      case 'x':
         return '@username';
       case 'linkedin':
         return 'https://linkedin.com/in/username';
@@ -219,7 +219,7 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
         return '@username2';
       case 'facebook':
         return 'https://facebook.com/username2';
-      case 'twitter':
+      case 'x':
         return '@username2';
       case 'linkedin':
         return 'https://linkedin.com/in/username2';
