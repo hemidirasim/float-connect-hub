@@ -193,19 +193,19 @@ const defaultJavaScriptLogic = `
           
           if (video.src && video.src !== '') {
             video.currentTime = 0;
-            video.muted = false; // Ensure muted for autoplay
+            // Remove muted = false to enable sound
             
             var playPromise = video.play();
             if (playPromise !== undefined) {
               playPromise.then(function() {
-                console.log('Video', index, 'started playing successfully');
+                console.log('Video', index, 'started playing successfully with sound');
               }).catch(function(error) {
                 console.log('Video', index, 'autoplay failed:', error);
                 // Force play after small delay
                 setTimeout(function() {
                   try {
                     video.play().then(function() {
-                      console.log('Video', index, 'started on retry');
+                      console.log('Video', index, 'started on retry with sound');
                     }).catch(function(retryError) {
                       console.log('Video', index, 'retry failed:', retryError);
                     });
@@ -350,13 +350,13 @@ const defaultJavaScriptLogic = `
     
     console.log('Widget initialized successfully');
     
-    // Try to preload any videos immediately after init
+    // Preload videos on widget init with metadata only
     setTimeout(function() {
       var videos = document.querySelectorAll('.hiclient-video-player');
       if (videos.length > 0) {
-        console.log('Preloading', videos.length, 'videos');
+        console.log('Preloading', videos.length, 'videos metadata');
         videos.forEach(function(video) {
-          video.load(); // Preload the video
+          video.preload = 'metadata'; // Only preload metadata, not full video
         });
       }
     }, 100);
