@@ -1,3 +1,4 @@
+
 import type { TemplateConfig } from './types.ts'
 
 export function getPositionStyle(position: string): string {
@@ -43,21 +44,23 @@ export function getTooltipPositionStyle(config: TemplateConfig): string {
   return adjustedStyle
 }
 
-// Helper functions to calculate button offset - removed complex calculations
-function getButtonOffsetX(config: TemplateConfig): number {
-  // Remove button offset to prevent tooltip from going off-screen
-  return 0
-}
-
-function getButtonOffsetY(config: TemplateConfig): number {
-  // Remove button offset to prevent tooltip from going off-screen
-  return 0
-}
-
-// Function to adjust button position - now returns empty to keep button static
+// Button-u tooltip pozisiyasına əsasən hərəkət etdirəcəyəm
 export function getButtonOffsetStyle(config: TemplateConfig): string {
-  // Keep button in original position to prevent tooltip issues
-  return ''
+  const tooltipPosition = config.tooltipPosition || 'top'
+  const offsetAmount = 15 // Button-un hərəkət məsafəsi
+  
+  switch (tooltipPosition) {
+    case 'top':
+      return `transform: translateY(${offsetAmount}px);` // Aşağı hərəkət
+    case 'bottom':
+      return `transform: translateY(-${offsetAmount}px);` // Yuxarı hərəkət
+    case 'left':
+      return `transform: translateX(${offsetAmount}px);` // Sağa hərəkət
+    case 'right':
+      return `transform: translateX(-${offsetAmount}px);` // Sola hərəkət
+    default:
+      return `transform: translateY(${offsetAmount}px);`
+  }
 }
 
 export function getModalPositionStyle(position: string): string {
