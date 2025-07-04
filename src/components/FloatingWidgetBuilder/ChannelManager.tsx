@@ -172,8 +172,6 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
         return 'https://m.me/username';
       case 'viber':
         return '+994501234567';
-      case 'skype':
-        return 'username';
       case 'discord':
         return 'https://discord.gg/invite';
       case 'tiktok':
@@ -190,8 +188,6 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
         return 'https://github.com/username';
       case 'website':
         return 'https://example.com';
-      case 'chatbot':
-        return 'https://chat.example.com';
       case 'email':
         return 'contact@example.com';
       case 'phone':
@@ -215,8 +211,6 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
         return 'https://m.me/username2';
       case 'viber':
         return '+994501234568';
-      case 'skype':
-        return 'username2';
       case 'discord':
         return 'https://discord.gg/invite2';
       case 'tiktok':
@@ -233,8 +227,6 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
         return 'https://github.com/username2';
       case 'website':
         return 'https://example2.com';
-      case 'chatbot':
-        return 'https://chat2.example.com';
       case 'email':
         return 'contact2@example.com';
       case 'phone':
