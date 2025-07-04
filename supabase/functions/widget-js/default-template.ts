@@ -50,25 +50,10 @@ const defaultJavaScriptLogic = `
 
   function getChannelColor(type) {
     var colors = {
-      whatsapp: '#25d366',
-      telegram: '#0088cc',
-      instagram: '#e4405f',
-      messenger: '#006aff',
-      viber: '#665cac',
-      discord: '#7289da',
-      tiktok: '#000000',
-      youtube: '#ff0000',
-      facebook: '#1877f2',
-      twitter: '#1da1f2',
-      linkedin: '#0077b5',
-      github: '#333333',
-      dribble: '#fffff',
-      website: '#6b7280',
-      email: '#ea4335',
-      phone: '#34d399',
-      custom: '#6b7280'
+      phone: '#ffffff',
+      custom: '#ffffff'
     };
-    return colors[type] || '#6b7280';
+    return colors[type] || '#ffffff';
   }
   
   console.log('Widget loading with channels:', {{CHANNELS_DATA}});
