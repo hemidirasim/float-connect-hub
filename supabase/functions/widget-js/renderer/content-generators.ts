@@ -43,13 +43,13 @@ export function generateVideoContent(config: TemplateConfig): string {
     }
     
     if (videoId) {
-      // Use iframe for YouTube videos - remove mute parameter for sound
+      // Use iframe for YouTube videos - remove autoplay, will be triggered by JS
       const videoHeight = config.videoHeight || 200
       const videoAlignment = config.videoAlignment || 'center'
       
       const youtubeHtml = `<div class="hiclient-video-container" style="text-align: ${videoAlignment}; margin-bottom: 20px;">
          <iframe class="hiclient-video-player" 
-                src="https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}" 
+                src="https://www.youtube.com/embed/${videoId}?loop=1&playlist=${videoId}&enablejsapi=1" 
                 style="height: ${videoHeight}px; width: 100%; border-radius: 12px; border: none;" 
                 allow="autoplay; encrypted-media" 
                 allowfullscreen>
@@ -61,7 +61,7 @@ export function generateVideoContent(config: TemplateConfig): string {
     }
   }
   
-  // For direct video files (mp4, webm, etc.) - remove muted and controls attributes
+  // For direct video files (mp4, webm, etc.) - remove autoplay, will be triggered by JS
   const videoHeight = config.videoHeight || 200
   const videoAlignment = config.videoAlignment || 'center'
   
@@ -70,7 +70,7 @@ export function generateVideoContent(config: TemplateConfig): string {
   const videoHtml = `<div class="hiclient-video-container" style="text-align: ${videoAlignment}; margin-bottom: 20px;">
      <video class="hiclient-video-player" src="${processedVideoUrl}" 
             style="height: ${videoHeight}px; width: 100%; border-radius: 12px;" 
-            autoplay loop playsinline webkit-playsinline preload="metadata">
+            loop playsinline webkit-playsinline preload="metadata">
        Your browser does not support the video tag.
      </video>
    </div>`

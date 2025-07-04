@@ -191,32 +191,45 @@ const defaultJavaScriptLogic = `
         videos.forEach(function(video, index) {
           console.log('Processing video', index, 'with src:', video.src);
           
-          if (video.src && video.src !== '') {
-            video.currentTime = 0;
-            // Remove muted = false to enable sound
-            
-            var playPromise = video.play();
-            if (playPromise !== undefined) {
-              playPromise.then(function() {
-                console.log('Video', index, 'started playing successfully with sound');
-              }).catch(function(error) {
-                console.log('Video', index, 'autoplay failed:', error);
-                // Force play after small delay
-                setTimeout(function() {
-                  try {
-                    video.play().then(function() {
-                      console.log('Video', index, 'started on retry with sound');
-                    }).catch(function(retryError) {
-                      console.log('Video', index, 'retry failed:', retryError);
-                    });
-                  } catch (e) {
-                    console.log('Video', index, 'retry exception:', e);
-                  }
-                }, 500);
-              });
+          if (video.tagName === 'VIDEO') {
+            // Handle HTML5 video elements
+            if (video.src && video.src !== '') {
+              video.currentTime = 0;
+              // Enable sound for video playback
+              
+              var playPromise = video.play();
+              if (playPromise !== undefined) {
+                playPromise.then(function() {
+                  console.log('Video', index, 'started playing successfully with sound');
+                }).catch(function(error) {
+                  console.log('Video', index, 'autoplay failed:', error);
+                  // Force play after small delay
+                  setTimeout(function() {
+                    try {
+                      video.play().then(function() {
+                        console.log('Video', index, 'started on retry with sound');
+                      }).catch(function(retryError) {
+                        console.log('Video', index, 'retry failed:', retryError);
+                      });
+                    } catch (e) {
+                      console.log('Video', index, 'retry exception:', e);
+                    }
+                  }, 500);
+                });
+              }
+            } else {
+              console.log('Video', index, 'has no valid src');
             }
-          } else {
-            console.log('Video', index, 'has no valid src');
+          } else if (video.tagName === 'IFRAME') {
+            // Handle YouTube iframe videos
+            console.log('Processing YouTube iframe', index);
+            var currentSrc = video.src;
+            // Add autoplay parameter to YouTube iframe when modal opens
+            if (currentSrc && !currentSrc.includes('autoplay=1')) {
+              var separator = currentSrc.includes('?') ? '&' : '?';
+              video.src = currentSrc + separator + 'autoplay=1';
+              console.log('YouTube iframe', index, 'autoplay enabled');
+            }
           }
         });
       } else {
@@ -295,13 +308,20 @@ const defaultJavaScriptLogic = `
     });
     
     function closeModal() {
-      // Pause all videos when modal closes
+      // Pause all videos when modal closes and reset YouTube iframes
       try {
         var videos = document.querySelectorAll('.hiclient-video-player');
         videos.forEach(function(video) {
-          if (video && !video.paused) {
+          if (video.tagName === 'VIDEO' && !video.paused) {
             video.pause();
             console.log('Video paused');
+          } else if (video.tagName === 'IFRAME') {
+            // Remove autoplay from YouTube iframe when modal closes
+            var currentSrc = video.src;
+            if (currentSrc && currentSrc.includes('autoplay=1')) {
+              video.src = currentSrc.replace(/[?&]autoplay=1/, '').replace(/autoplay=1[&]?/, '');
+              console.log('YouTube iframe autoplay disabled');
+            }
           }
         });
       } catch (error) {
@@ -350,13 +370,15 @@ const defaultJavaScriptLogic = `
     
     console.log('Widget initialized successfully');
     
-    // Preload videos on widget init with metadata only
+    // Only preload video metadata on widget init, do NOT start playing
     setTimeout(function() {
       var videos = document.querySelectorAll('.hiclient-video-player');
       if (videos.length > 0) {
         console.log('Preloading', videos.length, 'videos metadata');
         videos.forEach(function(video) {
-          video.preload = 'metadata'; // Only preload metadata, not full video
+          if (video.tagName === 'VIDEO') {
+            video.preload = 'metadata'; // Only preload metadata, not full video
+          }
         });
       }
     }, 100);
