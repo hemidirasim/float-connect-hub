@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Channel, FormData } from "./types";
@@ -81,10 +82,13 @@ export const useWidgetActions = (
         video_url: formData.videoUrl || null,
         video_height: formData.videoHeight,
         video_alignment: formData.videoAlignment,
+        video_object_fit: formData.videoObjectFit,
         custom_icon_url: formData.customIcon === 'custom' ? formData.customIconUrl : null,
         button_size: formData.buttonSize,
         preview_video_height: formData.previewVideoHeight,
         template_id: formData.templateId || 'default',
+        widget_width: formData.widgetWidth,
+        widget_height: formData.widgetHeight,
         channels: channels, // Save channels with both label and value
         user_id: user?.id
       };

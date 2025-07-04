@@ -17,7 +17,8 @@ export function generateVideoContent(config: TemplateConfig): string {
     videoEnabled: config.videoEnabled,
     videoUrl: config.videoUrl,
     videoHeight: config.videoHeight,
-    videoAlignment: config.videoAlignment
+    videoAlignment: config.videoAlignment,
+    videoObjectFit: config.videoObjectFit
   })
 
   // Check if video is enabled AND has a URL
@@ -50,7 +51,7 @@ export function generateVideoContent(config: TemplateConfig): string {
       const youtubeHtml = `<div class="hiclient-video-container" style="text-align: ${videoAlignment}; margin-bottom: 20px;">
          <iframe class="hiclient-video-player" 
                 src="https://www.youtube.com/embed/${videoId}?loop=1&playlist=${videoId}&enablejsapi=1" 
-                style="height: ${videoHeight}px; width: 100%; border-radius: 12px; border: none;" 
+                style="height: ${videoHeight}px; width: 100%; border-radius: 12px; border: none; object-fit: ${config.videoObjectFit || 'cover'};" 
                 allow="autoplay; encrypted-media" 
                 allowfullscreen>
          </iframe>
@@ -64,12 +65,13 @@ export function generateVideoContent(config: TemplateConfig): string {
   // For direct video files (mp4, webm, etc.) - remove autoplay, will be triggered by JS
   const videoHeight = config.videoHeight || 200
   const videoAlignment = config.videoAlignment || 'center'
+  const videoObjectFit = config.videoObjectFit || 'cover'
   
-  console.log('Generated video content with processed URL:', processedVideoUrl)
+  console.log('Generated video content with processed URL and object-fit:', processedVideoUrl, videoObjectFit)
   
   const videoHtml = `<div class="hiclient-video-container" style="text-align: ${videoAlignment}; margin-bottom: 20px;">
      <video class="hiclient-video-player" src="${processedVideoUrl}" 
-            style="height: ${videoHeight}px; width: 100%; border-radius: 12px;" 
+            style="height: ${videoHeight}px; width: 100%; border-radius: 12px; object-fit: ${videoObjectFit};" 
             loop playsinline webkit-playsinline preload="metadata">
        Your browser does not support the video tag.
      </video>

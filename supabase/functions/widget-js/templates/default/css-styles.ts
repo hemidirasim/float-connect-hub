@@ -54,14 +54,17 @@ export const defaultCssStyles = `
     background: white;
     padding: 24px;
     border-radius: 16px;
-    max-width: 2500px;
-    width: 90%;
-    max-height: 80vh;
+    width: {{WIDGET_WIDTH}}px;
+    height: {{WIDGET_HEIGHT}}px;
     {{MODAL_CONTENT_POSITION}}
     overflow-y: auto;
     position: relative;
     transition: transform 0.3s ease;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .hiclient-video-player {
+    object-fit: {{VIDEO_OBJECT_FIT}};
   }
   
   #lovable-modal-header {
@@ -326,6 +329,13 @@ export const defaultCssStyles = `
 
   /* Mobile responsive */
   @media (max-width: 768px) {
+    #lovable-modal-content {
+      width: 95%;
+      height: 90%;
+      max-width: 450px;
+      max-height: 600px;
+    }
+    
     .dropdown {
       margin-top: 5px;
     }

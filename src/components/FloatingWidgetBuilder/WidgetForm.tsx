@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import { WebsiteInfoForm } from './WebsiteInfoForm';
 import { ChannelManager } from './ChannelManager';
 import { VideoUpload } from './VideoUpload';
 import { CustomizationOptions } from './CustomizationOptions';
+import { WidgetDimensions } from './WidgetDimensions';
 import { Channel, FormData } from './types';
 import { TemplatePreview } from './TemplatePreview';
 
@@ -85,6 +87,14 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Widget Dimensions */}
+          <WidgetDimensions
+            widgetWidth={formData.widgetWidth}
+            widgetHeight={formData.widgetHeight}
+            onWidgetWidthChange={(width) => onFormDataChange('widgetWidth', width)}
+            onWidgetHeightChange={(height) => onFormDataChange('widgetHeight', height)}
+          />
+
           {/* Video Upload & Icon Settings */}
           <VideoUpload
             video={formData.video}
@@ -92,6 +102,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             useVideoPreview={formData.useVideoPreview}
             videoHeight={formData.videoHeight}
             videoAlignment={formData.videoAlignment}
+            videoObjectFit={formData.videoObjectFit}
             customIcon={formData.customIcon}
             customIconUrl={formData.customIconUrl}
             buttonSize={formData.buttonSize}
@@ -102,6 +113,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             onVideoPreviewChange={(checked) => onFormDataChange('useVideoPreview', checked)}
             onVideoHeightChange={(height) => onFormDataChange('videoHeight', height)}
             onVideoAlignmentChange={(alignment) => onFormDataChange('videoAlignment', alignment)}
+            onVideoObjectFitChange={(objectFit) => onFormDataChange('videoObjectFit', objectFit)}
             onCustomIconChange={(icon) => onFormDataChange('customIcon', icon)}
             onCustomIconUpload={onCustomIconUpload}
             onButtonSizeChange={(size) => onFormDataChange('buttonSize', size)}

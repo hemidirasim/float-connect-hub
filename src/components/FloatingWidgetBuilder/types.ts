@@ -1,16 +1,11 @@
+
 export interface Channel {
   id: string;
   type: string;
   value: string;
   label: string;
-  customIcon?: string; // For custom uploaded icons
-  // New grouping properties
-  isGroup?: boolean;
-  groupItems?: Channel[];
-  displayMode?: 'individual' | 'grouped';
-  // New child channels for same type grouping
-  childChannels?: Channel[];
-  parentId?: string; // Reference to parent channel
+  color?: string;
+  icon?: string;
 }
 
 export interface FormData {
@@ -25,9 +20,12 @@ export interface FormData {
   useVideoPreview: boolean;
   videoHeight: number;
   videoAlignment: string;
+  videoObjectFit: string;
   customIcon: string;
   customIconUrl: string;
   buttonSize: number;
   previewVideoHeight: number;
   templateId: string;
+  widgetWidth: number;
+  widgetHeight: number;
 }

@@ -9,6 +9,9 @@ export function createWidgetConfig(widget: any): TemplateConfig {
     name: widget.name,
     greeting_message: widget.greeting_message,
     tooltip_position: widget.tooltip_position,
+    video_object_fit: widget.video_object_fit,
+    widget_width: widget.widget_width,
+    widget_height: widget.widget_height,
     raw_template_fields: {
       template_id: widget.template_id,
       templateId: widget.templateId
@@ -34,6 +37,7 @@ export function createWidgetConfig(widget: any): TemplateConfig {
     hasVideoUrl,
     video_url: widget.video_url,
     video_enabled: widget.video_enabled,
+    video_object_fit: widget.video_object_fit,
     finalVideoEnabled: videoEnabled
   })
 
@@ -50,18 +54,24 @@ export function createWidgetConfig(widget: any): TemplateConfig {
     videoUrl: widget.video_url || null,
     videoHeight: widget.video_height || 200,
     videoAlignment: widget.video_alignment || 'center',
+    videoObjectFit: widget.video_object_fit || 'cover',
     useVideoPreview: widget.use_video_preview || false,
     buttonSize: widget.button_size || 60,
     previewVideoHeight: widget.preview_video_height || 120,
-    templateId: templateId
+    templateId: templateId,
+    widgetWidth: widget.widget_width || 400,
+    widgetHeight: widget.widget_height || 600
   }
 
-  console.log('Widget config created with final templateId and greeting message:', {
+  console.log('Widget config created with final templateId and new fields:', {
     templateId: config.templateId,
     greetingMessage: config.greetingMessage,
     tooltipPosition: config.tooltipPosition,
     videoEnabled: config.videoEnabled,
-    videoUrl: config.videoUrl
+    videoUrl: config.videoUrl,
+    videoObjectFit: config.videoObjectFit,
+    widgetWidth: config.widgetWidth,
+    widgetHeight: config.widgetHeight
   })
 
   return config

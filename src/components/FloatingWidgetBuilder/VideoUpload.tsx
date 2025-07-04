@@ -3,11 +3,11 @@ import React, { useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Upload, Trash2, MessageCircle, Info, Play, X } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { VideoSettings } from './VideoSettings';
 
 interface VideoUploadProps {
   video: File | null;
@@ -15,6 +15,7 @@ interface VideoUploadProps {
   useVideoPreview: boolean;
   videoHeight: number;
   videoAlignment: string;
+  videoObjectFit: string;
   customIcon: string | null;
   customIconUrl: string;
   buttonSize: number;
@@ -25,6 +26,7 @@ interface VideoUploadProps {
   onVideoPreviewChange: (checked: boolean) => void;
   onVideoHeightChange: (height: number) => void;
   onVideoAlignmentChange: (alignment: string) => void;
+  onVideoObjectFitChange: (objectFit: string) => void;
   onCustomIconChange: (icon: string) => void;
   onCustomIconUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onButtonSizeChange: (size: number) => void;
@@ -36,6 +38,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
   videoUrl,
   videoHeight,
   videoAlignment,
+  videoObjectFit,
   customIcon,
   customIconUrl,
   buttonSize,
@@ -44,6 +47,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
   onVideoRemove,
   onVideoHeightChange,
   onVideoAlignmentChange,
+  onVideoObjectFitChange,
   onCustomIconChange,
   onCustomIconUpload,
   onButtonSizeChange
@@ -234,34 +238,14 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
             </div>
 
             {hasVideo && (
-              <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
-                {/* Video Height */}
-                <div className="space-y-2">
-                  <Label>Video Height: {videoHeight}px</Label>
-                  <Input
-                    type="range"
-                    min="150"
-                    max="400"
-                    value={videoHeight}
-                    onChange={(e) => onVideoHeightChange(Number(e.target.value))}
-                  />
-                </div>
-
-                {/* Video Alignment */}
-                <div className="space-y-2">
-                  <Label>Video Alignment</Label>
-                  <Select value={videoAlignment} onValueChange={onVideoAlignmentChange}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white">
-                      <SelectItem value="left">Left</SelectItem>
-                      <SelectItem value="center">Center</SelectItem>
-                      <SelectItem value="right">Right</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              <VideoSettings
+                videoHeight={videoHeight}
+                videoAlignment={videoAlignment}
+                videoObjectFit={videoObjectFit}
+                onVideoHeightChange={onVideoHeightChange}
+                onVideoAlignmentChange={onVideoAlignmentChange}
+                onVideoObjectFitChange={onVideoObjectFitChange}
+              />
             )}
           </div>
         </CardContent>

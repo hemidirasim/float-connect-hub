@@ -26,11 +26,14 @@ export const useWidgetState = (user: any) => {
     useVideoPreview: false,
     videoHeight: 200,
     videoAlignment: 'center',
+    videoObjectFit: 'cover',
     customIcon: 'message',
     customIconUrl: '',
     buttonSize: 60,
     previewVideoHeight: 120,
-    templateId: 'default'
+    templateId: 'default',
+    widgetWidth: 400,
+    widgetHeight: 600
   });
 
   // Check for editing widget on load
@@ -70,11 +73,14 @@ export const useWidgetState = (user: any) => {
           useVideoPreview: data.video_enabled || false,
           videoHeight: data.video_height || 200,
           videoAlignment: data.video_alignment || 'center',
+          videoObjectFit: data.video_object_fit || 'cover',
           customIcon: data.custom_icon_url ? 'custom' : 'message',
           customIconUrl: data.custom_icon_url || '',
           buttonSize: data.button_size || 60,
           previewVideoHeight: data.preview_video_height || 120,
-          templateId: data.template_id || 'default'
+          templateId: data.template_id || 'default',
+          widgetWidth: data.widget_width || 400,
+          widgetHeight: data.widget_height || 600
         });
 
         // Scroll to widget form
@@ -108,11 +114,14 @@ export const useWidgetState = (user: any) => {
       useVideoPreview: false,
       videoHeight: 200,
       videoAlignment: 'center',
+      videoObjectFit: 'cover',
       customIcon: 'message',
       customIconUrl: '',
       buttonSize: 60,
       previewVideoHeight: 120,
-      templateId: 'default'
+      templateId: 'default',
+      widgetWidth: 400,
+      widgetHeight: 600
     });
   };
 

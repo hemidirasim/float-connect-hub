@@ -453,8 +453,11 @@ export type Database = {
           video_alignment: string | null
           video_enabled: boolean | null
           video_height: number | null
+          video_object_fit: string | null
           video_url: string | null
           website_url: string
+          widget_height: number | null
+          widget_width: number | null
         }
         Insert: {
           button_color?: string
@@ -481,8 +484,11 @@ export type Database = {
           video_alignment?: string | null
           video_enabled?: boolean | null
           video_height?: number | null
+          video_object_fit?: string | null
           video_url?: string | null
           website_url: string
+          widget_height?: number | null
+          widget_width?: number | null
         }
         Update: {
           button_color?: string
@@ -509,8 +515,11 @@ export type Database = {
           video_alignment?: string | null
           video_enabled?: boolean | null
           video_height?: number | null
+          video_object_fit?: string | null
           video_url?: string | null
           website_url?: string
+          widget_height?: number | null
+          widget_width?: number | null
         }
         Relationships: []
       }
