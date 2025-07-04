@@ -24,9 +24,9 @@ const defaultJavaScriptLogic = `
 
   function getChannelIcon(channel) {
     var icons = {
-      whatsapp: '<img src="/social-icons/facebook.png" alt="Facebook" className="w-8 h-8" />',
-      telegram: '✈️',
-      instagram: '📷',
+      whatsapp: '<img src="/social-icons/007-social.png" alt="Whatsapp" className="w-8 h-8" />',
+      telegram: '<img src="/social-icons/006-telegram.png" alt="Telegram" className="w-8 h-8" />',
+      instagram: '<img src="/social-icons/002-instagram.png" alt="Instagram" className="w-8 h-8" />',
       messenger: '💬',
       viber: '📞',
       skype: '💻',
