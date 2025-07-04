@@ -15,7 +15,7 @@ export const platformOptions = [
   { value: 'linkedin', label: 'LinkedIn', icon: Linkedin, color: '#0077b5' },
   { value: 'github', label: 'GitHub', icon: Github, color: '#333333' },
   { value: 'behance', label: 'Behance', icon: Palette, color: '#1769ff' },
-  { value: 'dribbble', label: 'Dribbble', icon: Camera, color: '#ea4c89' },
+  { value: 'dribble', label: 'Dribble', icon: Camera, color: '#ea4c89' },
   { value: 'pinterest', label: 'Pinterest', icon: Camera, color: '#bd081c' },
   { value: 'figma', label: 'Figma', icon: Code, color: '#f24e1e' },
   { value: 'upwork', label: 'Upwork', icon: Briefcase, color: '#6fda44' },
