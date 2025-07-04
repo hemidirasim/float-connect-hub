@@ -15,12 +15,12 @@ export const platformConfig: Record<string, PlatformInfo> = {
   tiktok: { icon: 'fab fa-tiktok', color: '#000000', name: 'TikTok' },
   youtube: { icon: 'fab fa-youtube', color: '#ff0000', name: 'YouTube' },
   facebook: { icon: 'fab fa-facebook', color: '#1877f2', name: 'Facebook' },
-  twitter: { icon: 'fab fa-twitter', color: '#1da1f2', name: 'Twitter' },
+  x: { icon: 'fab fa-x', color: '#1da1f2', name: 'x' },
   linkedin: { icon: 'fab fa-linkedin', color: '#0077b5', name: 'LinkedIn' },
   github: { icon: 'fab fa-github', color: '#333333', name: 'GitHub' },
   website: { icon: 'fas fa-globe', color: '#6b7280', name: 'Website' },
   email: { icon: 'fas fa-envelope', color: '#ea4335', name: 'Email' },
-  phone: { icon: 'fas fa-phone', color: '#34d399', name: 'Telefon' },
+  phone: { icon: 'fas fa-phone', color: '#34d399', name: 'Phone' },
   custom: { icon: 'fas fa-link', color: '#6b7280', name: 'Custom' }
 };
 
