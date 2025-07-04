@@ -25,7 +25,7 @@ export function getChannelUrl(channel: any): string {
       return channel.value.startsWith('http') ? channel.value : 'https://instagram.com/' + channel.value.replace('@', '');
     case 'facebook':
       return channel.value.startsWith('http') ? channel.value : 'https://facebook.com/' + channel.value;
-    case 'x':
+    case 'twitter':
       return channel.value.startsWith('http') ? channel.value : 'https://x.com/' + channel.value.replace('@', '');
     case 'linkedin':
       return channel.value.startsWith('http') ? channel.value : 'https://linkedin.com/in/' + channel.value;

@@ -1,5 +1,5 @@
 
-import { MessageCircle, Send, Instagram, Mail, Link, Video, Phone, MessageSquare, Music, Github, Linkedin, Youtube, x, Facebook, Globe, MessageCircleMore, Bot, Palette, Camera, Briefcase, Code, Zap, Users } from 'lucide-react';
+import { MessageCircle, Send, Instagram, Mail, Link, Video, Phone, MessageSquare, Music, Github, Linkedin, Youtube, Twitter, Facebook, Globe, MessageCircleMore, Bot, Palette, Camera, Briefcase, Code, Zap, Users } from 'lucide-react';
 
 export const platformOptions = [
   { value: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: '#25d366' },
@@ -11,7 +11,7 @@ export const platformOptions = [
   { value: 'tiktok', label: 'TikTok', icon: Music, color: '#ff0050' },
   { value: 'youtube', label: 'YouTube', icon: Youtube, color: '#ff0000' },
   { value: 'facebook', label: 'Facebook', icon: Facebook, color: '#1877f2' },
-  { value: 'x', label: 'x', icon: x, color: '#1da1f2' },
+  { value: 'twitter', label: 'Twitter', icon: Twitter, color: '#1da1f2' },
   { value: 'linkedin', label: 'LinkedIn', icon: Linkedin, color: '#0077b5' },
   { value: 'github', label: 'GitHub', icon: Github, color: '#333333' },
   { value: 'behance', label: 'Behance', icon: Palette, color: '#1769ff' },
@@ -23,6 +23,6 @@ export const platformOptions = [
   { value: 'freelancer', label: 'Freelancer', icon: Users, color: '#0e4194' },
   { value: 'website', label: 'Website', icon: Globe, color: '#6b7280' },
   { value: 'email', label: 'Email', icon: Mail, color: '#ea4335' },
-  { value: 'phone', label: 'Phone', icon: Phone, color: '#22c55e' },
+  { value: 'phone', label: 'Telefon', icon: Phone, color: '#22c55e' },
   { value: 'custom', label: 'Custom Link', icon: Link, color: '#6b7280' }
 ];
