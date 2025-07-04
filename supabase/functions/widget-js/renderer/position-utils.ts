@@ -31,6 +31,40 @@ export function getTooltipPositionStyle(config: TemplateConfig): string {
   }
 }
 
+// New function to adjust button position when tooltip might go off-screen
+export function getButtonOffsetStyle(config: TemplateConfig): string {
+  const tooltipPosition = config.tooltipPosition || 'top'
+  const position = config.position
+  
+  // Calculate approximate tooltip width (rough estimate)
+  const tooltipText = config.tooltip || ''
+  const approximateTooltipWidth = Math.max(120, tooltipText.length * 8)
+  
+  let offsetX = 0
+  let offsetY = 0
+  
+  // Adjust for right tooltip on right-positioned button
+  if (tooltipPosition === 'right' && position === 'right') {
+    offsetX = -(approximateTooltipWidth / 2) // Push button left
+  }
+  
+  // Adjust for left tooltip on left-positioned button  
+  if (tooltipPosition === 'left' && position === 'left') {
+    offsetX = approximateTooltipWidth / 2 // Push button right
+  }
+  
+  // Adjust for bottom tooltip
+  if (tooltipPosition === 'bottom') {
+    offsetY = -40 // Push button up
+  }
+  
+  if (offsetX !== 0 || offsetY !== 0) {
+    return `transform: translate(${offsetX}px, ${offsetY}px);`
+  }
+  
+  return ''
+}
+
 export function getModalPositionStyle(position: string): string {
   switch (position) {
     case 'left':

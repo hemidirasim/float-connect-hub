@@ -1,4 +1,3 @@
-
 export const defaultCssStyles = `
   #lovable-widget-button {
     border-radius: 50%;
@@ -12,6 +11,7 @@ export const defaultCssStyles = `
     justify-content: center;
     transition: all 0.3s ease;
     color: white;
+    {{BUTTON_OFFSET_STYLE}}
   }
   
   #lovable-widget-button:hover {
