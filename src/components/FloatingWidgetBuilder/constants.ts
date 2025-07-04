@@ -23,6 +23,6 @@ export const platformOptions = [
   { value: 'freelancer', label: 'Freelancer', icon: Users, color: '#0e4194' },
   { value: 'website', label: 'Website', icon: Globe, color: '#6b7280' },
   { value: 'email', label: 'Email', icon: Mail, color: '#ea4335' },
-  { value: 'phone', label: 'Telefon', icon: Phone, color: '#22c55e' },
+  { value: 'phone', label: 'Phone', icon: Phone, color: '#22c55e' },
   { value: 'custom', label: 'Custom Link', icon: Link, color: '#6b7280' }
 ];
