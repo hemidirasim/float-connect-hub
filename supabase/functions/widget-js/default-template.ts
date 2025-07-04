@@ -62,6 +62,7 @@ const defaultJavaScriptLogic = `
       twitter: '#1da1f2',
       linkedin: '#0077b5',
       github: '#333333',
+      dribble: '#fffff',
       website: '#6b7280',
       email: '#ea4335',
       phone: '#34d399',
