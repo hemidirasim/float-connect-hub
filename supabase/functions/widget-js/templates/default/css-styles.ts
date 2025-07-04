@@ -42,8 +42,8 @@ export const defaultCssStyles = `
     background: rgba(0, 0, 0, 0.7);
     z-index: 100000;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: end;
+    justify-content: flex-end;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     transition: opacity 0.3s ease, visibility 0.3s ease;
   }
