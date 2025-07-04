@@ -30,8 +30,6 @@ export class ChannelUtils {
         return channel.value.startsWith('http') ? channel.value : 'https://m.me/' + channel.value;
       case 'viber':
         return 'viber://chat?number=' + channel.value.replace(/[^0-9]/g, '');
-      case 'skype':
-        return 'skype:' + channel.value + '?chat';
       case 'discord':
         return channel.value;
       case 'behance':
@@ -50,8 +48,6 @@ export class ChannelUtils {
         return channel.value.startsWith('http') ? channel.value : 'https://freelancer.com/u/' + channel.value;
       case 'website':
         return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
-      case 'chatbot':
-        return channel.value;
       case 'custom':
         return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
       default:
