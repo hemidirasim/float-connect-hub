@@ -24,6 +24,8 @@ export function getChannelUrl(channel: any): string {
       return channel.value.startsWith('http') ? channel.value : 'https://tiktok.com/@' + channel.value;
     case 'messenger':
       return channel.value.startsWith('http') ? channel.value : 'https://m.me/' + channel.value;
+    case 'dribble':
+      return channel.value.startsWith('http') ? channel.value : 'https://dribbble.com/' + channel.value;
     case 'viber':
       return 'viber://chat?number=' + channel.value.replace(/[^0-9]/g, '');
     case 'discord':
