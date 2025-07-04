@@ -26,7 +26,7 @@ export function getChannelUrl(channel: any): string {
     case 'facebook':
       return channel.value.startsWith('http') ? channel.value : 'https://facebook.com/' + channel.value;
     case 'twitter':
-      return channel.value.startsWith('http') ? channel.value : 'https://twitter.com/' + channel.value.replace('@', '');
+      return channel.value.startsWith('http') ? channel.value : 'https://x.com/' + channel.value.replace('@', '');
     case 'linkedin':
       return channel.value.startsWith('http') ? channel.value : 'https://linkedin.com/in/' + channel.value;
     case 'youtube':
@@ -39,14 +39,10 @@ export function getChannelUrl(channel: any): string {
       return channel.value.startsWith('http') ? channel.value : 'https://m.me/' + channel.value;
     case 'viber':
       return 'viber://chat?number=' + channel.value.replace(/[^0-9]/g, '');
-    case 'skype':
-      return 'skype:' + channel.value + '?chat';
     case 'discord':
       return channel.value;
     case 'website':
       return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
-    case 'chatbot':
-      return channel.value;
     case 'custom':
       return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
     default:
