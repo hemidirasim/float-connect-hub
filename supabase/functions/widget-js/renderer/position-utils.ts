@@ -16,19 +16,71 @@ export function getPositionStyle(position: string): string {
 export function getTooltipPositionStyle(config: TemplateConfig): string {
   const buttonSize = config.buttonSize || 60
   const tooltipOffset = 8
+  const tooltipPosition = config.tooltipPosition || 'top'
+  const position = config.position
   
-  switch (config.tooltipPosition || 'top') {
+  // Calculate button offset to adjust tooltip position accordingly
+  const tooltipText = config.tooltip || ''
+  const approximateTooltipWidth = Math.max(120, tooltipText.length * 8)
+  
+  let adjustedStyle = ''
+  
+  switch (tooltipPosition) {
     case 'top':
-      return `bottom: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%); margin-bottom: 0;`
+      adjustedStyle = `bottom: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%); margin-bottom: 0;`
+      
+      // Adjust for right tooltip on right-positioned button
+      if (position === 'right') {
+        const offsetX = -(approximateTooltipWidth / 2)
+        adjustedStyle = `bottom: ${buttonSize + tooltipOffset}px; left: calc(50% + ${offsetX}px); transform: translateX(-50%); margin-bottom: 0;`
+      }
+      
+      // Adjust for left tooltip on left-positioned button
+      if (position === 'left') {
+        const offsetX = approximateTooltipWidth / 2
+        adjustedStyle = `bottom: ${buttonSize + tooltipOffset}px; left: calc(50% + ${offsetX}px); transform: translateX(-50%); margin-bottom: 0;`
+      }
+      break
+      
     case 'bottom':
-      return `top: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%); margin-top: 0;`
+      adjustedStyle = `top: ${buttonSize + tooltipOffset - 40}px; left: 50%; transform: translateX(-50%); margin-top: 0;`
+      
+      // Adjust for right tooltip on right-positioned button
+      if (position === 'right') {
+        const offsetX = -(approximateTooltipWidth / 2)
+        adjustedStyle = `top: ${buttonSize + tooltipOffset - 40}px; left: calc(50% + ${offsetX}px); transform: translateX(-50%); margin-top: 0;`
+      }
+      
+      // Adjust for left tooltip on left-positioned button
+      if (position === 'left') {
+        const offsetX = approximateTooltipWidth / 2
+        adjustedStyle = `top: ${buttonSize + tooltipOffset - 40}px; left: calc(50% + ${offsetX}px); transform: translateX(-50%); margin-top: 0;`
+      }
+      break
+      
     case 'left':
-      return `right: ${buttonSize + tooltipOffset}px; top: 50%; transform: translateY(-50%);`
+      if (position === 'left') {
+        // When tooltip is on left and button is on left, move tooltip to right side of button
+        adjustedStyle = `left: ${buttonSize + tooltipOffset + approximateTooltipWidth / 2}px; top: 50%; transform: translateY(-50%);`
+      } else {
+        adjustedStyle = `right: ${buttonSize + tooltipOffset}px; top: 50%; transform: translateY(-50%);`
+      }
+      break
+      
     case 'right':
-      return `left: ${buttonSize + tooltipOffset}px; top: 50%; transform: translateY(-50%);`
+      if (position === 'right') {
+        // When tooltip is on right and button is on right, move tooltip to left side of button
+        adjustedStyle = `right: ${buttonSize + tooltipOffset + approximateTooltipWidth / 2}px; top: 50%; transform: translateY(-50%);`
+      } else {
+        adjustedStyle = `left: ${buttonSize + tooltipOffset}px; top: 50%; transform: translateY(-50%);`
+      }
+      break
+      
     default:
-      return `bottom: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%); margin-bottom: 0;`
+      adjustedStyle = `bottom: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%); margin-bottom: 0;`
   }
+  
+  return adjustedStyle
 }
 
 // New function to adjust button position when tooltip might go off-screen
