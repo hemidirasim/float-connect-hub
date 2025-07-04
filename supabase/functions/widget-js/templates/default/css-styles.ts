@@ -55,6 +55,8 @@ export const defaultCssStyles = `
     max-width: 400px;
     width: 90%;
     max-height: 80vh;
+    bottom: 20px;
+    right: 14px;
     overflow-y: auto;
     position: relative;
     transition: transform 0.3s ease;
