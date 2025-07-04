@@ -26,23 +26,24 @@ export function getTooltipPositionStyle(config: TemplateConfig): string {
   
   switch (tooltipPosition) {
     case 'top':
-      adjustedStyle = `bottom: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%);`
+      // Adjust tooltip position based on button offset
+      adjustedStyle = `bottom: ${buttonSize + tooltipOffset + Math.abs(buttonOffsetY)}px; left: calc(50% + ${buttonOffsetX}px); transform: translateX(-50%);`
       break
       
     case 'bottom':
-      adjustedStyle = `top: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%);`
+      adjustedStyle = `top: ${buttonSize + tooltipOffset + Math.abs(buttonOffsetY)}px; left: calc(50% + ${buttonOffsetX}px); transform: translateX(-50%);`
       break
       
     case 'left':
-      adjustedStyle = `right: ${buttonSize + tooltipOffset}px; top: 50%; transform: translateY(-50%);`
+      adjustedStyle = `right: ${buttonSize + tooltipOffset + Math.abs(buttonOffsetX)}px; top: calc(50% + ${buttonOffsetY}px); transform: translateY(-50%);`
       break
       
     case 'right':
-      adjustedStyle = `left: ${buttonSize + tooltipOffset}px; top: 50%; transform: translateY(-50%);`
+      adjustedStyle = `left: ${buttonSize + tooltipOffset + Math.abs(buttonOffsetX)}px; top: calc(50% + ${buttonOffsetY}px); transform: translateY(-50%);`
       break
       
     default:
-      adjustedStyle = `bottom: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%);`
+      adjustedStyle = `bottom: ${buttonSize + tooltipOffset + Math.abs(buttonOffsetY)}px; left: calc(50% + ${buttonOffsetX}px); transform: translateX(-50%);`
   }
   
   return adjustedStyle
