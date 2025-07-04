@@ -1,3 +1,4 @@
+
 export const defaultCssStyles = `
   #lovable-widget-button {
     border-radius: 50%;
@@ -17,6 +18,7 @@ export const defaultCssStyles = `
   #lovable-widget-button:hover {
     box-shadow: 0 12px 35px rgba(34, 197, 94, 0.5);
     background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    /* Remove transform on hover to prevent movement */
   }
   
   #lovable-widget-tooltip {
@@ -31,6 +33,7 @@ export const defaultCssStyles = `
     transition: all 0.2s ease;
     pointer-events: none;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    {{TOOLTIP_POSITION_STYLE}}
   }
   
   #lovable-widget-modal {

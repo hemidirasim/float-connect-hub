@@ -15,18 +15,22 @@ export function getPositionStyle(position: string): string {
 
 export function getTooltipPositionStyle(config: TemplateConfig): string {
   const buttonSize = config.buttonSize || 60
-  const tooltipOffset = 8
+  const tooltipOffset = 12
   const tooltipPosition = config.tooltipPosition || 'top'
+  
+  // Calculate button offset amounts
+  const buttonOffsetX = getButtonOffsetX(config)
+  const buttonOffsetY = getButtonOffsetY(config)
   
   let adjustedStyle = ''
   
   switch (tooltipPosition) {
     case 'top':
-      adjustedStyle = `bottom: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%); margin-bottom: 0;`
+      adjustedStyle = `bottom: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%);`
       break
       
     case 'bottom':
-      adjustedStyle = `top: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%); margin-top: 0;`
+      adjustedStyle = `top: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%);`
       break
       
     case 'left':
@@ -38,44 +42,44 @@ export function getTooltipPositionStyle(config: TemplateConfig): string {
       break
       
     default:
-      adjustedStyle = `bottom: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%); margin-bottom: 0;`
+      adjustedStyle = `bottom: ${buttonSize + tooltipOffset}px; left: 50%; transform: translateX(-50%);`
   }
   
   return adjustedStyle
 }
 
-// Function to adjust button position to prevent tooltip from going off-screen
-export function getButtonOffsetStyle(config: TemplateConfig): string {
+// Helper functions to calculate button offset
+function getButtonOffsetX(config: TemplateConfig): number {
   const tooltipPosition = config.tooltipPosition || 'top'
   const position = config.position
-  
-  // Calculate approximate tooltip width
   const tooltipText = config.tooltip || ''
   const approximateTooltipWidth = Math.max(120, tooltipText.length * 8)
   
-  let offsetX = 0
-  let offsetY = 0
-  
-  // Adjust button position based on tooltip position and widget position
   if (tooltipPosition === 'right' && position === 'right') {
-    // Move button left to make space for right tooltip
-    offsetX = -(approximateTooltipWidth / 2 + 10)
+    return -(approximateTooltipWidth / 2 + 20)
   }
   
   if (tooltipPosition === 'left' && position === 'left') {
-    // Move button right to make space for left tooltip  
-    offsetX = approximateTooltipWidth / 2 + 10
+    return approximateTooltipWidth / 2 + 20
   }
+  
+  return 0
+}
+
+function getButtonOffsetY(config: TemplateConfig): number {
+  const tooltipPosition = config.tooltipPosition || 'top'
   
   if (tooltipPosition === 'bottom') {
-    // Move button up to make space for bottom tooltip
-    offsetY = -50
+    return -60
   }
   
-  if (tooltipPosition === 'top' && position === 'center') {
-    // For center position, no horizontal offset needed
-    offsetX = 0
-  }
+  return 0
+}
+
+// Function to adjust button position to prevent tooltip from going off-screen
+export function getButtonOffsetStyle(config: TemplateConfig): string {
+  const offsetX = getButtonOffsetX(config)
+  const offsetY = getButtonOffsetY(config)
   
   if (offsetX !== 0 || offsetY !== 0) {
     return `transform: translate(${offsetX}px, ${offsetY}px);`
