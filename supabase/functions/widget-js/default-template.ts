@@ -36,6 +36,7 @@ const defaultJavaScriptLogic = `
       twitter: '<img src="/social-icons/twitter.png" alt="X" className="w-8 h-8" />',
       linkedin: '<img src="/social-icons/005-linkedin.png" alt="Linkedin" className="w-8 h-8" />',
       github: '<img src="/social-icons/012-github.png" alt="Github" className="w-8 h-8" />',
+      github: '<img src="/social-icons/014-behance.png" alt="Behance" className="w-8 h-8" />',
       website: '🌐',
       email: '<img src="/social-icons/019-mail.png" alt="Email" className="w-8 h-8" />',
       phone: '📞',
