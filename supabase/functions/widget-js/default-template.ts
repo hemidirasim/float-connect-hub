@@ -193,7 +193,7 @@ const defaultJavaScriptLogic = `
           
           if (video.src && video.src !== '') {
             video.currentTime = 0;
-            video.muted = true; // Ensure muted for autoplay
+            video.muted = false; // Ensure muted for autoplay
             
             var playPromise = video.play();
             if (playPromise !== undefined) {
