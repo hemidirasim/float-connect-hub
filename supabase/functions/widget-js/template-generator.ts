@@ -123,11 +123,58 @@ export class WidgetTemplateRenderer {
     const escapedCss = escapeTemplateContent(css)
     const escapedJs = escapeTemplateContent(js)
 
+    // Video URL yükləmə funksiyası
+    const videoUrlLoaderScript = `
+    // Təhlükəsiz video URL yükləmə funksiyası
+    async function loadSecureVideoUrl(videoElement) {
+      const videoUrl = videoElement.getAttribute('data-video-url');
+      if (!videoUrl) return;
+      
+      try {
+        // Əgər Supabase Storage URL-dirsə, signed URL al
+        if (videoUrl.includes('supabase') && videoUrl.includes('/storage/')) {
+          const urlParts = videoUrl.split('/storage/v1/object/public/videos/');
+          if (urlParts.length > 1) {
+            const videoPath = urlParts[1];
+            
+            const response = await fetch('${Deno.env.get('SUPABASE_URL')}/functions/v1/get-video-url', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ videoPath })
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              videoElement.src = data.signedUrl;
+              return;
+            }
+          }
+        }
+        
+        // Fallback - orijinal URL-i istifadə et
+        videoElement.src = videoUrl;
+      } catch (error) {
+        console.error('Video URL yükləmə xətası:', error);
+        videoElement.src = videoUrl; // Fallback
+      }
+    }
+    
+    // Bütün video elementləri üçün URL-ləri yüklə
+    function initializeVideoElements() {
+      const videoElements = document.querySelectorAll('video[data-video-url]');
+      videoElements.forEach(loadSecureVideoUrl);
+    }
+    `
+
     // Add global function for channel clicks
     const globalScript = `
     window.openChannel = function(url) {
       window.open(url, '_blank');
     };
+    
+    ${videoUrlLoaderScript}
     `
 
     // Generate complete script using properly escaped content
@@ -148,6 +195,9 @@ export class WidgetTemplateRenderer {
 
   // Execute JavaScript
   ${escapedJs}
+
+  // Video elementlərini işə sal
+  setTimeout(initializeVideoElements, 100);
 })();
 `
 

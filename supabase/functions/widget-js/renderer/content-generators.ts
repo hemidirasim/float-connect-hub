@@ -12,6 +12,38 @@ export function generateChannelsHtml(config: TemplateConfig, templateId: string)
   return generateDefaultChannelsHtml(config.channels)
 }
 
+async function getSecureVideoUrl(videoUrl: string): Promise<string> {
+  // Əgər Supabase Storage URL-dirsə, signed URL yarat
+  if (videoUrl.includes('supabase') && videoUrl.includes('/storage/')) {
+    try {
+      // Video path-ini çıxar
+      const urlParts = videoUrl.split('/storage/v1/object/public/videos/')
+      if (urlParts.length > 1) {
+        const videoPath = urlParts[1]
+        
+        const response = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/get-video-url`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+          },
+          body: JSON.stringify({ videoPath })
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          return data.signedUrl
+        }
+      }
+    } catch (error) {
+      console.error('Error getting secure video URL:', error)
+    }
+  }
+  
+  // Fallback - orijinal URL-i qaytar
+  return videoUrl
+}
+
 export function generateVideoContent(config: TemplateConfig): string {
   console.log('generateVideoContent called with:', {
     videoEnabled: config.videoEnabled,
@@ -76,14 +108,15 @@ export function generateVideoContent(config: TemplateConfig): string {
     }
   }
   
-  // For direct video files (mp4, webm, etc.) with vertical alignment
+  // For direct video files (mp4, webm, etc.) with vertical alignment and dynamic URL loading
   const videoHeight = config.videoHeight || 200
   const videoObjectFit = config.videoObjectFit || 'cover'
   
   console.log('Generated video content with vertical alignment and object-fit:', processedVideoUrl, videoObjectFit)
   
   const videoHtml = `<div class="hiclient-video-container" style="display: flex; ${alignmentStyle} justify-content: center; margin-bottom: 20px;">
-     <video class="hiclient-video-player" src="${processedVideoUrl}" 
+     <video class="hiclient-video-player" 
+            data-video-url="${processedVideoUrl}"
             style="height: ${videoHeight}px; width: 100%; border-radius: 12px; object-fit: ${videoObjectFit};" 
             loop playsinline webkit-playsinline preload="metadata">
        Your browser does not support the video tag.
@@ -115,8 +148,8 @@ export function generateButtonIcon(customIconUrl?: string, useVideoPreview?: boo
                        allow="autoplay; encrypted-media"></iframe>`
       }
     } else {
-      // Handle direct video files for preview
-      return `<video src="${videoUrl}" 
+      // Handle direct video files for preview with dynamic URL loading
+      return `<video data-video-url="${videoUrl}"
                      style="width: ${width}px; height: ${height}px; border-radius: 50%; object-fit: cover; pointer-events: none;" 
                      autoplay muted loop playsinline webkit-playsinline preload="metadata">
               </video>`
