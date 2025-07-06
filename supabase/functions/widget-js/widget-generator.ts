@@ -10,6 +10,9 @@ export function generateWidgetScript(widget: any): string {
     template_id: widget.template_id,
     greeting_message: widget.greeting_message,
     channels: widget.channels?.length || 0,
+    video_enabled: widget.video_enabled,
+    video_url: widget.video_url,
+    preview_video_height: widget.preview_video_height,
     raw_widget_data: JSON.stringify(widget, null, 2)
   })
   
@@ -56,17 +59,21 @@ export function generateWidgetScript(widget: any): string {
     videoUrl: config.videoUrl,
     videoHeight: config.videoHeight,
     videoAlignment: config.videoAlignment,
+    videoObjectFit: config.videoObjectFit,
     useVideoPreview: config.useVideoPreview,
     buttonSize: config.buttonSize,
     previewVideoHeight: config.previewVideoHeight
   }
 
-  console.log('Template config created with greeting message:', {
+  console.log('Template config created with video preview settings:', {
     templateId: templateId,
     channels: templateConfig.channels.length,
     buttonColor: templateConfig.buttonColor,
     position: templateConfig.position,
-    greetingMessage: templateConfig.greetingMessage
+    greetingMessage: templateConfig.greetingMessage,
+    videoEnabled: templateConfig.videoEnabled,
+    useVideoPreview: templateConfig.useVideoPreview,
+    previewVideoHeight: templateConfig.previewVideoHeight
   })
 
   const renderer = new WidgetTemplateRenderer(template, templateConfig)
@@ -77,7 +84,8 @@ export function generateWidgetScript(widget: any): string {
     templateName: template.name,
     scriptLength: script.length,
     hasChannels: templateConfig.channels.length > 0,
-    greetingMessage: templateConfig.greetingMessage
+    greetingMessage: templateConfig.greetingMessage,
+    videoPreviewEnabled: templateConfig.useVideoPreview
   })
   
   return script

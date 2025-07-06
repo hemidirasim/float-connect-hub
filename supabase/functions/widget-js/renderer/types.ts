@@ -1,30 +1,23 @@
 
+import type { Channel } from '../types.ts'
+
 export interface TemplateConfig {
-  channels: any[];
+  channels: Channel[];
   buttonColor: string;
   position: string;
   tooltip: string;
   tooltipDisplay: string;
-  tooltipPosition: string;
-  greetingMessage: string;
-  customIconUrl: string | null;
+  tooltipPosition?: string;
+  greetingMessage?: string;
+  customIconUrl?: string;
   videoEnabled: boolean;
-  videoUrl: string | null;
+  videoUrl?: string;
   videoHeight: number;
   videoAlignment: string;
-  videoObjectFit: string;
+  videoObjectFit?: string;
   useVideoPreview: boolean;
   buttonSize: number;
   previewVideoHeight: number;
-  templateId: string;
-  widgetWidth: number;
-  widgetHeight: number;
-}
-
-export interface WidgetTemplate {
-  name: string;
-  description: string;
-  htmlTemplate: string;
-  cssStyles: string;
-  jsTemplate: string;
+  widgetWidth?: number;
+  widgetHeight?: number;
 }
