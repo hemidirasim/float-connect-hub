@@ -94,7 +94,36 @@ export function generateVideoContent(config: TemplateConfig): string {
   return videoHtml
 }
 
-export function generateButtonIcon(customIconUrl?: string): string {
+export function generateButtonIcon(customIconUrl?: string, useVideoPreview?: boolean, videoUrl?: string, previewVideoHeight?: number): string {
+  // If using video preview, generate video button instead of icon
+  if (useVideoPreview && videoUrl) {
+    const height = previewVideoHeight || 120;
+    const width = height; // Keep it square for button
+    
+    if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+      // Handle YouTube videos for preview
+      let videoId = ''
+      if (videoUrl.includes('youtube.com/watch?v=')) {
+        videoId = videoUrl.split('v=')[1]?.split('&')[0]
+      } else if (videoUrl.includes('youtu.be/')) {
+        videoId = videoUrl.split('youtu.be/')[1]?.split('?')[0]
+      }
+      
+      if (videoId) {
+        return `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1" 
+                       style="width: ${width}px; height: ${height}px; border-radius: 50%; border: none; object-fit: cover; pointer-events: none;" 
+                       allow="autoplay; encrypted-media"></iframe>`
+      }
+    } else {
+      // Handle direct video files for preview
+      return `<video src="${videoUrl}" 
+                     style="width: ${width}px; height: ${height}px; border-radius: 50%; object-fit: cover; pointer-events: none;" 
+                     autoplay muted loop playsinline webkit-playsinline preload="metadata">
+              </video>`
+    }
+  }
+  
+  // Standard icon logic
   if (customIconUrl) {
     return `<img src="${customIconUrl}" style="width: 24px; height: 24px; object-fit: contain;" alt="Contact">`
   }

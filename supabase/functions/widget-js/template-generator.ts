@@ -46,7 +46,9 @@ export class WidgetTemplateRenderer {
     console.log('Template config for video:', {
       videoEnabled: this.config.videoEnabled,
       videoUrl: this.config.videoUrl,
-      videoHeight: this.config.videoHeight
+      videoHeight: this.config.videoHeight,
+      useVideoPreview: this.config.useVideoPreview,
+      previewVideoHeight: this.config.previewVideoHeight
     })
     
     let html = this.template.html
@@ -55,13 +57,14 @@ export class WidgetTemplateRenderer {
 
     // Generate common content (video, button icon) - Make sure video is generated
     const videoContent = generateVideoContent(this.config)
-    const buttonIcon = generateButtonIcon(this.config.customIconUrl)
+    const buttonIcon = generateButtonIcon(this.config.customIconUrl, this.config.useVideoPreview, this.config.videoUrl, this.config.previewVideoHeight)
 
     console.log('Generated video content for template:', videoContent ? 'YES' : 'NO')
     console.log('Video content length:', videoContent.length)
+    console.log('Using video preview as button:', this.config.useVideoPreview)
 
     // Calculate responsive values
-    const buttonSize = this.config.buttonSize || 60
+    const buttonSize = this.config.useVideoPreview ? (this.config.previewVideoHeight || 120) : (this.config.buttonSize || 60)
     const iconSize = Math.max(40, Math.min(55, buttonSize * 0.83))
     const channelGap = Math.max(8, Math.min(12, buttonSize * 0.15))
     const channelBottomOffset = buttonSize + 15
@@ -95,6 +98,7 @@ export class WidgetTemplateRenderer {
     }
 
     console.log('Video content in replacements:', replacements['{{VIDEO_CONTENT}}'] ? 'YES' : 'NO')
+    console.log('Button icon type:', this.config.useVideoPreview ? 'VIDEO_PREVIEW' : 'STANDARD_ICON')
 
     // Apply replacements with safe string handling
     Object.entries(replacements).forEach(([placeholder, value]) => {
