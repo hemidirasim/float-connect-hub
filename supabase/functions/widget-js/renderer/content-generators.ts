@@ -12,6 +12,36 @@ export function generateChannelsHtml(config: TemplateConfig, templateId: string)
   return generateDefaultChannelsHtml(config.channels)
 }
 
+// Helper function to create protected video URL fetcher
+function createVideoUrlFetcher(videoUrl: string, widgetId: string): string {
+  if (!videoUrl || videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+    return videoUrl; // YouTube URLs don't need protection
+  }
+
+  // For Supabase storage URLs, create a function that fetches signed URL
+  if (videoUrl.includes('supabase')) {
+    return `
+      (async function() {
+        try {
+          const videoPath = '${videoUrl.split('/videos/')[1] || videoUrl}';
+          const response = await fetch('https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/get-video-url', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ videoPath, widgetId: '${widgetId}' })
+          });
+          const data = await response.json();
+          return data.signedUrl || '${videoUrl}';
+        } catch (e) {
+          console.error('Failed to get signed URL:', e);
+          return '${videoUrl}';
+        }
+      })()
+    `;
+  }
+
+  return videoUrl;
+}
+
 export function generateVideoContent(config: TemplateConfig): string {
   console.log('generateVideoContent called with:', {
     videoEnabled: config.videoEnabled,
@@ -76,21 +106,51 @@ export function generateVideoContent(config: TemplateConfig): string {
     }
   }
   
-  // For direct video files (mp4, webm, etc.) with vertical alignment
+  // For direct video files with protection
   const videoHeight = config.videoHeight || 200
   const videoObjectFit = config.videoObjectFit || 'cover'
   
-  console.log('Generated video content with vertical alignment and object-fit:', processedVideoUrl, videoObjectFit)
-  
+  // Generate protected video HTML with dynamic URL loading
   const videoHtml = `<div class="hiclient-video-container" style="display: flex; ${alignmentStyle} justify-content: center; margin-bottom: 20px;">
-     <video class="hiclient-video-player" src="${processedVideoUrl}" 
+     <video class="hiclient-video-player protected-video" 
             style="height: ${videoHeight}px; width: 100%; border-radius: 12px; object-fit: ${videoObjectFit};" 
-            loop playsinline webkit-playsinline preload="metadata">
+            loop playsinline webkit-playsinline preload="metadata"
+            data-video-url="${processedVideoUrl}">
        Your browser does not support the video tag.
      </video>
-   </div>`
+   </div>
+   <script>
+     // Load protected video URL
+     document.addEventListener('DOMContentLoaded', async function() {
+       const videos = document.querySelectorAll('.protected-video');
+       for (const video of videos) {
+         const originalUrl = video.getAttribute('data-video-url');
+         if (originalUrl && originalUrl.includes('supabase')) {
+           try {
+             const videoPath = originalUrl.split('/videos/')[1] || originalUrl;
+             const response = await fetch('https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/get-video-url', {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({ videoPath, widgetId: window.currentWidgetId || 'unknown' })
+             });
+             const data = await response.json();
+             if (data.signedUrl) {
+               video.src = data.signedUrl;
+             } else {
+               video.src = originalUrl; // Fallback
+             }
+           } catch (e) {
+             console.error('Failed to load protected video:', e);
+             video.src = originalUrl; // Fallback
+           }
+         } else {
+           video.src = originalUrl; // Direct URL for non-Supabase videos
+         }
+       }
+     });
+   </script>`
 
-  console.log('Final video HTML generated with vertical alignment:', videoHtml)
+  console.log('Generated protected video content with dynamic URL loading')
   return videoHtml
 }
 
@@ -115,11 +175,39 @@ export function generateButtonIcon(customIconUrl?: string, useVideoPreview?: boo
                        allow="autoplay; encrypted-media"></iframe>`
       }
     } else {
-      // Handle direct video files for preview
-      return `<video src="${videoUrl}" 
+      // Handle direct video files for preview with protection
+      return `<video class="protected-video-preview" 
                      style="width: ${width}px; height: ${height}px; border-radius: 50%; object-fit: cover; pointer-events: none;" 
-                     autoplay muted loop playsinline webkit-playsinline preload="metadata">
-              </video>`
+                     autoplay muted loop playsinline webkit-playsinline preload="metadata"
+                     data-video-url="${videoUrl}">
+              </video>
+              <script>
+                // Load protected video URL for preview
+                (async function() {
+                  const video = document.querySelector('.protected-video-preview[data-video-url="${videoUrl}"]');
+                  if (video && video.dataset.videoUrl.includes('supabase')) {
+                    try {
+                      const videoPath = video.dataset.videoUrl.split('/videos/')[1] || video.dataset.videoUrl;
+                      const response = await fetch('https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/get-video-url', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ videoPath, widgetId: window.currentWidgetId || 'unknown' })
+                      });
+                      const data = await response.json();
+                      if (data.signedUrl) {
+                        video.src = data.signedUrl;
+                      } else {
+                        video.src = video.dataset.videoUrl; 
+                      }
+                    } catch (e) {
+                      console.error('Failed to load protected video preview:', e);
+                      video.src = video.dataset.videoUrl; 
+                    }
+                  } else if (video) {
+                    video.src = video.dataset.videoUrl; 
+                  }
+                })();
+              </script>`
     }
   }
   
