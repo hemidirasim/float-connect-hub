@@ -123,14 +123,11 @@ export class WidgetTemplateRenderer {
     const escapedCss = escapeTemplateContent(css)
     const escapedJs = escapeTemplateContent(js)
 
-    // Add global function for channel clicks and widget ID tracking
+    // Add global function for channel clicks
     const globalScript = `
     window.openChannel = function(url) {
       window.open(url, '_blank');
     };
-    
-    // Set current widget ID for video URL fetching
-    window.currentWidgetId = document.currentScript?.src?.match(/widget-js\/([^?]+)/)?.[1] || 'unknown';
     `
 
     // Generate complete script using properly escaped content
