@@ -94,7 +94,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       liveChatRequireEmail: formData.liveChatRequireEmail,
       liveChatRequireName: formData.liveChatRequireName,
       liveChatRequirePhone: formData.liveChatRequirePhone,
-      liveChatCustomFields: formData.liveChatCustomFields
+      liveChatCustomFields: JSON.stringify(formData.liveChatCustomFields)
     };
 
     // Use SAME renderer as edge function

@@ -5,6 +5,8 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MessageSquare } from 'lucide-react';
+import { CustomFieldManager } from './CustomFieldManager';
+import { CustomField } from './types';
 
 interface LiveChatSettingsProps {
   liveChatEnabled: boolean;
@@ -16,7 +18,13 @@ interface LiveChatSettingsProps {
   liveChatRequireEmail: boolean;
   liveChatRequireName: boolean;
   liveChatRequirePhone: boolean;
-  liveChatCustomFields: string;
+  liveChatCustomFields: CustomField[];
+  liveChatNameLabel: string;
+  liveChatNamePlaceholder: string;
+  liveChatEmailLabel: string;
+  liveChatEmailPlaceholder: string;
+  liveChatPhoneLabel: string;
+  liveChatPhonePlaceholder: string;
   onLiveChatEnabledChange: (enabled: boolean) => void;
   onLiveChatAgentNameChange: (name: string) => void;
   onLiveChatGreetingChange: (greeting: string) => void;
@@ -26,7 +34,13 @@ interface LiveChatSettingsProps {
   onLiveChatRequireEmailChange: (required: boolean) => void;
   onLiveChatRequireNameChange: (required: boolean) => void;
   onLiveChatRequirePhoneChange: (required: boolean) => void;
-  onLiveChatCustomFieldsChange: (fields: string) => void;
+  onLiveChatCustomFieldsChange: (fields: CustomField[]) => void;
+  onLiveChatNameLabelChange: (label: string) => void;
+  onLiveChatNamePlaceholderChange: (placeholder: string) => void;
+  onLiveChatEmailLabelChange: (label: string) => void;
+  onLiveChatEmailPlaceholderChange: (placeholder: string) => void;
+  onLiveChatPhoneLabelChange: (label: string) => void;
+  onLiveChatPhonePlaceholderChange: (placeholder: string) => void;
 }
 
 export const LiveChatSettings: React.FC<LiveChatSettingsProps> = ({
@@ -40,6 +54,12 @@ export const LiveChatSettings: React.FC<LiveChatSettingsProps> = ({
   liveChatRequireName,
   liveChatRequirePhone,
   liveChatCustomFields,
+  liveChatNameLabel,
+  liveChatNamePlaceholder,
+  liveChatEmailLabel,
+  liveChatEmailPlaceholder,
+  liveChatPhoneLabel,
+  liveChatPhonePlaceholder,
   onLiveChatEnabledChange,
   onLiveChatAgentNameChange,
   onLiveChatGreetingChange,
@@ -49,7 +69,13 @@ export const LiveChatSettings: React.FC<LiveChatSettingsProps> = ({
   onLiveChatRequireEmailChange,
   onLiveChatRequireNameChange,
   onLiveChatRequirePhoneChange,
-  onLiveChatCustomFieldsChange
+  onLiveChatCustomFieldsChange,
+  onLiveChatNameLabelChange,
+  onLiveChatNamePlaceholderChange,
+  onLiveChatEmailLabelChange,
+  onLiveChatEmailPlaceholderChange,
+  onLiveChatPhoneLabelChange,
+  onLiveChatPhonePlaceholderChange
 }) => {
   return (
     <Card>
@@ -144,58 +170,118 @@ export const LiveChatSettings: React.FC<LiveChatSettingsProps> = ({
             <div className="space-y-4 pt-4 border-t">
               <Label className="text-base font-semibold">Pre-Chat Form Settings</Label>
               
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-base">Require Name</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Ask for visitor's name before starting chat
-                  </p>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base">Require Name</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Ask for visitor's name before starting chat
+                    </p>
+                  </div>
+                  <Switch
+                    checked={liveChatRequireName}
+                    onCheckedChange={onLiveChatRequireNameChange}
+                  />
                 </div>
-                <Switch
-                  checked={liveChatRequireName}
-                  onCheckedChange={onLiveChatRequireNameChange}
-                />
+
+                {liveChatRequireName && (
+                  <div className="grid grid-cols-2 gap-3 ml-4">
+                    <div className="space-y-1">
+                      <Label className="text-sm">Name Label</Label>
+                      <Input
+                        value={liveChatNameLabel}
+                        onChange={(e) => onLiveChatNameLabelChange(e.target.value)}
+                        placeholder="Name"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-sm">Name Placeholder</Label>
+                      <Input
+                        value={liveChatNamePlaceholder}
+                        onChange={(e) => onLiveChatNamePlaceholderChange(e.target.value)}
+                        placeholder="Your name"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-base">Require Email</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Ask for visitor's email address before starting chat
-                  </p>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base">Require Email</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Ask for visitor's email address before starting chat
+                    </p>
+                  </div>
+                  <Switch
+                    checked={liveChatRequireEmail}
+                    onCheckedChange={onLiveChatRequireEmailChange}
+                  />
                 </div>
-                <Switch
-                  checked={liveChatRequireEmail}
-                  onCheckedChange={onLiveChatRequireEmailChange}
-                />
+
+                {liveChatRequireEmail && (
+                  <div className="grid grid-cols-2 gap-3 ml-4">
+                    <div className="space-y-1">
+                      <Label className="text-sm">Email Label</Label>
+                      <Input
+                        value={liveChatEmailLabel}
+                        onChange={(e) => onLiveChatEmailLabelChange(e.target.value)}
+                        placeholder="Email"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-sm">Email Placeholder</Label>
+                      <Input
+                        value={liveChatEmailPlaceholder}
+                        onChange={(e) => onLiveChatEmailPlaceholderChange(e.target.value)}
+                        placeholder="your@email.com"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-base">Require Phone</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Ask for visitor's phone number before starting chat
-                  </p>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base">Require Phone</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Ask for visitor's phone number before starting chat
+                    </p>
+                  </div>
+                  <Switch
+                    checked={liveChatRequirePhone}
+                    onCheckedChange={onLiveChatRequirePhoneChange}
+                  />
                 </div>
-                <Switch
-                  checked={liveChatRequirePhone}
-                  onCheckedChange={onLiveChatRequirePhoneChange}
-                />
+
+                {liveChatRequirePhone && (
+                  <div className="grid grid-cols-2 gap-3 ml-4">
+                    <div className="space-y-1">
+                      <Label className="text-sm">Phone Label</Label>
+                      <Input
+                        value={liveChatPhoneLabel}
+                        onChange={(e) => onLiveChatPhoneLabelChange(e.target.value)}
+                        placeholder="Phone"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-sm">Phone Placeholder</Label>
+                      <Input
+                        value={liveChatPhonePlaceholder}
+                        onChange={(e) => onLiveChatPhonePlaceholderChange(e.target.value)}
+                        placeholder="+1 (555) 123-4567"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="liveChatCustomFields">Custom Fields</Label>
-                <Textarea
-                  id="liveChatCustomFields"
-                  placeholder="Enter custom field names separated by commas (e.g., Company, Department, Subject)"
-                  value={liveChatCustomFields}
-                  onChange={(e) => onLiveChatCustomFieldsChange(e.target.value)}
-                  rows={3}
-                />
-                <p className="text-sm text-muted-foreground">
-                  Add custom fields that visitors need to fill before starting chat
-                </p>
-              </div>
+              <CustomFieldManager
+                customFields={liveChatCustomFields}
+                onCustomFieldsChange={onLiveChatCustomFieldsChange}
+              />
             </div>
           </>
         )}

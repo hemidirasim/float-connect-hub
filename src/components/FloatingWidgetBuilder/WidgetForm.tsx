@@ -24,7 +24,7 @@ interface WidgetFormProps {
   onChannelsChange: (channels: Channel[]) => void;
   onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onVideoRemove: () => void;
-  onFormDataChange: (field: string, value: string | boolean | number) => void;
+  onFormDataChange: (field: string, value: string | boolean | number | any) => void;
   onCreateWidget: () => void;
   onCustomIconUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
@@ -147,6 +147,12 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             liveChatRequireName={formData.liveChatRequireName}
             liveChatRequirePhone={formData.liveChatRequirePhone}
             liveChatCustomFields={formData.liveChatCustomFields}
+            liveChatNameLabel={formData.liveChatNameLabel}
+            liveChatNamePlaceholder={formData.liveChatNamePlaceholder}
+            liveChatEmailLabel={formData.liveChatEmailLabel}
+            liveChatEmailPlaceholder={formData.liveChatEmailPlaceholder}
+            liveChatPhoneLabel={formData.liveChatPhoneLabel}
+            liveChatPhonePlaceholder={formData.liveChatPhonePlaceholder}
             onLiveChatEnabledChange={(enabled) => onFormDataChange('liveChatEnabled', enabled)}
             onLiveChatAgentNameChange={(name) => onFormDataChange('liveChatAgentName', name)}
             onLiveChatGreetingChange={(greeting) => onFormDataChange('liveChatGreeting', greeting)}
@@ -157,6 +163,12 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             onLiveChatRequireNameChange={(required) => onFormDataChange('liveChatRequireName', required)}
             onLiveChatRequirePhoneChange={(required) => onFormDataChange('liveChatRequirePhone', required)}
             onLiveChatCustomFieldsChange={(fields) => onFormDataChange('liveChatCustomFields', fields)}
+            onLiveChatNameLabelChange={(label) => onFormDataChange('liveChatNameLabel', label)}
+            onLiveChatNamePlaceholderChange={(placeholder) => onFormDataChange('liveChatNamePlaceholder', placeholder)}
+            onLiveChatEmailLabelChange={(label) => onFormDataChange('liveChatEmailLabel', label)}
+            onLiveChatEmailPlaceholderChange={(placeholder) => onFormDataChange('liveChatEmailPlaceholder', placeholder)}
+            onLiveChatPhoneLabelChange={(label) => onFormDataChange('liveChatPhoneLabel', label)}
+            onLiveChatPhonePlaceholderChange={(placeholder) => onFormDataChange('liveChatPhonePlaceholder', placeholder)}
           />
 
           <Button

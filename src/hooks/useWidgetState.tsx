@@ -43,7 +43,14 @@ export const useWidgetState = (user: any) => {
     liveChatRequireEmail: false,
     liveChatRequireName: true,
     liveChatRequirePhone: false,
-    liveChatCustomFields: ''
+    liveChatCustomFields: [],
+    // Pre-chat form labels and placeholders
+    liveChatNameLabel: 'Name',
+    liveChatNamePlaceholder: 'Your name',
+    liveChatEmailLabel: 'Email',
+    liveChatEmailPlaceholder: 'your@email.com',
+    liveChatPhoneLabel: 'Phone',
+    liveChatPhonePlaceholder: '+1 (555) 123-4567'
   });
 
   // Check for editing widget on load
@@ -100,7 +107,14 @@ export const useWidgetState = (user: any) => {
           liveChatRequireEmail: data.live_chat_require_email || false,
           liveChatRequireName: data.live_chat_require_name || true,
           liveChatRequirePhone: data.live_chat_require_phone || false,
-          liveChatCustomFields: data.live_chat_custom_fields || ''
+          liveChatCustomFields: [],
+          // Pre-chat form labels and placeholders
+          liveChatNameLabel: 'Name',
+          liveChatNamePlaceholder: 'Your name',
+          liveChatEmailLabel: 'Email',
+          liveChatEmailPlaceholder: 'your@email.com',
+          liveChatPhoneLabel: 'Phone',
+          liveChatPhonePlaceholder: '+1 (555) 123-4567'
         });
 
         // Scroll to widget form
@@ -151,7 +165,14 @@ export const useWidgetState = (user: any) => {
       liveChatRequireEmail: false,
       liveChatRequireName: true,
       liveChatRequirePhone: false,
-      liveChatCustomFields: ''
+      liveChatCustomFields: [],
+      // Pre-chat form labels and placeholders
+      liveChatNameLabel: 'Name',
+      liveChatNamePlaceholder: 'Your name',
+      liveChatEmailLabel: 'Email',
+      liveChatEmailPlaceholder: 'your@email.com',
+      liveChatPhoneLabel: 'Phone',
+      liveChatPhonePlaceholder: '+1 (555) 123-4567'
     });
   };
 

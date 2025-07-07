@@ -20,42 +20,41 @@ export const defaultHtmlTemplate = `
       <div class="lovable-empty-icon">📱</div>
       <p>No channels configured</p>
     </div>
-  </div>
-</div>
-
-<div id="lovable-livechat-modal" style="display: none; visibility: hidden; opacity: 0;">
-  <div id="lovable-livechat-content">
-    <div id="lovable-livechat-header">
-      <h3>{{LIVE_CHAT_GREETING}}</h3>
-      <button id="lovable-livechat-close">×</button>
-    </div>
     
-    <!-- Pre-chat form -->
-    <div id="lovable-prechat-form">
-      <div class="prechat-title">Please provide your information to start the chat</div>
-      <div class="prechat-fields">
-        <div class="prechat-field" data-field="name" style="display: none;">
-          <label for="prechat-name">Name *</label>
-          <input type="text" id="prechat-name" placeholder="Your name" required />
-        </div>
-        <div class="prechat-field" data-field="email" style="display: none;">
-          <label for="prechat-email">Email *</label>
-          <input type="email" id="prechat-email" placeholder="your@email.com" required />
-        </div>
-        <div class="prechat-field" data-field="phone" style="display: none;">
-          <label for="prechat-phone">Phone</label>
-          <input type="tel" id="prechat-phone" placeholder="+1 (555) 123-4567" />
-        </div>
-        <div id="prechat-custom-fields"></div>
-        <button id="prechat-submit" class="prechat-submit-btn">Start Chat</button>
+    <!-- Live chat content inside main modal -->
+    <div id="lovable-livechat-content" style="display: none;">
+      <div id="lovable-livechat-header">
+        <h3>{{LIVE_CHAT_GREETING}}</h3>
+        <button id="lovable-livechat-back">← Back</button>
       </div>
-    </div>
-    
-    <!-- Chat messages -->
-    <div id="lovable-livechat-messages" style="display: none;"></div>
-    <div id="lovable-livechat-input-area" style="display: none;">
-      <input type="text" id="lovable-livechat-input" placeholder="Type your message..." />
-      <button id="lovable-livechat-send">Send</button>
+      
+      <!-- Pre-chat form -->
+      <div id="lovable-prechat-form">
+        <div class="prechat-title">{{PRECHAT_FORM_TITLE}}</div>
+        <div class="prechat-fields">
+          <div class="prechat-field" data-field="name" style="display: none;">
+            <label for="prechat-name">{{NAME_LABEL}}</label>
+            <input type="text" id="prechat-name" placeholder="{{NAME_PLACEHOLDER}}" required />
+          </div>
+          <div class="prechat-field" data-field="email" style="display: none;">
+            <label for="prechat-email">{{EMAIL_LABEL}}</label>
+            <input type="email" id="prechat-email" placeholder="{{EMAIL_PLACEHOLDER}}" required />
+          </div>
+          <div class="prechat-field" data-field="phone" style="display: none;">
+            <label for="prechat-phone">{{PHONE_LABEL}}</label>
+            <input type="tel" id="prechat-phone" placeholder="{{PHONE_PLACEHOLDER}}" />
+          </div>
+          <div id="prechat-custom-fields"></div>
+          <button id="prechat-submit" class="prechat-submit-btn">Start Chat</button>
+        </div>
+      </div>
+      
+      <!-- Chat messages -->
+      <div id="lovable-livechat-messages" style="display: none;"></div>
+      <div id="lovable-livechat-input-area" style="display: none;">
+        <input type="text" id="lovable-livechat-input" placeholder="Type your message..." />
+        <button id="lovable-livechat-send">Send</button>
+      </div>
     </div>
   </div>
 </div>

@@ -116,6 +116,13 @@ export class WidgetTemplateRenderer {
       '{{LIVE_CHAT_BUTTON}}': this.generateLiveChatButton(),
       '{{LIVE_CHAT_GREETING}}': this.config.liveChatGreeting || 'Hello! How can we help you today?',
       '{{LIVE_CHAT_COLOR}}': this.config.liveChatColor || '#4f46e5',
+      '{{PRECHAT_FORM_TITLE}}': 'Please provide your information to start the chat',
+      '{{NAME_LABEL}}': this.config.liveChatRequireName ? 'Name *' : 'Name',
+      '{{NAME_PLACEHOLDER}}': 'Your name',
+      '{{EMAIL_LABEL}}': this.config.liveChatRequireEmail ? 'Email *' : 'Email', 
+      '{{EMAIL_PLACEHOLDER}}': 'your@email.com',
+      '{{PHONE_LABEL}}': this.config.liveChatRequirePhone ? 'Phone *' : 'Phone',
+      '{{PHONE_PLACEHOLDER}}': '+1 (555) 123-4567',
       // Widget config for JavaScript access
       '{{WIDGET_CONFIG}}': JSON.stringify(this.config)
     }

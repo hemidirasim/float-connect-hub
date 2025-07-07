@@ -4,16 +4,19 @@ export interface Channel {
   type: string;
   value: string;
   label: string;
-  color?: string;
-  icon?: string;
-  customIcon?: string; // For custom uploaded icons
-  // New grouping properties
+  customIcon?: string;
   isGroup?: boolean;
   groupItems?: Channel[];
   displayMode?: 'individual' | 'grouped';
-  // New child channels for same type grouping
   childChannels?: Channel[];
-  parentId?: string; // Reference to parent channel
+  parentId?: string;
+}
+
+export interface CustomField {
+  id: string;
+  label: string;
+  placeholder: string;
+  required: boolean;
 }
 
 export interface FormData {
@@ -45,5 +48,12 @@ export interface FormData {
   liveChatRequireEmail: boolean;
   liveChatRequireName: boolean;
   liveChatRequirePhone: boolean;
-  liveChatCustomFields: string;
+  liveChatCustomFields: CustomField[];
+  // Pre-chat form labels and placeholders
+  liveChatNameLabel: string;
+  liveChatNamePlaceholder: string;
+  liveChatEmailLabel: string;
+  liveChatEmailPlaceholder: string;
+  liveChatPhoneLabel: string;
+  liveChatPhonePlaceholder: string;
 }

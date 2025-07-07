@@ -313,6 +313,24 @@ export const defaultCssStyles = `
     overflow-y: auto;
   }
   
+  #lovable-livechat-back {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  #lovable-livechat-back:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
   .channel-item, .parent-channel {
     display: flex;
     align-items: center;
