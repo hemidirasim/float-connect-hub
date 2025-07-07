@@ -301,7 +301,7 @@ export function getDefaultTemplate(): WidgetTemplate {
       }
     `,
     js: `
-      console.log('🔥 Widget script starting - FORCED VISIBILITY VERSION');
+      console.log('🔥 Widget script starting - SIMPLE RELIABLE VERSION');
       
       // Widget configuration
       let channels = [];
@@ -328,72 +328,112 @@ export function getDefaultTemplate(): WidgetTemplate {
         console.error('❌ Error parsing widget data:', e);
       }
 
-      // FORCE BUTTON VISIBILITY FUNCTION
-      function forceButtonVisibility() {
+      // Helper functions - defined first
+      function getChannelIcon(type) {
+        const icons = {
+          whatsapp: '💬',
+          telegram: '✈️',
+          email: '📧',
+          phone: '📞',
+          instagram: '📷',
+          facebook: '👥',
+          twitter: '🐦',
+          linkedin: '💼',
+          youtube: '📺',
+          tiktok: '🎵',
+          discord: '🎮',
+          custom: '🔗'
+        };
+        return icons[type] || '🔗';
+      }
+
+      function getChannelUrl(channel) {
+        switch (channel.type) {
+          case 'whatsapp':
+            return 'https://wa.me/' + channel.value.replace(/[^0-9]/g, '');
+          case 'telegram':
+            return 'https://t.me/' + channel.value.replace('@', '');
+          case 'email':
+            return 'mailto:' + channel.value;
+          case 'phone':
+            return 'tel:' + channel.value;
+          case 'instagram':
+            return channel.value.startsWith('http') ? channel.value : 'https://instagram.com/' + channel.value;
+          default:
+            return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
+        }
+      }
+
+      // Global function for opening channels
+      window.openChannel = function(url) {
+        console.log('🔥 Opening channel:', url);
+        window.open(url, '_blank');
+      };
+
+      // SIMPLE BUTTON VISIBILITY FUNCTION
+      function makeButtonVisible() {
         const button = document.getElementById('lovable-widget-button');
         const container = document.getElementById('lovable-widget-container');
         
         if (button) {
-          console.log('🔥 FORCING BUTTON VISIBILITY');
-          button.style.display = 'flex';
-          button.style.visibility = 'visible';
-          button.style.opacity = '1';
-          button.style.pointerEvents = 'auto';
-          button.style.position = 'relative';
-          button.style.zIndex = '100000';
-          button.style.width = '{{BUTTON_SIZE}}px';
-          button.style.height = '{{BUTTON_SIZE}}px';
-          button.style.backgroundColor = '{{BUTTON_COLOR}}';
-          button.style.border = 'none';
-          button.style.borderRadius = '50%';
-          button.style.cursor = 'pointer';
-          button.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-          button.style.alignItems = 'center';
-          button.style.justifyContent = 'center';
-          button.style.color = 'white';
-          button.style.fontSize = '24px';
-          
-          console.log('✅ Button visibility forced:', button.style.cssText);
-        } else {
-          console.error('❌ Button element not found!');
+          console.log('🔥 Making button visible');
+          button.style.cssText = 'display: flex !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; position: relative !important; z-index: 100000 !important; width: {{BUTTON_SIZE}}px !important; height: {{BUTTON_SIZE}}px !important; background-color: {{BUTTON_COLOR}} !important; border: none !important; border-radius: 50% !important; cursor: pointer !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important; align-items: center !important; justify-content: center !important; color: white !important; font-size: 24px !important;';
         }
         
         if (container) {
-          console.log('🔥 FORCING CONTAINER VISIBILITY');
-          container.style.display = 'block';
-          container.style.visibility = 'visible';
-          container.style.opacity = '1';
-          container.style.position = 'fixed';
-          container.style.bottom = '20px';
-          container.style.zIndex = '99999';
-          container.style.pointerEvents = 'auto';
-          
-          console.log('✅ Container visibility forced:', container.style.cssText);
-        } else {
-          console.error('❌ Container element not found!');
+          console.log('🔥 Making container visible');
+          container.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; position: fixed !important; bottom: 20px !important; z-index: 99999 !important; pointer-events: auto !important; {{POSITION_STYLE}}';
         }
+      }
+
+      // Channel rendering functions
+      function renderChannels() {
+        const channelsContainer = document.getElementById('lovable-widget-channels');
+        if (!channelsContainer) return;
+        
+        console.log('🔥 Rendering channels:', channels.length);
+        
+        if (channels.length === 0) {
+          const emptyState = document.querySelector('.lovable-empty-state');
+          if (emptyState) {
+            emptyState.style.display = 'block';
+          }
+          return;
+        }
+
+        const channelsHtml = channels.map(function(channel) {
+          const iconHtml = channel.customIcon 
+            ? '<img src="' + channel.customIcon + '" alt="' + channel.label + '" class="lovable-channel-icon" />'
+            : getChannelIcon(channel.type);
+          
+          const channelUrl = getChannelUrl(channel);
+          return '<div class="lovable-channel-item" onclick="openChannel(' + "'" + channelUrl + "'" + ')">' +
+            iconHtml +
+            '<span>' + channel.label + '</span>' +
+          '</div>';
+        }).join('');
+        
+        channelsContainer.innerHTML = channelsHtml;
+        console.log('✅ Channels rendered');
       }
 
       // Initialize widget immediately
       function initializeWidget() {
-        console.log('🔥 Initializing widget elements...');
+        console.log('🔥 Initializing widget...');
         
-        // Force visibility first
-        forceButtonVisibility();
+        // Make button visible FIRST
+        makeButtonVisible();
         
         // Get DOM elements
         const modal = document.getElementById('lovable-widget-modal');
         const button = document.getElementById('lovable-widget-button');
         const closeBtn = document.getElementById('lovable-widget-close');
-        const channelsContainer = document.getElementById('lovable-widget-channels');
-        const liveChatContainer = document.getElementById('lovable-live-chat-container');
         const tooltip = document.getElementById('lovable-widget-tooltip');
 
-        console.log('🔥 DOM elements found:', {
+        console.log('🔥 Elements found:', {
           modal: !!modal,
           button: !!button,
-          closeBtn: !!closeBtn,
-          channelsContainer: !!channelsContainer
+          closeBtn: !!closeBtn
         });
 
         // Set modal position class
@@ -438,8 +478,6 @@ export function getDefaultTemplate(): WidgetTemplate {
           });
           
           console.log('✅ Button event listeners attached');
-        } else {
-          console.error('❌ Button element not found for event listeners!');
         }
 
         // Close button event listener
@@ -474,190 +512,46 @@ export function getDefaultTemplate(): WidgetTemplate {
           });
         }
 
-        // Re-force visibility after initialization
-        setTimeout(forceButtonVisibility, 100);
-        setTimeout(forceButtonVisibility, 500);
-        setTimeout(forceButtonVisibility, 1000);
+        // Force button visibility multiple times
+        makeButtonVisible();
+        setTimeout(makeButtonVisible, 100);
+        setTimeout(makeButtonVisible, 500);
 
         // Render channels
         renderChannels();
         
-        // Initialize live chat if enabled
+        // Initialize live chat LAST if enabled (so it doesn't interfere)
         if (liveChatEnabled) {
-          initLiveChat();
+          setTimeout(function() {
+            const liveChatContainer = document.getElementById('lovable-live-chat-container');
+            if (liveChatContainer) {
+              console.log('🔥 Initializing live chat');
+              liveChatContainer.style.display = 'block';
+              liveChatContainer.innerHTML = '<div class="lovable-live-chat-header"><span>💬</span><span>Chat with ' + liveChatAgentName + '</span></div><div class="lovable-live-chat-messages"><div class="lovable-chat-message agent"><div>Hello! How can we help you today?</div></div></div>';
+            }
+          }, 200);
         }
         
         console.log('✅ Widget initialization complete');
       }
 
-      // Helper functions - defined first
-      function getChannelIcon(type) {
-        const icons = {
-          whatsapp: '💬',
-          telegram: '✈️',
-          email: '📧',
-          phone: '📞',
-          instagram: '📷',
-          facebook: '👥',
-          twitter: '🐦',
-          linkedin: '💼',
-          youtube: '📺',
-          tiktok: '🎵',
-          discord: '🎮',
-          custom: '🔗'
-        };
-        return icons[type] || '🔗';
-      }
-
-      function getChannelUrl(channel) {
-        switch (channel.type) {
-          case 'whatsapp':
-            return 'https://wa.me/' + channel.value.replace(/[^0-9]/g, '');
-          case 'telegram':
-            return 'https://t.me/' + channel.value.replace('@', '');
-          case 'email':
-            return 'mailto:' + channel.value;
-          case 'phone':
-            return 'tel:' + channel.value;
-          case 'instagram':
-            return channel.value.startsWith('http') ? channel.value : 'https://instagram.com/' + channel.value;
-          default:
-            return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
-        }
-      }
-
-      // Channel rendering functions
-      function renderChannels() {
-        const channelsContainer = document.getElementById('lovable-widget-channels');
-        if (!channelsContainer) return;
-        
-        console.log('🔥 Rendering channels:', channels.length);
-        
-        if (channels.length === 0) {
-          const emptyState = document.querySelector('.lovable-empty-state');
-          if (emptyState) {
-            emptyState.style.display = 'block';
-          }
-          return;
-        }
-
-        const channelsHtml = channels.map(function(channel) {
-          const iconHtml = channel.customIcon 
-            ? '<img src="' + channel.customIcon + '" alt="' + channel.label + '" class="lovable-channel-icon" />'
-            : getChannelIcon(channel.type);
-          
-          const channelUrl = getChannelUrl(channel);
-          return '<div class="lovable-channel-item" onclick="openChannel(' + "'" + channelUrl + "'" + ')">' +
-            iconHtml +
-            '<span>' + channel.label + '</span>' +
-          '</div>';
-        }).join('');
-        
-        channelsContainer.innerHTML = channelsHtml;
-        console.log('✅ Channels rendered');
-      }
-
-      // Global function for opening channels
-      window.openChannel = function(url) {
-        console.log('🔥 Opening channel:', url);
-        window.open(url, '_blank');
-      };
-
-      // Live Chat Functionality
-      function initLiveChat() {
-        const liveChatContainer = document.getElementById('lovable-live-chat-container');
-        if (!liveChatContainer) return;
-        
-        console.log('🔥 Initializing live chat');
-        
-        liveChatContainer.style.display = 'block';
-        liveChatContainer.innerHTML = '<div class="lovable-live-chat-header">' +
-          '<span>💬</span>' +
-          '<span>Chat with ' + liveChatAgentName + '</span>' +
-        '</div>' +
-        '<div class="lovable-live-chat-messages" id="lovable-chat-messages">' +
-          '<div class="lovable-chat-message agent">' +
-            '<div class="lovable-chat-message-sender">' + liveChatAgentName + '</div>' +
-            '<div>Hello! How can we help you today?</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="lovable-chat-input-container">' +
-          '<input type="text" class="lovable-chat-input" id="lovable-chat-message-input" placeholder="Type your message..." />' +
-          '<button class="lovable-chat-send-btn" id="lovable-chat-send-btn">Send</button>' +
-        '</div>';
-
-        const messageInput = document.getElementById('lovable-chat-message-input');
-        const sendBtn = document.getElementById('lovable-chat-send-btn');
-        const messagesContainer = document.getElementById('lovable-chat-messages');
-
-        function sendMessage() {
-          const message = messageInput.value.trim();
-          if (!message) return;
-
-          // Add visitor message
-          const messageEl = document.createElement('div');
-          messageEl.className = 'lovable-chat-message visitor';
-          messageEl.innerHTML = '<div class="lovable-chat-message-sender">You</div>' +
-            '<div>' + message + '</div>';
-          messagesContainer.appendChild(messageEl);
-          
-          messageInput.value = '';
-          messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-          console.log('Live chat message sent:', message);
-          
-          // Auto-response
-          setTimeout(function() {
-            const responseEl = document.createElement('div');
-            responseEl.className = 'lovable-chat-message agent';
-            responseEl.innerHTML = '<div class="lovable-chat-message-sender">' + liveChatAgentName + '</div>' +
-              '<div>Thank you for your message! We will get back to you shortly.</div>';
-            messagesContainer.appendChild(responseEl);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-          }, 1000);
-        }
-
-        if (sendBtn) {
-          sendBtn.addEventListener('click', sendMessage);
-        }
-
-        if (messageInput) {
-          messageInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-              sendMessage();
-            }
-          });
-        }
-      }
-
       // Multiple initialization attempts
-      console.log('🔥 Starting widget initialization process...');
+      console.log('🔥 Starting widget initialization...');
       
       // Try immediate initialization
       if (document.readyState === 'complete') {
-        console.log('🔥 DOM already complete, initializing immediately');
         initializeWidget();
       } else if (document.readyState === 'interactive') {
-        console.log('🔥 DOM interactive, initializing with small delay');
         setTimeout(initializeWidget, 50);
       } else {
-        console.log('🔥 DOM still loading, waiting for DOMContentLoaded');
         document.addEventListener('DOMContentLoaded', initializeWidget);
       }
       
       // Backup initialization
-      setTimeout(function() {
-        console.log('🔥 Backup initialization trigger');
-        initializeWidget();
-      }, 200);
+      setTimeout(initializeWidget, 200);
+      setTimeout(initializeWidget, 1000);
       
-      // Final backup
-      setTimeout(function() {
-        console.log('🔥 Final backup initialization trigger');
-        initializeWidget();
-      }, 1000);
-      
-      console.log('✅ Widget script loaded with forced visibility');
+      console.log('✅ Widget script loaded - SIMPLE VERSION');
     `
   };
 }
