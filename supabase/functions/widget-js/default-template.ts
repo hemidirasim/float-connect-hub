@@ -7,19 +7,19 @@ export function getDefaultTemplate(): WidgetTemplate {
     name: 'Default Template',
     description: 'Classic floating widget with customizable colors and positioning',
     html: `
-<div id="lovable-widget-container" style="position: fixed; {{POSITION_STYLE}} bottom: 20px; z-index: 99999;">
+<div id="lovable-widget-container" style="position: fixed; {{POSITION_STYLE}} bottom: 20px; z-index: 99999; pointer-events: auto;">
   <div id="lovable-widget-relative-container" style="position: relative;">
     <div id="lovable-widget-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
-    <button id="lovable-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}}">
+    <button id="lovable-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}} display: flex !important; visibility: visible !important; opacity: 1 !important;">
       {{BUTTON_ICON}}
     </button>
   </div>
 </div>
 
-<div id="lovable-widget-modal" style="display: none; visibility: hidden; opacity: 0;">
-  <div id="lovable-modal-content" style="transform: translateY(20px);">
+<div id="lovable-widget-modal" style="display: none; visibility: hidden; opacity: 0; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 99998;">
+  <div id="lovable-modal-content" style="transform: translateY(20px); background: white; border-radius: 12px; width: min(400px, 90vw); max-height: 80vh; overflow-y: auto; padding: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); position: relative; margin: auto; margin-top: 50px;">
     <div id="lovable-modal-header">{{GREETING_MESSAGE}}</div>
-    <button id="lovable-widget-close">×</button>
+    <button id="lovable-widget-close" style="position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 24px; cursor: pointer; color: #666; padding: 4px; line-height: 1;">×</button>
     {{VIDEO_CONTENT}}
     <div id="lovable-widget-channels"></div>
     <div id="lovable-live-chat-container" style="display: none;"></div>
@@ -31,35 +31,37 @@ export function getDefaultTemplate(): WidgetTemplate {
 </div>
 `,
     css: `
-      /* Widget container styles */
-      #lovable-widget-container {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        position: fixed;
-        z-index: 99999;
-        bottom: 20px;
-      }
-      
+      /* Widget button - ensure visibility */
       #lovable-widget-button {
-        border: none;
-        border-radius: 50%;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        transition: all 0.3s ease;
+        border: none !important;
+        border-radius: 50% !important;
+        cursor: pointer !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        transition: all 0.3s ease !important;
         display: flex !important;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 24px;
-        text-decoration: none;
-        z-index: 100000;
-        position: relative;
+        align-items: center !important;
+        justify-content: center !important;
+        color: white !important;
+        font-size: 24px !important;
+        text-decoration: none !important;
+        z-index: 100000 !important;
+        position: relative !important;
         visibility: visible !important;
         opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+      
+      #lovable-widget-container {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        position: fixed !important;
+        z-index: 99999 !important;
+        bottom: 20px !important;
+        pointer-events: auto !important;
       }
       
       #lovable-widget-button:hover {
-        transform: scale(1.1);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        transform: scale(1.1) !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
       }
       
       /* Tooltip styles */
@@ -79,44 +81,44 @@ export function getDefaultTemplate(): WidgetTemplate {
       
       /* Modal styles */
       #lovable-widget-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 99998;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: flex-end;
-        justify-content: flex-end;
-        padding: 20px;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+        z-index: 99998 !important;
+        transition: all 0.3s ease !important;
+        display: flex !important;
+        align-items: flex-end !important;
+        justify-content: flex-end !important;
+        padding: 20px !important;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
       }
       
       #lovable-modal-content {
-        background: white;
-        border-radius: 12px;
-        width: min(400px, 90vw);
-        max-height: 80vh;
-        overflow-y: auto;
-        padding: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        transition: transform 0.3s ease;
-        position: relative;
+        background: white !important;
+        border-radius: 12px !important;
+        width: min(400px, 90vw) !important;
+        max-height: 80vh !important;
+        overflow-y: auto !important;
+        padding: 20px !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+        transition: transform 0.3s ease !important;
+        position: relative !important;
       }
       
       /* Position modal based on button position */
       #lovable-widget-modal.position-right {
-        justify-content: flex-end;
+        justify-content: flex-end !important;
       }
       
       #lovable-widget-modal.position-left {
-        justify-content: flex-start;
+        justify-content: flex-start !important;
       }
       
       #lovable-widget-modal.position-center {
-        justify-content: center;
+        justify-content: center !important;
       }
       
       #lovable-modal-header {
@@ -125,19 +127,6 @@ export function getDefaultTemplate(): WidgetTemplate {
         margin-bottom: 16px;
         color: #333;
         white-space: pre-line;
-      }
-      
-      #lovable-widget-close {
-        position: absolute;
-        top: 12px;
-        right: 16px;
-        background: none;
-        border: none;
-        font-size: 24px;
-        cursor: pointer;
-        color: #666;
-        padding: 4px;
-        line-height: 1;
       }
       
       #lovable-widget-close:hover {
@@ -286,16 +275,26 @@ export function getDefaultTemplate(): WidgetTemplate {
       /* Responsive styles */
       @media (max-width: 768px) {
         #lovable-widget-modal {
-          padding: 10px;
+          padding: 10px !important;
         }
         
         #lovable-modal-content {
-          width: calc(100% - 20px);
-          max-width: none;
+          width: calc(100% - 20px) !important;
+          max-width: none !important;
         }
+      }
+      
+      /* Force visibility for everything */
+      #lovable-widget-container,
+      #lovable-widget-container *,
+      #lovable-widget-button {
+        visibility: visible !important;
+        opacity: 1 !important;
       }
     `,
     js: `
+      console.log('Widget script starting execution...');
+      
       // Widget configuration
       let channels = [];
       let liveChatEnabled = false;
@@ -311,101 +310,142 @@ export function getDefaultTemplate(): WidgetTemplate {
         liveChatEnabled = '{{LIVE_CHAT_ENABLED}}' === 'true';
         liveChatAgentName = '{{LIVE_CHAT_AGENT_NAME}}' || 'Support Team';
         widgetPosition = '{{POSITION}}' || 'right';
+        
+        console.log('Widget config parsed:', {
+          channels: channels.length,
+          position: widgetPosition,
+          liveChatEnabled: liveChatEnabled
+        });
       } catch (e) {
         console.error('Error parsing widget data:', e);
       }
 
-      // Get DOM elements
-      const modal = document.getElementById('lovable-widget-modal');
-      const button = document.getElementById('lovable-widget-button');
-      const closeBtn = document.getElementById('lovable-widget-close');
-      const channelsContainer = document.getElementById('lovable-widget-channels');
-      const liveChatContainer = document.getElementById('lovable-live-chat-container');
-      const tooltip = document.getElementById('lovable-widget-tooltip');
+      // Initialize widget immediately
+      function initializeWidget() {
+        console.log('Initializing widget elements...');
+        
+        // Get DOM elements
+        const modal = document.getElementById('lovable-widget-modal');
+        const button = document.getElementById('lovable-widget-button');
+        const closeBtn = document.getElementById('lovable-widget-close');
+        const channelsContainer = document.getElementById('lovable-widget-channels');
+        const liveChatContainer = document.getElementById('lovable-live-chat-container');
+        const tooltip = document.getElementById('lovable-widget-tooltip');
 
-      // Ensure button is visible
-      if (button) {
-        button.style.display = 'flex';
-        button.style.visibility = 'visible';
-        button.style.opacity = '1';
-        console.log('Widget button initialized and visible');
-      } else {
-        console.error('Widget button not found');
-      }
+        console.log('DOM elements found:', {
+          modal: !!modal,
+          button: !!button,
+          closeBtn: !!closeBtn,
+          channelsContainer: !!channelsContainer
+        });
 
-      // Set modal position class based on widget position
-      if (modal) {
-        modal.classList.add('position-' + widgetPosition);
-      }
-
-      // Tooltip functions
-      function showTooltip() {
-        const tooltipDisplay = '{{TOOLTIP_DISPLAY}}';
-        if (tooltipDisplay === 'hover' && tooltip) {
-          tooltip.style.display = 'block';
+        // Force button visibility
+        if (button) {
+          button.style.display = 'flex';
+          button.style.visibility = 'visible';
+          button.style.opacity = '1';
+          button.style.pointerEvents = 'auto';
+          button.style.position = 'relative';
+          button.style.zIndex = '100000';
+          console.log('Button forced visible:', button.style.cssText);
+        } else {
+          console.error('Button element not found!');
+          return;
         }
-      }
 
-      function hideTooltip() {
-        if (tooltip) {
-          tooltip.style.display = 'none';
+        // Set modal position class
+        if (modal) {
+          modal.classList.add('position-' + widgetPosition);
         }
-      }
 
-      // Button event listeners
-      if (button) {
-        button.addEventListener('mouseenter', showTooltip);
-        button.addEventListener('mouseleave', hideTooltip);
-        button.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          console.log('Button clicked, opening modal');
-          if (modal) {
-            modal.style.display = 'flex';
-            modal.style.visibility = 'visible';
-            modal.style.opacity = '1';
-            const content = document.getElementById('lovable-modal-content');
-            if (content) {
-              content.style.transform = 'translateY(0)';
-            }
+        // Tooltip functions
+        function showTooltip() {
+          const tooltipDisplay = '{{TOOLTIP_DISPLAY}}';
+          if (tooltipDisplay === 'hover' && tooltip) {
+            tooltip.style.display = 'block';
           }
-        });
-      }
+        }
 
-      // Close button event listener
-      if (closeBtn) {
-        closeBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          console.log('Close button clicked');
-          if (modal) {
-            modal.style.opacity = '0';
-            const content = document.getElementById('lovable-modal-content');
-            if (content) {
-              content.style.transform = 'translateY(20px)';
-            }
-            setTimeout(function() {
-              modal.style.visibility = 'hidden';
-              modal.style.display = 'none';
-            }, 300);
+        function hideTooltip() {
+          if (tooltip) {
+            tooltip.style.display = 'none';
           }
-        });
-      }
+        }
 
-      // Modal backdrop click
-      if (modal) {
-        modal.addEventListener('click', function(e) {
-          if (e.target === modal) {
-            if (closeBtn) {
-              closeBtn.click();
+        // Button event listeners
+        if (button) {
+          button.addEventListener('mouseenter', showTooltip);
+          button.addEventListener('mouseleave', hideTooltip);
+          button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Button clicked, opening modal');
+            
+            if (modal) {
+              modal.style.display = 'flex';
+              modal.style.visibility = 'visible';
+              modal.style.opacity = '1';
+              
+              const content = document.getElementById('lovable-modal-content');
+              if (content) {
+                content.style.transform = 'translateY(0)';
+              }
+              console.log('Modal opened');
             }
-          }
-        });
+          });
+          
+          console.log('Button event listeners attached');
+        }
+
+        // Close button event listener
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Close button clicked');
+            
+            if (modal) {
+              modal.style.opacity = '0';
+              const content = document.getElementById('lovable-modal-content');
+              if (content) {
+                content.style.transform = 'translateY(20px)';
+              }
+              setTimeout(function() {
+                modal.style.visibility = 'hidden';
+                modal.style.display = 'none';
+              }, 300);
+            }
+          });
+        }
+
+        // Modal backdrop click
+        if (modal) {
+          modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+              if (closeBtn) {
+                closeBtn.click();
+              }
+            }
+          });
+        }
+
+        // Render channels
+        renderChannels();
+        
+        // Initialize live chat if enabled
+        if (liveChatEnabled) {
+          initLiveChat();
+        }
+        
+        console.log('Widget initialization complete');
       }
 
       // Channel rendering functions
       function renderChannels() {
+        const channelsContainer = document.getElementById('lovable-widget-channels');
         if (!channelsContainer) return;
+        
+        console.log('Rendering channels:', channels.length);
         
         if (channels.length === 0) {
           const emptyState = document.querySelector('.lovable-empty-state');
@@ -427,6 +467,7 @@ export function getDefaultTemplate(): WidgetTemplate {
         }).join('');
         
         channelsContainer.innerHTML = channelsHtml;
+        console.log('Channels rendered');
       }
 
       function getChannelIcon(type) {
@@ -460,18 +501,22 @@ export function getDefaultTemplate(): WidgetTemplate {
           case 'instagram':
             return channel.value.startsWith('http') ? channel.value : 'https://instagram.com/' + channel.value;
           default:
-            return channel.value;
+            return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
         }
       }
 
       // Global function for opening channels
       window.openChannel = function(url) {
+        console.log('Opening channel:', url);
         window.open(url, '_blank');
       };
 
       // Live Chat Functionality
       function initLiveChat() {
-        if (!liveChatEnabled || !liveChatContainer) return;
+        const liveChatContainer = document.getElementById('lovable-live-chat-container');
+        if (!liveChatContainer) return;
+        
+        console.log('Initializing live chat');
         
         liveChatContainer.style.display = 'block';
         liveChatContainer.innerHTML = '<div class="lovable-live-chat-header">' +
@@ -507,10 +552,9 @@ export function getDefaultTemplate(): WidgetTemplate {
           messageInput.value = '';
           messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-          // Send to backend (this would be implemented with actual backend)
-          console.log('Sending message:', message);
+          console.log('Live chat message sent:', message);
           
-          // Show typing indicator and auto-response
+          // Auto-response
           setTimeout(function() {
             const responseEl = document.createElement('div');
             responseEl.className = 'lovable-chat-message agent';
@@ -534,31 +578,15 @@ export function getDefaultTemplate(): WidgetTemplate {
         }
       }
 
-      // Initialize all components when DOM is ready
-      function initWidget() {
-        console.log('Initializing widget...');
-        console.log('Widget position:', widgetPosition);
-        console.log('Live chat enabled:', liveChatEnabled);
-        console.log('Channels:', channels.length);
-        
-        renderChannels();
-        initLiveChat();
-        
-        // Final check - make sure button is visible
-        if (button) {
-          button.style.display = 'flex';
-          button.style.visibility = 'visible';
-          button.style.opacity = '1';
-          console.log('Widget initialization complete - button should be visible');
-        }
-      }
-
-      // Initialize when DOM is ready
+      // Initialize immediately when script loads
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initWidget);
+        document.addEventListener('DOMContentLoaded', initializeWidget);
       } else {
-        initWidget();
+        // DOM is already ready
+        setTimeout(initializeWidget, 100);
       }
+      
+      console.log('Widget script loaded');
     `
   };
 }
