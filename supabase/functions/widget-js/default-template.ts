@@ -138,93 +138,92 @@ const defaultJavaScriptLogic = `
     startChatSession(userData, customFieldsData);
   }
 
-  // Realtime setup
-  let realtimeWs = null;
+  // Realtime setup using Supabase client approach
+  let realtimeChannel = null;
   
   function setupRealtimeSubscription(sessionId) {
-    if (realtimeWs) {
-      realtimeWs.close();
+    if (realtimeChannel) {
+      realtimeChannel.unsubscribe();
     }
     
-    // Create WebSocket connection to Supabase Realtime
-    const wsUrl = 'wss://ttzioshkresaqmsodhfb.supabase.co/realtime/v1/websocket?apikey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0emlvc2hrcmVzYXFtc29kaGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NDM3NjksImV4cCI6MjA2NjAxOTc2OX0.2haK7pikLtZOmf4nsmcb8wcvjbYaZLzR7ESug0R4oX0&vsn=1.0.0';
+    // Use Supabase client-like approach for realtime
+    fetch('https://ttzioshkresaqmsodhfb.supabase.co/rest/v1/live_chat_messages?select=*&session_id=eq.' + sessionId + '&order=created_at.desc&limit=1', {
+      headers: {
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0emlvc2hrcmVzYXFtc29kaGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NDM3NjksImV4cCI6MjA2NjAxOTc2OX0.2haK7pikLtZOmf4nsmcb8wcvjbYaZLzR7ESug0R4oX0',
+        'Content-Type': 'application/json'
+      }
+    });
     
-    realtimeWs = new WebSocket(wsUrl);
-    
-    realtimeWs.onopen = function() {
-      console.log('Realtime connected');
+    // Set up polling for new messages every 2 seconds
+    window.messagePollInterval = setInterval(function() {
+      if (!window.liveChatSessionId) {
+        clearInterval(window.messagePollInterval);
+        return;
+      }
       
-      // Join messages channel
-      var messagesJoin = {
-        topic: 'realtime:public:live_chat_messages',
-        event: 'phx_join',
-        payload: { 
-          config: { 
-            postgres_changes: [
-              { event: 'INSERT', schema: 'public', table: 'live_chat_messages', filter: 'session_id=eq.' + sessionId }
-            ]
-          }
-        },
-        ref: '1'
-      };
-      realtimeWs.send(JSON.stringify(messagesJoin));
-      
-      // Join sessions channel
-      var sessionsJoin = {
-        topic: 'realtime:public:chat_sessions',
-        event: 'phx_join',
-        payload: { 
-          config: { 
-            postgres_changes: [
-              { event: 'UPDATE', schema: 'public', table: 'chat_sessions', filter: 'id=eq.' + sessionId }
-            ]
-          }
-        },
-        ref: '2'
-      };
-      realtimeWs.send(JSON.stringify(sessionsJoin));
-    };
-    
-    realtimeWs.onmessage = function(event) {
-      var message = JSON.parse(event.data);
-      
-      if (message.event === 'postgres_changes' && message.payload) {
-        var payload = message.payload;
-        
-        if (payload.table === 'live_chat_messages' && payload.eventType === 'INSERT') {
-          var newMessage = payload.new;
-          if (newMessage.session_id === sessionId && !newMessage.is_from_visitor) {
-            // Add agent message to chat
-            addAgentMessageToChat(newMessage.message, newMessage.sender_name);
-          }
+      fetch('https://ttzioshkresaqmsodhfb.supabase.co/rest/v1/live_chat_messages?select=*&session_id=eq.' + sessionId + '&is_from_visitor=eq.false&order=created_at.desc&limit=10', {
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0emlvc2hrcmVzYXFtc29kaGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NDM3NjksImV4cCI6MjA2NjAxOTc2OX0.2haK7pikLtZOmf4nsmcb8wcvjbYaZLzR7ESug0R4oX0',
+          'Content-Type': 'application/json'
         }
-        
-        if (payload.table === 'chat_sessions' && payload.eventType === 'UPDATE') {
-          var sessionUpdate = payload.new;
-          if (sessionUpdate.status === 'ended') {
-            // Session ended by agent
-            showSessionEndedMessage();
-            window.liveChatSessionId = null;
-            if (realtimeWs) {
-              realtimeWs.close();
+      })
+      .then(response => response.json())
+      .then(messages => {
+        if (messages && messages.length > 0) {
+          // Check for new messages that aren't already displayed
+          var messagesDiv = document.querySelector('#lovable-livechat-messages');
+          if (messagesDiv) {
+            var existingMessages = messagesDiv.querySelectorAll('.agent-message');
+            var existingCount = existingMessages.length - 1; // Subtract 1 for initial greeting
+            
+            if (messages.length > existingCount) {
+              // Add new messages
+              for (var i = existingCount; i < messages.length; i++) {
+                var message = messages[messages.length - 1 - i]; // Reverse order since we get desc
+                if (!message.is_from_visitor) {
+                  addAgentMessageToChat(message.message, message.sender_name);
+                }
+              }
             }
           }
         }
-      }
-    };
-    
-    realtimeWs.onerror = function(error) {
-      console.error('Realtime error:', error);
-    };
-    
-    realtimeWs.onclose = function() {
-      console.log('Realtime disconnected');
-    };
+      })
+      .catch(error => {
+        console.log('Error polling messages:', error);
+      });
+      
+      // Check session status
+      fetch('https://ttzioshkresaqmsodhfb.supabase.co/rest/v1/chat_sessions?select=status&id=eq.' + sessionId, {
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0emlvc2hrcmVzYXFtc29kaGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NDM3NjksImV4cCI6MjA2NjAxOTc2OX0.2haK7pikLtZOmf4nsmcb8wcvjbYaZLzR7ESug0R4oX0',
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(sessions => {
+        if (sessions && sessions.length > 0 && sessions[0].status === 'ended') {
+          showSessionEndedMessage();
+          window.liveChatSessionId = null;
+          clearInterval(window.messagePollInterval);
+        }
+      })
+      .catch(error => {
+        console.log('Error checking session status:', error);
+      });
+    }, 2000);
   }
   
   function addAgentMessageToChat(messageText, senderName) {
     var messagesDiv = document.querySelector('#lovable-livechat-messages');
     if (messagesDiv) {
+      // Check if this message already exists
+      var existingMessages = messagesDiv.querySelectorAll('.agent-message .message-content');
+      for (var i = 0; i < existingMessages.length; i++) {
+        if (existingMessages[i].textContent === messageText) {
+          return; // Message already exists
+        }
+      }
+      
       var agentMessage = document.createElement('div');
       agentMessage.className = 'chat-message agent-message';
       agentMessage.innerHTML = '<div class="message-content">' + escapeHtml(messageText) + '</div>';
@@ -275,7 +274,7 @@ const defaultJavaScriptLogic = `
       if (data.session_id) {
         window.liveChatSessionId = data.session_id;
         window.liveChatUserData = userData;
-        // Setup realtime subscription
+        // Setup message polling
         setupRealtimeSubscription(data.session_id);
         showChatInterface();
       } else {
@@ -351,6 +350,12 @@ const defaultJavaScriptLogic = `
   function endChatSession() {
     console.log('Ending chat session');
     
+    // Clear polling interval
+    if (window.messagePollInterval) {
+      clearInterval(window.messagePollInterval);
+      window.messagePollInterval = null;
+    }
+    
     // Send end session request to server if session exists
     if (window.liveChatSessionId) {
       fetch('https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/live-chat-message', {
@@ -376,12 +381,6 @@ const defaultJavaScriptLogic = `
       .catch(error => {
         console.error('Error ending session:', error);
       });
-    }
-    
-    // Close realtime connection
-    if (realtimeWs) {
-      realtimeWs.close();
-      realtimeWs = null;
     }
     
     // Clear session data
