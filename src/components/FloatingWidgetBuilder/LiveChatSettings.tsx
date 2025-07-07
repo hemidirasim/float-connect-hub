@@ -5,20 +5,17 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MessageCircle } from 'lucide-react';
 
 interface LiveChatSettingsProps {
   liveChatEnabled: boolean;
   liveChatGreeting: string;
   liveChatColor: string;
-  liveChatPosition: string;
   liveChatAutoOpen: boolean;
   liveChatOfflineMessage: string;
   onLiveChatEnabledChange: (enabled: boolean) => void;
   onLiveChatGreetingChange: (greeting: string) => void;
   onLiveChatColorChange: (color: string) => void;
-  onLiveChatPositionChange: (position: string) => void;
   onLiveChatAutoOpenChange: (autoOpen: boolean) => void;
   onLiveChatOfflineMessageChange: (message: string) => void;
 }
@@ -27,13 +24,11 @@ export const LiveChatSettings: React.FC<LiveChatSettingsProps> = ({
   liveChatEnabled,
   liveChatGreeting,
   liveChatColor,
-  liveChatPosition,
   liveChatAutoOpen,
   liveChatOfflineMessage,
   onLiveChatEnabledChange,
   onLiveChatGreetingChange,
   onLiveChatColorChange,
-  onLiveChatPositionChange,
   onLiveChatAutoOpenChange,
   onLiveChatOfflineMessageChange
 }) => {
@@ -85,19 +80,6 @@ export const LiveChatSettings: React.FC<LiveChatSettingsProps> = ({
                   className="flex-1"
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="live-chat-position">Chat Position</Label>
-              <Select value={liveChatPosition} onValueChange={onLiveChatPositionChange}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bottom-right">Bottom Right</SelectItem>
-                  <SelectItem value="bottom-left">Bottom Left</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
             <div className="flex items-center justify-between">

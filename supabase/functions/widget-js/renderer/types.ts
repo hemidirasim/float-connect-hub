@@ -24,7 +24,6 @@ export interface TemplateConfig {
   liveChatEnabled?: boolean;
   liveChatGreeting?: string;
   liveChatColor?: string;
-  liveChatPosition?: string;
   liveChatAutoOpen?: boolean;
   liveChatOfflineMessage?: string;
 }

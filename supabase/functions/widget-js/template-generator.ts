@@ -97,11 +97,10 @@ export class WidgetTemplateRenderer {
       '{{TOOLTIP_RIGHT_OFFSET}}': tooltipRightOffset.toString(),
       '{{MOBILE_CHANNEL_GAP}}': mobileChannelGap.toString(),
       '{{MOBILE_TOOLTIP_RIGHT_OFFSET}}': mobileTooltipRightOffset.toString(),
-      // Live chat replacements
+      // Live chat replacements (removed position)
       '{{LIVE_CHAT_ENABLED}}': this.config.liveChatEnabled ? 'true' : 'false',
       '{{LIVE_CHAT_GREETING}}': this.config.liveChatGreeting || 'Hello! How can we help you today?',
       '{{LIVE_CHAT_COLOR}}': this.config.liveChatColor || '#4f46e5',
-      '{{LIVE_CHAT_POSITION}}': this.config.liveChatPosition || 'bottom-right',
       '{{LIVE_CHAT_AUTO_OPEN}}': this.config.liveChatAutoOpen ? 'true' : 'false',
       '{{LIVE_CHAT_OFFLINE_MESSAGE}}': this.config.liveChatOfflineMessage || 'We are currently offline. Please leave a message and we will get back to you.'
     }

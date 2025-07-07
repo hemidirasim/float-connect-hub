@@ -1,3 +1,4 @@
+
 import type { Channel } from '../types.ts'
 import { getChannelUrl, getChannelIcon, getChannelColor } from '../templates/default/utility-functions.ts'
 
@@ -129,17 +130,17 @@ export function generateMinimalChannelsHtml(channels: Channel[]): string {
   return channels.map(channel => {
     if (channel.childChannels && channel.childChannels.length > 0) {
       // Generate group button with dropdown for minimal template
-      const platform = getPlatformInfo(channel.type);
       const dropdownId = `dropdown-${channel.id}`;
       const childCount = channel.childChannels.length;
+      const channelIcon = getChannelIcon(channel.type);
       
       const dropdownItems = [channel, ...channel.childChannels].map((item, index) => {
-        const href = generateChannelLink(item);
+        const href = getChannelUrl(item.type, item.value);
         const label = item.label;
         
         return `
           <a href="${href}" target="_blank" class="widget-dropdown-item" onclick="window.openChannel && window.openChannel('${href}')">
-            <i class="${platform.icon}"></i>
+            <i class="${channelIcon}"></i>
             <div class="item-info">
               <div class="item-label">${label}${index === 0 ? ' (Primary)' : ''}</div>
               <div class="item-value">${item.value}</div>
@@ -151,7 +152,7 @@ export function generateMinimalChannelsHtml(channels: Channel[]): string {
       return `
         <div class="widget-channel-group">
           <div class="widget-channel-btn widget-dropdown-btn" data-dropdown="${dropdownId}" data-type="${channel.type}">
-            <i class="${platform.icon}"></i>
+            <i class="${channelIcon}"></i>
             <span class="child-indicator">+${childCount}</span>
           </div>
           <div class="widget-dropdown" id="${dropdownId}">
@@ -161,12 +162,12 @@ export function generateMinimalChannelsHtml(channels: Channel[]): string {
       `;
     } else {
       // Regular individual channel for minimal template
-      const platform = getPlatformInfo(channel.type);
-      const href = generateChannelLink(channel);
+      const channelIcon = getChannelIcon(channel.type);
+      const href = getChannelUrl(channel.type, channel.value);
       
       return `
         <a href="${href}" target="_blank" class="widget-channel-btn" data-type="${channel.type}" onclick="window.openChannel && window.openChannel('${href}')">
-          <i class="${platform.icon}"></i>
+          <i class="${channelIcon}"></i>
         </a>
       `;
     }
@@ -177,12 +178,12 @@ export function generateDefaultChannelsHtml(channels: Channel[]): string {
   return channels.map(channel => {
     if (channel.isGroup && channel.groupItems) {
       // Generate group for default template
-      const iconSvg = getChannelIcon(channel.type, channel.customIcon, false)
+      const iconSvg = getChannelIcon(channel.type)
       const channelColor = getChannelColor(channel.type)
       
       const groupItemsHtml = channel.groupItems.map(item => {
-        const itemUrl = getChannelUrl(item)
-        const itemIcon = getChannelIcon(item.type, item.customIcon, false)
+        const itemUrl = getChannelUrl(item.type, item.value)
+        const itemIcon = getChannelIcon(item.type)
         return `
           <a href="${itemUrl}" target="_blank" class="lovable-group-item" onclick="window.openChannel && window.openChannel('${itemUrl}')">
             <div class="lovable-group-item-icon" style="background: ${getChannelColor(item.type)}; color: white;">${itemIcon}</div>
@@ -212,12 +213,12 @@ export function generateDefaultChannelsHtml(channels: Channel[]): string {
       `
     } else if (channel.childChannels && channel.childChannels.length > 0) {
       // Handle child channels for default template
-      const iconSvg = getChannelIcon(channel.type, channel.customIcon, false)
+      const iconSvg = getChannelIcon(channel.type)
       const channelColor = getChannelColor(channel.type)
       const dropdownId = `dropdown-${channel.id}`
       
       // Include parent channel as first item in dropdown
-      const parentUrl = getChannelUrl(channel)
+      const parentUrl = getChannelUrl(channel.type, channel.value)
       const childItemsHtml = [
         // Parent channel as first item
         `<a href="${parentUrl}" target="_blank" class="lovable-group-item" onclick="window.openChannel && window.openChannel('${parentUrl}')">
@@ -229,8 +230,8 @@ export function generateDefaultChannelsHtml(channels: Channel[]): string {
         </a>`,
         // Child channels
         ...channel.childChannels.map(item => {
-          const itemUrl = getChannelUrl(item)
-          const itemIcon = getChannelIcon(item.type, item.customIcon, false)
+          const itemUrl = getChannelUrl(item.type, item.value)
+          const itemIcon = getChannelIcon(item.type)
           return `
             <a href="${itemUrl}" target="_blank" class="lovable-group-item" onclick="window.openChannel && window.openChannel('${itemUrl}')">
               <div class="lovable-group-item-icon" style="background: ${getChannelColor(item.type)}; color: white;">${itemIcon}</div>
@@ -261,8 +262,8 @@ export function generateDefaultChannelsHtml(channels: Channel[]): string {
       `
     } else {
       // Regular individual channel for default template
-      const iconSvg = getChannelIcon(channel.type, channel.customIcon, false)
-      const channelUrl = getChannelUrl(channel)
+      const iconSvg = getChannelIcon(channel.type)
+      const channelUrl = getChannelUrl(channel.type, channel.value)
       const channelColor = getChannelColor(channel.type)
       
       return `

@@ -92,13 +92,11 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             liveChatEnabled={formData.liveChatEnabled}
             liveChatGreeting={formData.liveChatGreeting}
             liveChatColor={formData.liveChatColor}
-            liveChatPosition={formData.liveChatPosition}
             liveChatAutoOpen={formData.liveChatAutoOpen}
             liveChatOfflineMessage={formData.liveChatOfflineMessage}
             onLiveChatEnabledChange={(enabled) => onFormDataChange('liveChatEnabled', enabled)}
             onLiveChatGreetingChange={(greeting) => onFormDataChange('liveChatGreeting', greeting)}
             onLiveChatColorChange={(color) => onFormDataChange('liveChatColor', color)}
-            onLiveChatPositionChange={(position) => onFormDataChange('liveChatPosition', position)}
             onLiveChatAutoOpenChange={(autoOpen) => onFormDataChange('liveChatAutoOpen', autoOpen)}
             onLiveChatOfflineMessageChange={(message) => onFormDataChange('liveChatOfflineMessage', message)}
           />

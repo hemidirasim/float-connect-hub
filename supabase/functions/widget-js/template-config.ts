@@ -43,11 +43,10 @@ export function createWidgetConfig(widget: any): WidgetConfig {
     buttonSize: widget.button_size || 60,
     previewVideoHeight: widget.preview_video_height || 120,
     templateId: widget.template_id || 'default',
-    // Live chat settings
+    // Live chat settings (removed position)
     liveChatEnabled: Boolean(widget.live_chat_enabled),
     liveChatGreeting: widget.live_chat_greeting || 'Hello! How can we help you today?',
     liveChatColor: widget.live_chat_color || '#4f46e5',
-    liveChatPosition: widget.live_chat_position || 'bottom-right',
     liveChatAutoOpen: Boolean(widget.live_chat_auto_open),
     liveChatOfflineMessage: widget.live_chat_offline_message || 'We are currently offline. Please leave a message and we will get back to you.'
   }
