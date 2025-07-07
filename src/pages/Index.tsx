@@ -192,16 +192,6 @@ const Index = () => {
           customIconUrl: '' // Clear custom icon URL when switching to preset icons
         };
       }
-      
-      // Auto-fill live chat agent name with website name if not set
-      if (field === 'liveChatEnabled' && value === true && !prev.liveChatAgentName) {
-        return {
-          ...prev,
-          [field]: value,
-          liveChatAgentName: websiteName || 'Support Team'
-        };
-      }
-      
       return {
         ...prev,
         [field]: value

@@ -1,557 +1,415 @@
+
 import type { WidgetTemplate } from './template-types.ts'
+import { defaultHtmlTemplate } from './templates/default/html-template.ts'
+import { defaultCssStyles } from './templates/default/css-styles.ts'
+import { getChannelUrl, getChannelIcon, getChannelColor } from './templates/default/utility-functions.ts'
 
-export function getDefaultTemplate(): WidgetTemplate {
-  return {
-    id: 'default',
-    name: 'Default Template',
-    description: 'Classic floating widget with customizable colors and positioning',
-    html: `
-<div id="lovable-widget-container" style="position: fixed !important; {{POSITION_STYLE}} bottom: 20px !important; z-index: 99999 !important; pointer-events: auto !important;">
-  <div id="lovable-widget-relative-container" style="position: relative !important;">
-    <div id="lovable-widget-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
-    <button id="lovable-widget-button" style="width: {{BUTTON_SIZE}}px !important; height: {{BUTTON_SIZE}}px !important; background-color: {{BUTTON_COLOR}} !important; {{BUTTON_OFFSET_STYLE}} display: flex !important; visibility: visible !important; opacity: 1 !important; border: none !important; border-radius: 50% !important; cursor: pointer !important; position: relative !important; z-index: 100000 !important;">
-      {{BUTTON_ICON}}
-    </button>
-  </div>
-</div>
+// JavaScript logic with proper utility injection and fixed string escaping
+const defaultJavaScriptLogic = `
+  // Utility functions
+  function getChannelUrl(channel) {
+    switch (channel.type) {
+      case 'whatsapp':
+        return 'https://wa.me/' + channel.value.replace(/[^0-9]/g, '');
+      case 'telegram':
+        return channel.value.startsWith('@') ? 'https://t.me/' + channel.value.slice(1) : 'https://t.me/' + channel.value;
+      case 'email':
+        return 'mailto:' + channel.value;
+      case 'phone':
+        return 'tel:' + channel.value;
+      default:
+        return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
+    }
+  }
 
-<div id="lovable-widget-modal" style="display: none; visibility: hidden; opacity: 0; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 99998;">
-  <div id="lovable-modal-content" style="transform: translateY(20px); background: white; border-radius: 12px; width: min(400px, 90vw); max-height: 80vh; overflow-y: auto; padding: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); position: relative; margin: auto; margin-top: 50px;">
-    <div id="lovable-modal-header">{{GREETING_MESSAGE}}</div>
-    <button id="lovable-widget-close" style="position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 24px; cursor: pointer; color: #666; padding: 4px; line-height: 1;">×</button>
-    {{VIDEO_CONTENT}}
-    <div id="lovable-widget-channels"></div>
-    <div id="lovable-live-chat-container" style="display: none;"></div>
-    <div class="lovable-empty-state" style="display: none;">
-      <div class="lovable-empty-icon">📱</div>
-      <p>No channels configured</p>
-    </div>
-  </div>
-</div>
-`,
-    css: `
-      /* Force widget button visibility */
-      #lovable-widget-button {
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        border: none !important;
-        border-radius: 50% !important;
-        cursor: pointer !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-        transition: all 0.3s ease !important;
-        align-items: center !important;
-        justify-content: center !important;
-        color: white !important;
-        font-size: 24px !important;
-        text-decoration: none !important;
-        z-index: 100000 !important;
-        position: relative !important;
-        pointer-events: auto !important;
-      }
-      
-      #lovable-widget-container {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        position: fixed !important;
-        z-index: 99999 !important;
-        bottom: 20px !important;
-        pointer-events: auto !important;
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-      }
-      
-      #lovable-widget-button:hover {
-        transform: scale(1.1) !important;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
-      }
-      
-      /* Tooltip styles */
-      #lovable-widget-tooltip {
-        position: absolute;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 8px 12px;
-        border-radius: 8px;
-        font-size: 14px;
-        white-space: nowrap;
-        z-index: 100001;
-        transition: all 0.2s ease;
-        pointer-events: none;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      }
-      
-      /* Modal styles */
-      #lovable-widget-modal {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        background: rgba(0, 0, 0, 0.5) !important;
-        z-index: 99998 !important;
-        transition: all 0.3s ease !important;
-        display: flex !important;
-        align-items: flex-end !important;
-        justify-content: flex-end !important;
-        padding: 20px !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-      }
-      
-      #lovable-modal-content {
-        background: white !important;
-        border-radius: 12px !important;
-        width: min(400px, 90vw) !important;
-        max-height: 80vh !important;
-        overflow-y: auto !important;
-        padding: 20px !important;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
-        transition: transform 0.3s ease !important;
-        position: relative !important;
-      }
-      
-      /* Position modal based on button position */
-      #lovable-widget-modal.position-right {
-        justify-content: flex-end !important;
-      }
-      
-      #lovable-widget-modal.position-left {
-        justify-content: flex-start !important;
-      }
-      
-      #lovable-widget-modal.position-center {
-        justify-content: center !important;
-      }
-      
-      #lovable-modal-header {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 16px;
-        color: #333;
-        white-space: pre-line;
-      }
-      
-      #lovable-widget-close:hover {
-        background: rgba(239, 68, 68, 0.1);
-        color: #ef4444;
-        transform: rotate(90deg);
-      }
-      
-      /* Channel item styles */
-      .lovable-channel-item {
-        display: flex;
-        align-items: center;
-        padding: 12px;
-        margin-bottom: 8px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        text-decoration: none;
-        color: #333;
-        transition: all 0.2s ease;
-        cursor: pointer;
-      }
-      
-      .lovable-channel-item:hover {
-        background: #e9ecef;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-      
-      .lovable-channel-icon {
-        width: 24px;
-        height: 24px;
-        margin-right: 12px;
-        flex-shrink: 0;
-      }
-      
-      /* Video styles */
-      .hiclient-video {
-        width: 100%;
-        border-radius: 8px;
-        margin-bottom: 16px;
-      }
-      
-      /* Empty state styles */
-      .lovable-empty-state {
-        text-align: center;
-        padding: 40px 20px;
-        color: #666;
-      }
-      
-      .lovable-empty-icon {
-        font-size: 48px;
-        margin-bottom: 16px;
-      }
+  function getChannelIcon(channel) {
+    var icons = {
+      whatsapp: '<img src="/social-icons/007-social.png" alt="Whatsapp" className="w-8 h-8" />',
+      telegram: '<img src="/social-icons/006-telegram.png" alt="Telegram" className="w-8 h-8" />',
+      instagram: '<img src="/social-icons/002-instagram.png" alt="Instagram" className="w-8 h-8" />',
+      messenger: '<img src="/social-icons/018-messenger.png" alt="Messenger" className="w-8 h-8" />',
+      viber: '<img src="/social-icons/011-viber.png" alt="Viber" className="w-8 h-8" />',
+      discord: '<img src="/social-icons/017-discord.png" alt="Discord" className="w-8 h-8" />',
+      tiktok: '<img src="/social-icons/004-tiktok.png" alt="Tiktok" className="w-8 h-8" />',
+      youtube: '<img src="/social-icons/008-youtube.png" alt="Youtube" className="w-8 h-8" />',
+      facebook: '<img src="/social-icons/003-facebook.png" alt="Facebook" className="w-8 h-8" />',
+      twitter: '<img src="/social-icons/twitter.png" alt="X" className="w-8 h-8" />',
+      linkedin: '<img src="/social-icons/005-linkedin.png" alt="Linkedin" className="w-8 h-8" />',
+      github: '<img src="/social-icons/012-github.png" alt="Github" className="w-8 h-8" />',
+      behance: '<img src="/social-icons/014-behance.png" alt="Behance" className="w-8 h-8" />',
+      dribble: '<img src="/social-icons/013-dribble.png" alt="Dribble" className="w-8 h-8" />',
+      figma: '<img src="/social-icons/016-figma.png" alt="Figma" className="w-8 h-8" />',
+      upwork: '<img src="/social-icons/015-upwork.png" alt="Upwork" className="w-8 h-8" />',
+      website: '<img src="/social-icons/internet.png" alt="Website" className="w-8 h-8" />',
+      email: '<img src="/social-icons/019-mail.png" alt="Email" className="w-8 h-8" />',
+      phone: '<img src="/social-icons/telephone.png" alt="Telephone" className="w-8 h-8" />',
+      custom: '<img src="/social-icons/link.png" alt="Link" className="w-8 h-8" />'
+    };
+    return icons[channel.type] || '🔗';
+  }
 
-      /* Live Chat Styles */
-      #lovable-live-chat-container {
-        border-top: 1px solid #e5e7eb;
-        margin-top: 16px;
-        padding-top: 16px;
+  function getChannelColor(type) {
+    var colors = {
+      phone: '#ffffff',
+      custom: '#ffffff'
+    };
+    return colors[type] || '#ffffff';
+  }
+  
+  console.log('Widget loading with channels:', {{CHANNELS_DATA}});
+  
+  var channelsData = {{CHANNELS_DATA}};
+  
+  function openChannel(url) {
+    window.open(url, '_blank');
+  }
+  
+  function toggleDropdown(dropdownId) {
+    var dropdown = document.getElementById(dropdownId);
+    var arrow = document.querySelector('[data-dropdown="' + dropdownId + '"]');
+    
+    if (!dropdown || !arrow) return;
+    
+    var allDropdowns = document.querySelectorAll('.dropdown');
+    var allArrows = document.querySelectorAll('.dropdown-arrow');
+    
+    allDropdowns.forEach(function(d) {
+      if (d.id !== dropdownId) {
+        d.classList.remove('show');
       }
-
-      .lovable-live-chat-header {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 12px;
-        font-weight: 600;
-        color: #374151;
+    });
+    
+    allArrows.forEach(function(a) {
+      if (a !== arrow) {
+        a.classList.remove('rotated');
       }
-
-      .lovable-live-chat-messages {
-        max-height: 200px;
-        overflow-y: auto;
-        margin-bottom: 12px;
-        padding: 8px;
-        background: #f9fafb;
-        border-radius: 6px;
-        border: 1px solid #e5e7eb;
+    });
+    
+    dropdown.classList.toggle('show');
+    arrow.classList.toggle('rotated');
+  }
+  
+  function generateChannelsHtml() {
+    if (!channelsData || channelsData.length === 0) {
+      var emptyState = document.querySelector('.lovable-empty-state');
+      if (emptyState) {
+        emptyState.style.display = 'block';
       }
-
-      .lovable-chat-message {
-        margin-bottom: 8px;
-        padding: 8px 12px;
-        border-radius: 8px;
-        max-width: 80%;
-      }
-
-      .lovable-chat-message.visitor {
-        background: #3b82f6;
-        color: white;
-        margin-left: auto;
-        text-align: right;
-      }
-
-      .lovable-chat-message.agent {
-        background: #e5e7eb;
-        color: #374151;
-        margin-right: auto;
-      }
-
-      .lovable-chat-message-sender {
-        font-size: 12px;
-        opacity: 0.8;
-        margin-bottom: 4px;
-      }
-
-      .lovable-chat-input-container {
-        display: flex;
-        gap: 8px;
-      }
-
-      .lovable-chat-input {
-        flex: 1;
-        padding: 8px 12px;
-        border: 1px solid #d1d5db;
-        border-radius: 6px;
-        font-size: 14px;
-        outline: none;
-      }
-
-      .lovable-chat-input:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-      }
-
-      .lovable-chat-send-btn {
-        padding: 8px 16px;
-        background: #3b82f6;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background 0.2s;
-      }
-
-      .lovable-chat-send-btn:hover {
-        background: #2563eb;
-      }
-
-      .lovable-chat-send-btn:disabled {
-        background: #9ca3af;
-        cursor: not-allowed;
-      }
-
-      /* Responsive styles */
-      @media (max-width: 768px) {
-        #lovable-widget-modal {
-          padding: 10px !important;
-        }
+      return '';
+    }
+    
+    var html = '';
+    
+    for (var i = 0; i < channelsData.length; i++) {
+      var channel = channelsData[i];
+      var channelUrl = getChannelUrl(channel);
+      var channelIcon = getChannelIcon(channel);
+      var channelColor = getChannelColor(channel.type);
+      
+      if (channel.childChannels && channel.childChannels.length > 0) {
+        var dropdownId = 'dropdown-' + channel.id;
         
-        #lovable-modal-content {
-          width: calc(100% - 20px) !important;
-          max-width: none !important;
-        }
-      }
-      
-      /* Force visibility for everything - CRITICAL */
-      #lovable-widget-container,
-      #lovable-widget-container *,
-      #lovable-widget-button,
-      #lovable-widget-relative-container {
-        visibility: visible !important;
-        opacity: 1 !important;
-        display: block !important;
-      }
-      
-      #lovable-widget-button {
-        display: flex !important;
-      }
-    `,
-    js: `
-      console.log('🔥 Widget script starting - SIMPLE RELIABLE VERSION');
-      
-      // Widget configuration
-      let channels = [];
-      let liveChatEnabled = false;
-      let liveChatAgentName = 'Support Team';
-      let widgetPosition = 'right';
-      
-      // Parse configuration data
-      try {
-        const channelsData = '{{CHANNELS_DATA}}';
-        if (channelsData && channelsData !== '{{CHANNELS_DATA}}') {
-          channels = JSON.parse(channelsData);
-        }
-        liveChatEnabled = '{{LIVE_CHAT_ENABLED}}' === 'true';
-        liveChatAgentName = '{{LIVE_CHAT_AGENT_NAME}}' || 'Support Team';
-        widgetPosition = '{{POSITION}}' || 'right';
+        html += '<div class="parent-channel-wrapper">';
+        html += '<div style="display: flex; align-items: center; border: 1px solid #e2e8f0; border-radius: 12px; background: white; transition: all 0.3s ease;">';
         
-        console.log('🔥 Widget config:', {
-          channels: channels.length,
-          position: widgetPosition,
-          liveChatEnabled: liveChatEnabled
-        });
-      } catch (e) {
-        console.error('❌ Error parsing widget data:', e);
-      }
-
-      // Helper functions - defined first
-      function getChannelIcon(type) {
-        const icons = {
-          whatsapp: '💬',
-          telegram: '✈️',
-          email: '📧',
-          phone: '📞',
-          instagram: '📷',
-          facebook: '👥',
-          twitter: '🐦',
-          linkedin: '💼',
-          youtube: '📺',
-          tiktok: '🎵',
-          discord: '🎮',
-          custom: '🔗'
-        };
-        return icons[type] || '🔗';
-      }
-
-      function getChannelUrl(channel) {
-        switch (channel.type) {
-          case 'whatsapp':
-            return 'https://wa.me/' + channel.value.replace(/[^0-9]/g, '');
-          case 'telegram':
-            return 'https://t.me/' + channel.value.replace('@', '');
-          case 'email':
-            return 'mailto:' + channel.value;
-          case 'phone':
-            return 'tel:' + channel.value;
-          case 'instagram':
-            return channel.value.startsWith('http') ? channel.value : 'https://instagram.com/' + channel.value;
-          default:
-            return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
-        }
-      }
-
-      // Global function for opening channels
-      window.openChannel = function(url) {
-        console.log('🔥 Opening channel:', url);
-        window.open(url, '_blank');
-      };
-
-      // SIMPLE BUTTON VISIBILITY FUNCTION
-      function makeButtonVisible() {
-        const button = document.getElementById('lovable-widget-button');
-        const container = document.getElementById('lovable-widget-container');
+        // Changed to a div instead of an anchor to prevent direct navigation
+        html += '<div class="parent-channel" style="border: none; margin: 0; flex: 1; cursor: pointer;" onclick="toggleDropdown(' + "'" + dropdownId + "'" + ')">';
+        html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
+        html += '<div class="channel-info">';
+        html += '<div class="channel-label">' + escapeHtml(channel.label) + '</div>';
+        html += '<div class="channel-value">' + escapeHtml(channel.value) + '</div>';
+        html += '</div>';
+        html += '</div>';
         
-        if (button) {
-          console.log('🔥 Making button visible');
-          button.style.cssText = 'display: flex !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; position: relative !important; z-index: 100000 !important; width: {{BUTTON_SIZE}}px !important; height: {{BUTTON_SIZE}}px !important; background-color: {{BUTTON_COLOR}} !important; border: none !important; border-radius: 50% !important; cursor: pointer !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important; align-items: center !important; justify-content: center !important; color: white !important; font-size: 24px !important;';
-        }
+        html += '<button class="dropdown-toggle" onclick="toggleDropdown(' + "'" + dropdownId + "'" + ')">';
+        html += '<svg class="dropdown-arrow" data-dropdown="' + dropdownId + '" viewBox="0 0 24 24" fill="currentColor">';
+        html += '<path d="M7 10l5 5 5-5z"/>';
+        html += '</svg>';
+        html += '</button>';
+        html += '<div class="child-count">' + (channel.childChannels.length + 1) + '</div>';
+        html += '</div>';
+        html += '<div class="dropdown" id="' + dropdownId + '">';
         
-        if (container) {
-          console.log('🔥 Making container visible');
-          container.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; position: fixed !important; bottom: 20px !important; z-index: 99999 !important; pointer-events: auto !important; {{POSITION_STYLE}}';
-        }
-      }
-
-      // Channel rendering functions
-      function renderChannels() {
-        const channelsContainer = document.getElementById('lovable-widget-channels');
-        if (!channelsContainer) return;
+        // Add the parent channel as the first item in the dropdown
+        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="dropdown-item">';
+        html += '<div class="dropdown-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
+        html += '<div class="dropdown-info">';
+        html += '<div class="dropdown-label">' + escapeHtml(channel.label) + ' (Primary)</div>';
+        html += '<div class="dropdown-value">' + escapeHtml(channel.value) + '</div>';
+        html += '</div>';
+        html += '</a>';
         
-        console.log('🔥 Rendering channels:', channels.length);
-        
-        if (channels.length === 0) {
-          const emptyState = document.querySelector('.lovable-empty-state');
-          if (emptyState) {
-            emptyState.style.display = 'block';
-          }
-          return;
-        }
-
-        const channelsHtml = channels.map(function(channel) {
-          const iconHtml = channel.customIcon 
-            ? '<img src="' + channel.customIcon + '" alt="' + channel.label + '" class="lovable-channel-icon" />'
-            : getChannelIcon(channel.type);
+        for (var j = 0; j < channel.childChannels.length; j++) {
+          var childChannel = channel.childChannels[j];
+          var childUrl = getChannelUrl(childChannel);
+          var childIcon = getChannelIcon(childChannel);
+          var childColor = getChannelColor(childChannel.type);
           
-          const channelUrl = getChannelUrl(channel);
-          return '<div class="lovable-channel-item" onclick="openChannel(' + "'" + channelUrl + "'" + ')">' +
-            iconHtml +
-            '<span>' + channel.label + '</span>' +
-          '</div>';
-        }).join('');
-        
-        channelsContainer.innerHTML = channelsHtml;
-        console.log('✅ Channels rendered');
-      }
-
-      // Initialize widget immediately
-      function initializeWidget() {
-        console.log('🔥 Initializing widget...');
-        
-        // Make button visible FIRST
-        makeButtonVisible();
-        
-        // Get DOM elements
-        const modal = document.getElementById('lovable-widget-modal');
-        const button = document.getElementById('lovable-widget-button');
-        const closeBtn = document.getElementById('lovable-widget-close');
-        const tooltip = document.getElementById('lovable-widget-tooltip');
-
-        console.log('🔥 Elements found:', {
-          modal: !!modal,
-          button: !!button,
-          closeBtn: !!closeBtn
-        });
-
-        // Set modal position class
-        if (modal) {
-          modal.classList.add('position-' + widgetPosition);
-        }
-
-        // Tooltip functions
-        function showTooltip() {
-          const tooltipDisplay = '{{TOOLTIP_DISPLAY}}';
-          if (tooltipDisplay === 'hover' && tooltip) {
-            tooltip.style.display = 'block';
-          }
-        }
-
-        function hideTooltip() {
-          if (tooltip) {
-            tooltip.style.display = 'none';
-          }
-        }
-
-        // Button event listeners
-        if (button) {
-          button.addEventListener('mouseenter', showTooltip);
-          button.addEventListener('mouseleave', hideTooltip);
-          button.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('🔥 Button clicked, opening modal');
-            
-            if (modal) {
-              modal.style.display = 'flex';
-              modal.style.visibility = 'visible';
-              modal.style.opacity = '1';
-              
-              const content = document.getElementById('lovable-modal-content');
-              if (content) {
-                content.style.transform = 'translateY(0)';
-              }
-              console.log('✅ Modal opened');
-            }
-          });
-          
-          console.log('✅ Button event listeners attached');
-        }
-
-        // Close button event listener
-        if (closeBtn) {
-          closeBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('🔥 Close button clicked');
-            
-            if (modal) {
-              modal.style.opacity = '0';
-              const content = document.getElementById('lovable-modal-content');
-              if (content) {
-                content.style.transform = 'translateY(20px)';
-              }
-              setTimeout(function() {
-                modal.style.visibility = 'hidden';
-                modal.style.display = 'none';
-              }, 300);
-            }
-          });
-        }
-
-        // Modal backdrop click
-        if (modal) {
-          modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-              if (closeBtn) {
-                closeBtn.click();
-              }
-            }
-          });
-        }
-
-        // Force button visibility multiple times
-        makeButtonVisible();
-        setTimeout(makeButtonVisible, 100);
-        setTimeout(makeButtonVisible, 500);
-
-        // Render channels
-        renderChannels();
-        
-        // Initialize live chat LAST if enabled (so it doesn't interfere)
-        if (liveChatEnabled) {
-          setTimeout(function() {
-            const liveChatContainer = document.getElementById('lovable-live-chat-container');
-            if (liveChatContainer) {
-              console.log('🔥 Initializing live chat');
-              liveChatContainer.style.display = 'block';
-              liveChatContainer.innerHTML = '<div class="lovable-live-chat-header"><span>💬</span><span>Chat with ' + liveChatAgentName + '</span></div><div class="lovable-live-chat-messages"><div class="lovable-chat-message agent"><div>Hello! How can we help you today?</div></div></div>';
-            }
-          }, 200);
+          html += '<a href="' + escapeHtml(childUrl) + '" target="_blank" class="dropdown-item">';
+          html += '<div class="dropdown-icon" style="background: ' + childColor + ';">' + childIcon + '</div>';
+          html += '<div class="dropdown-info">';
+          html += '<div class="dropdown-label">' + escapeHtml(childChannel.label) + '</div>';
+          html += '<div class="dropdown-value">' + escapeHtml(childChannel.value) + '</div>';
+          html += '</div>';
+          html += '</a>';
         }
         
-        console.log('✅ Widget initialization complete');
-      }
-
-      // Multiple initialization attempts
-      console.log('🔥 Starting widget initialization...');
-      
-      // Try immediate initialization
-      if (document.readyState === 'complete') {
-        initializeWidget();
-      } else if (document.readyState === 'interactive') {
-        setTimeout(initializeWidget, 50);
+        html += '</div>';
+        html += '</div>';
       } else {
-        document.addEventListener('DOMContentLoaded', initializeWidget);
+        html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="channel-item">';
+        html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
+        html += '<div class="channel-info">';
+        html += '<div class="channel-label">' + escapeHtml(channel.label) + '</div>';
+        html += '<div class="channel-value">' + escapeHtml(channel.value) + '</div>';
+        html += '</div>';
+        html += '<div class="channel-arrow">→</div>';
+        html += '</a>';
+      }
+    }
+    
+    return html;
+  }
+  
+  function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+  
+  function playVideo() {
+    try {
+      console.log('playVideo function called');
+      var videos = document.querySelectorAll('.hiclient-video-player');
+      console.log('Found videos:', videos.length);
+      
+      if (videos.length > 0) {
+        videos.forEach(function(video, index) {
+          console.log('Processing video', index, 'with src:', video.src);
+          
+          if (video.tagName === 'VIDEO') {
+            // Handle HTML5 video elements
+            if (video.src && video.src !== '') {
+              video.currentTime = 0;
+              // Enable sound for video playback
+              
+              var playPromise = video.play();
+              if (playPromise !== undefined) {
+                playPromise.then(function() {
+                  console.log('Video', index, 'started playing successfully with sound');
+                }).catch(function(error) {
+                  console.log('Video', index, 'autoplay failed:', error);
+                  // Force play after small delay
+                  setTimeout(function() {
+                    try {
+                      video.play().then(function() {
+                        console.log('Video', index, 'started on retry with sound');
+                      }).catch(function(retryError) {
+                        console.log('Video', index, 'retry failed:', retryError);
+                      });
+                    } catch (e) {
+                      console.log('Video', index, 'retry exception:', e);
+                    }
+                  }, 500);
+                });
+              }
+            } else {
+              console.log('Video', index, 'has no valid src');
+            }
+          } else if (video.tagName === 'IFRAME') {
+            // Handle YouTube iframe videos
+            console.log('Processing YouTube iframe', index);
+            var currentSrc = video.src;
+            // Add autoplay parameter to YouTube iframe when modal opens
+            if (currentSrc && !currentSrc.includes('autoplay=1')) {
+              var separator = currentSrc.includes('?') ? '&' : '?';
+              video.src = currentSrc + separator + 'autoplay=1';
+              console.log('YouTube iframe', index, 'autoplay enabled');
+            }
+          }
+        });
+      } else {
+        console.log('No video elements found with class hiclient-video-player');
+      }
+    } catch (error) {
+      console.log('Error in playVideo function:', error);
+    }
+  }
+  
+  function initWidget() {
+    console.log('Initializing widget...');
+    
+    var channelsContainer = document.querySelector('#lovable-widget-channels');
+    if (channelsContainer) {
+      var generatedHtml = generateChannelsHtml();
+      channelsContainer.innerHTML = generatedHtml;
+      console.log('Channels HTML generated and inserted');
+    }
+    
+    var button = document.querySelector('#lovable-widget-button');
+    var modal = document.querySelector('#lovable-widget-modal');
+    var modalContent = document.querySelector('#lovable-modal-content');
+    var tooltip = document.querySelector('#lovable-widget-tooltip');
+    var closeBtn = document.querySelector('#lovable-widget-close');
+    
+    if (!button || !modal) {
+      console.error('Missing widget elements:', { button: !!button, modal: !!modal });
+      return;
+    }
+    
+    console.log('Widget elements found:', { button: !!button, modal: !!modal, closeBtn: !!closeBtn });
+    
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Button clicked, showing modal');
+      modal.style.display = 'flex';
+      modal.style.visibility = 'visible';
+      modal.style.opacity = '1';
+      
+      if (modalContent) {
+        setTimeout(function() {
+          modalContent.style.transform = 'translateY(0)';
+        }, 50);
       }
       
-      // Backup initialization
-      setTimeout(initializeWidget, 200);
-      setTimeout(initializeWidget, 1000);
+      // Start video playback when modal opens - with delay to ensure DOM is ready
+      setTimeout(function() {
+        console.log('Attempting to play video after modal open');
+        playVideo();
+      }, 300);
+    });
+    
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Close button clicked');
+        closeModal();
+      });
+    }
+    
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        console.log('Modal backdrop clicked');
+        closeModal();
+      }
+    });
+    
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal.style.display === 'flex') {
+        console.log('ESC key pressed');
+        closeModal();
+      }
+    });
+    
+    function closeModal() {
+      // Pause all videos when modal closes and reset YouTube iframes
+      try {
+        var videos = document.querySelectorAll('.hiclient-video-player');
+        videos.forEach(function(video) {
+          if (video.tagName === 'VIDEO' && !video.paused) {
+            video.pause();
+            console.log('Video paused');
+          } else if (video.tagName === 'IFRAME') {
+            // Remove autoplay from YouTube iframe when modal closes
+            var currentSrc = video.src;
+            if (currentSrc && currentSrc.includes('autoplay=1')) {
+              video.src = currentSrc.replace(/[?&]autoplay=1/, '').replace(/autoplay=1[&]?/, '');
+              console.log('YouTube iframe autoplay disabled');
+            }
+          }
+        });
+      } catch (error) {
+        console.log('Error pausing videos:', error);
+      }
       
-      console.log('✅ Widget script loaded - SIMPLE VERSION');
-    `
+      if (modalContent) {
+        modalContent.style.transform = 'translateY(20px)';
+      }
+      
+      setTimeout(function() {
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        
+        var allDropdowns = document.querySelectorAll('.dropdown');
+        var allArrows = document.querySelectorAll('.dropdown-arrow');
+        allDropdowns.forEach(function(dropdown) {
+          dropdown.classList.remove('show');
+        });
+        allArrows.forEach(function(arrow) {
+          arrow.classList.remove('rotated');
+        });
+      }, 100);
+    }
+    
+    if (tooltip && button) {
+      if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
+        button.addEventListener('mouseenter', function() {
+          tooltip.style.display = 'block';
+          tooltip.style.visibility = 'visible';
+          tooltip.style.opacity = '1';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+          tooltip.style.display = 'none';
+          tooltip.style.visibility = 'hidden';
+          tooltip.style.opacity = '0';
+        });
+      } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
+        tooltip.style.display = 'block';
+        tooltip.style.visibility = 'visible';
+        tooltip.style.opacity = '1';
+      }
+    }
+    
+    console.log('Widget initialized successfully');
+    
+    // Only preload video metadata on widget init, do NOT start playing
+    setTimeout(function() {
+      var videos = document.querySelectorAll('.hiclient-video-player');
+      if (videos.length > 0) {
+        console.log('Preloading', videos.length, 'videos metadata');
+        videos.forEach(function(video) {
+          if (video.tagName === 'VIDEO') {
+            video.preload = 'metadata'; // Only preload metadata, not full video
+          }
+        });
+      }
+    }, 100);
+  }
+  
+  window.refreshWidget = function() {
+    var channelsContainer = document.querySelector('#lovable-widget-channels');
+    if (channelsContainer) {
+      var generatedHtml = generateChannelsHtml();
+      channelsContainer.innerHTML = generatedHtml;
+    }
   };
-}
+  
+  window.openChannel = openChannel;
+  window.toggleDropdown = toggleDropdown;
+  window.playVideo = playVideo;
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWidget);
+  } else {
+    setTimeout(initWidget, 100);
+  }
+`;
+
+export const defaultTemplate: WidgetTemplate = {
+  id: 'default',
+  name: 'Modern Clean Template', 
+  description: 'Modern and clean floating widget with green accent',
+  html: defaultHtmlTemplate,
+  css: defaultCssStyles,
+  js: defaultJavaScriptLogic
+};
+
+export const getDefaultTemplate = () => defaultTemplate;

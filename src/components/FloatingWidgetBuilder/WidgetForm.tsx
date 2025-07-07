@@ -7,8 +7,8 @@ import { WebsiteInfoForm } from './WebsiteInfoForm';
 import { ChannelManager } from './ChannelManager';
 import { VideoUpload } from './VideoUpload';
 import { CustomizationOptions } from './CustomizationOptions';
-import { LiveChatSettings } from './LiveChatSettings';
 import { Channel, FormData } from './types';
+import { TemplatePreview } from './TemplatePreview';
 
 interface WidgetFormProps {
   websiteName: string;
@@ -111,15 +111,6 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             onPreviewVideoHeightChange={(height) => onFormDataChange('previewVideoHeight', height)}
           />
 
-          {/* Live Chat Settings */}
-          <LiveChatSettings
-            liveChatEnabled={formData.liveChatEnabled}
-            liveChatAgentName={formData.liveChatAgentName}
-            websiteName={websiteName}
-            onLiveChatEnabledChange={(enabled) => onFormDataChange('liveChatEnabled', enabled)}
-            onLiveChatAgentNameChange={(name) => onFormDataChange('liveChatAgentName', name)}
-          />
-
           {/* Customization Options */}
           <Card>
             <CardHeader>
@@ -153,6 +144,14 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           </Button>
         </CardContent>
       </Card>
+
+      {/* Live widget preview directly on the page */}
+      <TemplatePreview
+        showWidget={channels.length > 0}
+        formData={formData}
+        channels={channels}
+        editingWidget={editingWidget}
+      />
     </>
   );
 };

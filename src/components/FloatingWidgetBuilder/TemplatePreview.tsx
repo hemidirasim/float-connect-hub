@@ -84,27 +84,55 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       widgetHeight: 600 // Default value
     };
 
-    // Use SAME renderer as edge function - but get complete script directly
+    // Use SAME renderer as edge function
     const renderer = new WidgetTemplateRenderer(template, templateConfig);
     const completeScript = renderer.generateWidgetScript();
     
-    // Instead of parsing, just inject the complete script directly
-    const finalHtml = `
-      <div id="widget-preview-container"></div>
-      <script>
-        // Clear any existing widgets first
-        try {
-          const existingWidgets = document.querySelectorAll('[id*="lovable-widget"]');
-          existingWidgets.forEach(w => w.remove());
-        } catch(e) {}
-        
-        // Execute the complete widget script
-        ${completeScript}
-      </script>
-    `;
+    // Parse and clean the generated script to extract HTML, CSS, and JS
+    const htmlMatch = completeScript.match(/widgetDiv\.innerHTML = `([^`]+)`/);
+    const cssMatch = completeScript.match(/style\.textContent = `([^`]+)`/);
+    const jsMatch = completeScript.match(/\/\/ Execute JavaScript\s*([\s\S]*?)(?=\}\)\(\);)/);
+    
+    let finalHtml = '';
+    
+    if (htmlMatch && cssMatch) {
+      const html = htmlMatch[1]
+        .replace(/\\n/g, '\n')
+        .replace(/\\t/g, '\t')
+        .replace(/\\'/g, "'")
+        .replace(/\\"/g, '"');
+      
+      const css = cssMatch[1]
+        .replace(/\\n/g, '\n')
+        .replace(/\\t/g, '\t')
+        .replace(/\\'/g, "'")
+        .replace(/\\"/g, '"');
+      
+      let js = '';
+      if (jsMatch) {
+        js = jsMatch[1]
+          .replace(/\\n/g, '\n')
+          .replace(/\\t/g, '\t')
+          .replace(/\\'/g, "'")
+          .replace(/\\"/g, '"');
+      }
+      
+      finalHtml = `
+        <style>${css}</style>
+        ${html}
+        <script>
+          (function() {
+            ${js}
+          })();
+        </script>
+      `;
+    } else {
+      // Fallback - use the complete script
+      finalHtml = `<div id="temp-container"></div><script>${completeScript}</script>`;
+    }
     
     setPreviewHtml(finalHtml);
-    console.log('Floating widget preview generated - DIRECT INJECTION');
+    console.log('Floating widget preview generated using SAME system as edge function');
   }, [
     showWidget,
     formData.templateId,
@@ -140,7 +168,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
           const tempDiv = document.createElement('div');
           tempDiv.innerHTML = previewHtml;
           
-          // Add all elements to the body and mark them as preview
+          // Add all elements to the body
           const elements = Array.from(tempDiv.children);
           elements.forEach(element => {
             element.setAttribute('data-widget-preview', 'true');
@@ -149,18 +177,10 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 
           // Wait a bit for DOM to be ready, then execute any inline scripts
           setTimeout(() => {
-            // Find and execute ALL script tags that contain widget code
-            const allScripts = document.querySelectorAll('script');
-            allScripts.forEach(script => {
-              // Check if this script contains widget-related code or has preview attribute
-              const hasPreviewAttribute = script.hasAttribute('data-widget-preview');
-              const hasWidgetCode = script.textContent && (
-                script.textContent.includes('lovable-widget') ||
-                script.textContent.includes('Widget script') ||
-                script.textContent.includes('initializeWidget')
-              );
-              
-              if ((hasPreviewAttribute || hasWidgetCode) && script.textContent && script.textContent.trim()) {
+            // Find and execute script tags
+            const scripts = document.querySelectorAll('script[data-widget-preview]');
+            scripts.forEach(script => {
+              if (script.textContent && script.textContent.trim()) {
                 console.log('Executing widget script for preview...');
                 try {
                   // Create a new function from the script content and execute it

@@ -6,8 +6,7 @@ export function createWidgetConfig(widget: any): WidgetConfig {
     video_enabled: widget.video_enabled,
     video_url: widget.video_url,
     preview_video_height: widget.preview_video_height,
-    button_size: widget.button_size,
-    live_chat_enabled: widget.live_chat_enabled
+    button_size: widget.button_size
   })
 
   // Parse channels with fallback
@@ -42,14 +41,7 @@ export function createWidgetConfig(widget: any): WidgetConfig {
     useVideoPreview: Boolean(widget.video_enabled), // Use video_enabled as useVideoPreview
     buttonSize: widget.button_size || 60,
     previewVideoHeight: widget.preview_video_height || 120,
-    templateId: widget.template_id || 'default',
-    // Live Chat configuration
-    liveChatEnabled: Boolean(widget.live_chat_enabled),
-    liveChatAgentName: widget.live_chat_agent_name || widget.name || 'Support Team',
-    liveChatGreeting: widget.live_chat_greeting || 'Hello! How can we help you today?',
-    liveChatColor: widget.live_chat_color || '#4f46e5',
-    liveChatAutoOpen: Boolean(widget.live_chat_auto_open),
-    liveChatOfflineMessage: widget.live_chat_offline_message || 'We are currently offline. Please leave a message and we will get back to you.'
+    templateId: widget.template_id || 'default'
   }
 
   console.log('Final widget config created:', {
@@ -57,8 +49,7 @@ export function createWidgetConfig(widget: any): WidgetConfig {
     useVideoPreview: config.useVideoPreview,
     previewVideoHeight: config.previewVideoHeight,
     buttonSize: config.buttonSize,
-    templateId: config.templateId,
-    liveChatEnabled: config.liveChatEnabled
+    templateId: config.templateId
   })
 
   return config
