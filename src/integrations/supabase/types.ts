@@ -47,6 +47,56 @@ export type Database = {
         }
         Relationships: []
       }
+      banned_visitors: {
+        Row: {
+          ban_reason: string | null
+          banned_at: string
+          banned_by: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          updated_at: string
+          visitor_email: string | null
+          visitor_ip: string | null
+          visitor_name: string | null
+          widget_id: string
+        }
+        Insert: {
+          ban_reason?: string | null
+          banned_at?: string
+          banned_by?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          visitor_email?: string | null
+          visitor_ip?: string | null
+          visitor_name?: string | null
+          widget_id: string
+        }
+        Update: {
+          ban_reason?: string | null
+          banned_at?: string
+          banned_by?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          visitor_email?: string | null
+          visitor_ip?: string | null
+          visitor_name?: string | null
+          widget_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "banned_visitors_widget_id_fkey"
+            columns: ["widget_id"]
+            isOneToOne: false
+            referencedRelation: "widgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blogs: {
         Row: {
           author_id: string | null
@@ -92,6 +142,7 @@ export type Database = {
           custom_fields: Json | null
           ended_at: string | null
           id: string
+          is_banned: boolean | null
           last_message_at: string | null
           started_at: string
           status: string
@@ -107,6 +158,7 @@ export type Database = {
           custom_fields?: Json | null
           ended_at?: string | null
           id?: string
+          is_banned?: boolean | null
           last_message_at?: string | null
           started_at?: string
           status?: string
@@ -122,6 +174,7 @@ export type Database = {
           custom_fields?: Json | null
           ended_at?: string | null
           id?: string
+          is_banned?: boolean | null
           last_message_at?: string | null
           started_at?: string
           status?: string
@@ -459,6 +512,62 @@ export type Database = {
         }
         Relationships: []
       }
+      visitor_contacts: {
+        Row: {
+          created_at: string
+          custom_fields: Json | null
+          first_contact_at: string
+          id: string
+          last_contact_at: string
+          total_sessions: number | null
+          updated_at: string
+          user_agent: string | null
+          visitor_email: string | null
+          visitor_ip: string | null
+          visitor_name: string
+          visitor_phone: string | null
+          widget_id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_fields?: Json | null
+          first_contact_at?: string
+          id?: string
+          last_contact_at?: string
+          total_sessions?: number | null
+          updated_at?: string
+          user_agent?: string | null
+          visitor_email?: string | null
+          visitor_ip?: string | null
+          visitor_name: string
+          visitor_phone?: string | null
+          widget_id: string
+        }
+        Update: {
+          created_at?: string
+          custom_fields?: Json | null
+          first_contact_at?: string
+          id?: string
+          last_contact_at?: string
+          total_sessions?: number | null
+          updated_at?: string
+          user_agent?: string | null
+          visitor_email?: string | null
+          visitor_ip?: string | null
+          visitor_name?: string
+          visitor_phone?: string | null
+          widget_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visitor_contacts_widget_id_fkey"
+            columns: ["widget_id"]
+            isOneToOne: false
+            referencedRelation: "widgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       widget_templates: {
         Row: {
           created_at: string | null
@@ -684,6 +793,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_visitor_banned: {
+        Args: {
+          p_widget_id: string
+          p_visitor_email?: string
+          p_visitor_ip?: string
+        }
+        Returns: boolean
+      }
       mark_session_as_read: {
         Args: { session_id: string }
         Returns: undefined
@@ -695,6 +812,18 @@ export type Database = {
           p_user_agent?: string
         }
         Returns: Json
+      }
+      track_visitor_contact: {
+        Args: {
+          p_widget_id: string
+          p_visitor_name: string
+          p_visitor_email?: string
+          p_visitor_phone?: string
+          p_visitor_ip?: string
+          p_user_agent?: string
+          p_custom_fields?: Json
+        }
+        Returns: string
       }
       update_admin_last_login: {
         Args: { p_admin_id: string }

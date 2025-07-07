@@ -6,6 +6,7 @@ import { ProfileSettings } from "@/components/ProfileSettings";
 import { BillingSection } from "@/components/BillingSection";
 import { TransactionHistory } from "@/components/TransactionHistory";
 import { WebsitesList } from "./WebsitesList";
+import { LiveChatManager } from "./live-chat/LiveChatManager";
 
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -98,9 +99,7 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
       </TabsContent>
 
       <TabsContent value="live-chat">
-        <div className="text-center text-muted-foreground p-8">
-          <p>Live chat functionality will be implemented here.</p>
-        </div>
+        <LiveChatManager widgets={widgets} userEmail={userEmail} />
       </TabsContent>
 
       <TabsContent value="billing">
