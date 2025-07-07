@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { useRealtimeConnection } from "./useRealtimeConnection";
-import { User, Send, MessageCircle, Clock, Ban } from 'lucide-react';
+import { User, Send, MessageCircle, Clock, Ban, Trash2, MessageSquareOff } from 'lucide-react';
 
 interface ChatSession {
   id: string;
@@ -48,6 +49,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ session, widgetId, onBan
   const [newMessage, setNewMessage] = useState('');
   const [banReason, setBanReason] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showBanDialog, setShowBanDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEndDialog, setShowEndDialog] = useState(false);
   const { setupRealtimeChannel, cleanupChannel } = useRealtimeConnection();
 
   // Load messages when session changes
@@ -147,10 +151,52 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ session, widgetId, onBan
     }
   };
 
+  const handleEndSession = async () => {
+    if (!session) return;
+    
+    try {
+      const { error } = await supabase
+        .from('chat_sessions')
+        .update({ 
+          status: 'ended', 
+          ended_at: new Date().toISOString() 
+        })
+        .eq('id', session.id);
+
+      if (error) throw error;
+      
+      toast.success('Söhbət bitirildi');
+      setShowEndDialog(false);
+    } catch (error) {
+      console.error('Error ending session:', error);
+      toast.error('Söhbət bitirilə bilmədi');
+    }
+  };
+
+  const handleDeleteSession = async () => {
+    if (!session) return;
+    
+    try {
+      const { error } = await supabase
+        .from('chat_sessions')
+        .delete()
+        .eq('id', session.id);
+
+      if (error) throw error;
+      
+      toast.success('Söhbət silindi');
+      setShowDeleteDialog(false);
+    } catch (error) {
+      console.error('Error deleting session:', error);
+      toast.error('Söhbət silinə bilmədi');
+    }
+  };
+
   const handleBan = () => {
     if (session && banReason.trim()) {
       onBanVisitor(session, banReason.trim());
       setBanReason('');
+      setShowBanDialog(false);
     }
   };
 
@@ -194,45 +240,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ session, widgetId, onBan
           <Badge variant={session.status === 'active' ? 'default' : 'secondary'}>
             {session.status === 'active' ? 'Aktiv' : 'Bitib'}
           </Badge>
-          
-          {session.status === 'active' && !session.is_banned && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  <Ban className="w-4 h-4 mr-1" />
-                  Ban
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Ziyarətçini ban et</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {session.visitor_name} adlı ziyarətçini ban etmək istədiyinizə əminsiniz?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <div className="my-4">
-                  <Label htmlFor="ban-reason">Ban səbəbi</Label>
-                  <Textarea
-                    id="ban-reason"
-                    placeholder="Ban səbəbini qeyd edin..."
-                    value={banReason}
-                    onChange={(e) => setBanReason(e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Ləğv et</AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={handleBan}
-                    disabled={!banReason.trim()}
-                    className="bg-destructive hover:bg-destructive/90"
-                  >
-                    Ban et
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
         </div>
       </CardHeader>
 
@@ -273,29 +280,48 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ session, widgetId, onBan
           </div>
         </ScrollArea>
 
-        {/* Message Input */}
+        {/* Message Input with Context Menu */}
         <div className="border-t p-4">
           {session.status === 'active' && !session.is_banned ? (
-            <div className="flex gap-2">
-              <Input
-                placeholder="Mesajınızı yazın..."
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSendMessage();
-                  }
-                }}
-                className="flex-1"
-                disabled={loading}
-              />
-              <Button 
-                onClick={handleSendMessage} 
-                disabled={!newMessage.trim() || loading}
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
+            <ContextMenu>
+              <ContextMenuTrigger asChild>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Mesajınızı yazın..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleSendMessage();
+                      }
+                    }}
+                    className="flex-1"
+                    disabled={loading}
+                  />
+                  <Button 
+                    onClick={handleSendMessage} 
+                    disabled={!newMessage.trim() || loading}
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent className="w-64">
+                <ContextMenuItem onClick={() => setShowEndDialog(true)}>
+                  <MessageSquareOff className="w-4 h-4 mr-2" />
+                  Söhbəti bitir
+                </ContextMenuItem>
+                <ContextMenuItem onClick={() => setShowDeleteDialog(true)}>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Söhbəti sil
+                </ContextMenuItem>
+                <ContextMenuSeparator />
+                <ContextMenuItem onClick={() => setShowBanDialog(true)}>
+                  <Ban className="w-4 h-4 mr-2" />
+                  Ziyarətçini ban et
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
           ) : (
             <div className="text-center text-muted-foreground p-4 bg-muted/50 rounded-lg">
               <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -309,6 +335,77 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ session, widgetId, onBan
           )}
         </div>
       </CardContent>
+
+      {/* Ban Dialog */}
+      <AlertDialog open={showBanDialog} onOpenChange={setShowBanDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ziyarətçini ban et</AlertDialogTitle>
+            <AlertDialogDescription>
+              {session.visitor_name} adlı ziyarətçini ban etmək istədiyinizə əminsiniz?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="my-4">
+            <Label htmlFor="ban-reason">Ban səbəbi</Label>
+            <Textarea
+              id="ban-reason"
+              placeholder="Ban səbəbini qeyd edin..."
+              value={banReason}
+              onChange={(e) => setBanReason(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Ləğv et</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleBan}
+              disabled={!banReason.trim()}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Ban et
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* End Session Dialog */}
+      <AlertDialog open={showEndDialog} onOpenChange={setShowEndDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Söhbəti bitir</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bu söhbəti bitirmək istədiyinizə əminsiniz?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Ləğv et</AlertDialogCancel>
+            <AlertDialogAction onClick={handleEndSession}>
+              Bitir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Session Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Söhbəti sil</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bu söhbəti silmək istədiyinizə əminsiniz? Bu əməliyyat geri alına bilməz.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Ləğv et</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteSession}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Sil
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
