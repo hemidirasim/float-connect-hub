@@ -201,6 +201,9 @@ const defaultJavaScriptLogic = `
         
         console.log('Session restored successfully');
         
+        // Update button text to show continue conversation
+        updateLiveChatButtonText();
+        
         // Setup polling and load messages
         setupMessagePolling(sessionData.sessionId);
         loadSessionMessages(sessionData.sessionId);
@@ -214,6 +217,7 @@ const defaultJavaScriptLogic = `
         // Session is ended, clear storage
         console.log('Session is no longer active, clearing storage');
         clearSessionFromStorage();
+        updateLiveChatButtonText();
       }
     })
     .catch(error => {
@@ -224,6 +228,21 @@ const defaultJavaScriptLogic = `
     return true;
   }
   
+  
+  function updateLiveChatButtonText() {
+    var sessionData = getSessionFromStorage();
+    var buttonText = document.querySelector('#lovable-livechat-btn-text');
+    
+    if (buttonText) {
+      if (sessionData && sessionData.sessionId && sessionData.status === 'active') {
+        buttonText.textContent = 'Continue Conversation';
+      } else {
+        var config = {{WIDGET_CONFIG}};
+        buttonText.textContent = config.liveChatButtonText || 'Start Live Chat';
+      }
+    }
+  }
+
   function loadSessionMessages(sessionId) {
     fetch('https://ttzioshkresaqmsodhfb.supabase.co/rest/v1/live_chat_messages?session_id=eq.' + sessionId + '&order=created_at.asc', {
       headers: {
@@ -542,6 +561,9 @@ const defaultJavaScriptLogic = `
     lastMessageTime = null;
     clearSessionFromStorage();
     
+    // Update button text back to start live chat
+    updateLiveChatButtonText();
+    
     // Close live chat UI
     closeLiveChat();
   }
@@ -838,6 +860,9 @@ const defaultJavaScriptLogic = `
   
   function initWidget() {
     console.log('Initializing widget...');
+    
+    // Check for existing session and update button text accordingly
+    updateLiveChatButtonText();
     
     // Try to restore previous session on widget load
     var sessionData = getSessionFromStorage();

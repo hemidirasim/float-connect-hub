@@ -73,7 +73,12 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
           (payload) => {
             console.log('New session created:', payload);
             const newSession = payload.new as ChatSession;
-            setSessions(prev => [newSession, ...prev]);
+            setSessions(prev => {
+              // Check if session already exists to prevent duplicates
+              const exists = prev.some(s => s.id === newSession.id);
+              if (exists) return prev;
+              return [newSession, ...prev];
+            });
           }
         )
         .subscribe();
@@ -409,8 +414,8 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
                                variant="outline"
                                onClick={(e) => {
                                  e.stopPropagation();
+                                 console.log('Joining conversation:', session.id);
                                  setSelectedSession(session.id);
-                                 fetchMessages();
                                }}
                                className="mt-2 w-full"
                              >
