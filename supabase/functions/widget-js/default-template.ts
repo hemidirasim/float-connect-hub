@@ -490,36 +490,7 @@ export function getDefaultTemplate(): WidgetTemplate {
         console.log('✅ Widget initialization complete');
       }
 
-      // Channel rendering functions
-      function renderChannels() {
-        const channelsContainer = document.getElementById('lovable-widget-channels');
-        if (!channelsContainer) return;
-        
-        console.log('🔥 Rendering channels:', channels.length);
-        
-        if (channels.length === 0) {
-          const emptyState = document.querySelector('.lovable-empty-state');
-          if (emptyState) {
-            emptyState.style.display = 'block';
-          }
-          return;
-        }
-
-        const channelsHtml = channels.map(function(channel) {
-          const iconHtml = channel.customIcon 
-            ? '<img src="' + channel.customIcon + '" alt="' + channel.label + '" class="lovable-channel-icon" />'
-            : getChannelIcon(channel.type);
-          
-          return '<div class="lovable-channel-item" onclick="openChannel(\\'' + getChannelUrl(channel) + '\\')">' +
-            iconHtml +
-            '<span>' + channel.label + '</span>' +
-          '</div>';
-        }).join('');
-        
-        channelsContainer.innerHTML = channelsHtml;
-        console.log('✅ Channels rendered');
-      }
-
+      // Helper functions - defined first
       function getChannelIcon(type) {
         const icons = {
           whatsapp: '💬',
@@ -553,6 +524,36 @@ export function getDefaultTemplate(): WidgetTemplate {
           default:
             return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
         }
+      }
+
+      // Channel rendering functions
+      function renderChannels() {
+        const channelsContainer = document.getElementById('lovable-widget-channels');
+        if (!channelsContainer) return;
+        
+        console.log('🔥 Rendering channels:', channels.length);
+        
+        if (channels.length === 0) {
+          const emptyState = document.querySelector('.lovable-empty-state');
+          if (emptyState) {
+            emptyState.style.display = 'block';
+          }
+          return;
+        }
+
+        const channelsHtml = channels.map(function(channel) {
+          const iconHtml = channel.customIcon 
+            ? '<img src="' + channel.customIcon + '" alt="' + channel.label + '" class="lovable-channel-icon" />'
+            : getChannelIcon(channel.type);
+          
+          return '<div class="lovable-channel-item" onclick="openChannel(\\'' + getChannelUrl(channel) + '\\')">' +
+            iconHtml +
+            '<span>' + channel.label + '</span>' +
+          '</div>';
+        }).join('');
+        
+        channelsContainer.innerHTML = channelsHtml;
+        console.log('✅ Channels rendered');
       }
 
       // Global function for opening channels
