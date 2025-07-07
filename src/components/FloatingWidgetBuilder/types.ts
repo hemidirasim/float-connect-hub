@@ -41,4 +41,9 @@ export interface FormData {
   liveChatColor: string;
   liveChatAutoOpen: boolean;
   liveChatOfflineMessage: string;
+  // Pre-chat form fields
+  liveChatRequireEmail: boolean;
+  liveChatRequireName: boolean;
+  liveChatRequirePhone: boolean;
+  liveChatCustomFields: string;
 }

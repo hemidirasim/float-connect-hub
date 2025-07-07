@@ -13,12 +13,20 @@ interface LiveChatSettingsProps {
   liveChatColor: string;
   liveChatAutoOpen: boolean;
   liveChatOfflineMessage: string;
+  liveChatRequireEmail: boolean;
+  liveChatRequireName: boolean;
+  liveChatRequirePhone: boolean;
+  liveChatCustomFields: string;
   onLiveChatEnabledChange: (enabled: boolean) => void;
   onLiveChatAgentNameChange: (name: string) => void;
   onLiveChatGreetingChange: (greeting: string) => void;
   onLiveChatColorChange: (color: string) => void;
   onLiveChatAutoOpenChange: (autoOpen: boolean) => void;
   onLiveChatOfflineMessageChange: (message: string) => void;
+  onLiveChatRequireEmailChange: (required: boolean) => void;
+  onLiveChatRequireNameChange: (required: boolean) => void;
+  onLiveChatRequirePhoneChange: (required: boolean) => void;
+  onLiveChatCustomFieldsChange: (fields: string) => void;
 }
 
 export const LiveChatSettings: React.FC<LiveChatSettingsProps> = ({
@@ -28,12 +36,20 @@ export const LiveChatSettings: React.FC<LiveChatSettingsProps> = ({
   liveChatColor,
   liveChatAutoOpen,
   liveChatOfflineMessage,
+  liveChatRequireEmail,
+  liveChatRequireName,
+  liveChatRequirePhone,
+  liveChatCustomFields,
   onLiveChatEnabledChange,
   onLiveChatAgentNameChange,
   onLiveChatGreetingChange,
   onLiveChatColorChange,
   onLiveChatAutoOpenChange,
-  onLiveChatOfflineMessageChange
+  onLiveChatOfflineMessageChange,
+  onLiveChatRequireEmailChange,
+  onLiveChatRequireNameChange,
+  onLiveChatRequirePhoneChange,
+  onLiveChatCustomFieldsChange
 }) => {
   return (
     <Card>
@@ -123,6 +139,63 @@ export const LiveChatSettings: React.FC<LiveChatSettingsProps> = ({
                 checked={liveChatAutoOpen}
                 onCheckedChange={onLiveChatAutoOpenChange}
               />
+            </div>
+
+            <div className="space-y-4 pt-4 border-t">
+              <Label className="text-base font-semibold">Pre-Chat Form Settings</Label>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-base">Require Name</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Ask for visitor's name before starting chat
+                  </p>
+                </div>
+                <Switch
+                  checked={liveChatRequireName}
+                  onCheckedChange={onLiveChatRequireNameChange}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-base">Require Email</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Ask for visitor's email address before starting chat
+                  </p>
+                </div>
+                <Switch
+                  checked={liveChatRequireEmail}
+                  onCheckedChange={onLiveChatRequireEmailChange}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-base">Require Phone</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Ask for visitor's phone number before starting chat
+                  </p>
+                </div>
+                <Switch
+                  checked={liveChatRequirePhone}
+                  onCheckedChange={onLiveChatRequirePhoneChange}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="liveChatCustomFields">Custom Fields</Label>
+                <Textarea
+                  id="liveChatCustomFields"
+                  placeholder="Enter custom field names separated by commas (e.g., Company, Department, Subject)"
+                  value={liveChatCustomFields}
+                  onChange={(e) => onLiveChatCustomFieldsChange(e.target.value)}
+                  rows={3}
+                />
+                <p className="text-sm text-muted-foreground">
+                  Add custom fields that visitors need to fill before starting chat
+                </p>
+              </div>
             </div>
           </>
         )}

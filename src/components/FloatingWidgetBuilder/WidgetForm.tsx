@@ -143,12 +143,20 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             liveChatColor={formData.liveChatColor}
             liveChatAutoOpen={formData.liveChatAutoOpen}
             liveChatOfflineMessage={formData.liveChatOfflineMessage}
+            liveChatRequireEmail={formData.liveChatRequireEmail}
+            liveChatRequireName={formData.liveChatRequireName}
+            liveChatRequirePhone={formData.liveChatRequirePhone}
+            liveChatCustomFields={formData.liveChatCustomFields}
             onLiveChatEnabledChange={(enabled) => onFormDataChange('liveChatEnabled', enabled)}
             onLiveChatAgentNameChange={(name) => onFormDataChange('liveChatAgentName', name)}
             onLiveChatGreetingChange={(greeting) => onFormDataChange('liveChatGreeting', greeting)}
             onLiveChatColorChange={(color) => onFormDataChange('liveChatColor', color)}
             onLiveChatAutoOpenChange={(autoOpen) => onFormDataChange('liveChatAutoOpen', autoOpen)}
             onLiveChatOfflineMessageChange={(message) => onFormDataChange('liveChatOfflineMessage', message)}
+            onLiveChatRequireEmailChange={(required) => onFormDataChange('liveChatRequireEmail', required)}
+            onLiveChatRequireNameChange={(required) => onFormDataChange('liveChatRequireName', required)}
+            onLiveChatRequirePhoneChange={(required) => onFormDataChange('liveChatRequirePhone', required)}
+            onLiveChatCustomFieldsChange={(fields) => onFormDataChange('liveChatCustomFields', fields)}
           />
 
           <Button

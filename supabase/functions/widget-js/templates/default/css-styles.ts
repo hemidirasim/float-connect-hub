@@ -53,32 +53,41 @@ export const defaultCssStyles = `
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     z-index: 100001;
     display: flex;
     align-items: center;
     justify-content: center;
+    backdrop-filter: blur(4px);
   }
   
   #lovable-livechat-content {
     background: white;
-    border-radius: 12px;
+    border-radius: 16px;
     width: 90%;
-    max-width: 400px;
-    height: 500px;
+    max-width: 420px;
+    height: 600px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
   }
   
   #lovable-livechat-header {
-    padding: 16px;
+    padding: 20px;
     background: {{LIVE_CHAT_COLOR}};
     color: white;
-    border-radius: 12px 12px 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  #lovable-livechat-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
   }
   
   #lovable-livechat-close {
@@ -439,6 +448,7 @@ export const defaultCssStyles = `
     overflow: hidden;
     background: #000;
     position: relative;
+    z-index: 1;
   }
   
   .hiclient-video-container iframe {
