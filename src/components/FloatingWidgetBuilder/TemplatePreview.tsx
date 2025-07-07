@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MessageCircle, Phone, Mail, Send, Instagram, Zap, Globe, Users, Heart, Star, Square, Circle } from 'lucide-react';
+import { MessageCircle, Phone, Mail, Send, Instagram, Zap, Globe, Users, Heart, Star, Square, Circle, X, Minus } from 'lucide-react';
 import { Channel, FormData } from './types';
 
 interface TemplatePreviewProps {
@@ -20,6 +21,9 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [liveChatOpen, setLiveChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<Array<{text: string, isUser: boolean, time: string}>>([]);
+  const [chatInput, setChatInput] = useState('');
 
   const getChannelIcon = (type: string) => {
     switch (type) {
@@ -78,6 +82,40 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     window.open(url, '_blank');
   };
 
+  const handleSendMessage = () => {
+    if (chatInput.trim()) {
+      const newMessage = {
+        text: chatInput,
+        isUser: true,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setChatMessages([...chatMessages, newMessage]);
+      setChatInput('');
+      
+      // Simulate agent response
+      setTimeout(() => {
+        const agentMessage = {
+          text: "Thanks for your message! We'll get back to you soon.",
+          isUser: false,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        setChatMessages(prev => [...prev, agentMessage]);
+      }, 1000);
+    }
+  };
+
+  const handleStartLiveChat = () => {
+    setIsOpen(false);
+    setLiveChatOpen(true);
+    if (chatMessages.length === 0) {
+      setChatMessages([{
+        text: formData.liveChatGreeting,
+        isUser: false,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }]);
+    }
+  };
+
   // Show widget if there are channels OR live chat is enabled
   const shouldShowWidget = showWidget && (channels.length > 0 || formData.liveChatEnabled);
 
@@ -86,7 +124,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       <div className="fixed bottom-4 right-4 p-4 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 text-center">
         <MessageCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
         <p className="text-sm text-gray-500">
-          {channels.length === 0 && !formData.liveChatEnabled ? 'Add channels or enable live chat to see preview' : 'Widget preview will appear here'}
+          Add channels or enable live chat to see preview
         </p>
       </div>
     );
@@ -97,8 +135,80 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 
   return (
     <>
+      {/* Live Chat Modal */}
+      {liveChatOpen && formData.liveChatEnabled && (
+        <div 
+          className={`fixed bottom-20 ${position} w-80 h-96 bg-white rounded-lg shadow-xl border z-50`}
+          style={{ zIndex: 9999 }}
+        >
+          {/* Chat Header */}
+          <div 
+            className="flex items-center justify-between p-3 rounded-t-lg text-white"
+            style={{ backgroundColor: formData.liveChatColor }}
+          >
+            <div className="font-semibold">
+              {formData.liveChatAgentName ? `Chat with ${formData.liveChatAgentName}` : 'Live Chat'}
+            </div>
+            <div className="flex gap-1">
+              <button 
+                onClick={() => setLiveChatOpen(false)}
+                className="text-white hover:bg-white/20 p-1 rounded"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setLiveChatOpen(false)}
+                className="text-white hover:bg-white/20 p-1 rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Chat Messages */}
+          <div className="flex-1 p-3 h-72 overflow-y-auto bg-gray-50">
+            {chatMessages.map((message, index) => (
+              <div key={index} className={`mb-3 ${message.isUser ? 'text-right' : 'text-left'}`}>
+                <div 
+                  className={`inline-block max-w-xs p-2 rounded-lg ${
+                    message.isUser 
+                      ? 'text-white' 
+                      : 'bg-white border'
+                  }`}
+                  style={message.isUser ? { backgroundColor: formData.liveChatColor } : {}}
+                >
+                  {message.text}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">{message.time}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Chat Input */}
+          <div className="p-3 border-t bg-white rounded-b-lg">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="Type your message..."
+                className="flex-1 p-2 border rounded-full text-sm outline-none focus:border-blue-500"
+              />
+              <button
+                onClick={handleSendMessage}
+                className="text-white px-4 py-2 rounded-full text-sm font-medium"
+                style={{ backgroundColor: formData.liveChatColor }}
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Widget Button */}
-      <div className={`fixed bottom-4 ${position} z-50`}>
+      <div className={`fixed bottom-4 ${position} z-40`}>
         <div className="relative group">
           {/* Tooltip */}
           {formData.tooltip && formData.tooltipDisplay === 'hover' && (
@@ -176,6 +286,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
                     borderColor: formData.liveChatColor,
                     color: formData.liveChatColor
                   }}
+                  onClick={handleStartLiveChat}
                 >
                   <MessageCircle className="w-5 h-5 mr-3" />
                   <div className="text-left">

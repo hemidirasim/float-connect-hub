@@ -4,7 +4,7 @@ import { defaultHtmlTemplate } from './templates/default/html-template.ts'
 import { defaultCssStyles } from './templates/default/css-styles.ts'
 import { getChannelUrl, getChannelIcon, getChannelColor } from './templates/default/utility-functions.ts'
 
-// JavaScript logic with proper utility injection and fixed string escaping
+// JavaScript logic with proper utility injection and live chat functionality
 const defaultJavaScriptLogic = `
   // Utility functions
   function getChannelUrl(channel) {
@@ -57,11 +57,90 @@ const defaultJavaScriptLogic = `
   }
   
   console.log('Widget loading with channels:', {{CHANNELS_DATA}});
+  console.log('Live chat enabled:', {{LIVE_CHAT_ENABLED}});
   
   var channelsData = {{CHANNELS_DATA}};
+  var liveChatEnabled = {{LIVE_CHAT_ENABLED}};
+  var liveChatMessages = [];
   
   function openChannel(url) {
     window.open(url, '_blank');
+  }
+
+  // Live Chat Functions
+  function openLiveChat() {
+    var modal = document.querySelector('#lovable-widget-modal');
+    var liveChatModal = document.querySelector('#hiclient-live-chat-modal');
+    
+    if (modal) {
+      modal.style.display = 'none';
+    }
+    
+    if (liveChatModal) {
+      liveChatModal.style.display = 'block';
+      
+      // Add initial greeting if no messages
+      if (liveChatMessages.length === 0) {
+        addChatMessage('{{LIVE_CHAT_GREETING}}', false);
+      }
+    }
+  }
+
+  function closeLiveChat() {
+    var liveChatModal = document.querySelector('#hiclient-live-chat-modal');
+    if (liveChatModal) {
+      liveChatModal.style.display = 'none';
+    }
+  }
+
+  function minimizeLiveChat() {
+    closeLiveChat();
+  }
+
+  function addChatMessage(message, isUser) {
+    var timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    var messageObj = {
+      text: message,
+      isUser: isUser,
+      time: timestamp
+    };
+    
+    liveChatMessages.push(messageObj);
+    renderChatMessages();
+  }
+
+  function renderChatMessages() {
+    var messagesContainer = document.querySelector('#hiclient-live-chat-messages');
+    if (!messagesContainer) return;
+    
+    var html = '<div class="hiclient-live-chat-greeting">{{LIVE_CHAT_GREETING}}</div>';
+    
+    liveChatMessages.forEach(function(msg) {
+      var messageClass = msg.isUser ? 'visitor' : 'agent';
+      html += '<div class="hiclient-live-chat-message ' + messageClass + '">';
+      html += '<div class="hiclient-live-chat-message-bubble">' + escapeHtml(msg.text) + '</div>';
+      html += '<div class="hiclient-live-chat-message-time">' + msg.time + '</div>';
+      html += '</div>';
+    });
+    
+    messagesContainer.innerHTML = html;
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+
+  function sendChatMessage() {
+    var input = document.querySelector('#hiclient-live-chat-input');
+    if (!input) return;
+    
+    var message = input.value.trim();
+    if (!message) return;
+    
+    addChatMessage(message, true);
+    input.value = '';
+    
+    // Simulate agent response
+    setTimeout(function() {
+      addChatMessage("Thanks for your message! We'll get back to you soon.", false);
+    }, 1000);
   }
   
   function toggleDropdown(dropdownId) {
@@ -100,6 +179,21 @@ const defaultJavaScriptLogic = `
     
     var html = '';
     
+    // Add live chat section if enabled
+    if (liveChatEnabled) {
+      html += '<div class="hiclient-live-chat-section">';
+      html += '<button onclick="openLiveChat()" class="hiclient-live-chat-start-btn">';
+      html += '<span class="hiclient-live-chat-icon">💬</span>';
+      var agentName = '{{LIVE_CHAT_AGENT_NAME}}';
+      if (agentName && agentName !== '') {
+        html += 'Chat with ' + escapeHtml(agentName);
+      } else {
+        html += 'Live Chat';
+      }
+      html += '</button>';
+      html += '</div>';
+    }
+    
     for (var i = 0; i < channelsData.length; i++) {
       var channel = channelsData[i];
       var channelUrl = getChannelUrl(channel);
@@ -112,7 +206,6 @@ const defaultJavaScriptLogic = `
         html += '<div class="parent-channel-wrapper">';
         html += '<div style="display: flex; align-items: center; border: 1px solid #e2e8f0; border-radius: 12px; background: white; transition: all 0.3s ease;">';
         
-        // Changed to a div instead of an anchor to prevent direct navigation
         html += '<div class="parent-channel" style="border: none; margin: 0; flex: 1; cursor: pointer;" onclick="toggleDropdown(' + "'" + dropdownId + "'" + ')">';
         html += '<div class="channel-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="channel-info">';
@@ -130,7 +223,6 @@ const defaultJavaScriptLogic = `
         html += '</div>';
         html += '<div class="dropdown" id="' + dropdownId + '">';
         
-        // Add the parent channel as the first item in the dropdown
         html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="dropdown-item">';
         html += '<div class="dropdown-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
         html += '<div class="dropdown-info">';
@@ -192,10 +284,8 @@ const defaultJavaScriptLogic = `
           console.log('Processing video', index, 'with src:', video.src);
           
           if (video.tagName === 'VIDEO') {
-            // Handle HTML5 video elements
             if (video.src && video.src !== '') {
               video.currentTime = 0;
-              // Enable sound for video playback
               
               var playPromise = video.play();
               if (playPromise !== undefined) {
@@ -203,7 +293,6 @@ const defaultJavaScriptLogic = `
                   console.log('Video', index, 'started playing successfully with sound');
                 }).catch(function(error) {
                   console.log('Video', index, 'autoplay failed:', error);
-                  // Force play after small delay
                   setTimeout(function() {
                     try {
                       video.play().then(function() {
@@ -221,10 +310,8 @@ const defaultJavaScriptLogic = `
               console.log('Video', index, 'has no valid src');
             }
           } else if (video.tagName === 'IFRAME') {
-            // Handle YouTube iframe videos
             console.log('Processing YouTube iframe', index);
             var currentSrc = video.src;
-            // Add autoplay parameter to YouTube iframe when modal opens
             if (currentSrc && !currentSrc.includes('autoplay=1')) {
               var separator = currentSrc.includes('?') ? '&' : '?';
               video.src = currentSrc + separator + 'autoplay=1';
@@ -256,6 +343,13 @@ const defaultJavaScriptLogic = `
     var tooltip = document.querySelector('#lovable-widget-tooltip');
     var closeBtn = document.querySelector('#lovable-widget-close');
     
+    // Live chat elements
+    var liveChatModal = document.querySelector('#hiclient-live-chat-modal');
+    var liveChatClose = document.querySelector('#hiclient-live-chat-close');
+    var liveChatMinimize = document.querySelector('#hiclient-live-chat-minimize');
+    var liveChatSend = document.querySelector('#hiclient-live-chat-send');
+    var liveChatInput = document.querySelector('#hiclient-live-chat-input');
+    
     if (!button || !modal) {
       console.error('Missing widget elements:', { button: !!button, modal: !!modal });
       return;
@@ -277,7 +371,6 @@ const defaultJavaScriptLogic = `
         }, 50);
       }
       
-      // Start video playback when modal opens - with delay to ensure DOM is ready
       setTimeout(function() {
         console.log('Attempting to play video after modal open');
         playVideo();
@@ -293,6 +386,27 @@ const defaultJavaScriptLogic = `
       });
     }
     
+    // Live chat event listeners
+    if (liveChatClose) {
+      liveChatClose.addEventListener('click', closeLiveChat);
+    }
+    
+    if (liveChatMinimize) {
+      liveChatMinimize.addEventListener('click', minimizeLiveChat);
+    }
+    
+    if (liveChatSend) {
+      liveChatSend.addEventListener('click', sendChatMessage);
+    }
+    
+    if (liveChatInput) {
+      liveChatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          sendChatMessage();
+        }
+      });
+    }
+    
     modal.addEventListener('click', function(e) {
       if (e.target === modal) {
         console.log('Modal backdrop clicked');
@@ -305,10 +419,13 @@ const defaultJavaScriptLogic = `
         console.log('ESC key pressed');
         closeModal();
       }
+      
+      if (e.key === 'Escape' && liveChatModal && liveChatModal.style.display === 'block') {
+        closeLiveChat();
+      }
     });
     
     function closeModal() {
-      // Pause all videos when modal closes and reset YouTube iframes
       try {
         var videos = document.querySelectorAll('.hiclient-video-player');
         videos.forEach(function(video) {
@@ -316,7 +433,6 @@ const defaultJavaScriptLogic = `
             video.pause();
             console.log('Video paused');
           } else if (video.tagName === 'IFRAME') {
-            // Remove autoplay from YouTube iframe when modal closes
             var currentSrc = video.src;
             if (currentSrc && currentSrc.includes('autoplay=1')) {
               video.src = currentSrc.replace(/[?&]autoplay=1/, '').replace(/autoplay=1[&]?/, '');
@@ -370,14 +486,13 @@ const defaultJavaScriptLogic = `
     
     console.log('Widget initialized successfully');
     
-    // Only preload video metadata on widget init, do NOT start playing
     setTimeout(function() {
       var videos = document.querySelectorAll('.hiclient-video-player');
       if (videos.length > 0) {
         console.log('Preloading', videos.length, 'videos metadata');
         videos.forEach(function(video) {
           if (video.tagName === 'VIDEO') {
-            video.preload = 'metadata'; // Only preload metadata, not full video
+            video.preload = 'metadata';
           }
         });
       }
@@ -395,6 +510,9 @@ const defaultJavaScriptLogic = `
   window.openChannel = openChannel;
   window.toggleDropdown = toggleDropdown;
   window.playVideo = playVideo;
+  window.openLiveChat = openLiveChat;
+  window.closeLiveChat = closeLiveChat;
+  window.sendChatMessage = sendChatMessage;
   
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initWidget);
