@@ -415,9 +415,9 @@ const defaultJavaScriptLogic = `
     var messagesDiv = document.querySelector('#lovable-livechat-messages');
     var userData = window.liveChatUserData || {};
     
-    // Check if session is still active
-    if (!window.liveChatSessionActive) {
-      console.log('Cannot send message - session is not active');
+    // Check if session is still active AND session exists
+    if (!window.liveChatSessionActive || !window.liveChatSessionId) {
+      console.log('Cannot send message - session is ended or not active');
       return;
     }
     

@@ -165,17 +165,6 @@ export const WebsitesList: React.FC<WebsitesListProps> = ({ widgets, onRefresh }
                     </Button>
                   </div>
                   
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="default"
-                      onClick={() => handleLiveChat(widget.id)}
-                      className="flex-1"
-                    >
-                      <MessageCircle className="w-4 h-4 mr-1" />
-                      Enter Live Chat
-                    </Button>
-                  </div>
                   
                   <div className="flex gap-2">
                     <Button
