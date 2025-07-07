@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -226,6 +225,26 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
     }
   };
 
+  const handleJoinConversation = async (sessionId: string) => {
+    console.log('Joining conversation:', sessionId);
+    setSelectedSession(sessionId);
+    
+    // Immediately fetch messages for this session
+    try {
+      const { data, error } = await supabase
+        .from('live_chat_messages')
+        .select('*')
+        .eq('session_id', sessionId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (error) {
+      console.error('Error fetching messages for session:', error);
+      toast.error('Mesajları yükləyərkən xəta baş verdi');
+    }
+  };
+
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedSession) return;
 
@@ -392,7 +411,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
                               ? 'bg-primary/10 border border-primary/20'
                               : 'bg-muted/50 hover:bg-muted'
                           }`}
-                          onClick={() => setSelectedSession(session.id)}
+                          onClick={() => handleJoinConversation(session.id)}
                         >
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex items-center gap-2">
@@ -414,8 +433,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
                                variant="outline"
                                onClick={(e) => {
                                  e.stopPropagation();
-                                 console.log('Joining conversation:', session.id);
-                                 setSelectedSession(session.id);
+                                 handleJoinConversation(session.id);
                                }}
                                className="mt-2 w-full"
                              >
