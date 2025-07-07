@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -120,7 +121,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 
   if (!shouldShowWidget) {
     return (
-      <div className="fixed bottom-4 right-4 p-4 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 text-center">
+      <div className="fixed bottom-4 right-4 p-4 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 text-center" style={{ position: 'fixed', zIndex: 40 }}>
         <MessageCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
         <p className="text-sm text-gray-500">
           Add channels or enable live chat to see preview
@@ -137,7 +138,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       {/* Live Chat Modal */}
       {liveChatOpen && formData.liveChatEnabled && (
         <div 
-          className={`fixed bottom-20 ${position} w-80 h-96 bg-white rounded-lg shadow-xl border z-50`}
+          className={`fixed bottom-20 ${position} w-80 h-96 bg-white rounded-lg shadow-xl border`}
           style={{ position: 'fixed', zIndex: 9999 }}
         >
           {/* Chat Header */}
@@ -205,41 +206,6 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
           </div>
         </div>
       )}
-
-      {/* Main Widget Button - Fixed Position */}
-      <div className={`fixed bottom-4 ${position}`} style={{ position: 'fixed', zIndex: 40 }}>
-        <div className="relative group">
-          {/* Tooltip */}
-          {formData.tooltip && formData.tooltipDisplay === 'hover' && (
-            <div className={`absolute bottom-full mb-2 ${formData.position === 'left' ? 'left-0' : 'right-0'} 
-              bg-gray-800 text-white px-3 py-1 rounded-lg text-sm whitespace-nowrap
-              opacity-0 group-hover:opacity-100 transition-opacity duration-200
-              ${formData.tooltipPosition === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'}`}>
-              {formData.tooltip}
-              <div className={`absolute ${formData.tooltipPosition === 'top' ? 'top-full' : 'bottom-full'} 
-                ${formData.position === 'left' ? 'left-4' : 'right-4'} 
-                w-0 h-0 border-l-4 border-r-4 border-transparent
-                ${formData.tooltipPosition === 'top' ? 'border-t-4 border-t-gray-800' : 'border-b-4 border-b-gray-800'}`}>
-              </div>
-            </div>
-          )}
-          
-          <Button
-            onClick={() => setIsOpen(true)}
-            className="rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110"
-            style={{
-              backgroundColor: formData.buttonColor,
-              width: `${buttonSize}px`,
-              height: `${buttonSize}px`,
-              padding: 0,
-              border: 'none',
-              position: 'fixed'
-            }}
-          >
-            <MessageCircle className="w-6 h-6 text-white" />
-          </Button>
-        </div>
-      </div>
 
       {/* Widget Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>

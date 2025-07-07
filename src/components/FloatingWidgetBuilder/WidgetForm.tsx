@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { CustomizationOptions } from './CustomizationOptions';
 import { LiveChatSettings } from './LiveChatSettings';
 import { Channel, FormData } from './types';
 import { TemplatePreview } from './TemplatePreview';
+import { WidgetPreviewButton } from './WidgetPreviewButton';
 
 interface WidgetFormProps {
   websiteName: string;
@@ -45,6 +47,8 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
   onCreateWidget,
   onCustomIconUpload
 }) => {
+  const [previewOpen, setPreviewOpen] = React.useState(false);
+
   return (
     <>
       <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
@@ -161,12 +165,19 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
         </CardContent>
       </Card>
 
-      {/* Live widget preview directly on the page */}
+      {/* Widget Preview Modal */}
       <TemplatePreview
-        showWidget={true}
+        showWidget={previewOpen}
         formData={formData}
         channels={channels}
         editingWidget={editingWidget}
+      />
+
+      {/* Separate Fixed Widget Button */}
+      <WidgetPreviewButton
+        formData={formData}
+        showWidget={channels.length > 0 || formData.liveChatEnabled}
+        onButtonClick={() => setPreviewOpen(true)}
       />
     </>
   );
