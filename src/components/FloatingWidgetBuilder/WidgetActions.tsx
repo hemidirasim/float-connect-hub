@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Channel, FormData } from "./types";
@@ -87,7 +88,14 @@ export const useWidgetActions = (
         preview_video_height: formData.previewVideoHeight,
         template_id: formData.templateId || 'default',
         channels: channels,
-        user_id: user?.id
+        user_id: user?.id,
+        // Live Chat fields
+        live_chat_enabled: formData.liveChatEnabled,
+        live_chat_agent_name: formData.liveChatAgentName || websiteName,
+        live_chat_greeting: formData.liveChatGreeting,
+        live_chat_color: formData.liveChatColor,
+        live_chat_auto_open: formData.liveChatAutoOpen,
+        live_chat_offline_message: formData.liveChatOfflineMessage
       };
 
       console.log('Widget data for database with channels:', widgetData);

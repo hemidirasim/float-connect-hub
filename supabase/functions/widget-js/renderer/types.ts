@@ -20,4 +20,11 @@ export interface TemplateConfig {
   previewVideoHeight: number;
   widgetWidth?: number;
   widgetHeight?: number;
+  // Live Chat properties
+  liveChatEnabled?: boolean;
+  liveChatAgentName?: string;
+  liveChatGreeting?: string;
+  liveChatColor?: string;
+  liveChatAutoOpen?: boolean;
+  liveChatOfflineMessage?: string;
 }

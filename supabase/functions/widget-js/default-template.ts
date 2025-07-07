@@ -4,7 +4,7 @@ import { defaultHtmlTemplate } from './templates/default/html-template.ts'
 import { defaultCssStyles } from './templates/default/css-styles.ts'
 import { getChannelUrl, getChannelIcon, getChannelColor } from './templates/default/utility-functions.ts'
 
-// JavaScript logic with proper utility injection and fixed string escaping
+// JavaScript logic with live chat functionality
 const defaultJavaScriptLogic = `
   // Utility functions
   function getChannelUrl(channel) {
@@ -57,11 +57,108 @@ const defaultJavaScriptLogic = `
   }
   
   console.log('Widget loading with channels:', {{CHANNELS_DATA}});
+  console.log('Live chat enabled:', {{LIVE_CHAT_ENABLED}});
   
   var channelsData = {{CHANNELS_DATA}};
+  var liveChatEnabled = {{LIVE_CHAT_ENABLED}};
+  var liveChatConfig = {
+    agentName: '{{LIVE_CHAT_AGENT_NAME}}',
+    greeting: '{{LIVE_CHAT_GREETING}}',
+    color: '{{LIVE_CHAT_COLOR}}',
+    autoOpen: {{LIVE_CHAT_AUTO_OPEN}},
+    offlineMessage: '{{LIVE_CHAT_OFFLINE_MESSAGE}}'
+  };
   
   function openChannel(url) {
     window.open(url, '_blank');
+  }
+  
+  function openLiveChat() {
+    var modal = document.querySelector('#lovable-widget-modal');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.style.visibility = 'visible';
+      modal.style.opacity = '1';
+      
+      var modalContent = document.querySelector('#lovable-modal-content');
+      if (modalContent) {
+        setTimeout(function() {
+          modalContent.style.transform = 'translateY(0)';
+        }, 50);
+      }
+      
+      // Switch to live chat view
+      showLiveChatInterface();
+    }
+  }
+  
+  function showLiveChatInterface() {
+    var channelsContainer = document.querySelector('#lovable-widget-channels');
+    var liveChatContainer = document.querySelector('#lovable-live-chat-container');
+    
+    if (channelsContainer) channelsContainer.style.display = 'none';
+    if (liveChatContainer) {
+      liveChatContainer.style.display = 'block';
+      // Focus on the message input
+      var messageInput = liveChatContainer.querySelector('#live-chat-message');
+      if (messageInput) messageInput.focus();
+    }
+  }
+  
+  function showChannels() {
+    var channelsContainer = document.querySelector('#lovable-widget-channels');
+    var liveChatContainer = document.querySelector('#lovable-live-chat-container');
+    
+    if (channelsContainer) channelsContainer.style.display = 'block';
+    if (liveChatContainer) liveChatContainer.style.display = 'none';
+  }
+  
+  function sendLiveChatMessage() {
+    var nameInput = document.querySelector('#live-chat-name');
+    var emailInput = document.querySelector('#live-chat-email');
+    var messageInput = document.querySelector('#live-chat-message');
+    var sendButton = document.querySelector('#live-chat-send-btn');
+    
+    if (!nameInput || !messageInput) return;
+    
+    var name = nameInput.value.trim();
+    var email = emailInput ? emailInput.value.trim() : '';
+    var message = messageInput.value.trim();
+    
+    if (!name || !message) {
+      alert('Please enter your name and message');
+      return;
+    }
+    
+    if (sendButton) sendButton.disabled = true;
+    
+    // Here you would normally send the message to your backend
+    // For now, we'll just show a success message
+    var messagesContainer = document.querySelector('#live-chat-messages');
+    if (messagesContainer) {
+      var messageElement = document.createElement('div');
+      messageElement.className = 'live-chat-message user-message';
+      messageElement.innerHTML = '<strong>You:</strong> ' + escapeHtml(message);
+      messagesContainer.appendChild(messageElement);
+      
+      // Simulate agent response
+      setTimeout(function() {
+        var agentMessage = document.createElement('div');
+        agentMessage.className = 'live-chat-message agent-message';
+        agentMessage.innerHTML = '<strong>' + escapeHtml(liveChatConfig.agentName) + ':</strong> Thank you for your message! We will get back to you soon.';
+        messagesContainer.appendChild(agentMessage);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }, 1000);
+    }
+    
+    // Clear the message input
+    messageInput.value = '';
+    if (sendButton) sendButton.disabled = false;
+    
+    // Scroll to bottom
+    if (messagesContainer) {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
   }
   
   function toggleDropdown(dropdownId) {
@@ -99,6 +196,18 @@ const defaultJavaScriptLogic = `
     }
     
     var html = '';
+    
+    // Add live chat option if enabled
+    if (liveChatEnabled) {
+      html += '<div class="channel-item live-chat-channel" onclick="openLiveChat()" style="cursor: pointer; background: linear-gradient(135deg, ' + liveChatConfig.color + ', ' + adjustColorBrightness(liveChatConfig.color, -20) + '); color: white; border: none;">';
+      html += '<div class="channel-icon" style="background: rgba(255, 255, 255, 0.2);">💬</div>';
+      html += '<div class="channel-info">';
+      html += '<div class="channel-label">Live Chat</div>';
+      html += '<div class="channel-value">Chat with ' + escapeHtml(liveChatConfig.agentName) + '</div>';
+      html += '</div>';
+      html += '<div class="channel-arrow">→</div>';
+      html += '</div>';
+    }
     
     for (var i = 0; i < channelsData.length; i++) {
       var channel = channelsData[i];
@@ -169,6 +278,21 @@ const defaultJavaScriptLogic = `
     }
     
     return html;
+  }
+  
+  function adjustColorBrightness(color, amount) {
+    var num = parseInt(color.replace("#",""),16);
+    var amt = Math.round((255 * amount) / 100);
+    
+    var r = (num >> 16) + amt;
+    var g = (num >> 8 & 0x00FF) + amt;
+    var b = (num & 0x0000FF) + amt;
+    
+    r = r > 255 ? 255 : r < 0 ? 0 : r;
+    g = g > 255 ? 255 : g < 0 ? 0 : g;
+    b = b > 255 ? 255 : b < 0 ? 0 : b;
+    
+    return "#" + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
   }
   
   function escapeHtml(text) {
@@ -250,6 +374,36 @@ const defaultJavaScriptLogic = `
       console.log('Channels HTML generated and inserted');
     }
     
+    // Initialize live chat interface
+    if (liveChatEnabled) {
+      var liveChatContainer = document.querySelector('#lovable-live-chat-container');
+      if (liveChatContainer) {
+        liveChatContainer.innerHTML = generateLiveChatHtml();
+        
+        // Set up live chat event listeners
+        var sendBtn = document.querySelector('#live-chat-send-btn');
+        var messageInput = document.querySelector('#live-chat-message');
+        var backBtn = document.querySelector('#live-chat-back-btn');
+        
+        if (sendBtn) {
+          sendBtn.addEventListener('click', sendLiveChatMessage);
+        }
+        
+        if (messageInput) {
+          messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              sendLiveChatMessage();
+            }
+          });
+        }
+        
+        if (backBtn) {
+          backBtn.addEventListener('click', showChannels);
+        }
+      }
+    }
+    
     var button = document.querySelector('#lovable-widget-button');
     var modal = document.querySelector('#lovable-widget-modal');
     var modalContent = document.querySelector('#lovable-modal-content');
@@ -275,6 +429,13 @@ const defaultJavaScriptLogic = `
         setTimeout(function() {
           modalContent.style.transform = 'translateY(0)';
         }, 50);
+      }
+      
+      // Auto-open live chat if enabled
+      if (liveChatEnabled && liveChatConfig.autoOpen) {
+        setTimeout(function() {
+          showLiveChatInterface();
+        }, 300);
       }
       
       // Start video playback when modal opens - with delay to ensure DOM is ready
@@ -337,6 +498,9 @@ const defaultJavaScriptLogic = `
         modal.style.visibility = 'hidden';
         modal.style.opacity = '0';
         
+        // Reset to channels view
+        showChannels();
+        
         var allDropdowns = document.querySelectorAll('.dropdown');
         var allArrows = document.querySelectorAll('.dropdown-arrow');
         allDropdowns.forEach(function(dropdown) {
@@ -384,6 +548,35 @@ const defaultJavaScriptLogic = `
     }, 100);
   }
   
+  function generateLiveChatHtml() {
+    return '<div class="live-chat-interface" style="display: none;">' +
+      '<div class="live-chat-header" style="padding: 15px; background: ' + liveChatConfig.color + '; color: white; border-radius: 15px 15px 0 0; display: flex; align-items: center; justify-content: space-between;">' +
+        '<div style="display: flex; align-items: center; gap: 10px;">' +
+          '<button id="live-chat-back-btn" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">←</button>' +
+          '<div>' +
+            '<div style="font-weight: bold;">' + escapeHtml(liveChatConfig.agentName) + '</div>' +
+            '<div style="font-size: 12px; opacity: 0.8;">Online now</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div id="live-chat-messages" style="height: 300px; overflow-y: auto; padding: 15px; background: #f8f9fa;">' +
+        '<div class="live-chat-message agent-message" style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">' +
+          '<strong>' + escapeHtml(liveChatConfig.agentName) + ':</strong> ' + escapeHtml(liveChatConfig.greeting) +
+        '</div>' +
+      '</div>' +
+      '<div class="live-chat-input" style="padding: 15px; background: white; border-top: 1px solid #e9ecef;">' +
+        '<div style="margin-bottom: 10px;">' +
+          '<input type="text" id="live-chat-name" placeholder="Your name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 8px;" required>' +
+          '<input type="email" id="live-chat-email" placeholder="Your email (optional)" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">' +
+        '</div>' +
+        '<div style="display: flex; gap: 10px;">' +
+          '<textarea id="live-chat-message" placeholder="Type your message..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; resize: vertical; min-height: 40px;" required></textarea>' +
+          '<button id="live-chat-send-btn" style="background: ' + liveChatConfig.color + '; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">Send</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+  
   window.refreshWidget = function() {
     var channelsContainer = document.querySelector('#lovable-widget-channels');
     if (channelsContainer) {
@@ -393,8 +586,12 @@ const defaultJavaScriptLogic = `
   };
   
   window.openChannel = openChannel;
+  window.openLiveChat = openLiveChat;
   window.toggleDropdown = toggleDropdown;
   window.playVideo = playVideo;
+  window.sendLiveChatMessage = sendLiveChatMessage;
+  window.showChannels = showChannels;
+  window.showLiveChatInterface = showLiveChatInterface;
   
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initWidget);
@@ -406,7 +603,7 @@ const defaultJavaScriptLogic = `
 export const defaultTemplate: WidgetTemplate = {
   id: 'default',
   name: 'Modern Clean Template', 
-  description: 'Modern and clean floating widget with green accent',
+  description: 'Modern and clean floating widget with green accent and live chat support',
   html: defaultHtmlTemplate,
   css: defaultCssStyles,
   js: defaultJavaScriptLogic

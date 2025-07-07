@@ -31,4 +31,11 @@ export interface WidgetConfig {
   buttonSize: number;
   previewVideoHeight: number;
   templateId?: string;
+  // Live Chat properties
+  liveChatEnabled?: boolean;
+  liveChatAgentName?: string;
+  liveChatGreeting?: string;
+  liveChatColor?: string;
+  liveChatAutoOpen?: boolean;
+  liveChatOfflineMessage?: string;
 }
