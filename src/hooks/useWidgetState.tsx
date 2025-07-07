@@ -31,27 +31,7 @@ export const useWidgetState = (user: any) => {
     customIconUrl: '',
     buttonSize: 60,
     previewVideoHeight: 120,
-    templateId: 'default',
-    // Live chat fields
-    liveChatEnabled: false,
-    liveChatAgentName: 'Support Agent',
-    liveChatGreeting: 'Hello! How can we help you today?',
-    liveChatColor: '#4f46e5',
-    liveChatAutoOpen: false,
-    liveChatOfflineMessage: 'We are currently offline. Please leave a message and we will get back to you.',
-    // Pre-chat form fields
-    liveChatRequireEmail: false,
-    liveChatRequireName: true,
-    liveChatRequirePhone: false,
-    liveChatCustomFields: [],
-    // Pre-chat form labels and placeholders
-    liveChatNameLabel: 'Name',
-    liveChatNamePlaceholder: 'Your name',
-    liveChatEmailLabel: 'Email',
-    liveChatEmailPlaceholder: 'your@email.com',
-    liveChatPhoneLabel: 'Phone',
-    liveChatPhonePlaceholder: '+1 (555) 123-4567',
-    liveChatButtonText: 'Start Live Chat'
+    templateId: 'default'
   });
 
   // Check for editing widget on load
@@ -96,27 +76,7 @@ export const useWidgetState = (user: any) => {
           customIconUrl: data.custom_icon_url || '',
           buttonSize: data.button_size || 60,
           previewVideoHeight: data.preview_video_height || 120,
-          templateId: data.template_id || 'default',
-          // Live chat fields
-          liveChatEnabled: data.live_chat_enabled || false,
-          liveChatAgentName: data.live_chat_agent_name || 'Support Agent',
-          liveChatGreeting: data.live_chat_greeting || 'Hello! How can we help you today?',
-          liveChatColor: data.live_chat_color || '#4f46e5',
-          liveChatAutoOpen: data.live_chat_auto_open || false,
-          liveChatOfflineMessage: data.live_chat_offline_message || 'We are currently offline. Please leave a message and we will get back to you.',
-          // Pre-chat form fields
-          liveChatRequireEmail: data.live_chat_require_email || false,
-          liveChatRequireName: data.live_chat_require_name || true,
-          liveChatRequirePhone: data.live_chat_require_phone || false,
-          liveChatCustomFields: [],
-          // Pre-chat form labels and placeholders
-          liveChatNameLabel: 'Name',
-          liveChatNamePlaceholder: 'Your name',
-          liveChatEmailLabel: 'Email',
-          liveChatEmailPlaceholder: 'your@email.com',
-          liveChatPhoneLabel: 'Phone',
-          liveChatPhonePlaceholder: '+1 (555) 123-4567',
-          liveChatButtonText: data.live_chat_button_text || 'Start Live Chat'
+          templateId: data.template_id || 'default'
         });
 
         // Scroll to widget form
@@ -155,27 +115,7 @@ export const useWidgetState = (user: any) => {
       customIconUrl: '',
       buttonSize: 60,
       previewVideoHeight: 120,
-      templateId: 'default',
-      // Live chat fields
-      liveChatEnabled: false,
-      liveChatAgentName: 'Support Agent',
-      liveChatGreeting: 'Hello! How can we help you today?',
-      liveChatColor: '#4f46e5',
-      liveChatAutoOpen: false,
-      liveChatOfflineMessage: 'We are currently offline. Please leave a message and we will get back to you.',
-      // Pre-chat form fields
-      liveChatRequireEmail: false,
-      liveChatRequireName: true,
-      liveChatRequirePhone: false,
-      liveChatCustomFields: [],
-      // Pre-chat form labels and placeholders
-      liveChatNameLabel: 'Name',
-      liveChatNamePlaceholder: 'Your name',
-      liveChatEmailLabel: 'Email',
-      liveChatEmailPlaceholder: 'your@email.com',
-      liveChatPhoneLabel: 'Phone',
-      liveChatPhonePlaceholder: '+1 (555) 123-4567',
-      liveChatButtonText: 'Start Live Chat'
+      templateId: 'default'
     });
   };
 

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { Channel, FormData } from './types';
 
@@ -42,10 +43,10 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     return template;
   }, []);
 
-  // Generate preview HTML when template or config changes - USE SAME SYSTEM AS EDGE FUNCTION
+  // Generate preview HTML when template or config changes
   useEffect(() => {
-    // Show widget if channels exist, video exists, or live chat is enabled
-    const hasContent = channels.length > 0 || formData.videoUrl || formData.liveChatEnabled;
+    // Show widget if channels exist or video exists
+    const hasContent = channels.length > 0 || formData.videoUrl;
     if (!hasContent) {
       setPreviewHtml('');
       return;
@@ -54,17 +55,13 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     const templateId = formData.templateId || 'default';
     const template = getTemplate(templateId);
 
-    console.log('Generating floating widget preview with SAME template system:', {
+    console.log('Generating floating widget preview with template system:', {
       templateId,
       templateName: template.name,
       channels: channels.length,
       buttonColor: formData.buttonColor,
       position: formData.position,
-      greetingMessage: formData.greetingMessage,
-      // Live chat debug
-      liveChatEnabled: formData.liveChatEnabled,
-      liveChatGreeting: formData.liveChatGreeting,
-      liveChatColor: formData.liveChatColor
+      greetingMessage: formData.greetingMessage
     });
 
     // Use EXACT SAME config structure as edge function template-generator.ts
@@ -87,17 +84,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       previewVideoHeight: formData.previewVideoHeight,
       templateId: templateId,
       widgetWidth: 400, // Default value
-      widgetHeight: 600, // Default value
-      // Live chat config
-      liveChatEnabled: formData.liveChatEnabled,
-      liveChatGreeting: formData.liveChatGreeting,
-      liveChatColor: formData.liveChatColor,
-      // Pre-chat form config
-      liveChatRequireEmail: formData.liveChatRequireEmail,
-      liveChatRequireName: formData.liveChatRequireName,
-      liveChatRequirePhone: formData.liveChatRequirePhone,
-      liveChatCustomFields: JSON.stringify(formData.liveChatCustomFields),
-      liveChatButtonText: formData.liveChatButtonText
+      widgetHeight: 600 // Default value
     };
 
     // Use SAME renderer as edge function
@@ -148,7 +135,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     }
     
     setPreviewHtml(finalHtml);
-    console.log('Floating widget preview generated using SAME system as edge function');
+    console.log('Floating widget preview generated using template system');
   }, [
     showWidget,
     formData.templateId,
@@ -166,16 +153,6 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     formData.useVideoPreview,
     formData.buttonSize,
     formData.previewVideoHeight,
-    // Live chat dependencies
-    formData.liveChatEnabled,
-    formData.liveChatGreeting,
-    formData.liveChatColor,
-    // Pre-chat form dependencies
-    formData.liveChatRequireEmail,
-    formData.liveChatRequireName,
-    formData.liveChatRequirePhone,
-    formData.liveChatCustomFields,
-    formData.liveChatButtonText,
     channels,
     editingWidget?.video_url,
     getTemplate
