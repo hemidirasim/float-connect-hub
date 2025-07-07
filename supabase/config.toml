@@ -102,6 +102,9 @@ enable_confirmations = false
 [functions.widget-js]
 verify_jwt = false
 
+[functions.live-chat-message]
+verify_jwt = false
+
 [analytics]
 enabled = false
 port = 54327
