@@ -24,9 +24,9 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
     if (selectedWidget) {
       fetchSessions();
       
-      // Subscribe to new sessions for the selected widget
+      // Subscribe to new sessions for the selected widget with more stable configuration
       const newSessionsChannel = supabase
-        .channel(`new-sessions-${selectedWidget}`)
+        .channel(`new-sessions-${selectedWidget}-${Date.now()}`)
         .on(
           'postgres_changes',
           {
@@ -63,7 +63,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
             filter: `widget_id=eq.${selectedWidget}`
           },
           (payload) => {
-            console.log('Session updated:', payload);
+            console.log('Session updated via realtime:', payload);
             const updatedSession = payload.new as ChatSession;
             setSessions(prev => prev.map(session => 
               session.id === updatedSession.id ? updatedSession : session
@@ -72,11 +72,21 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
         )
         .subscribe((status) => {
           console.log('Widget sessions subscription status:', status);
+          if (status === 'SUBSCRIBED') {
+            console.log('Successfully subscribed to widget sessions');
+          } else if (status === 'CHANNEL_ERROR') {
+            console.log('Channel error, attempting to reconnect...');
+            setTimeout(() => {
+              if (selectedWidget) {
+                fetchSessions();
+              }
+            }, 2000);
+          }
         });
 
-      // Subscribe to new messages for any session in this widget
+      // Subscribe to new messages for any session in this widget with unique channel name
       const widgetMessagesChannel = supabase
-        .channel(`widget-messages-${selectedWidget}`)
+        .channel(`widget-messages-${selectedWidget}-${Date.now()}`)
         .on(
           'postgres_changes',
           {
@@ -86,14 +96,15 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
             filter: `widget_id=eq.${selectedWidget}`
           },
           (payload) => {
-            console.log('New message in widget:', payload);
+            console.log('New message in widget via realtime:', payload);
             const newMessage = payload.new as LiveChatMessage;
             
-            // If it's a visitor message, show notification
+            // If it's a visitor message and not for current session, show notification
             if (newMessage.is_from_visitor && newMessage.session_id !== selectedSession) {
               setSessions(prev => {
                 const session = prev.find(s => s.id === newMessage.session_id);
                 if (session) {
+                  console.log('Showing notification for new message from:', session.visitor_name);
                   toast.info(`Yeni mesaj: ${session.visitor_name}`);
                 }
                 return prev;
@@ -103,6 +114,9 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
         )
         .subscribe((status) => {
           console.log('Widget messages subscription status:', status);
+          if (status === 'SUBSCRIBED') {
+            console.log('Successfully subscribed to widget messages');
+          }
         });
 
       return () => {
@@ -120,9 +134,9 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
       // Mark session as read when joining
       markSessionAsRead(selectedSession);
       
-      // Subscribe to real-time messages for this session
+      // Subscribe to real-time messages for this session with unique channel name
       const messagesChannel = supabase
-        .channel(`session-messages-${selectedSession}`)
+        .channel(`session-messages-${selectedSession}-${Date.now()}`)
         .on(
           'postgres_changes',
           {
@@ -137,7 +151,10 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
             setMessages(prev => {
               // Check if message already exists to prevent duplicates
               const exists = prev.some(msg => msg.id === newMessage.id);
-              if (exists) return prev;
+              if (exists) {
+                console.log('Message already exists, skipping duplicate');
+                return prev;
+              }
               console.log('Adding new message to local state:', newMessage);
               return [...prev, newMessage];
             });
@@ -152,11 +169,21 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
         )
         .subscribe((status) => {
           console.log('Dashboard messages subscription status:', status);
+          if (status === 'SUBSCRIBED') {
+            console.log('Successfully subscribed to session messages');
+          } else if (status === 'CHANNEL_ERROR') {
+            console.log('Message channel error, attempting to reconnect...');
+            setTimeout(() => {
+              if (selectedSession) {
+                fetchMessages();
+              }
+            }, 2000);
+          }
         });
 
-      // Subscribe to session status updates
+      // Subscribe to session status updates with unique channel name
       const sessionChannel = supabase
-        .channel(`session-status-${selectedSession}`)
+        .channel(`session-status-${selectedSession}-${Date.now()}`)
         .on(
           'postgres_changes',
           {
@@ -183,6 +210,9 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
         )
         .subscribe((status) => {
           console.log('Dashboard session subscription status:', status);
+          if (status === 'SUBSCRIBED') {
+            console.log('Successfully subscribed to session status');
+          }
         });
 
       return () => {
