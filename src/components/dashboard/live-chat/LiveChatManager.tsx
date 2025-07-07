@@ -10,7 +10,7 @@ import { ChatWindow } from "./ChatWindow";
 import { SessionsList } from "./SessionsList";
 import { VisitorInfo } from "./VisitorInfo";
 import { VisitorManagement } from "./VisitorManagement";
-import { IncomingNotifications } from "./IncomingNotifications";
+import { NewSessions } from "./NewSessions";
 import { useRealtimeConnection } from "./useRealtimeConnection";
 import { MessageCircle, Users, UserX, RefreshCw } from 'lucide-react';
 
@@ -199,12 +199,9 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
     }
   };
 
-  const handleSelectSessionFromIncoming = (sessionId: string) => {
-    const session = sessions.find(s => s.id === sessionId);
-    if (session) {
-      setSelectedSession(session);
-      setActiveTab('chats');
-    }
+  const handleMoveSessionToMain = async (sessionId: string) => {
+    // Reload sessions to get the new session in main list
+    await loadSessions();
   };
 
   const getActiveSessions = () => sessions.filter(s => s.status === 'active').length;
@@ -270,11 +267,12 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
         </CardContent>
       </Card>
 
-      {/* Incoming Notifications */}
+      {/* New Sessions Panel */}
       {selectedWidget && (
-        <IncomingNotifications 
+        <NewSessions 
           selectedWidget={selectedWidget}
-          onSelectSession={handleSelectSessionFromIncoming}
+          onSelectSession={setSelectedSession}
+          onMoveToMain={handleMoveSessionToMain}
         />
       )}
 
