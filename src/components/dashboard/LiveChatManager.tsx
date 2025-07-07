@@ -47,13 +47,62 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
             toast.success(`Yeni söhbət: ${newSession.visitor_name}`);
           }
         )
-        .subscribe();
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'chat_sessions',
+            filter: `widget_id=eq.${selectedWidget}`
+          },
+          (payload) => {
+            console.log('Session updated:', payload);
+            const updatedSession = payload.new as ChatSession;
+            setSessions(prev => prev.map(session => 
+              session.id === updatedSession.id ? updatedSession : session
+            ));
+          }
+        )
+        .subscribe((status) => {
+          console.log('Widget sessions subscription status:', status);
+        });
+
+      // Subscribe to new messages for any session in this widget
+      const widgetMessagesChannel = supabase
+        .channel(`widget-messages-${selectedWidget}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'live_chat_messages',
+            filter: `widget_id=eq.${selectedWidget}`
+          },
+          (payload) => {
+            console.log('New message in widget:', payload);
+            const newMessage = payload.new as LiveChatMessage;
+            
+            // If it's a visitor message, show notification
+            if (newMessage.is_from_visitor && newMessage.session_id !== selectedSession) {
+              // Find the session to get visitor name
+              const session = sessions.find(s => s.id === newMessage.session_id);
+              if (session) {
+                toast.info(`Yeni mesaj: ${session.visitor_name}`);
+              }
+            }
+          }
+        )
+        .subscribe((status) => {
+          console.log('Widget messages subscription status:', status);
+        });
 
       return () => {
+        console.log('Cleaning up widget subscriptions');
         supabase.removeChannel(newSessionsChannel);
+        supabase.removeChannel(widgetMessagesChannel);
       };
     }
-  }, [selectedWidget]);
+  }, [selectedWidget, sessions]);
 
   useEffect(() => {
     if (selectedSession) {
@@ -134,34 +183,6 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
     }
   }, [selectedSession]);
 
-  // Subscribe to session updates to get unread count changes
-  useEffect(() => {
-    if (selectedWidget && sessions.length > 0) {
-      const sessionUpdatesChannel = supabase
-        .channel(`session-updates-${selectedWidget}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'chat_sessions',
-            filter: `widget_id=eq.${selectedWidget}`
-          },
-          (payload) => {
-            const updatedSession = payload.new as ChatSession;
-            // Update the session in the list with new unread count
-            setSessions(prev => prev.map(session => 
-              session.id === updatedSession.id ? updatedSession : session
-            ));
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(sessionUpdatesChannel);
-      };
-    }
-  }, [selectedWidget, sessions.length]);
 
   const fetchSessions = async () => {
     if (!selectedWidget) return;
