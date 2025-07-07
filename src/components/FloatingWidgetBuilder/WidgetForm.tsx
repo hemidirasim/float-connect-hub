@@ -7,6 +7,7 @@ import { WebsiteInfoForm } from './WebsiteInfoForm';
 import { ChannelManager } from './ChannelManager';
 import { VideoUpload } from './VideoUpload';
 import { CustomizationOptions } from './CustomizationOptions';
+import { LiveChatSettings } from './LiveChatSettings';
 import { Channel, FormData } from './types';
 import { TemplatePreview } from './TemplatePreview';
 
@@ -86,6 +87,22 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Live Chat Settings */}
+          <LiveChatSettings
+            liveChatEnabled={formData.liveChatEnabled}
+            liveChatGreeting={formData.liveChatGreeting}
+            liveChatColor={formData.liveChatColor}
+            liveChatPosition={formData.liveChatPosition}
+            liveChatAutoOpen={formData.liveChatAutoOpen}
+            liveChatOfflineMessage={formData.liveChatOfflineMessage}
+            onLiveChatEnabledChange={(enabled) => onFormDataChange('liveChatEnabled', enabled)}
+            onLiveChatGreetingChange={(greeting) => onFormDataChange('liveChatGreeting', greeting)}
+            onLiveChatColorChange={(color) => onFormDataChange('liveChatColor', color)}
+            onLiveChatPositionChange={(position) => onFormDataChange('liveChatPosition', position)}
+            onLiveChatAutoOpenChange={(autoOpen) => onFormDataChange('liveChatAutoOpen', autoOpen)}
+            onLiveChatOfflineMessageChange={(message) => onFormDataChange('liveChatOfflineMessage', message)}
+          />
+
           {/* Video Upload & Icon Settings */}
           <VideoUpload
             video={formData.video}

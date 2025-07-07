@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Channel, FormData } from "./types";
@@ -67,7 +68,7 @@ export const useWidgetActions = (
     try {
       console.log('Saving widget to database with channels:', channels);
       
-      // Create widget data without widget dimensions
+      // Create widget data with live chat settings
       const widgetData = {
         name: websiteName,
         website_url: websiteUrl,
@@ -87,10 +88,17 @@ export const useWidgetActions = (
         preview_video_height: formData.previewVideoHeight,
         template_id: formData.templateId || 'default',
         channels: channels,
-        user_id: user?.id
+        user_id: user?.id,
+        // Live chat settings
+        live_chat_enabled: formData.liveChatEnabled,
+        live_chat_greeting: formData.liveChatGreeting,
+        live_chat_color: formData.liveChatColor,
+        live_chat_position: formData.liveChatPosition,
+        live_chat_auto_open: formData.liveChatAutoOpen,
+        live_chat_offline_message: formData.liveChatOfflineMessage
       };
 
-      console.log('Widget data for database with channels:', widgetData);
+      console.log('Widget data for database with live chat:', widgetData);
 
       let savedWidget;
 
@@ -125,7 +133,7 @@ export const useWidgetActions = (
         toast.success('Widget created!');
       }
       
-      console.log('Widget saved to database successfully with channels:', savedWidget);
+      console.log('Widget saved to database successfully with live chat:', savedWidget);
       
       return { success: true, widget: savedWidget };
     } catch (error) {
