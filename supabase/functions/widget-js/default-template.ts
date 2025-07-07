@@ -24,26 +24,26 @@ const defaultJavaScriptLogic = `
 
   function getChannelIcon(channel) {
     var icons = {
-      whatsapp: '<img src="/social-icons/007-social.png" alt="Whatsapp" className="w-8 h-8" />',
-      telegram: '<img src="/social-icons/006-telegram.png" alt="Telegram" className="w-8 h-8" />',
-      instagram: '<img src="/social-icons/002-instagram.png" alt="Instagram" className="w-8 h-8" />',
-      messenger: '<img src="/social-icons/018-messenger.png" alt="Messenger" className="w-8 h-8" />',
-      viber: '<img src="/social-icons/011-viber.png" alt="Viber" className="w-8 h-8" />',
-      discord: '<img src="/social-icons/017-discord.png" alt="Discord" className="w-8 h-8" />',
-      tiktok: '<img src="/social-icons/004-tiktok.png" alt="Tiktok" className="w-8 h-8" />',
-      youtube: '<img src="/social-icons/008-youtube.png" alt="Youtube" className="w-8 h-8" />',
-      facebook: '<img src="/social-icons/003-facebook.png" alt="Facebook" className="w-8 h-8" />',
-      twitter: '<img src="/social-icons/twitter.png" alt="X" className="w-8 h-8" />',
-      linkedin: '<img src="/social-icons/005-linkedin.png" alt="Linkedin" className="w-8 h-8" />',
-      github: '<img src="/social-icons/012-github.png" alt="Github" className="w-8 h-8" />',
-      behance: '<img src="/social-icons/014-behance.png" alt="Behance" className="w-8 h-8" />',
-      dribble: '<img src="/social-icons/013-dribble.png" alt="Dribble" className="w-8 h-8" />',
-      figma: '<img src="/social-icons/016-figma.png" alt="Figma" className="w-8 h-8" />',
-      upwork: '<img src="/social-icons/015-upwork.png" alt="Upwork" className="w-8 h-8" />',
-      website: '<img src="/social-icons/internet.png" alt="Website" className="w-8 h-8" />',
-      email: '<img src="/social-icons/019-mail.png" alt="Email" className="w-8 h-8" />',
-      phone: '<img src="/social-icons/telephone.png" alt="Telephone" className="w-8 h-8" />',
-      custom: '<img src="/social-icons/link.png" alt="Link" className="w-8 h-8" />'
+      whatsapp: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/007-social.png" alt="Whatsapp" className="w-8 h-8" />',
+      telegram: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/006-telegram.png" alt="Telegram" className="w-8 h-8" />',
+      instagram: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/002-instagram.png" alt="Instagram" className="w-8 h-8" />',
+      messenger: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/018-messenger.png" alt="Messenger" className="w-8 h-8" />',
+      viber: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/011-viber.png" alt="Viber" className="w-8 h-8" />',
+      discord: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/017-discord.png" alt="Discord" className="w-8 h-8" />',
+      tiktok: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/004-tiktok.png" alt="Tiktok" className="w-8 h-8" />',
+      youtube: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/008-youtube.png" alt="Youtube" className="w-8 h-8" />',
+      facebook: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/003-facebook.png" alt="Facebook" className="w-8 h-8" />',
+      twitter: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/twitter.png" alt="X" className="w-8 h-8" />',
+      linkedin: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/005-linkedin.png" alt="Linkedin" className="w-8 h-8" />',
+      github: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/012-github.png" alt="Github" className="w-8 h-8" />',
+      behance: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/014-behance.png" alt="Behance" className="w-8 h-8" />',
+      dribble: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/013-dribble.png" alt="Dribble" className="w-8 h-8" />',
+      figma: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/016-figma.png" alt="Figma" className="w-8 h-8" />',
+      upwork: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/015-upwork.png" alt="Upwork" className="w-8 h-8" />',
+      website: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/internet.png" alt="Website" className="w-8 h-8" />',
+      email: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/019-mail.png" alt="Email" className="w-8 h-8" />',
+      phone: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/telephone.png" alt="Telephone" className="w-8 h-8" />',
+      custom: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/link.png" alt="Link" className="w-8 h-8" />'
     };
     return icons[channel.type] || '🔗';
   }
