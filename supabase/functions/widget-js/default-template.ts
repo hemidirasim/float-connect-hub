@@ -1,4 +1,5 @@
 
+
 import type { WidgetTemplate } from './template-types.ts'
 
 export function getDefaultTemplate(): WidgetTemplate {
@@ -66,11 +67,13 @@ export function getDefaultTemplate(): WidgetTemplate {
         background: rgba(0, 0, 0, 0.5);
         z-index: 99998;
         transition: all 0.3s ease;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-end;
+        padding: 20px;
       }
       
       #lovable-modal-content {
-        position: absolute;
-        {{MODAL_ALIGNMENT}}
         background: white;
         border-radius: 12px;
         width: min(400px, 90vw);
@@ -79,6 +82,21 @@ export function getDefaultTemplate(): WidgetTemplate {
         padding: 20px;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         transition: transform 0.3s ease;
+        position: relative;
+        margin: 0;
+      }
+      
+      /* Position modal based on button position */
+      #lovable-widget-modal.position-right {
+        justify-content: flex-end;
+      }
+      
+      #lovable-widget-modal.position-left {
+        justify-content: flex-start;
+      }
+      
+      #lovable-widget-modal.position-center {
+        justify-content: center;
       }
       
       #lovable-modal-header {
@@ -241,9 +259,12 @@ export function getDefaultTemplate(): WidgetTemplate {
 
       /* Responsive styles */
       @media (max-width: 768px) {
+        #lovable-widget-modal {
+          padding: 10px;
+        }
+        
         #lovable-modal-content {
-          margin: 20px;
-          width: calc(100% - 40px);
+          width: calc(100% - 20px);
           max-width: none;
         }
       }
@@ -252,11 +273,13 @@ export function getDefaultTemplate(): WidgetTemplate {
       let channels = [];
       let liveChatEnabled = false;
       let liveChatAgentName = 'Support Team';
+      let widgetPosition = 'right';
       
       try {
         channels = JSON.parse('{{CHANNELS_DATA}}');
         liveChatEnabled = {{LIVE_CHAT_ENABLED}};
         liveChatAgentName = '{{LIVE_CHAT_AGENT_NAME}}';
+        widgetPosition = '{{POSITION}}';
       } catch (e) {
         console.error('Error parsing widget data:', e);
       }
@@ -267,6 +290,11 @@ export function getDefaultTemplate(): WidgetTemplate {
       const channelsContainer = document.getElementById('lovable-widget-channels');
       const liveChatContainer = document.getElementById('lovable-live-chat-container');
       const tooltip = document.getElementById('lovable-widget-tooltip');
+
+      // Set modal position class based on widget position
+      if (modal) {
+        modal.className = 'position-' + widgetPosition;
+      }
 
       function showTooltip() {
         if ('{{TOOLTIP_DISPLAY}}' === 'hover' && tooltip) {
@@ -285,7 +313,7 @@ export function getDefaultTemplate(): WidgetTemplate {
         button.addEventListener('mouseleave', hideTooltip);
         button.addEventListener('click', function() {
           if (modal) {
-            modal.style.display = 'block';
+            modal.style.display = 'flex';
             setTimeout(() => {
               modal.style.visibility = 'visible';
               modal.style.opacity = '1';
@@ -463,3 +491,4 @@ export function getDefaultTemplate(): WidgetTemplate {
     `
   };
 }
+
