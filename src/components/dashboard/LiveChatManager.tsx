@@ -1,44 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageCircle, Send, Clock, User, X, Minimize2, Archive, MessageSquare } from 'lucide-react';
+
+import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { DashboardHeader } from "./DashboardHeader";
-
-interface LiveChatMessage {
-  id: string;
-  session_id?: string;
-  widget_id: string;
-  sender_name: string;
-  sender_email?: string;
-  message: string;
-  is_from_visitor: boolean;
-  created_at: string;
-}
-
-interface ChatSession {
-  id: string;
-  widget_id: string;
-  visitor_name: string;
-  visitor_email?: string;
-  visitor_phone?: string;
-  custom_fields?: any;
-  status: 'active' | 'ended' | 'abandoned';
-  started_at: string;
-  ended_at?: string;
-  last_message_at: string;
-}
-
-interface Widget {
-  id: string;
-  name: string;
-  website_url: string;
-}
+import { WidgetSelector } from "./live-chat/WidgetSelector";
+import { SessionsList } from "./live-chat/SessionsList";
+import { ChatWindow } from "./live-chat/ChatWindow";
+import { LiveChatMessage, ChatSession, Widget } from "./live-chat/types";
 
 interface LiveChatManagerProps {
   widgets: Widget[];
@@ -50,9 +18,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
   const [selectedSession, setSelectedSession] = useState<string>('');
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [messages, setMessages] = useState<LiveChatMessage[]>([]);
-  const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (selectedWidget) {
@@ -173,14 +139,6 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
     }
   }, [selectedSession]);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   const fetchSessions = async () => {
     if (!selectedWidget) return;
     
@@ -246,25 +204,24 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
     }
   };
 
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedSession) return;
+  const sendMessage = async (message: string) => {
+    if (!selectedSession) return;
 
     try {
-      console.log('Sending agent message:', newMessage);
+      console.log('Sending agent message:', message);
       const { data, error } = await supabase
         .from('live_chat_messages')
         .insert([{
           session_id: selectedSession,
           widget_id: selectedWidget,
           sender_name: 'Support Agent',
-          message: newMessage.trim(),
+          message: message,
           is_from_visitor: false
         }])
         .select();
 
       if (error) throw error;
       console.log('Agent message sent successfully:', data);
-      setNewMessage('');
       
       // Manually add the message to local state if realtime doesn't work
       if (data && data[0]) {
@@ -311,40 +268,6 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
     }
   };
 
-  const formatTime = (timestamp: string) => {
-    return new Date(timestamp).toLocaleString('az-AZ', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const formatRelativeTime = (timestamp: string) => {
-    const now = new Date();
-    const date = new Date(timestamp);
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return 'İndi';
-    if (diffInMinutes < 60) return `${diffInMinutes} dəqiqə əvvəl`;
-    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} saat əvvəl`;
-    return `${Math.floor(diffInMinutes / 1440)} gün əvvəl`;
-  };
-
-  const getSessionStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge variant="default" className="bg-green-500">Aktiv</Badge>;
-      case 'ended':
-        return <Badge variant="secondary">Bitdi</Badge>;
-      case 'abandoned':
-        return <Badge variant="destructive">Tərk edildi</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
-  };
-
   const selectedWidgetData = widgets.find(w => w.id === selectedWidget);
   const selectedSessionData = sessions.find(s => s.id === selectedSession);
 
@@ -357,212 +280,32 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
         {/* Widget and Sessions */}
         <div className="lg:col-span-1 space-y-4">
           {/* Widget Selection */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Sayt Seçimi</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Select value={selectedWidget} onValueChange={setSelectedWidget}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sayt seçin" />
-                </SelectTrigger>
-                <SelectContent>
-                  {widgets.map((widget) => (
-                    <SelectItem key={widget.id} value={widget.id}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{widget.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {widget.website_url}
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </CardContent>
-          </Card>
+          <WidgetSelector
+            widgets={widgets}
+            selectedWidget={selectedWidget}
+            onWidgetChange={setSelectedWidget}
+          />
 
           {/* Sessions List */}
-          {selectedWidget && (
-            <Card className="flex-1">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Söhbətlər</CardTitle>
-                <CardDescription>
-                  {selectedWidgetData?.name} üçün söhbətlər
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <ScrollArea className="h-[500px]">
-                  {loading ? (
-                    <div className="p-4 text-center text-muted-foreground">
-                      Yüklənir...
-                    </div>
-                  ) : sessions.length === 0 ? (
-                    <div className="p-4 text-center text-muted-foreground">
-                      <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p>Söhbət yoxdur</p>
-                    </div>
-                  ) : (
-                    <div className="p-2 space-y-2">
-                      {sessions.map((session) => (
-                        <div
-                          key={session.id}
-                          className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                            selectedSession === session.id
-                              ? 'bg-primary/10 border border-primary/20'
-                              : 'bg-muted/50 hover:bg-muted'
-                          }`}
-                          onClick={() => handleJoinConversation(session.id)}
-                        >
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <User className="w-4 h-4" />
-                              <span className="font-medium text-sm">
-                                {session.visitor_name}
-                              </span>
-                            </div>
-                            {getSessionStatusBadge(session.status)}
-                          </div>
-                          
-                          <div className="text-xs text-muted-foreground">
-                           <div>Başladı: {formatRelativeTime(session.started_at)}</div>
-                           <div>Son mesaj: {formatRelativeTime(session.last_message_at)}</div>
-                          </div>
-                           {session.status === 'active' && selectedSession !== session.id && (
-                             <Button
-                               size="sm"
-                               variant="outline"
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 handleJoinConversation(session.id);
-                               }}
-                               className="mt-2 w-full"
-                             >
-                               <MessageSquare className="w-4 h-4 mr-1" />
-                               Söhbətə Qoşul
-                             </Button>
-                           )}
-                       </div>
-                     ))}
-                   </div>
-                  )}
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          )}
+          <SessionsList
+            selectedWidget={selectedWidget}
+            selectedSession={selectedSession}
+            sessions={sessions}
+            loading={loading}
+            selectedWidgetData={selectedWidgetData}
+            onJoinConversation={handleJoinConversation}
+          />
         </div>
 
         {/* Chat Messages */}
         <div className="lg:col-span-3">
-          {selectedSession ? (
-            <Card className="h-full flex flex-col">
-              <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="w-5 h-5" />
-                    {selectedSessionData?.visitor_name}
-                  </CardTitle>
-                  <CardDescription>
-                    {selectedSessionData?.visitor_email && (
-                      <span className="mr-4">📧 {selectedSessionData.visitor_email}</span>
-                    )}
-                    {selectedSessionData?.visitor_phone && (
-                      <span>📞 {selectedSessionData.visitor_phone}</span>
-                    )}
-                  </CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                  {getSessionStatusBadge(selectedSessionData?.status || '')}
-                </div>
-              </CardHeader>
-              
-              <CardContent className="flex-1 flex flex-col p-0">
-                {/* Messages */}
-                <div className="relative">
-                  {selectedSessionData?.status === 'active' && (
-                    <div className="absolute top-2 right-2 z-10">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={endSession}
-                      >
-                        <X className="w-4 h-4 mr-1" />
-                        Söhbəti Bitir
-                      </Button>
-                    </div>
-                  )}
-                  <ScrollArea className="flex-1 p-4 h-[500px]">
-                  <div className="space-y-4">
-                    {messages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.is_from_visitor ? 'justify-start' : 'justify-end'}`}
-                      >
-                        <div
-                          className={`max-w-[70%] rounded-lg p-3 ${
-                            message.is_from_visitor
-                              ? 'bg-muted text-foreground'
-                              : 'bg-primary text-primary-foreground'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-medium">
-                              {message.sender_name}
-                            </span>
-                            {message.is_from_visitor && (
-                              <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
-                                Ziyarətçi
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-sm">{message.message}</p>
-                          <div className="flex items-center gap-1 mt-2 text-xs opacity-70">
-                            <Clock className="w-3 h-3" />
-                            {formatTime(message.created_at)}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    <div ref={messagesEndRef} />
-                  </div>
-                  </ScrollArea>
-                </div>
-
-                {/* Message Input */}
-                <div className="border-t p-4">
-                  {selectedSessionData?.status === 'active' ? (
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Mesajınızı yazın..."
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                        className="flex-1"
-                      />
-                      <Button 
-                        onClick={sendMessage} 
-                        disabled={!newMessage.trim()}
-                      >
-                        <Send className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="text-center text-muted-foreground p-4 bg-muted/50 rounded-lg">
-                      <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p>Söhbət bitib - mesaj göndərmək mümkün deyil</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="h-full flex items-center justify-center">
-              <div className="text-center text-muted-foreground">
-                <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Söhbəti görmək üçün sayt və söhbət seçin</p>
-              </div>
-            </Card>
-          )}
+          <ChatWindow
+            selectedSession={selectedSession}
+            selectedSessionData={selectedSessionData}
+            messages={messages}
+            onEndSession={endSession}
+            onSendMessage={sendMessage}
+          />
         </div>
       </div>
     </div>
