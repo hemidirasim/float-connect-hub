@@ -7,6 +7,7 @@ import { WebsiteInfoForm } from './WebsiteInfoForm';
 import { ChannelManager } from './ChannelManager';
 import { VideoUpload } from './VideoUpload';
 import { CustomizationOptions } from './CustomizationOptions';
+import { LiveChatSettings } from './LiveChatSettings';
 import { Channel, FormData } from './types';
 import { TemplatePreview } from './TemplatePreview';
 
@@ -134,7 +135,23 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             </CardContent>
           </Card>
 
-          <Button 
+          {/* Live Chat Settings */}
+          <LiveChatSettings
+            liveChatEnabled={formData.liveChatEnabled}
+            liveChatAgentName={formData.liveChatAgentName}
+            liveChatGreeting={formData.liveChatGreeting}
+            liveChatColor={formData.liveChatColor}
+            liveChatAutoOpen={formData.liveChatAutoOpen}
+            liveChatOfflineMessage={formData.liveChatOfflineMessage}
+            onLiveChatEnabledChange={(enabled) => onFormDataChange('liveChatEnabled', enabled)}
+            onLiveChatAgentNameChange={(name) => onFormDataChange('liveChatAgentName', name)}
+            onLiveChatGreetingChange={(greeting) => onFormDataChange('liveChatGreeting', greeting)}
+            onLiveChatColorChange={(color) => onFormDataChange('liveChatColor', color)}
+            onLiveChatAutoOpenChange={(autoOpen) => onFormDataChange('liveChatAutoOpen', autoOpen)}
+            onLiveChatOfflineMessageChange={(message) => onFormDataChange('liveChatOfflineMessage', message)}
+          />
+
+          <Button
             onClick={onCreateWidget} 
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             size="lg"

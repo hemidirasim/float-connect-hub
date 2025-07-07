@@ -22,6 +22,67 @@ const defaultJavaScriptLogic = `
     }
   }
 
+  function openLiveChat() {
+    console.log('Opening live chat');
+    var liveChatModal = document.querySelector('#lovable-livechat-modal');
+    var mainModal = document.querySelector('#lovable-widget-modal');
+    
+    if (liveChatModal) {
+      // Hide main modal
+      if (mainModal) {
+        mainModal.style.display = 'none';
+        mainModal.style.visibility = 'hidden';
+        mainModal.style.opacity = '0';
+      }
+      
+      // Show live chat modal
+      liveChatModal.style.display = 'flex';
+      liveChatModal.style.visibility = 'visible';
+      liveChatModal.style.opacity = '1';
+      
+      // Add initial message from agent
+      var messagesDiv = document.querySelector('#lovable-livechat-messages');
+      if (messagesDiv && messagesDiv.children.length === 0) {
+        var initialMessage = document.createElement('div');
+        initialMessage.className = 'chat-message agent-message';
+        initialMessage.innerHTML = '<div class="message-content">{{LIVE_CHAT_GREETING}}</div>';
+        messagesDiv.appendChild(initialMessage);
+      }
+    }
+  }
+
+  function closeLiveChat() {
+    console.log('Closing live chat');
+    var liveChatModal = document.querySelector('#lovable-livechat-modal');
+    if (liveChatModal) {
+      liveChatModal.style.display = 'none';
+      liveChatModal.style.visibility = 'hidden';
+      liveChatModal.style.opacity = '0';
+    }
+  }
+
+  function sendMessage() {
+    var input = document.querySelector('#lovable-livechat-input');
+    var messagesDiv = document.querySelector('#lovable-livechat-messages');
+    
+    if (input && messagesDiv && input.value.trim()) {
+      // Add user message
+      var userMessage = document.createElement('div');
+      userMessage.className = 'chat-message user-message';
+      userMessage.innerHTML = '<div class="message-content">' + escapeHtml(input.value) + '</div>';
+      messagesDiv.appendChild(userMessage);
+      
+      // Clear input
+      input.value = '';
+      
+      // Scroll to bottom
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      
+      // TODO: Send message to server/database
+      console.log('Message sent to live chat');
+    }
+  }
+
   function getChannelIcon(channel) {
     var icons = {
       whatsapp: '<img src="/social-icons/007-social.png" alt="Whatsapp" className="w-8 h-8" />',
@@ -370,6 +431,45 @@ const defaultJavaScriptLogic = `
     
     console.log('Widget initialized successfully');
     
+    // Initialize live chat
+    var liveChatBtn = document.querySelector('#lovable-livechat-btn');
+    var liveChatClose = document.querySelector('#lovable-livechat-close');
+    var liveChatSend = document.querySelector('#lovable-livechat-send');
+    var liveChatInput = document.querySelector('#lovable-livechat-input');
+    
+    if (liveChatBtn) {
+      liveChatBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openLiveChat();
+      });
+    }
+    
+    if (liveChatClose) {
+      liveChatClose.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeLiveChat();
+      });
+    }
+    
+    if (liveChatSend) {
+      liveChatSend.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        sendMessage();
+      });
+    }
+    
+    if (liveChatInput) {
+      liveChatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+    }
+    
     // Only preload video metadata on widget init, do NOT start playing
     setTimeout(function() {
       var videos = document.querySelectorAll('.hiclient-video-player');
@@ -395,6 +495,9 @@ const defaultJavaScriptLogic = `
   window.openChannel = openChannel;
   window.toggleDropdown = toggleDropdown;
   window.playVideo = playVideo;
+  window.openLiveChat = openLiveChat;
+  window.closeLiveChat = closeLiveChat;
+  window.sendMessage = sendMessage;
   
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initWidget);

@@ -41,6 +41,23 @@ function safeStringReplace(template: string, placeholder: string, value: string)
 export class WidgetTemplateRenderer {
   constructor(private template: WidgetTemplate, private config: TemplateConfig) {}
 
+  generateLiveChatButton(config: TemplateConfig): string {
+    if (!config.liveChatEnabled) {
+      return '';
+    }
+
+    return `
+      <div class="live-chat-section">
+        <button id="lovable-livechat-btn" class="live-chat-button">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+          </svg>
+          Start Live Chat
+        </button>
+      </div>
+    `;
+  }
+
   generateWidgetScript(): string {
     console.log('Generating widget script for template:', this.template.id)
     console.log('Template config for video:', {
@@ -94,7 +111,11 @@ export class WidgetTemplateRenderer {
       '{{CHANNEL_BOTTOM_OFFSET}}': channelBottomOffset.toString(),
       '{{TOOLTIP_RIGHT_OFFSET}}': tooltipRightOffset.toString(),
       '{{MOBILE_CHANNEL_GAP}}': mobileChannelGap.toString(),
-      '{{MOBILE_TOOLTIP_RIGHT_OFFSET}}': mobileTooltipRightOffset.toString()
+      '{{MOBILE_TOOLTIP_RIGHT_OFFSET}}': mobileTooltipRightOffset.toString(),
+      // Live chat placeholders
+      '{{LIVE_CHAT_BUTTON}}': this.generateLiveChatButton(this.config),
+      '{{LIVE_CHAT_GREETING}}': this.config.liveChatGreeting || 'Hello! How can we help you today?',
+      '{{LIVE_CHAT_COLOR}}': this.config.liveChatColor || '#4f46e5'
     }
 
     console.log('Video content in replacements:', replacements['{{VIDEO_CONTENT}}'] ? 'YES' : 'NO')

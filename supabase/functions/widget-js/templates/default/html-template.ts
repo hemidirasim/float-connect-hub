@@ -14,10 +14,25 @@ export const defaultHtmlTemplate = `
     <div id="lovable-modal-header">{{GREETING_MESSAGE}}</div>
     <button id="lovable-widget-close">×</button>
     {{VIDEO_CONTENT}}
+    {{LIVE_CHAT_BUTTON}}
     <div id="lovable-widget-channels"></div>
     <div class="lovable-empty-state" style="display: none;">
       <div class="lovable-empty-icon">📱</div>
       <p>No channels configured</p>
+    </div>
+  </div>
+</div>
+
+<div id="lovable-livechat-modal" style="display: none; visibility: hidden; opacity: 0;">
+  <div id="lovable-livechat-content">
+    <div id="lovable-livechat-header">
+      <h3>{{LIVE_CHAT_GREETING}}</h3>
+      <button id="lovable-livechat-close">×</button>
+    </div>
+    <div id="lovable-livechat-messages"></div>
+    <div id="lovable-livechat-input-area">
+      <input type="text" id="lovable-livechat-input" placeholder="Type your message..." />
+      <button id="lovable-livechat-send">Send</button>
     </div>
   </div>
 </div>

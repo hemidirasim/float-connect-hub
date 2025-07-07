@@ -20,4 +20,8 @@ export interface TemplateConfig {
   previewVideoHeight: number;
   widgetWidth?: number;
   widgetHeight?: number;
+  // Live chat fields
+  liveChatEnabled?: boolean;
+  liveChatGreeting?: string;
+  liveChatColor?: string;
 }

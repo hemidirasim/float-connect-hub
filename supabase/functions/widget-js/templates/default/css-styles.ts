@@ -15,6 +15,129 @@ export const defaultCssStyles = `
     {{BUTTON_OFFSET_STYLE}}
   }
   
+  .live-chat-section {
+    margin: 16px 0;
+    padding: 16px 0;
+    border-top: 1px solid #e5e7eb;
+  }
+  
+  .live-chat-button {
+    width: 100%;
+    padding: 12px 16px;
+    background: {{LIVE_CHAT_COLOR}};
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .live-chat-button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+  
+  #lovable-livechat-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 100001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  #lovable-livechat-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+  
+  #lovable-livechat-header {
+    padding: 16px;
+    background: {{LIVE_CHAT_COLOR}};
+    color: white;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: between;
+    align-items: center;
+  }
+  
+  #lovable-livechat-messages {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .chat-message {
+    max-width: 80%;
+  }
+  
+  .agent-message {
+    align-self: flex-start;
+  }
+  
+  .user-message {
+    align-self: flex-end;
+  }
+  
+  .message-content {
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+  }
+  
+  .agent-message .message-content {
+    background: #f3f4f6;
+    color: #374151;
+  }
+  
+  .user-message .message-content {
+    background: {{LIVE_CHAT_COLOR}};
+    color: white;
+  }
+  
+  #lovable-livechat-input-area {
+    padding: 16px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    gap: 8px;
+  }
+  
+  #lovable-livechat-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 20px;
+    outline: none;
+  }
+  
+  #lovable-livechat-send {
+    padding: 8px 16px;
+    background: {{LIVE_CHAT_COLOR}};
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+  }`;
+  
   #lovable-widget-button:hover {
     box-shadow: 0 12px 35px rgba(34, 197, 94, 0.5);
     background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
