@@ -58,7 +58,11 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       channels: channels.length,
       buttonColor: formData.buttonColor,
       position: formData.position,
-      greetingMessage: formData.greetingMessage
+      greetingMessage: formData.greetingMessage,
+      // Live chat debug
+      liveChatEnabled: formData.liveChatEnabled,
+      liveChatGreeting: formData.liveChatGreeting,
+      liveChatColor: formData.liveChatColor
     });
 
     // Use EXACT SAME config structure as edge function template-generator.ts
@@ -81,7 +85,11 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       previewVideoHeight: formData.previewVideoHeight,
       templateId: templateId,
       widgetWidth: 400, // Default value
-      widgetHeight: 600 // Default value
+      widgetHeight: 600, // Default value
+      // Live chat config
+      liveChatEnabled: formData.liveChatEnabled,
+      liveChatGreeting: formData.liveChatGreeting,
+      liveChatColor: formData.liveChatColor
     };
 
     // Use SAME renderer as edge function
@@ -150,6 +158,10 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     formData.useVideoPreview,
     formData.buttonSize,
     formData.previewVideoHeight,
+    // Live chat dependencies
+    formData.liveChatEnabled,
+    formData.liveChatGreeting,
+    formData.liveChatColor,
     channels,
     editingWidget?.video_url,
     getTemplate
