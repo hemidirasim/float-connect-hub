@@ -500,14 +500,18 @@ export const defaultCssStyles = `
     width: 100% !important;
     max-width: 100% !important;
     height: auto !important;
+    max-height: 200px !important;
     border-radius: 12px;
     margin-bottom: 20px;
     z-index: 1;
     position: relative;
+    object-fit: contain !important;
   }
   
   .hiclient-video-container {
     width: 100%;
+    max-width: 100%;
+    max-height: 250px;
     margin-bottom: 20px;
     border-radius: 12px;
     overflow: hidden;
@@ -518,7 +522,9 @@ export const defaultCssStyles = `
   
   .hiclient-video-container iframe {
     width: 100% !important;
+    max-width: 100% !important;
     height: 200px !important;
+    max-height: 200px !important;
     border: none;
     border-radius: 12px;
   }

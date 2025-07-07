@@ -119,14 +119,24 @@ const defaultJavaScriptLogic = `
       }
     }
     
-    // Collect custom fields
+    // Collect custom fields and include in message
     var customFields = config.liveChatCustomFields ? config.liveChatCustomFields.split(',').map(f => f.trim()).filter(f => f) : [];
+    var customFieldsData = {};
     customFields.forEach(function(fieldName, index) {
       var customInput = document.querySelector('#prechat-custom-' + index);
       if (customInput && customInput.value.trim()) {
+        customFieldsData[fieldName] = customInput.value.trim();
         userData[fieldName] = customInput.value.trim();
       }
     });
+    
+    // Include custom fields in the initial message
+    if (Object.keys(customFieldsData).length > 0) {
+      var customFieldsText = Object.entries(customFieldsData).map(function([key, value]) {
+        return key + ': ' + value;
+      }).join(', ');
+      userData.customFieldsInfo = customFieldsText;
+    }
     
     if (!isValid) {
       return;

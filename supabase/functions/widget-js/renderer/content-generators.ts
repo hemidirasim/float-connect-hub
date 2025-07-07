@@ -62,10 +62,10 @@ export function generateVideoContent(config: TemplateConfig): string {
       // Use iframe for YouTube videos with vertical alignment
       const videoHeight = config.videoHeight || 200
       
-      const youtubeHtml = `<div class="hiclient-video-container" style="display: flex; ${alignmentStyle} justify-content: center; margin-bottom: 20px;">
+      const youtubeHtml = `<div class="hiclient-video-container" style="position: relative; display: flex; ${alignmentStyle} justify-content: center; margin-bottom: 20px; max-width: 100%; overflow: hidden;">
          <iframe class="hiclient-video-player" 
                 src="https://www.youtube.com/embed/${videoId}?loop=1&playlist=${videoId}&enablejsapi=1" 
-                style="height: ${videoHeight}px; width: 100%; border-radius: 12px; border: none; object-fit: ${config.videoObjectFit || 'cover'};" 
+                style="height: ${videoHeight}px; max-width: 100%; width: auto; aspect-ratio: 16/9; border-radius: 12px; border: none;" 
                 allow="autoplay; encrypted-media" 
                 allowfullscreen>
          </iframe>
@@ -82,9 +82,9 @@ export function generateVideoContent(config: TemplateConfig): string {
   
   console.log('Generated video content with vertical alignment and object-fit:', processedVideoUrl, videoObjectFit)
   
-  const videoHtml = `<div class="hiclient-video-container" style="display: flex; ${alignmentStyle} justify-content: center; margin-bottom: 20px;">
+  const videoHtml = `<div class="hiclient-video-container" style="position: relative; display: flex; ${alignmentStyle} justify-content: center; margin-bottom: 20px; max-width: 100%; overflow: hidden;">
      <video class="hiclient-video-player" src="${processedVideoUrl}" 
-            style="height: ${videoHeight}px; width: 100%; border-radius: 12px; object-fit: ${videoObjectFit};" 
+            style="height: ${videoHeight}px; max-width: 100%; width: auto; border-radius: 12px; object-fit: ${videoObjectFit};" 
             loop playsinline webkit-playsinline preload="metadata">
        Your browser does not support the video tag.
      </video>

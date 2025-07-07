@@ -330,26 +330,7 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
           <CardTitle>Appearance settings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>Button shape</Label>
-              <Select value={formData.button_style} onValueChange={(value) => handleInputChange('button_style', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {buttonStyles.map((style) => (
-                    <SelectItem key={style.value} value={style.value}>
-                      <div className="flex items-center gap-2">
-                        <style.icon className="w-4 h-4" />
-                        {style.label}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Color</Label>
               <div className="flex items-center gap-2">
