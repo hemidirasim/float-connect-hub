@@ -109,6 +109,14 @@ export const useWidgetActions = (
         }
         savedWidget = data;
         toast.success('Widget updated! Changes will appear on your website within 1 minute.');
+        
+        // Scroll to generated code section
+        setTimeout(() => {
+          const codeElement = document.getElementById('generated-code');
+          if (codeElement) {
+            codeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 500);
       } else {
         console.log('Creating new widget');
         const { data, error } = await supabase
@@ -123,6 +131,14 @@ export const useWidgetActions = (
         }
         savedWidget = data;
         toast.success('Widget created!');
+        
+        // Scroll to generated code section
+        setTimeout(() => {
+          const codeElement = document.getElementById('generated-code');
+          if (codeElement) {
+            codeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 500);
       }
       
       console.log('Widget saved to database successfully with channels:', savedWidget);
