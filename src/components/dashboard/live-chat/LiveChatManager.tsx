@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -55,7 +56,8 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
       audio.volume = 0.5;
       audio.play().catch(() => {
         // If built-in sound fails, try a simple beep
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        const audioContext = new AudioContextClass();
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
         
