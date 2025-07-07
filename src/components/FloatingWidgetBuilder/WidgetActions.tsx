@@ -59,7 +59,7 @@ export const useWidgetActions = (
       return { success: false };
     }
 
-    if (channels.length === 0) {
+    if (channels.length === 0 && !formData.videoUrl) {
       toast.error('At least 1 contact channel is required');
       return { success: false };
     }
