@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { useRealtimeConnection } from "./useRealtimeConnection";
 import { User, Send, MessageCircle, Clock, Ban } from 'lucide-react';
 
 interface ChatSession {
@@ -47,6 +48,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ session, widgetId, onBan
   const [newMessage, setNewMessage] = useState('');
   const [banReason, setBanReason] = useState('');
   const [loading, setLoading] = useState(false);
+  const { setupRealtimeChannel, cleanupChannel } = useRealtimeConnection();
 
   // Load messages when session changes
   useEffect(() => {
@@ -62,42 +64,35 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ session, widgetId, onBan
   useEffect(() => {
     if (!session) return;
 
-    console.log('Setting up messages realtime subscription for session:', session.id);
-
-    const channel = supabase
-      .channel(`messages-${session.id}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'live_chat_messages',
-        filter: `session_id=eq.${session.id}`
-      }, (payload) => {
-        console.log('New message realtime event:', payload);
-        const newMsg = payload.new as Message;
-        
-        setMessages(prev => {
-          // Check if message already exists to avoid duplicates
-          if (prev.find(m => m.id === newMsg.id)) return prev;
-          return [...prev, newMsg];
-        });
-        
-        // Auto-scroll to bottom
-        setTimeout(() => {
-          const scrollArea = document.querySelector('[data-radix-scroll-area-viewport]');
-          if (scrollArea) {
-            scrollArea.scrollTop = scrollArea.scrollHeight;
-          }
-        }, 100);
-      })
-      .subscribe((status) => {
-        console.log('Messages subscription status:', status);
-      });
+    const channel = setupRealtimeChannel(
+      `session-messages-${session.id}`,
+      'live_chat_messages',
+      `session_id=eq.${session.id}`,
+      (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const newMsg = payload.new as Message;
+          
+          setMessages(prev => {
+            // Check if message already exists to avoid duplicates
+            if (prev.find(m => m.id === newMsg.id)) return prev;
+            return [...prev, newMsg];
+          });
+          
+          // Auto-scroll to bottom
+          setTimeout(() => {
+            const scrollArea = document.querySelector('[data-radix-scroll-area-viewport]');
+            if (scrollArea) {
+              scrollArea.scrollTop = scrollArea.scrollHeight;
+            }
+          }, 100);
+        }
+      }
+    );
 
     return () => {
-      console.log('Cleaning up messages subscription');
-      supabase.removeChannel(channel);
+      cleanupChannel(channel);
     };
-  }, [session?.id]); // Only depend on session.id to avoid unnecessary reconnections
+  }, [session?.id]);
 
   const loadMessages = async () => {
     if (!session) return;

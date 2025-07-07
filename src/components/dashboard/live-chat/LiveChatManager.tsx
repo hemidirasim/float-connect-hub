@@ -10,6 +10,7 @@ import { ChatWindow } from "./ChatWindow";
 import { SessionsList } from "./SessionsList";
 import { VisitorInfo } from "./VisitorInfo";
 import { VisitorManagement } from "./VisitorManagement";
+import { useRealtimeConnection } from "./useRealtimeConnection";
 import { MessageCircle, Users, UserX, RefreshCw } from 'lucide-react';
 
 interface Widget {
@@ -44,23 +45,17 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
   const [selectedSession, setSelectedSession] = useState<ChatSession | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('chats');
+  const { setupRealtimeChannel, cleanupChannel } = useRealtimeConnection();
 
   // Real-time subscription
   useEffect(() => {
     if (!selectedWidget) return;
 
-    console.log('Setting up realtime subscription for widget:', selectedWidget);
-
-    const channel = supabase
-      .channel(`widget-${selectedWidget}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'chat_sessions',
-        filter: `widget_id=eq.${selectedWidget}`
-      }, (payload) => {
-        console.log('Chat sessions realtime event:', payload);
-        
+    const channel = setupRealtimeChannel(
+      `widget-sessions-${selectedWidget}`,
+      'chat_sessions',
+      `widget_id=eq.${selectedWidget}`,
+      (payload) => {
         if (payload.eventType === 'INSERT') {
           const newSession = payload.new as ChatSession;
           setSessions(prev => {
@@ -86,18 +81,13 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
             setSelectedSession(null);
           }
         }
-      })
-      .subscribe((status) => {
-        console.log('Chat sessions subscription status:', status);
-      });
+      }
+    );
 
     return () => {
-      console.log('Cleaning up realtime subscription');
-      supabase.removeChannel(channel);
+      cleanupChannel(channel);
     };
   }, [selectedWidget]);
-
-  // Separate effect for selectedSession to avoid dependency issues
 
   // Load sessions when widget changes
   useEffect(() => {
