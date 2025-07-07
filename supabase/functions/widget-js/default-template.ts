@@ -34,6 +34,9 @@ export function getDefaultTemplate(): WidgetTemplate {
       /* Widget container styles */
       #lovable-widget-container {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        position: fixed;
+        z-index: 99999;
+        bottom: 20px;
       }
       
       #lovable-widget-button {
@@ -42,18 +45,36 @@ export function getDefaultTemplate(): WidgetTemplate {
         cursor: pointer;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         transition: all 0.3s ease;
-        display: flex;
+        display: flex !important;
         align-items: center;
         justify-content: center;
         color: white;
         font-size: 24px;
         text-decoration: none;
-        z-index: 1000;
+        z-index: 100000;
+        position: relative;
+        visibility: visible !important;
+        opacity: 1 !important;
       }
       
       #lovable-widget-button:hover {
         transform: scale(1.1);
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      }
+      
+      /* Tooltip styles */
+      #lovable-widget-tooltip {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        white-space: nowrap;
+        z-index: 100001;
+        transition: all 0.2s ease;
+        pointer-events: none;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       }
       
       /* Modal styles */
@@ -70,6 +91,7 @@ export function getDefaultTemplate(): WidgetTemplate {
         align-items: flex-end;
         justify-content: flex-end;
         padding: 20px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       }
       
       #lovable-modal-content {
@@ -82,7 +104,6 @@ export function getDefaultTemplate(): WidgetTemplate {
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         transition: transform 0.3s ease;
         position: relative;
-        margin: 0;
       }
       
       /* Position modal based on button position */
@@ -117,6 +138,12 @@ export function getDefaultTemplate(): WidgetTemplate {
         color: #666;
         padding: 4px;
         line-height: 1;
+      }
+      
+      #lovable-widget-close:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        transform: rotate(90deg);
       }
       
       /* Channel item styles */
@@ -269,20 +296,26 @@ export function getDefaultTemplate(): WidgetTemplate {
       }
     `,
     js: `
+      // Widget configuration
       let channels = [];
       let liveChatEnabled = false;
       let liveChatAgentName = 'Support Team';
       let widgetPosition = 'right';
       
+      // Parse configuration data
       try {
-        channels = JSON.parse('{{CHANNELS_DATA}}');
-        liveChatEnabled = {{LIVE_CHAT_ENABLED}};
-        liveChatAgentName = '{{LIVE_CHAT_AGENT_NAME}}';
-        widgetPosition = '{{POSITION}}';
+        const channelsData = '{{CHANNELS_DATA}}';
+        if (channelsData && channelsData !== '{{CHANNELS_DATA}}') {
+          channels = JSON.parse(channelsData);
+        }
+        liveChatEnabled = '{{LIVE_CHAT_ENABLED}}' === 'true';
+        liveChatAgentName = '{{LIVE_CHAT_AGENT_NAME}}' || 'Support Team';
+        widgetPosition = '{{POSITION}}' || 'right';
       } catch (e) {
         console.error('Error parsing widget data:', e);
       }
 
+      // Get DOM elements
       const modal = document.getElementById('lovable-widget-modal');
       const button = document.getElementById('lovable-widget-button');
       const closeBtn = document.getElementById('lovable-widget-close');
@@ -290,13 +323,25 @@ export function getDefaultTemplate(): WidgetTemplate {
       const liveChatContainer = document.getElementById('lovable-live-chat-container');
       const tooltip = document.getElementById('lovable-widget-tooltip');
 
+      // Ensure button is visible
+      if (button) {
+        button.style.display = 'flex';
+        button.style.visibility = 'visible';
+        button.style.opacity = '1';
+        console.log('Widget button initialized and visible');
+      } else {
+        console.error('Widget button not found');
+      }
+
       // Set modal position class based on widget position
       if (modal) {
         modal.classList.add('position-' + widgetPosition);
       }
 
+      // Tooltip functions
       function showTooltip() {
-        if ('{{TOOLTIP_DISPLAY}}' === 'hover' && tooltip) {
+        const tooltipDisplay = '{{TOOLTIP_DISPLAY}}';
+        if (tooltipDisplay === 'hover' && tooltip) {
           tooltip.style.display = 'block';
         }
       }
@@ -307,10 +352,13 @@ export function getDefaultTemplate(): WidgetTemplate {
         }
       }
 
+      // Button event listeners
       if (button) {
         button.addEventListener('mouseenter', showTooltip);
         button.addEventListener('mouseleave', hideTooltip);
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
           console.log('Button clicked, opening modal');
           if (modal) {
             modal.style.display = 'flex';
@@ -324,8 +372,11 @@ export function getDefaultTemplate(): WidgetTemplate {
         });
       }
 
+      // Close button event listener
       if (closeBtn) {
-        closeBtn.addEventListener('click', function() {
+        closeBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
           console.log('Close button clicked');
           if (modal) {
             modal.style.opacity = '0';
@@ -333,7 +384,7 @@ export function getDefaultTemplate(): WidgetTemplate {
             if (content) {
               content.style.transform = 'translateY(20px)';
             }
-            setTimeout(() => {
+            setTimeout(function() {
               modal.style.visibility = 'hidden';
               modal.style.display = 'none';
             }, 300);
@@ -341,14 +392,18 @@ export function getDefaultTemplate(): WidgetTemplate {
         });
       }
 
+      // Modal backdrop click
       if (modal) {
         modal.addEventListener('click', function(e) {
           if (e.target === modal) {
-            closeBtn.click();
+            if (closeBtn) {
+              closeBtn.click();
+            }
           }
         });
       }
 
+      // Channel rendering functions
       function renderChannels() {
         if (!channelsContainer) return;
         
@@ -360,16 +415,18 @@ export function getDefaultTemplate(): WidgetTemplate {
           return;
         }
 
-        channelsContainer.innerHTML = channels.map(channel => {
+        const channelsHtml = channels.map(function(channel) {
           const iconHtml = channel.customIcon 
             ? '<img src="' + channel.customIcon + '" alt="' + channel.label + '" class="lovable-channel-icon" />'
             : getChannelIcon(channel.type);
           
-          return '<div class="lovable-channel-item" onclick="openChannel(\'' + getChannelUrl(channel) + '\')">' +
+          return '<div class="lovable-channel-item" onclick="openChannel(\\'' + getChannelUrl(channel) + '\\')">' +
             iconHtml +
             '<span>' + channel.label + '</span>' +
           '</div>';
         }).join('');
+        
+        channelsContainer.innerHTML = channelsHtml;
       }
 
       function getChannelIcon(type) {
@@ -407,6 +464,7 @@ export function getDefaultTemplate(): WidgetTemplate {
         }
       }
 
+      // Global function for opening channels
       window.openChannel = function(url) {
         window.open(url, '_blank');
       };
@@ -453,7 +511,7 @@ export function getDefaultTemplate(): WidgetTemplate {
           console.log('Sending message:', message);
           
           // Show typing indicator and auto-response
-          setTimeout(() => {
+          setTimeout(function() {
             const responseEl = document.createElement('div');
             responseEl.className = 'lovable-chat-message agent';
             responseEl.innerHTML = '<div class="lovable-chat-message-sender">' + liveChatAgentName + '</div>' +
@@ -476,13 +534,31 @@ export function getDefaultTemplate(): WidgetTemplate {
         }
       }
 
-      // Initialize components
-      renderChannels();
-      initLiveChat();
-      
-      console.log('Widget initialized with position:', widgetPosition);
-      console.log('Live chat enabled:', liveChatEnabled);
-      console.log('Channels:', channels.length);
+      // Initialize all components when DOM is ready
+      function initWidget() {
+        console.log('Initializing widget...');
+        console.log('Widget position:', widgetPosition);
+        console.log('Live chat enabled:', liveChatEnabled);
+        console.log('Channels:', channels.length);
+        
+        renderChannels();
+        initLiveChat();
+        
+        // Final check - make sure button is visible
+        if (button) {
+          button.style.display = 'flex';
+          button.style.visibility = 'visible';
+          button.style.opacity = '1';
+          console.log('Widget initialization complete - button should be visible');
+        }
+      }
+
+      // Initialize when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initWidget);
+      } else {
+        initWidget();
+      }
     `
   };
 }
