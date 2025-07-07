@@ -7,7 +7,6 @@ import { WebsiteInfoForm } from './WebsiteInfoForm';
 import { ChannelManager } from './ChannelManager';
 import { VideoUpload } from './VideoUpload';
 import { CustomizationOptions } from './CustomizationOptions';
-import { LiveChatSettings } from './LiveChatSettings';
 import { Channel, FormData } from './types';
 import { TemplatePreview } from './TemplatePreview';
 
@@ -134,44 +133,6 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
               />
             </CardContent>
           </Card>
-
-          {/* Live Chat Settings */}
-          <LiveChatSettings
-            liveChatEnabled={formData.liveChatEnabled}
-            liveChatAgentName={formData.liveChatAgentName}
-            liveChatGreeting={formData.liveChatGreeting}
-            liveChatColor={formData.liveChatColor}
-            liveChatAutoOpen={formData.liveChatAutoOpen}
-            liveChatOfflineMessage={formData.liveChatOfflineMessage}
-            liveChatRequireEmail={formData.liveChatRequireEmail}
-            liveChatRequireName={formData.liveChatRequireName}
-            liveChatRequirePhone={formData.liveChatRequirePhone}
-            liveChatCustomFields={formData.liveChatCustomFields}
-            liveChatNameLabel={formData.liveChatNameLabel}
-            liveChatNamePlaceholder={formData.liveChatNamePlaceholder}
-            liveChatEmailLabel={formData.liveChatEmailLabel}
-            liveChatEmailPlaceholder={formData.liveChatEmailPlaceholder}
-            liveChatPhoneLabel={formData.liveChatPhoneLabel}
-            liveChatPhonePlaceholder={formData.liveChatPhonePlaceholder}
-            liveChatButtonText={formData.liveChatButtonText}
-            onLiveChatEnabledChange={(enabled) => onFormDataChange('liveChatEnabled', enabled)}
-            onLiveChatAgentNameChange={(name) => onFormDataChange('liveChatAgentName', name)}
-            onLiveChatGreetingChange={(greeting) => onFormDataChange('liveChatGreeting', greeting)}
-            onLiveChatColorChange={(color) => onFormDataChange('liveChatColor', color)}
-            onLiveChatAutoOpenChange={(autoOpen) => onFormDataChange('liveChatAutoOpen', autoOpen)}
-            onLiveChatOfflineMessageChange={(message) => onFormDataChange('liveChatOfflineMessage', message)}
-            onLiveChatRequireEmailChange={(required) => onFormDataChange('liveChatRequireEmail', required)}
-            onLiveChatRequireNameChange={(required) => onFormDataChange('liveChatRequireName', required)}
-            onLiveChatRequirePhoneChange={(required) => onFormDataChange('liveChatRequirePhone', required)}
-            onLiveChatCustomFieldsChange={(fields) => onFormDataChange('liveChatCustomFields', fields)}
-            onLiveChatNameLabelChange={(label) => onFormDataChange('liveChatNameLabel', label)}
-            onLiveChatNamePlaceholderChange={(placeholder) => onFormDataChange('liveChatNamePlaceholder', placeholder)}
-            onLiveChatEmailLabelChange={(label) => onFormDataChange('liveChatEmailLabel', label)}
-            onLiveChatEmailPlaceholderChange={(placeholder) => onFormDataChange('liveChatEmailPlaceholder', placeholder)}
-            onLiveChatPhoneLabelChange={(label) => onFormDataChange('liveChatPhoneLabel', label)}
-            onLiveChatPhonePlaceholderChange={(placeholder) => onFormDataChange('liveChatPhonePlaceholder', placeholder)}
-            onLiveChatButtonTextChange={(text) => onFormDataChange('liveChatButtonText', text)}
-          />
 
           <Button
             onClick={onCreateWidget} 
