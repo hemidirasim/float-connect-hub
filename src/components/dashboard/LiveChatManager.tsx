@@ -402,21 +402,22 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
                           <div className="text-xs text-muted-foreground">
                            <div>Başladı: {formatRelativeTime(session.started_at)}</div>
                            <div>Son mesaj: {formatRelativeTime(session.last_message_at)}</div>
-                         </div>
-                          {session.status === 'active' && selectedSession !== session.id && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedSession(session.id);
-                              }}
-                              className="mt-2 w-full"
-                            >
-                              <MessageSquare className="w-4 h-4 mr-1" />
-                              Söhbətə Qoşul
-                            </Button>
-                          )}
+                          </div>
+                           {session.status === 'active' && selectedSession !== session.id && (
+                             <Button
+                               size="sm"
+                               variant="outline"
+                               onClick={(e) => {
+                                 e.stopPropagation();
+                                 setSelectedSession(session.id);
+                                 fetchMessages();
+                               }}
+                               className="mt-2 w-full"
+                             >
+                               <MessageSquare className="w-4 h-4 mr-1" />
+                               Söhbətə Qoşul
+                             </Button>
+                           )}
                        </div>
                      ))}
                    </div>

@@ -199,11 +199,20 @@ const defaultJavaScriptLogic = `
         window.liveChatSessionActive = true;
         lastMessageTime = sessionData.lastMessageTime || new Date().toISOString();
         
+        console.log('Session restored successfully');
+        
         // Setup polling and load messages
         setupMessagePolling(sessionData.sessionId);
         loadSessionMessages(sessionData.sessionId);
+        
+        // If modal is open, show chat interface
+        var modal = document.querySelector('#lovable-widget-modal');
+        if (modal && modal.style.display === 'flex') {
+          openLiveChat();
+        }
       } else {
         // Session is ended, clear storage
+        console.log('Session is no longer active, clearing storage');
         clearSessionFromStorage();
       }
     })
@@ -829,6 +838,13 @@ const defaultJavaScriptLogic = `
   
   function initWidget() {
     console.log('Initializing widget...');
+    
+    // Try to restore previous session on widget load
+    var sessionData = getSessionFromStorage();
+    if (sessionData && sessionData.sessionId && sessionData.status === 'active') {
+      console.log('Found existing session in storage, checking if still active...');
+      restorePreviousSession();
+    }
     
     var channelsContainer = document.querySelector('#lovable-widget-channels');
     if (channelsContainer) {
