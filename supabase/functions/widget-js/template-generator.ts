@@ -94,7 +94,8 @@ export class WidgetTemplateRenderer {
       '{{CHANNEL_BOTTOM_OFFSET}}': channelBottomOffset.toString(),
       '{{TOOLTIP_RIGHT_OFFSET}}': tooltipRightOffset.toString(),
       '{{MOBILE_CHANNEL_GAP}}': mobileChannelGap.toString(),
-      '{{MOBILE_TOOLTIP_RIGHT_OFFSET}}': mobileTooltipRightOffset.toString()
+      '{{MOBILE_TOOLTIP_RIGHT_OFFSET}}': mobileTooltipRightOffset.toString(),
+      '{{VIDEO_BUTTON_STYLE}}': this.config.useVideoPreview ? 'background: transparent !important; border: none !important; padding: 0 !important;' : ''
     }
 
     console.log('Video content in replacements:', replacements['{{VIDEO_CONTENT}}'] ? 'YES' : 'NO')
