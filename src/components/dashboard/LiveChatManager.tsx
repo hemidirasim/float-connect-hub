@@ -38,11 +38,13 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
           (payload) => {
             console.log('New session created:', payload);
             const newSession = payload.new as ChatSession;
+            // Mark new session as unread
+            const sessionWithUnread = { ...newSession, unread: true };
             setSessions(prev => {
               // Check if session already exists to prevent duplicates
               const exists = prev.some(s => s.id === newSession.id);
               if (exists) return prev;
-              return [newSession, ...prev];
+              return [sessionWithUnread, ...prev];
             });
             toast.success(`Yeni söhbət: ${newSession.visitor_name}`);
           }
@@ -58,6 +60,13 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
   useEffect(() => {
     if (selectedSession) {
       fetchMessages();
+      
+      // Mark selected session as read
+      setSessions(prev => prev.map(session => 
+        session.id === selectedSession 
+          ? { ...session, unread: false }
+          : session
+      ));
       
       // Subscribe to real-time messages for this session with faster polling
       const messagesChannel = supabase
@@ -109,7 +118,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
             
             // Update sessions list with new status
             setSessions(prev => prev.map(session => 
-              session.id === updatedSession.id ? updatedSession : session
+              session.id === updatedSession.id ? { ...updatedSession, unread: session.unread } : session
             ));
             
             if (updatedSession.status === 'ended' && selectedSession === updatedSession.id) {
@@ -139,6 +148,39 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
     }
   }, [selectedSession]);
 
+  // Subscribe to new messages for unselected sessions to mark them as unread
+  useEffect(() => {
+    if (selectedWidget && sessions.length > 0) {
+      const unreadMessagesChannel = supabase
+        .channel(`unread-messages-${selectedWidget}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'live_chat_messages',
+            filter: `widget_id=eq.${selectedWidget}`
+          },
+          (payload) => {
+            const newMessage = payload.new as LiveChatMessage;
+            // If message is for a different session and it's from visitor, mark as unread
+            if (newMessage.session_id !== selectedSession && newMessage.is_from_visitor) {
+              setSessions(prev => prev.map(session => 
+                session.id === newMessage.session_id 
+                  ? { ...session, unread: true, last_message_at: newMessage.created_at }
+                  : session
+              ));
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(unreadMessagesChannel);
+      };
+    }
+  }, [selectedWidget, selectedSession, sessions.length]);
+
   const fetchSessions = async () => {
     if (!selectedWidget) return;
     
@@ -151,9 +193,16 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
         .order('last_message_at', { ascending: false });
 
       if (error) throw error;
-      setSessions(data || []);
       
-      // Select first active session if available
+      // Mark all sessions as unread initially, except if one is already selected
+      const sessionsWithUnread = (data || []).map(session => ({
+        ...session,
+        unread: session.id !== selectedSession
+      }));
+      
+      setSessions(sessionsWithUnread);
+      
+      // Select first active session if available and no session is selected
       const activeSession = data?.find(s => s.status === 'active');
       if (activeSession && !selectedSession) {
         setSelectedSession(activeSession.id);
@@ -187,6 +236,13 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
   const handleJoinConversation = async (sessionId: string) => {
     console.log('Joining conversation:', sessionId);
     setSelectedSession(sessionId);
+    
+    // Mark session as read when joining
+    setSessions(prev => prev.map(session => 
+      session.id === sessionId 
+        ? { ...session, unread: false }
+        : session
+    ));
     
     // Immediately fetch messages for this session
     try {

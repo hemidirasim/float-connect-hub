@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import { MessageCircle, User, MessageSquare } from 'lucide-react';
 import { ChatSession, Widget } from './types';
 import { formatRelativeTime } from './utils';
@@ -51,19 +52,30 @@ export const SessionsList: React.FC<SessionsListProps> = ({
               {sessions.map((session) => (
                 <div
                   key={session.id}
-                  className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                  className={`p-3 rounded-lg cursor-pointer transition-colors relative ${
                     selectedSession === session.id
                       ? 'bg-primary/10 border border-primary/20'
                       : 'bg-muted/50 hover:bg-muted'
                   }`}
                   onClick={() => onJoinConversation(session.id)}
                 >
+                  {session.unread && selectedSession !== session.id && (
+                    <div className="absolute top-2 right-2">
+                      <Badge variant="destructive" className="px-1.5 py-0.5 text-xs">
+                        Yeni
+                      </Badge>
+                    </div>
+                  )}
+                  
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4" />
                       <span className="font-medium text-sm">
                         {session.visitor_name}
                       </span>
+                      {session.unread && selectedSession !== session.id && (
+                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      )}
                     </div>
                     <SessionStatusBadge status={session.status} />
                   </div>

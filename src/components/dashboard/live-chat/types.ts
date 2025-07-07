@@ -21,6 +21,7 @@ export interface ChatSession {
   started_at: string;
   ended_at?: string;
   last_message_at: string;
+  unread?: boolean; // Add unread status
 }
 
 export interface Widget {
