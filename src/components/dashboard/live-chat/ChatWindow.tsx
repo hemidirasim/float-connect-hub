@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { useRealtimeConnection } from "./useRealtimeConnection";
-import { User, Send, MessageCircle, Clock, Ban, Trash2, MessageSquareOff } from 'lucide-react';
+import { User, Send, MessageCircle, Clock, Ban, Trash2, MessageSquareOff, MoreVertical } from 'lucide-react';
 
 interface ChatSession {
   id: string;
@@ -220,7 +220,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ session, widgetId, onBan
 
   return (
     <Card className="h-full flex flex-col">
-      {/* Chat Header */}
+      {/* Chat Header with Actions Menu */}
       <CardHeader className="flex-row items-center justify-between space-y-0 pb-2 border-b">
         <div>
           <CardTitle className="flex items-center gap-2 text-base">
@@ -240,6 +240,30 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ session, widgetId, onBan
           <Badge variant={session.status === 'active' ? 'default' : 'secondary'}>
             {session.status === 'active' ? 'Aktiv' : 'Bitib'}
           </Badge>
+          
+          {/* Actions Menu */}
+          <ContextMenu>
+            <ContextMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+            </ContextMenuTrigger>
+            <ContextMenuContent className="w-48">
+              <ContextMenuItem onClick={() => setShowEndDialog(true)}>
+                <MessageSquareOff className="w-4 h-4 mr-2" />
+                Söhbəti bitir
+              </ContextMenuItem>
+              <ContextMenuItem onClick={() => setShowDeleteDialog(true)}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Söhbəti sil
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+              <ContextMenuItem onClick={() => setShowBanDialog(true)}>
+                <Ban className="w-4 h-4 mr-2" />
+                Ziyarətçini ban et
+              </ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
         </div>
       </CardHeader>
 
@@ -280,48 +304,29 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ session, widgetId, onBan
           </div>
         </ScrollArea>
 
-        {/* Message Input with Context Menu */}
+        {/* Message Input */}
         <div className="border-t p-4">
           {session.status === 'active' && !session.is_banned ? (
-            <ContextMenu>
-              <ContextMenuTrigger asChild>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Mesajınızı yazın..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        handleSendMessage();
-                      }
-                    }}
-                    className="flex-1"
-                    disabled={loading}
-                  />
-                  <Button 
-                    onClick={handleSendMessage} 
-                    disabled={!newMessage.trim() || loading}
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
-                </div>
-              </ContextMenuTrigger>
-              <ContextMenuContent className="w-64">
-                <ContextMenuItem onClick={() => setShowEndDialog(true)}>
-                  <MessageSquareOff className="w-4 h-4 mr-2" />
-                  Söhbəti bitir
-                </ContextMenuItem>
-                <ContextMenuItem onClick={() => setShowDeleteDialog(true)}>
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Söhbəti sil
-                </ContextMenuItem>
-                <ContextMenuSeparator />
-                <ContextMenuItem onClick={() => setShowBanDialog(true)}>
-                  <Ban className="w-4 h-4 mr-2" />
-                  Ziyarətçini ban et
-                </ContextMenuItem>
-              </ContextMenuContent>
-            </ContextMenu>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Mesajınızı yazın..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSendMessage();
+                  }
+                }}
+                className="flex-1"
+                disabled={loading}
+              />
+              <Button 
+                onClick={handleSendMessage} 
+                disabled={!newMessage.trim() || loading}
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
           ) : (
             <div className="text-center text-muted-foreground p-4 bg-muted/50 rounded-lg">
               <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
