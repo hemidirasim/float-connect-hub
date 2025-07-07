@@ -182,7 +182,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
 
     try {
       console.log('Sending agent message:', newMessage);
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('live_chat_messages')
         .insert([{
           session_id: selectedSession,
@@ -190,11 +190,23 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
           sender_name: 'Support Agent',
           message: newMessage.trim(),
           is_from_visitor: false
-        }]);
+        }])
+        .select();
 
       if (error) throw error;
+      console.log('Agent message sent successfully:', data);
       setNewMessage('');
-      console.log('Agent message sent successfully');
+      
+      // Manually add the message to local state if realtime doesn't work
+      if (data && data[0]) {
+        const newMsg = data[0] as LiveChatMessage;
+        setMessages(prev => {
+          const exists = prev.some(msg => msg.id === newMsg.id);
+          if (exists) return prev;
+          return [...prev, newMsg];
+        });
+      }
+      
       toast.success('Mesaj göndərildi');
     } catch (error) {
       console.error('Error sending message:', error);
