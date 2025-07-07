@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useRealtimeConnection } from "./useRealtimeConnection";
 import { ChevronDown, ChevronRight, MessageCircle, X, User, MapPin } from 'lucide-react';
 
 interface IncomingMessage {
@@ -31,45 +30,83 @@ export const IncomingNotifications: React.FC<IncomingNotificationsProps> = ({
 }) => {
   const [incomingMessages, setIncomingMessages] = useState<IncomingMessage[]>([]);
   const [isExpanded, setIsExpanded] = useState(true);
-  const { setupRealtimeChannel, cleanupChannel } = useRealtimeConnection();
+  
 
   // Real-time subscription for new visitor messages
   useEffect(() => {
-    if (!selectedWidget) return;
+    if (!selectedWidget) {
+      console.log('No widget selected for incoming notifications');
+      return;
+    }
 
-    const channel = setupRealtimeChannel(
-      `incoming-messages-${selectedWidget}`,
-      'live_chat_messages',
-      `widget_id=eq.${selectedWidget}`,
-      async (payload) => {
-        if (payload.eventType === 'INSERT' && payload.new.is_from_visitor) {
+    console.log('Setting up incoming notifications for widget:', selectedWidget);
+
+    const channel = supabase
+      .channel(`incoming-messages-${selectedWidget}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'live_chat_messages',
+        filter: `widget_id=eq.${selectedWidget}`
+      }, async (payload) => {
+        console.log('New message received in incoming notifications:', payload);
+        
+        if (payload.new && payload.new.is_from_visitor) {
+          console.log('Processing visitor message:', payload.new);
           const newMsg = payload.new;
           
           // Get session info to show visitor details
           try {
-            const { data: sessionData } = await supabase
+            const { data: sessionData, error } = await supabase
               .from('chat_sessions')
               .select('visitor_name, visitor_email, visitor_ip')
               .eq('id', newMsg.session_id)
               .single();
 
+            if (error) {
+              console.error('Error fetching session data:', error);
+              return;
+            }
+
             const incomingMsg: IncomingMessage = {
-              ...newMsg,
+              id: newMsg.id,
+              session_id: newMsg.session_id,
+              message: newMsg.message,
+              created_at: newMsg.created_at,
+              widget_id: newMsg.widget_id,
+              sender_name: newMsg.sender_name,
+              is_from_visitor: newMsg.is_from_visitor,
               visitor_name: sessionData?.visitor_name || 'Naməlum',
               visitor_email: sessionData?.visitor_email,
               visitor_ip: sessionData?.visitor_ip,
             };
 
-            setIncomingMessages(prev => [incomingMsg, ...prev.slice(0, 9)]); // Keep only 10 latest
+            console.log('Adding incoming message:', incomingMsg);
+            setIncomingMessages(prev => {
+              // Check if already exists
+              if (prev.find(m => m.id === incomingMsg.id)) {
+                console.log('Message already exists, skipping');
+                return prev;
+              }
+              return [incomingMsg, ...prev.slice(0, 9)]; // Keep only 10 latest
+            });
           } catch (error) {
-            console.error('Error fetching session data:', error);
+            console.error('Error processing incoming message:', error);
           }
+        } else {
+          console.log('Message is not from visitor, ignoring:', payload.new);
         }
-      }
-    );
+      })
+      .subscribe((status, err) => {
+        console.log('Incoming notifications subscription status:', status);
+        if (err) {
+          console.error('Incoming notifications subscription error:', err);
+        }
+      });
 
     return () => {
-      cleanupChannel(channel);
+      console.log('Cleaning up incoming notifications subscription');
+      supabase.removeChannel(channel);
     };
   }, [selectedWidget]);
 
