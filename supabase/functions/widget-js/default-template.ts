@@ -39,7 +39,13 @@ const defaultJavaScriptLogic = `
       // Show live chat content
       liveChatContent.style.display = 'block';
       
-      // Setup pre-chat form
+      // Try to restore previous session
+      if (restorePreviousSession()) {
+        showChatInterface();
+        return;
+      }
+      
+      // Setup pre-chat form for new session
       setupPreChatForm();
     }
   }
@@ -135,6 +141,110 @@ const defaultJavaScriptLogic = `
     
     // Start chat session
     startChatSession(userData, customFieldsData);
+  }
+  
+  // Session persistence functions
+  function saveSessionToStorage(sessionData) {
+    try {
+      var storageKey = 'lovable_chat_session_{{WIDGET_ID}}';
+      localStorage.setItem(storageKey, JSON.stringify(sessionData));
+      console.log('Session saved to storage:', sessionData);
+    } catch (error) {
+      console.log('Error saving session to storage:', error);
+    }
+  }
+  
+  function getSessionFromStorage() {
+    try {
+      var storageKey = 'lovable_chat_session_{{WIDGET_ID}}';
+      var sessionData = localStorage.getItem(storageKey);
+      return sessionData ? JSON.parse(sessionData) : null;
+    } catch (error) {
+      console.log('Error getting session from storage:', error);
+      return null;
+    }
+  }
+  
+  function clearSessionFromStorage() {
+    try {
+      var storageKey = 'lovable_chat_session_{{WIDGET_ID}}';
+      localStorage.removeItem(storageKey);
+      console.log('Session cleared from storage');
+    } catch (error) {
+      console.log('Error clearing session from storage:', error);
+    }
+  }
+  
+  function restorePreviousSession() {
+    var sessionData = getSessionFromStorage();
+    if (!sessionData || !sessionData.sessionId || sessionData.status === 'ended') {
+      return false;
+    }
+    
+    console.log('Restoring previous session:', sessionData);
+    
+    // Check if session is still active
+    fetch('https://ttzioshkresaqmsodhfb.supabase.co/rest/v1/chat_sessions?select=status&id=eq.' + sessionData.sessionId, {
+      headers: {
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0emlvc2hrcmVzYXFtc29kaGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NDM3NjksImV4cCI6MjA2NjAxOTc2OX0.2haK7pikLtZOmf4nsmcb8wcvjbYaZLzR7ESug0R4oX0',
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(sessions => {
+      if (sessions && sessions.length > 0 && sessions[0].status === 'active') {
+        // Session is still active, restore it
+        window.liveChatSessionId = sessionData.sessionId;
+        window.liveChatUserData = sessionData.userData;
+        window.liveChatSessionActive = true;
+        lastMessageTime = sessionData.lastMessageTime || new Date().toISOString();
+        
+        // Setup polling and load messages
+        setupMessagePolling(sessionData.sessionId);
+        loadSessionMessages(sessionData.sessionId);
+      } else {
+        // Session is ended, clear storage
+        clearSessionFromStorage();
+      }
+    })
+    .catch(error => {
+      console.log('Error checking session status:', error);
+      clearSessionFromStorage();
+    });
+    
+    return true;
+  }
+  
+  function loadSessionMessages(sessionId) {
+    fetch('https://ttzioshkresaqmsodhfb.supabase.co/rest/v1/live_chat_messages?session_id=eq.' + sessionId + '&order=created_at.asc', {
+      headers: {
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0emlvc2hrcmVzYXFtc29kaGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NDM3NjksImV4cCI6MjA2NjAxOTc2OX0.2haK7pikLtZOmf4nsmcb8wcvjbYaZLzR7ESug0R4oX0',
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(messages => {
+      var messagesDiv = document.querySelector('#lovable-livechat-messages');
+      if (messagesDiv && messages && Array.isArray(messages)) {
+        messagesDiv.innerHTML = '';
+        
+        messages.forEach(function(message) {
+          var messageDiv = document.createElement('div');
+          messageDiv.className = message.is_from_visitor ? 'chat-message user-message' : 'chat-message agent-message';
+          messageDiv.innerHTML = '<div class="message-content">' + escapeHtml(message.message) + '</div>';
+          messagesDiv.appendChild(messageDiv);
+          
+          if (!message.is_from_visitor && message.created_at) {
+            lastMessageTime = message.created_at;
+          }
+        });
+        
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
+    })
+    .catch(error => {
+      console.log('Error loading session messages:', error);
+    });
   }
 
   // Real-time message polling system
@@ -257,6 +367,13 @@ const defaultJavaScriptLogic = `
       }
       if (sendBtn) sendBtn.disabled = true;
       window.liveChatSessionActive = false;
+      
+      // Update session status in storage
+      var sessionData = getSessionFromStorage();
+      if (sessionData) {
+        sessionData.status = 'ended';
+        saveSessionToStorage(sessionData);
+      }
     }
   }
 
@@ -286,6 +403,15 @@ const defaultJavaScriptLogic = `
         window.liveChatSessionId = data.session_id;
         window.liveChatUserData = userData;
         console.log('Chat session started:', data.session_id);
+        
+        // Save session to storage for persistence
+        saveSessionToStorage({
+          sessionId: data.session_id,
+          userData: userData,
+          status: 'active',
+          lastMessageTime: new Date().toISOString()
+        });
+        
         // Setup message polling for instant agent responses
         setupMessagePolling(data.session_id);
         showChatInterface();
@@ -401,10 +527,11 @@ const defaultJavaScriptLogic = `
       });
     }
     
-    // Clear session data
+    // Clear session data and storage
     window.liveChatSessionId = null;
     window.liveChatUserData = null;
     lastMessageTime = null;
+    clearSessionFromStorage();
     
     // Close live chat UI
     closeLiveChat();
@@ -457,6 +584,14 @@ const defaultJavaScriptLogic = `
         .then(data => {
           if (data.success) {
             console.log('Message saved to database');
+            
+            // Update last message time in storage
+            var sessionData = getSessionFromStorage();
+            if (sessionData) {
+              sessionData.lastMessageTime = new Date().toISOString();
+              saveSessionToStorage(sessionData);
+            }
+            
             // Check for agent responses immediately after sending
             setTimeout(function() {
               if (window.liveChatSessionId) {

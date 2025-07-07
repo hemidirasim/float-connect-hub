@@ -58,6 +58,29 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
   useEffect(() => {
     if (selectedWidget) {
       fetchSessions();
+      
+      // Subscribe to new sessions for the selected widget
+      const newSessionsChannel = supabase
+        .channel(`new-sessions-${selectedWidget}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'chat_sessions',
+            filter: `widget_id=eq.${selectedWidget}`
+          },
+          (payload) => {
+            console.log('New session created:', payload);
+            const newSession = payload.new as ChatSession;
+            setSessions(prev => [newSession, ...prev]);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(newSessionsChannel);
+      };
     }
   }, [selectedWidget]);
 
