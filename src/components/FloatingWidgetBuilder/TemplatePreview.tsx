@@ -168,7 +168,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
           const tempDiv = document.createElement('div');
           tempDiv.innerHTML = previewHtml;
           
-          // Add all elements to the body
+          // Add all elements to the body and mark them as preview
           const elements = Array.from(tempDiv.children);
           elements.forEach(element => {
             element.setAttribute('data-widget-preview', 'true');
@@ -177,10 +177,18 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 
           // Wait a bit for DOM to be ready, then execute any inline scripts
           setTimeout(() => {
-            // Find and execute script tags
-            const scripts = document.querySelectorAll('script[data-widget-preview]');
-            scripts.forEach(script => {
-              if (script.textContent && script.textContent.trim()) {
+            // Find and execute ALL script tags that contain widget code
+            const allScripts = document.querySelectorAll('script');
+            allScripts.forEach(script => {
+              // Check if this script contains widget-related code or has preview attribute
+              const hasPreviewAttribute = script.hasAttribute('data-widget-preview');
+              const hasWidgetCode = script.textContent && (
+                script.textContent.includes('lovable-widget') ||
+                script.textContent.includes('Widget script') ||
+                script.textContent.includes('initializeWidget')
+              );
+              
+              if ((hasPreviewAttribute || hasWidgetCode) && script.textContent && script.textContent.trim()) {
                 console.log('Executing widget script for preview...');
                 try {
                   // Create a new function from the script content and execute it
