@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -48,7 +47,36 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
   const [activeTab, setActiveTab] = useState('chats');
   const { setupRealtimeChannel, cleanupChannel } = useRealtimeConnection();
 
-  // Real-time subscription
+  // Add notification sound functionality
+  const playNotificationSound = () => {
+    try {
+      // Try to play a built-in notification sound
+      const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoFAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+Pwt2QdBz2V2+3QbiEFL3/O8tyLOgkjdsrw4ZlMEAg2jdLx0nnEgIRMHnNfXIibqcgEDjSSJTkQF0UBAA==');
+      audio.volume = 0.5;
+      audio.play().catch(() => {
+        // If built-in sound fails, try a simple beep
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
+      });
+    } catch (error) {
+      console.log('Could not play notification sound:', error);
+    }
+  };
+
+  // Real-time subscription for sessions
   useEffect(() => {
     if (!selectedWidget) return;
 
@@ -64,6 +92,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
             if (prev.find(s => s.id === newSession.id)) return prev;
             return [newSession, ...prev];
           });
+          playNotificationSound(); // Play sound for new session
           toast.success(`Yeni söhbət başladı: ${newSession.visitor_name}`);
         } else if (payload.eventType === 'UPDATE') {
           const updatedSession = payload.new as ChatSession;
@@ -80,6 +109,30 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
           
           if (selectedSession?.id === deletedSession.id) {
             setSelectedSession(null);
+          }
+        }
+      }
+    );
+
+    return () => {
+      cleanupChannel(channel);
+    };
+  }, [selectedWidget]);
+
+  // Real-time subscription for messages
+  useEffect(() => {
+    if (!selectedWidget) return;
+
+    const channel = setupRealtimeChannel(
+      `widget-messages-${selectedWidget}`,
+      'live_chat_messages',
+      `widget_id=eq.${selectedWidget}`,
+      (payload) => {
+        if (payload.eventType === 'INSERT') {
+          const newMessage = payload.new;
+          // Play sound for new visitor messages (not admin messages)
+          if (newMessage.is_from_visitor) {
+            playNotificationSound();
           }
         }
       }
