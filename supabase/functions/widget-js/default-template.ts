@@ -620,6 +620,16 @@ const defaultJavaScriptLogic = `
       });
     }
     
+    // Add event listener for end chat button
+    var endChatBtn = document.querySelector('#lovable-livechat-end');
+    if (endChatBtn) {
+      endChatBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        endChatSession();
+      });
+    }
+    
     // Only preload video metadata on widget init, do NOT start playing
     setTimeout(function() {
       var videos = document.querySelectorAll('.hiclient-video-player');
