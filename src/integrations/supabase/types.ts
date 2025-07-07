@@ -486,6 +486,7 @@ export type Database = {
           is_active: boolean | null
           live_chat_agent_name: string | null
           live_chat_auto_open: boolean | null
+          live_chat_button_text: string | null
           live_chat_color: string | null
           live_chat_custom_fields: string | null
           live_chat_enabled: boolean | null
@@ -527,6 +528,7 @@ export type Database = {
           is_active?: boolean | null
           live_chat_agent_name?: string | null
           live_chat_auto_open?: boolean | null
+          live_chat_button_text?: string | null
           live_chat_color?: string | null
           live_chat_custom_fields?: string | null
           live_chat_enabled?: boolean | null
@@ -568,6 +570,7 @@ export type Database = {
           is_active?: boolean | null
           live_chat_agent_name?: string | null
           live_chat_auto_open?: boolean | null
+          live_chat_button_text?: string | null
           live_chat_color?: string | null
           live_chat_custom_fields?: string | null
           live_chat_enabled?: boolean | null
