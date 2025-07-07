@@ -62,6 +62,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ session, widgetId, onBan
   useEffect(() => {
     if (!session) return;
 
+    console.log('Setting up messages realtime subscription for session:', session.id);
+
     const channel = supabase
       .channel(`messages-${session.id}`)
       .on('postgres_changes', {
@@ -70,8 +72,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ session, widgetId, onBan
         table: 'live_chat_messages',
         filter: `session_id=eq.${session.id}`
       }, (payload) => {
+        console.log('New message realtime event:', payload);
         const newMsg = payload.new as Message;
-        setMessages(prev => [...prev, newMsg]);
+        
+        setMessages(prev => {
+          // Check if message already exists to avoid duplicates
+          if (prev.find(m => m.id === newMsg.id)) return prev;
+          return [...prev, newMsg];
+        });
         
         // Auto-scroll to bottom
         setTimeout(() => {
@@ -81,12 +89,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ session, widgetId, onBan
           }
         }, 100);
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Messages subscription status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up messages subscription');
       supabase.removeChannel(channel);
     };
-  }, [session]);
+  }, [session?.id]); // Only depend on session.id to avoid unnecessary reconnections
 
   const loadMessages = async () => {
     if (!session) return;

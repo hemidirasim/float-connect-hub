@@ -49,6 +49,8 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
   useEffect(() => {
     if (!selectedWidget) return;
 
+    console.log('Setting up realtime subscription for widget:', selectedWidget);
+
     const channel = supabase
       .channel(`widget-${selectedWidget}`)
       .on('postgres_changes', {
@@ -57,9 +59,15 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
         table: 'chat_sessions',
         filter: `widget_id=eq.${selectedWidget}`
       }, (payload) => {
+        console.log('Chat sessions realtime event:', payload);
+        
         if (payload.eventType === 'INSERT') {
           const newSession = payload.new as ChatSession;
-          setSessions(prev => [newSession, ...prev]);
+          setSessions(prev => {
+            // Check if session already exists to avoid duplicates
+            if (prev.find(s => s.id === newSession.id)) return prev;
+            return [newSession, ...prev];
+          });
           toast.success(`Yeni söhbət başladı: ${newSession.visitor_name}`);
         } else if (payload.eventType === 'UPDATE') {
           const updatedSession = payload.new as ChatSession;
@@ -79,12 +87,17 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
           }
         }
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Chat sessions subscription status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up realtime subscription');
       supabase.removeChannel(channel);
     };
-  }, [selectedWidget, selectedSession]);
+  }, [selectedWidget]);
+
+  // Separate effect for selectedSession to avoid dependency issues
 
   // Load sessions when widget changes
   useEffect(() => {
