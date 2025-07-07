@@ -138,6 +138,118 @@ const defaultJavaScriptLogic = `
     startChatSession(userData, customFieldsData);
   }
 
+  // Realtime setup
+  let realtimeWs = null;
+  
+  function setupRealtimeSubscription(sessionId) {
+    if (realtimeWs) {
+      realtimeWs.close();
+    }
+    
+    // Create WebSocket connection to Supabase Realtime
+    const wsUrl = 'wss://ttzioshkresaqmsodhfb.supabase.co/realtime/v1/websocket?apikey=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0emlvc2hrcmVzYXFtc29kaGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NDM3NjksImV4cCI6MjA2NjAxOTc2OX0.2haK7pikLtZOmf4nsmcb8wcvjbYaZLzR7ESug0R4oX0&vsn=1.0.0';
+    
+    realtimeWs = new WebSocket(wsUrl);
+    
+    realtimeWs.onopen = function() {
+      console.log('Realtime connected');
+      
+      // Join messages channel
+      var messagesJoin = {
+        topic: 'realtime:public:live_chat_messages',
+        event: 'phx_join',
+        payload: { 
+          config: { 
+            postgres_changes: [
+              { event: 'INSERT', schema: 'public', table: 'live_chat_messages', filter: 'session_id=eq.' + sessionId }
+            ]
+          }
+        },
+        ref: '1'
+      };
+      realtimeWs.send(JSON.stringify(messagesJoin));
+      
+      // Join sessions channel
+      var sessionsJoin = {
+        topic: 'realtime:public:chat_sessions',
+        event: 'phx_join',
+        payload: { 
+          config: { 
+            postgres_changes: [
+              { event: 'UPDATE', schema: 'public', table: 'chat_sessions', filter: 'id=eq.' + sessionId }
+            ]
+          }
+        },
+        ref: '2'
+      };
+      realtimeWs.send(JSON.stringify(sessionsJoin));
+    };
+    
+    realtimeWs.onmessage = function(event) {
+      var message = JSON.parse(event.data);
+      
+      if (message.event === 'postgres_changes' && message.payload) {
+        var payload = message.payload;
+        
+        if (payload.table === 'live_chat_messages' && payload.eventType === 'INSERT') {
+          var newMessage = payload.new;
+          if (newMessage.session_id === sessionId && !newMessage.is_from_visitor) {
+            // Add agent message to chat
+            addAgentMessageToChat(newMessage.message, newMessage.sender_name);
+          }
+        }
+        
+        if (payload.table === 'chat_sessions' && payload.eventType === 'UPDATE') {
+          var sessionUpdate = payload.new;
+          if (sessionUpdate.status === 'ended') {
+            // Session ended by agent
+            showSessionEndedMessage();
+            window.liveChatSessionId = null;
+            if (realtimeWs) {
+              realtimeWs.close();
+            }
+          }
+        }
+      }
+    };
+    
+    realtimeWs.onerror = function(error) {
+      console.error('Realtime error:', error);
+    };
+    
+    realtimeWs.onclose = function() {
+      console.log('Realtime disconnected');
+    };
+  }
+  
+  function addAgentMessageToChat(messageText, senderName) {
+    var messagesDiv = document.querySelector('#lovable-livechat-messages');
+    if (messagesDiv) {
+      var agentMessage = document.createElement('div');
+      agentMessage.className = 'chat-message agent-message';
+      agentMessage.innerHTML = '<div class="message-content">' + escapeHtml(messageText) + '</div>';
+      messagesDiv.appendChild(agentMessage);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+  }
+  
+  function showSessionEndedMessage() {
+    var messagesDiv = document.querySelector('#lovable-livechat-messages');
+    if (messagesDiv) {
+      var endMessage = document.createElement('div');
+      endMessage.className = 'chat-message system-message';
+      endMessage.innerHTML = '<div class="message-content">Chat session has been ended by the agent.</div>';
+      messagesDiv.appendChild(endMessage);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      
+      // Disable input
+      var input = document.querySelector('#lovable-livechat-input');
+      var sendBtn = document.querySelector('#lovable-livechat-send');
+      if (input) input.disabled = true;
+      if (sendBtn) sendBtn.disabled = true;
+    }
+  }
+
   function startChatSession(userData, customFieldsData) {
     var config = {{WIDGET_CONFIG}};
     
@@ -163,6 +275,8 @@ const defaultJavaScriptLogic = `
       if (data.session_id) {
         window.liveChatSessionId = data.session_id;
         window.liveChatUserData = userData;
+        // Setup realtime subscription
+        setupRealtimeSubscription(data.session_id);
         showChatInterface();
       } else {
         console.error('Failed to start chat session:', data);
@@ -262,6 +376,12 @@ const defaultJavaScriptLogic = `
       .catch(error => {
         console.error('Error ending session:', error);
       });
+    }
+    
+    // Close realtime connection
+    if (realtimeWs) {
+      realtimeWs.close();
+      realtimeWs = null;
     }
     
     // Clear session data

@@ -63,8 +63,8 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
       fetchMessages();
       
       // Subscribe to real-time messages for this session
-      const channel = supabase
-        .channel(`session-${selectedSession}`)
+      const messagesChannel = supabase
+        .channel(`session-messages-${selectedSession}`)
         .on(
           'postgres_changes',
           {
@@ -79,8 +79,33 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
         )
         .subscribe();
 
+      // Subscribe to session status updates
+      const sessionChannel = supabase
+        .channel(`session-status-${selectedSession}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'chat_sessions',
+            filter: `id=eq.${selectedSession}`
+          },
+          (payload) => {
+            const updatedSession = payload.new as ChatSession;
+            if (updatedSession.status === 'ended') {
+              // Session ended, refresh sessions list
+              fetchSessions();
+              // Clear selected session if it was ended
+              setSelectedSession('');
+              setMessages([]);
+            }
+          }
+        )
+        .subscribe();
+
       return () => {
-        supabase.removeChannel(channel);
+        supabase.removeChannel(messagesChannel);
+        supabase.removeChannel(sessionChannel);
       };
     }
   }, [selectedSession]);

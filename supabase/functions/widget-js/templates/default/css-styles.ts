@@ -313,6 +313,24 @@ export const defaultCssStyles = `
     margin-right: 40px;
   }
   
+  .system-message {
+    text-align: center;
+    font-style: italic;
+    opacity: 0.7;
+    margin: 16px 0;
+  }
+  
+  .system-message .message-content {
+    background: #f3f4f6;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #6b7280;
+    font-size: 14px;
+    display: inline-block;
+    border: none;
+    box-shadow: none;
+  }
+  
   .agent-message .message-content::before {
     content: '';
     position: absolute;
