@@ -27,22 +27,8 @@ export interface WidgetConfig {
   videoUrl?: string;
   videoHeight: number;
   videoAlignment: string;
-  videoObjectFit?: string;
   useVideoPreview: boolean;
   buttonSize: number;
   previewVideoHeight: number;
   templateId?: string;
-  // Live chat fields
-  liveChatEnabled?: boolean;
-  liveChatAgentName?: string;
-  liveChatGreeting?: string;
-  liveChatColor?: string;
-  liveChatAutoOpen?: boolean;
-  liveChatOfflineMessage?: string;
-  // Pre-chat form fields
-  liveChatRequireEmail?: boolean;
-  liveChatRequireName?: boolean;
-  liveChatRequirePhone?: boolean;
-  liveChatCustomFields?: string;
-  liveChatButtonText?: string;
 }

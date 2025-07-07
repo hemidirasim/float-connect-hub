@@ -23,7 +23,7 @@ interface WidgetFormProps {
   onChannelsChange: (channels: Channel[]) => void;
   onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onVideoRemove: () => void;
-  onFormDataChange: (field: string, value: string | boolean | number | any) => void;
+  onFormDataChange: (field: string, value: string | boolean | number) => void;
   onCreateWidget: () => void;
   onCustomIconUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
@@ -134,7 +134,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             </CardContent>
           </Card>
 
-          <Button
+          <Button 
             onClick={onCreateWidget} 
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             size="lg"
@@ -147,7 +147,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
 
       {/* Live widget preview directly on the page */}
       <TemplatePreview
-        showWidget={true}
+        showWidget={channels.length > 0}
         formData={formData}
         channels={channels}
         editingWidget={editingWidget}

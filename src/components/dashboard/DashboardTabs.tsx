@@ -36,15 +36,13 @@ interface DashboardTabsProps {
   userCredits: UserCredits;
   onRefreshWidgets: () => void;
   onRefreshCredits: () => void;
-  userEmail: string;
 }
 
 export const DashboardTabs: React.FC<DashboardTabsProps> = ({ 
   widgets, 
   userCredits, 
   onRefreshWidgets, 
-  onRefreshCredits,
-  userEmail
+  onRefreshCredits 
 }) => {
   return (
     <Tabs defaultValue="widgets" className="space-y-6">

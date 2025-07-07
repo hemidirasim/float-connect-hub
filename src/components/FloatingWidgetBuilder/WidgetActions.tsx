@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Channel, FormData } from "./types";
@@ -68,7 +67,7 @@ export const useWidgetActions = (
     try {
       console.log('Saving widget to database with channels:', channels);
       
-      // Create widget data without live chat fields
+      // Create widget data without widget dimensions
       const widgetData = {
         name: websiteName,
         website_url: websiteUrl,

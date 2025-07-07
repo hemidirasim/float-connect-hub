@@ -33,9 +33,9 @@ export function generateVideoContent(config: TemplateConfig): string {
   // Process video URL to ensure it works properly
   let processedVideoUrl = config.videoUrl.trim()
   
-  // Use video alignment and object fit from system config
+  // Determine vertical alignment styles
   let alignmentStyle = '';
-  switch (config.videoAlignment || 'center') {
+  switch (config.videoAlignment) {
     case 'top':
       alignmentStyle = 'align-items: flex-start;';
       break;
@@ -62,10 +62,10 @@ export function generateVideoContent(config: TemplateConfig): string {
       // Use iframe for YouTube videos with vertical alignment
       const videoHeight = config.videoHeight || 200
       
-      const youtubeHtml = `<div class="hiclient-video-container" style="position: relative; display: flex; ${alignmentStyle} justify-content: center; margin-bottom: 20px; max-width: 100%; overflow: hidden;">
+      const youtubeHtml = `<div class="hiclient-video-container" style="display: flex; ${alignmentStyle} justify-content: center; margin-bottom: 20px;">
          <iframe class="hiclient-video-player" 
                 src="https://www.youtube.com/embed/${videoId}?loop=1&playlist=${videoId}&enablejsapi=1" 
-                style="height: ${videoHeight}px; max-width: 100%; width: auto; aspect-ratio: 16/9; border-radius: 12px; border: none;" 
+                style="height: ${videoHeight}px; width: 100%; border-radius: 12px; border: none; object-fit: ${config.videoObjectFit || 'cover'};" 
                 allow="autoplay; encrypted-media" 
                 allowfullscreen>
          </iframe>
@@ -82,9 +82,9 @@ export function generateVideoContent(config: TemplateConfig): string {
   
   console.log('Generated video content with vertical alignment and object-fit:', processedVideoUrl, videoObjectFit)
   
-  const videoHtml = `<div class="hiclient-video-container" style="position: relative; display: flex; ${alignmentStyle} justify-content: center; margin-bottom: 20px; max-width: 100%; overflow: hidden;">
+  const videoHtml = `<div class="hiclient-video-container" style="display: flex; ${alignmentStyle} justify-content: center; margin-bottom: 20px;">
      <video class="hiclient-video-player" src="${processedVideoUrl}" 
-            style="height: ${videoHeight}px; max-width: 100%; width: auto; border-radius: 12px; object-fit: ${videoObjectFit};" 
+            style="height: ${videoHeight}px; width: 100%; border-radius: 12px; object-fit: ${videoObjectFit};" 
             loop playsinline webkit-playsinline preload="metadata">
        Your browser does not support the video tag.
      </video>
@@ -131,39 +131,4 @@ export function generateButtonIcon(customIconUrl?: string, useVideoPreview?: boo
   return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
    </svg>`
-}
-
-export function generateLiveChatButton(config: TemplateConfig): string {
-  if (!config.liveChatEnabled) {
-    return '';
-  }
-
-  const buttonText = config.liveChatButtonText || 'Start Live Chat';
-  const liveChatColor = config.liveChatColor || '#4f46e5';
-  
-  return `
-    <div class="live-chat-section" style="margin: 20px 0; padding: 0;">
-      <button id="lovable-livechat-btn" 
-              style="width: 100%; 
-                     padding: 12px 20px; 
-                     background: ${liveChatColor}; 
-                     color: white; 
-                     border: none; 
-                     border-radius: 8px; 
-                     font-size: 14px; 
-                     font-weight: 500; 
-                     cursor: pointer; 
-                     transition: opacity 0.2s ease;
-                     display: flex;
-                     align-items: center;
-                     justify-content: center;
-                     gap: 8px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" 
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span id="lovable-livechat-btn-text">${buttonText}</span>
-      </button>
-    </div>
-  `;
 }

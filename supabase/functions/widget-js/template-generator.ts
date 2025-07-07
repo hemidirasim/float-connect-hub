@@ -2,7 +2,7 @@
 import type { WidgetTemplate } from './template-types.ts'
 import type { TemplateConfig } from './renderer/types.ts'
 import { getPositionStyle, getTooltipPositionStyle, getModalPositionStyle, getModalContentPositionStyle, getButtonOffsetStyle } from './renderer/position-utils.ts'
-import { generateVideoContent, generateButtonIcon, generateLiveChatButton } from './renderer/content-generators.ts'
+import { generateVideoContent, generateButtonIcon } from './renderer/content-generators.ts'
 
 export type { TemplateConfig }
 
@@ -40,10 +40,6 @@ function safeStringReplace(template: string, placeholder: string, value: string)
 
 export class WidgetTemplateRenderer {
   constructor(private template: WidgetTemplate, private config: TemplateConfig) {}
-
-  generateLiveChatButtonContent(): string {
-    return generateLiveChatButton(this.config);
-  }
 
   generateWidgetScript(): string {
     console.log('Generating widget script for template:', this.template.id)
@@ -98,22 +94,7 @@ export class WidgetTemplateRenderer {
       '{{CHANNEL_BOTTOM_OFFSET}}': channelBottomOffset.toString(),
       '{{TOOLTIP_RIGHT_OFFSET}}': tooltipRightOffset.toString(),
       '{{MOBILE_CHANNEL_GAP}}': mobileChannelGap.toString(),
-      '{{MOBILE_TOOLTIP_RIGHT_OFFSET}}': mobileTooltipRightOffset.toString(),
-      // Live chat placeholders
-      '{{LIVE_CHAT_BUTTON}}': this.generateLiveChatButtonContent(),
-      '{{LIVE_CHAT_GREETING}}': this.config.liveChatGreeting || 'Hello! How can we help you today?',
-      '{{LIVE_CHAT_COLOR}}': this.config.liveChatColor || '#4f46e5',
-      '{{PRECHAT_FORM_TITLE}}': 'Please provide your information to start the chat',
-      '{{NAME_LABEL}}': this.config.liveChatRequireName ? 'Name *' : 'Name',
-      '{{NAME_PLACEHOLDER}}': 'Your name',
-      '{{EMAIL_LABEL}}': this.config.liveChatRequireEmail ? 'Email *' : 'Email', 
-      '{{EMAIL_PLACEHOLDER}}': 'your@email.com',
-      '{{PHONE_LABEL}}': this.config.liveChatRequirePhone ? 'Phone *' : 'Phone',
-      '{{PHONE_PLACEHOLDER}}': '+1 (555) 123-4567',
-      '{{LIVE_CHAT_BUTTON_TEXT}}': this.config.liveChatButtonText || 'Start Live Chat',
-      // Widget config for JavaScript access
-      '{{WIDGET_CONFIG}}': JSON.stringify(this.config),
-      '{{WIDGET_ID}}': this.config.widgetId || ''
+      '{{MOBILE_TOOLTIP_RIGHT_OFFSET}}': mobileTooltipRightOffset.toString()
     }
 
     console.log('Video content in replacements:', replacements['{{VIDEO_CONTENT}}'] ? 'YES' : 'NO')

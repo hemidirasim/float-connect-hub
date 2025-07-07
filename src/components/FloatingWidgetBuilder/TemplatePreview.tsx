@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { Channel, FormData } from './types';
 
@@ -43,11 +42,9 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     return template;
   }, []);
 
-  // Generate preview HTML when template or config changes
+  // Generate preview HTML when template or config changes - USE SAME SYSTEM AS EDGE FUNCTION
   useEffect(() => {
-    // Show widget if channels exist or video exists
-    const hasContent = channels.length > 0 || formData.videoUrl;
-    if (!hasContent) {
+    if (!showWidget) {
       setPreviewHtml('');
       return;
     }
@@ -55,7 +52,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     const templateId = formData.templateId || 'default';
     const template = getTemplate(templateId);
 
-    console.log('Generating floating widget preview with template system:', {
+    console.log('Generating floating widget preview with SAME template system:', {
       templateId,
       templateName: template.name,
       channels: channels.length,
@@ -74,11 +71,11 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       tooltipPosition: formData.tooltipPosition,
       greetingMessage: formData.greetingMessage,
       customIconUrl: formData.customIcon === 'custom' ? formData.customIconUrl : null,
-      videoEnabled: Boolean(formData.videoUrl || editingWidget?.video_url),
+      videoEnabled: Boolean(formData.videoUrl),
       videoUrl: formData.videoUrl || editingWidget?.video_url,
-      videoHeight: formData.videoHeight || editingWidget?.video_height || 200,
-      videoAlignment: formData.videoAlignment || editingWidget?.video_alignment || 'center',
-      videoObjectFit: formData.videoObjectFit || editingWidget?.video_object_fit || 'cover',
+      videoHeight: formData.videoHeight,
+      videoAlignment: formData.videoAlignment,
+      videoObjectFit: formData.videoObjectFit,
       useVideoPreview: formData.useVideoPreview,
       buttonSize: formData.buttonSize,
       previewVideoHeight: formData.previewVideoHeight,
@@ -135,7 +132,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     }
     
     setPreviewHtml(finalHtml);
-    console.log('Floating widget preview generated using template system');
+    console.log('Floating widget preview generated using SAME system as edge function');
   }, [
     showWidget,
     formData.templateId,

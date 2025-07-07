@@ -4,19 +4,16 @@ export interface Channel {
   type: string;
   value: string;
   label: string;
-  customIcon?: string;
+  color?: string;
+  icon?: string;
+  customIcon?: string; // For custom uploaded icons
+  // New grouping properties
   isGroup?: boolean;
   groupItems?: Channel[];
   displayMode?: 'individual' | 'grouped';
+  // New child channels for same type grouping
   childChannels?: Channel[];
-  parentId?: string;
-}
-
-export interface CustomField {
-  id: string;
-  label: string;
-  placeholder: string;
-  required: boolean;
+  parentId?: string; // Reference to parent channel
 }
 
 export interface FormData {
