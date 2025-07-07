@@ -1,24 +1,78 @@
 export const defaultCssStyles = `
+  /* Modern Button Design */
   #lovable-widget-button {
     border-radius: 50%;
-    background-color: {{BUTTON_COLOR}};
+    background: linear-gradient(135deg, {{BUTTON_COLOR}}, #16a34a);
     border: none;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: box-shadow 0.3s ease, background 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     color: white;
+    box-shadow: 0 8px 32px rgba(34, 197, 94, 0.3);
+    overflow: hidden;
     {{BUTTON_OFFSET_STYLE}}
   }
   
-  #lovable-widget-button:hover {
-    box-shadow: 0 12px 35px rgba(34, 197, 94, 0.5);
-    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  .button-content {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
   }
   
+  #lovable-widget-button:hover .button-content {
+    transform: scale(1.1);
+  }
+  
+  .pulse-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border: 3px solid rgba(34, 197, 94, 0.3);
+    border-radius: 50%;
+    animation: pulse-ring 2s infinite ease-out;
+  }
+  
+  .pulse-ring-2 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border: 3px solid rgba(34, 197, 94, 0.2);
+    border-radius: 50%;
+    animation: pulse-ring 2s infinite ease-out 1s;
+  }
+  
+  @keyframes pulse-ring {
+    0% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(2);
+      opacity: 0;
+    }
+  }
+  
+  #lovable-widget-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 48px rgba(34, 197, 94, 0.4);
+  }
+  
+  #lovable-widget-button:active {
+    transform: translateY(-1px);
+  }
+
   /* Live Chat Button Section */
   .live-chat-section {
     margin: 16px 20px 20px;
@@ -396,42 +450,50 @@ export const defaultCssStyles = `
   }
   
   #lovable-livechat-send {
-    padding: 12px 20px;
+    padding: 12px;
     background: linear-gradient(135deg, {{LIVE_CHAT_COLOR}} 0%, #6366f1 100%);
     color: white;
     border: none;
-    border-radius: 24px;
+    border-radius: 50%;
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
     transition: all 0.2s ease;
     box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
     letter-spacing: -0.01em;
-    min-width: 60px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   #lovable-livechat-send:hover {
-    transform: translateY(-1px);
+    transform: scale(1.05);
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
   }
   
   #lovable-livechat-send:active {
-    transform: translateY(0);
+    transform: scale(0.95);
   }
 
-  /* Main Modal */
+  /* Modern Modal Design */
   #lovable-widget-tooltip {
     position: absolute;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(12px);
     color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
+    padding: 12px 16px;
+    border-radius: 12px;
     font-size: 14px;
     white-space: nowrap;
     z-index: 100000;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     {{TOOLTIP_POSITION_STYLE}}
   }
   
@@ -441,221 +503,327 @@ export const defaultCssStyles = `
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7);
     z-index: 100000;
     display: flex;
     {{MODAL_ALIGNMENT}}
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  #lovable-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    animation: backdropFadeIn 0.4s ease-out;
+  }
+  
+  @keyframes backdropFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
   
   #lovable-modal-content {
     background: white;
-    border-radius: 20px;
+    border-radius: 24px;
     padding: 0;
-    max-width: 400px;
+    max-width: 420px;
     width: 90%;
-    max-height: 80vh;
+    max-height: 85vh;
     overflow: hidden;
     position: relative;
-    transition: transform 0.3s ease;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    z-index: 1;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 32px 64px rgba(0, 0, 0, 0.2);
     {{MODAL_CONTENT_POSITION}}
   }
   
   #lovable-modal-header {
-    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px 24px 0 0;
+  }
+  
+  .header-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+    opacity: 1;
+  }
+  
+  .header-content {
+    position: relative;
+    padding: 28px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 2;
+  }
+  
+  .greeting-text {
     color: white;
-    padding: 20px;
-    text-align: center;
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 700;
     white-space: pre-line;
-    line-height: 1.5;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    flex: 1;
   }
   
   #lovable-widget-close {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
-    font-size: 24px;
-    cursor: pointer;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s ease;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    margin-left: 16px;
   }
   
   #lovable-widget-close:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+  }
+  
+  .modal-body {
+    padding: 0;
+  }
+
+  /* Modern Channels Container */
+  .channels-container {
+    padding: 24px;
+    background: #fafbfc;
   }
   
   #lovable-widget-channels {
-    padding: 20px;
-    max-height: 50vh;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
   
-  .channel-item, .parent-channel {
+  /* Enhanced Channel Item */
+  .channel-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 16px;
-    margin-bottom: 8px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    text-decoration: none;
-    color: #334155;
-    transition: all 0.3s ease;
+    padding: 16px 20px;
+    border-radius: 16px;
+    background: white;
+    border: 2px solid #f1f5f9;
     cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    color: inherit;
     position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+  
+  .channel-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.6s ease;
+  }
+  
+  .channel-item:hover::before {
+    left: 100%;
   }
   
   .channel-item:hover {
-    background: #e2e8f0;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-color: #cbd5e1;
+    border-color: #e2e8f0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   }
   
   .channel-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
-    background: #22c55e;
-    color: white;
+    margin-right: 16px;
+    position: relative;
+    z-index: 1;
     flex-shrink: 0;
   }
   
   .channel-info {
     flex: 1;
-    min-width: 0;
+    position: relative;
+    z-index: 1;
   }
   
   .channel-label {
-    font-weight: 600;
     font-size: 16px;
+    font-weight: 600;
     color: #1e293b;
     margin-bottom: 4px;
+    letter-spacing: -0.01em;
   }
   
   .channel-value {
     font-size: 14px;
     color: #64748b;
-    word-break: break-all;
+    font-weight: 400;
   }
   
   .channel-arrow {
-    color: #22c55e;
-    font-size: 18px;
-    font-weight: bold;
-    flex-shrink: 0;
+    color: #94a3b8;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
   }
   
+  .channel-item:hover .channel-arrow {
+    color: #475569;
+    transform: translateX(4px);
+  }
+  
+  /* Modern Empty State */
   .lovable-empty-state {
     text-align: center;
-    padding: 40px 20px;
+    padding: 48px 24px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  }
+  
+  .empty-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: #64748b;
   }
   
-  .lovable-empty-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
+  .lovable-empty-state h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #334155;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.01em;
   }
   
-  .hiclient-video-player {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    max-height: 200px !important;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    z-index: 1;
-    position: relative;
-    object-fit: contain !important;
+  .lovable-empty-state p {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.5;
   }
-  
-  .hiclient-video-container {
-    width: 100%;
-    max-width: 100%;
-    max-height: 250px;
-    margin-bottom: 20px;
-    border-radius: 12px;
+
+  /* Video content styling */
+  .video-content {
+    margin: 0 24px 24px;
+    border-radius: 16px;
     overflow: hidden;
-    background: #000;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  .video-content video {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 16px;
+  }
+
+  /* Channel groups and dropdowns */
+  .channel-group, .channel-dropdown {
     position: relative;
-    z-index: 1;
   }
   
-  .hiclient-video-container iframe {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: 200px !important;
-    max-height: 200px !important;
+  .group-items, .dropdown-items {
+    display: none;
+    margin-top: 8px;
+    padding-left: 20px;
+    border-left: 2px solid #f1f5f9;
+    gap: 8px;
+    flex-direction: column;
+  }
+  
+  .group-items.open, .dropdown-items.open {
+    display: flex;
+  }
+  
+  .group-toggle, .dropdown-toggle {
+    background: none;
     border: none;
-    border-radius: 12px;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s ease;
   }
   
-  @media (max-width: 768px) {
+  .group-toggle:hover, .dropdown-toggle:hover {
+    color: #475569;
+  }
+  
+  .toggle-icon {
+    transition: transform 0.2s ease;
+  }
+  
+  .toggle-icon.open {
+    transform: rotate(90deg);
+  }
+
+  /* Responsive design */
+  @media (max-width: 480px) {
     #lovable-modal-content {
       width: 95%;
-      max-height: 85vh;
+      max-height: 90vh;
+      border-radius: 20px;
     }
     
-    .channel-item, .parent-channel {
-      padding: 12px;
-      gap: 10px;
-    }
-    
-    .channel-icon {
-      width: 40px;
-      height: 40px;
-      font-size: 20px;
-    }
-    
-    .channel-label {
-      font-size: 14px;
-    }
-    
-    .channel-value {
-      font-size: 12px;
-    }
-    
-    #lovable-modal-header {
-      padding: 16px;
-      font-size: 16px;
-    }
-    
-    #lovable-widget-channels {
-      padding: 16px;
-    }
-    
-    #lovable-prechat-form {
+    .header-content {
       padding: 24px 20px;
     }
     
-    .prechat-fields {
-      max-width: 100%;
+    .greeting-text {
+      font-size: 18px;
     }
     
-    #lovable-livechat-input-area {
+    .channels-container {
       padding: 20px;
-      gap: 12px;
     }
     
-    #lovable-livechat-messages {
-      padding: 20px;
+    .channel-item {
+      padding: 14px 16px;
+    }
+    
+    .channel-icon {
+      width: 44px;
+      height: 44px;
+    }
+    
+    .channel-label {
+      font-size: 15px;
+    }
+    
+    .channel-value {
+      font-size: 13px;
     }
   }
 `;
