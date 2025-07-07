@@ -131,6 +131,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
               // Check if message already exists to prevent duplicates
               const exists = prev.some(msg => msg.id === newMessage.id);
               if (exists) return prev;
+              console.log('Adding new message to local state:', newMessage);
               return [...prev, newMessage];
             });
             
