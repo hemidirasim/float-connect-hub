@@ -327,12 +327,20 @@ export const defaultCssStyles = `
     line-height: 1.3;
   }
 
+  /* Desktop responsive */
+  @media (min-width: 769px) {
+    #lovable-modal-content {
+      max-width: 420px;
+      max-height: 650px;
+    }
+  }
+
   /* Mobile responsive */
   @media (max-width: 768px) {
     #lovable-modal-content {
       width: 95%;
       height: 90%;
-      max-width: 450px;
+      max-width: 380px;
       max-height: 600px;
     }
     
