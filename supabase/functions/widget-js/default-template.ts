@@ -196,6 +196,12 @@ const defaultJavaScriptLogic = `
     }
   }
 
+  function endChatSession() {
+    console.log('Ending chat session');
+    // TODO: Send session end to server/database
+    closeLiveChat();
+  }
+
   function sendMessage() {
     var input = document.querySelector('#lovable-livechat-input');
     var messagesDiv = document.querySelector('#lovable-livechat-messages');
