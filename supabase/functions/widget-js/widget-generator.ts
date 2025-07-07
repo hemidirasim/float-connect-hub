@@ -71,7 +71,8 @@ export function generateWidgetScript(widget: any): string {
     liveChatRequireName: config.liveChatRequireName,
     liveChatRequirePhone: config.liveChatRequirePhone,
     liveChatCustomFields: config.liveChatCustomFields,
-    liveChatButtonText: config.liveChatButtonText
+    liveChatButtonText: config.liveChatButtonText,
+    widgetId: widget.id || ''
   }
 
   console.log('Template config created with video preview settings:', {

@@ -130,20 +130,55 @@ const defaultJavaScriptLogic = `
       }
     });
     
-    // Include custom fields in the initial message
-    if (Object.keys(customFieldsData).length > 0) {
-      var customFieldsText = Object.entries(customFieldsData).map(function([key, value]) {
-        return key + ': ' + value;
-      }).join(', ');
-      userData.customFieldsInfo = customFieldsText;
-    }
-    
     if (!isValid) {
       return;
     }
     
-    // Store user data for later use
-    window.liveChatUserData = userData;
+    // Start chat session
+    startChatSession(userData, customFieldsData);
+  }
+
+  function startChatSession(userData, customFieldsData) {
+    var config = {{WIDGET_CONFIG}};
+    
+    // Call edge function to create session
+    fetch('https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/live-chat-message', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'start_session',
+        data: {
+          widget_id: '{{WIDGET_ID}}',
+          visitor_name: userData.name || 'Anonymous',
+          visitor_email: userData.email || null,
+          visitor_phone: userData.phone || null,
+          custom_fields: customFieldsData
+        }
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.session_id) {
+        window.liveChatSessionId = data.session_id;
+        window.liveChatUserData = userData;
+        showChatInterface();
+      } else {
+        console.error('Failed to start chat session:', data);
+      }
+    })
+    .catch(error => {
+      console.error('Error starting chat session:', error);
+      // Still show chat interface for offline mode
+      window.liveChatUserData = userData;
+      showChatInterface();
+    });
+  }
+
+  function showChatInterface() {
+    var config = {{WIDGET_CONFIG}};
+    var userData = window.liveChatUserData || {};
     
     // Hide pre-chat form, show chat interface
     var prechatForm = document.querySelector('#lovable-prechat-form');
@@ -164,6 +199,9 @@ const defaultJavaScriptLogic = `
       }
       initialMessage.innerHTML = '<div class="message-content">' + greeting + '</div>';
       chatMessages.appendChild(initialMessage);
+      
+      // Scroll to bottom
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
   }
 
@@ -198,19 +236,54 @@ const defaultJavaScriptLogic = `
 
   function endChatSession() {
     console.log('Ending chat session');
-    // TODO: Send session end to server/database
+    
+    // Send end session request to server if session exists
+    if (window.liveChatSessionId) {
+      fetch('https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/live-chat-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'end_session',
+          data: {
+            session_id: window.liveChatSessionId
+          }
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('Chat session ended successfully');
+        } else {
+          console.error('Failed to end session:', data);
+        }
+      })
+      .catch(error => {
+        console.error('Error ending session:', error);
+      });
+    }
+    
+    // Clear session data
+    window.liveChatSessionId = null;
+    window.liveChatUserData = null;
+    
+    // Close live chat UI
     closeLiveChat();
   }
 
   function sendMessage() {
     var input = document.querySelector('#lovable-livechat-input');
     var messagesDiv = document.querySelector('#lovable-livechat-messages');
+    var userData = window.liveChatUserData || {};
     
     if (input && messagesDiv && input.value.trim()) {
-      // Add user message
+      var messageText = input.value.trim();
+      
+      // Add user message to UI immediately
       var userMessage = document.createElement('div');
       userMessage.className = 'chat-message user-message';
-      userMessage.innerHTML = '<div class="message-content">' + escapeHtml(input.value) + '</div>';
+      userMessage.innerHTML = '<div class="message-content">' + escapeHtml(messageText) + '</div>';
       messagesDiv.appendChild(userMessage);
       
       // Clear input
@@ -219,8 +292,37 @@ const defaultJavaScriptLogic = `
       // Scroll to bottom
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
       
-      // TODO: Send message to server/database
-      console.log('Message sent to live chat');
+      // Send message to server if session exists
+      if (window.liveChatSessionId) {
+        fetch('https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/live-chat-message', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'send_message',
+            data: {
+              widget_id: '{{WIDGET_ID}}',
+              session_id: window.liveChatSessionId,
+              message: messageText,
+              sender_name: userData.name || 'Anonymous',
+              sender_email: userData.email || null,
+              is_from_visitor: true
+            }
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            console.log('Message saved to database');
+          } else {
+            console.error('Failed to save message:', data);
+          }
+        })
+        .catch(error => {
+          console.error('Error saving message:', error);
+        });
+      }
     }
   }
 

@@ -78,110 +78,122 @@ export const defaultCssStyles = `
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
   }
 
-  /* Live Chat Content */
+  /* Live Chat Content - Improved Design */
   #lovable-livechat-content {
     display: none;
-    padding: 0;
+    flex-direction: column;
     height: 100%;
-    background: white;
-    border-radius: 0;
+    background: #ffffff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.15);
   }
   
   #lovable-livechat-header {
     background: linear-gradient(135deg, {{LIVE_CHAT_COLOR}} 0%, #6366f1 100%);
     color: white;
-    padding: 24px 20px;
-    position: relative;
+    padding: 20px 24px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+    position: relative;
+  }
+  
+  #lovable-livechat-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.05) 100%);
+    pointer-events: none;
   }
   
   #lovable-livechat-header h3 {
     margin: 0;
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.025em;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    z-index: 1;
+    position: relative;
+  }
+  
+  .livechat-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    z-index: 1;
+    position: relative;
   }
   
   #lovable-livechat-back {
     background: rgba(255, 255, 255, 0.15);
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
-    padding: 10px 16px;
-    border-radius: 50px;
+    padding: 8px 16px;
+    border-radius: 20px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 8px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 6px;
+    transition: all 0.2s ease;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
   }
   
   #lovable-livechat-back:hover {
     background: rgba(255, 255, 255, 0.25);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  .livechat-controls {
-    display: flex;
-    gap: 12px;
-    align-items: center;
   }
 
   .end-chat-btn {
     background: rgba(239, 68, 68, 0.9);
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
-    padding: 10px 16px;
-    border-radius: 50px;
+    padding: 8px 16px;
+    border-radius: 20px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .end-chat-btn:hover {
     background: rgba(220, 38, 38, 0.95);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
   }
 
-  /* Pre-chat Form */
+  /* Pre-chat Form - Redesigned */
   #lovable-prechat-form {
-    padding: 32px 24px;
+    padding: 32px 28px;
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    background: linear-gradient(135deg, #fafbfc 0%, #f1f5f9 100%);
     gap: 24px;
-    min-height: 400px;
     justify-content: center;
+    min-height: 0;
   }
   
   .prechat-title {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
     color: #1e293b;
     margin-bottom: 8px;
     text-align: center;
-    line-height: 1.4;
+    line-height: 1.3;
   }
   
   .prechat-fields {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    max-width: 360px;
-    margin: 0 auto;
-    width: 100%;
+    max-width: 100%;
+    margin: 0;
   }
   
   .prechat-field {
@@ -191,18 +203,18 @@ export const defaultCssStyles = `
   }
   
   .prechat-field label {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     color: #374151;
     margin-bottom: 4px;
   }
   
   .prechat-field input {
-    padding: 16px 20px;
+    padding: 14px 16px;
     border: 2px solid #e2e8f0;
-    border-radius: 16px;
+    border-radius: 12px;
     font-size: 15px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     background: white;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     font-weight: 400;
@@ -211,8 +223,7 @@ export const defaultCssStyles = `
   .prechat-field input:focus {
     outline: none;
     border-color: {{LIVE_CHAT_COLOR}};
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   }
   
   .prechat-field input::placeholder {
@@ -221,53 +232,52 @@ export const defaultCssStyles = `
   }
   
   .prechat-submit-btn {
-    padding: 18px 32px;
+    padding: 16px 24px;
     background: linear-gradient(135deg, {{LIVE_CHAT_COLOR}} 0%, #6366f1 100%);
     color: white;
     border: none;
-    border-radius: 50px;
-    font-size: 16px;
-    font-weight: 700;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-top: 16px;
-    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
-    letter-spacing: -0.025em;
-    position: relative;
-    overflow: hidden;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+    letter-spacing: -0.01em;
   }
   
   .prechat-submit-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
   }
   
   .prechat-submit-btn:active {
     transform: translateY(0);
   }
 
-  /* Chat Messages */
+  /* Chat Messages - Modern Design */
   #lovable-livechat-messages {
     flex: 1;
-    padding: 24px;
+    padding: 20px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    min-height: 400px;
+    gap: 12px;
+    background: #fafbfc;
+    min-height: 300px;
+    max-height: 400px;
   }
   
   .chat-message {
     display: flex;
-    margin-bottom: 16px;
-    animation: fadeInUp 0.4s ease-out;
+    margin-bottom: 8px;
+    animation: slideInUp 0.3s ease-out;
   }
   
-  @keyframes fadeInUp {
+  @keyframes slideInUp {
     from {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(15px);
     }
     to {
       opacity: 1;
@@ -284,56 +294,81 @@ export const defaultCssStyles = `
   }
   
   .message-content {
-    max-width: 75%;
-    padding: 16px 20px;
-    border-radius: 24px;
-    font-size: 15px;
-    line-height: 1.5;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.4;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     font-weight: 400;
     word-wrap: break-word;
+    position: relative;
   }
   
   .agent-message .message-content {
     background: white;
     color: #374151;
-    border-bottom-left-radius: 8px;
+    border-bottom-left-radius: 6px;
     border: 1px solid #e5e7eb;
+    margin-right: 40px;
+  }
+  
+  .agent-message .message-content::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 0 8px 8px;
+    border-color: transparent transparent white transparent;
   }
   
   .user-message .message-content {
     background: linear-gradient(135deg, {{LIVE_CHAT_COLOR}} 0%, #6366f1 100%);
     color: white;
-    border-bottom-right-radius: 8px;
-    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25);
+    border-bottom-right-radius: 6px;
+    margin-left: 40px;
+  }
+  
+  .user-message .message-content::before {
+    content: '';
+    position: absolute;
+    right: -6px;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 8px 8px 0;
+    border-color: transparent {{LIVE_CHAT_COLOR}} transparent transparent;
   }
 
-  /* Chat Input */
+  /* Chat Input - Improved */
   #lovable-livechat-input-area {
-    padding: 24px;
+    padding: 16px 20px;
     border-top: 1px solid #e2e8f0;
     display: flex;
-    gap: 16px;
+    gap: 12px;
     background: white;
     align-items: center;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
   }
   
   #lovable-livechat-input {
     flex: 1;
-    padding: 16px 24px;
+    padding: 12px 16px;
     border: 2px solid #e2e8f0;
-    border-radius: 50px;
+    border-radius: 24px;
     outline: none;
-    font-size: 15px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 14px;
+    transition: all 0.2s ease;
     background: #f8fafc;
     font-weight: 400;
   }
   
   #lovable-livechat-input:focus {
     border-color: {{LIVE_CHAT_COLOR}};
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     background: white;
   }
   
@@ -343,22 +378,23 @@ export const defaultCssStyles = `
   }
   
   #lovable-livechat-send {
-    padding: 16px 28px;
+    padding: 12px 20px;
     background: linear-gradient(135deg, {{LIVE_CHAT_COLOR}} 0%, #6366f1 100%);
     color: white;
     border: none;
-    border-radius: 50px;
+    border-radius: 24px;
     cursor: pointer;
-    font-size: 15px;
-    font-weight: 700;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
-    letter-spacing: -0.025em;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    letter-spacing: -0.01em;
+    min-width: 60px;
   }
   
   #lovable-livechat-send:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
   }
   
   #lovable-livechat-send:active {

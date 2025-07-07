@@ -112,7 +112,8 @@ export class WidgetTemplateRenderer {
       '{{PHONE_PLACEHOLDER}}': '+1 (555) 123-4567',
       '{{LIVE_CHAT_BUTTON_TEXT}}': this.config.liveChatButtonText || 'Start Live Chat',
       // Widget config for JavaScript access
-      '{{WIDGET_CONFIG}}': JSON.stringify(this.config)
+      '{{WIDGET_CONFIG}}': JSON.stringify(this.config),
+      '{{WIDGET_ID}}': this.config.widgetId || ''
     }
 
     console.log('Video content in replacements:', replacements['{{VIDEO_CONTENT}}'] ? 'YES' : 'NO')
