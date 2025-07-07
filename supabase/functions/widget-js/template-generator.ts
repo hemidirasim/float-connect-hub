@@ -115,7 +115,9 @@ export class WidgetTemplateRenderer {
       // Live chat placeholders
       '{{LIVE_CHAT_BUTTON}}': this.generateLiveChatButton(),
       '{{LIVE_CHAT_GREETING}}': this.config.liveChatGreeting || 'Hello! How can we help you today?',
-      '{{LIVE_CHAT_COLOR}}': this.config.liveChatColor || '#4f46e5'
+      '{{LIVE_CHAT_COLOR}}': this.config.liveChatColor || '#4f46e5',
+      // Widget config for JavaScript access
+      '{{WIDGET_CONFIG}}': JSON.stringify(this.config)
     }
 
     console.log('Video content in replacements:', replacements['{{VIDEO_CONTENT}}'] ? 'YES' : 'NO')

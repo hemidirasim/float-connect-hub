@@ -50,7 +50,12 @@ export function createWidgetConfig(widget: any): WidgetConfig {
     liveChatGreeting: widget.live_chat_greeting || 'Hello! How can we help you today?',
     liveChatColor: widget.live_chat_color || '#4f46e5',
     liveChatAutoOpen: Boolean(widget.live_chat_auto_open),
-    liveChatOfflineMessage: widget.live_chat_offline_message || 'We are currently offline. Please leave a message and we will get back to you.'
+    liveChatOfflineMessage: widget.live_chat_offline_message || 'We are currently offline. Please leave a message and we will get back to you.',
+    // Pre-chat form fields
+    liveChatRequireEmail: Boolean(widget.live_chat_require_email),
+    liveChatRequireName: Boolean(widget.live_chat_require_name),
+    liveChatRequirePhone: Boolean(widget.live_chat_require_phone),
+    liveChatCustomFields: widget.live_chat_custom_fields || ''
   }
 
   console.log('Final widget config created:', {

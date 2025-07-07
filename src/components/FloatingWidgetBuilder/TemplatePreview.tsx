@@ -89,7 +89,12 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       // Live chat config
       liveChatEnabled: formData.liveChatEnabled,
       liveChatGreeting: formData.liveChatGreeting,
-      liveChatColor: formData.liveChatColor
+      liveChatColor: formData.liveChatColor,
+      // Pre-chat form config
+      liveChatRequireEmail: formData.liveChatRequireEmail,
+      liveChatRequireName: formData.liveChatRequireName,
+      liveChatRequirePhone: formData.liveChatRequirePhone,
+      liveChatCustomFields: formData.liveChatCustomFields
     };
 
     // Use SAME renderer as edge function
@@ -162,6 +167,11 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     formData.liveChatEnabled,
     formData.liveChatGreeting,
     formData.liveChatColor,
+    // Pre-chat form dependencies
+    formData.liveChatRequireEmail,
+    formData.liveChatRequireName,
+    formData.liveChatRequirePhone,
+    formData.liveChatCustomFields,
     channels,
     editingWidget?.video_url,
     getTemplate

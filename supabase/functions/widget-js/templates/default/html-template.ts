@@ -29,8 +29,31 @@ export const defaultHtmlTemplate = `
       <h3>{{LIVE_CHAT_GREETING}}</h3>
       <button id="lovable-livechat-close">×</button>
     </div>
-    <div id="lovable-livechat-messages"></div>
-    <div id="lovable-livechat-input-area">
+    
+    <!-- Pre-chat form -->
+    <div id="lovable-prechat-form">
+      <div class="prechat-title">Please provide your information to start the chat</div>
+      <div class="prechat-fields">
+        <div class="prechat-field" data-field="name" style="display: none;">
+          <label for="prechat-name">Name *</label>
+          <input type="text" id="prechat-name" placeholder="Your name" required />
+        </div>
+        <div class="prechat-field" data-field="email" style="display: none;">
+          <label for="prechat-email">Email *</label>
+          <input type="email" id="prechat-email" placeholder="your@email.com" required />
+        </div>
+        <div class="prechat-field" data-field="phone" style="display: none;">
+          <label for="prechat-phone">Phone</label>
+          <input type="tel" id="prechat-phone" placeholder="+1 (555) 123-4567" />
+        </div>
+        <div id="prechat-custom-fields"></div>
+        <button id="prechat-submit" class="prechat-submit-btn">Start Chat</button>
+      </div>
+    </div>
+    
+    <!-- Chat messages -->
+    <div id="lovable-livechat-messages" style="display: none;"></div>
+    <div id="lovable-livechat-input-area" style="display: none;">
       <input type="text" id="lovable-livechat-input" placeholder="Type your message..." />
       <button id="lovable-livechat-send">Send</button>
     </div>

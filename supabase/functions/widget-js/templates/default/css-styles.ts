@@ -100,12 +100,84 @@ export const defaultCssStyles = `
   
   #lovable-livechat-messages {
     flex: 1;
-    padding: 16px;
+    padding: 20px;
     overflow-y: auto;
+    background: #f9fafb;
+  }
+  
+  /* Pre-chat form styles */
+  #lovable-prechat-form {
+    padding: 20px;
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
   }
+  
+  .prechat-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .prechat-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .prechat-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .prechat-field label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .prechat-field input {
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+  }
+  
+  .prechat-field input:focus {
+    outline: none;
+    border-color: {{LIVE_CHAT_COLOR}};
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+  
+  .prechat-submit-btn {
+    padding: 14px;
+    background: {{LIVE_CHAT_COLOR}};
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 10px;
+  }
+  
+  .prechat-submit-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+  
+  .prechat-submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  /* Chat message styles continue */
   
   .chat-message {
     max-width: 80%;

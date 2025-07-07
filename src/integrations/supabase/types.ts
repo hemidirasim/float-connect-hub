@@ -487,9 +487,13 @@ export type Database = {
           live_chat_agent_name: string | null
           live_chat_auto_open: boolean | null
           live_chat_color: string | null
+          live_chat_custom_fields: string | null
           live_chat_enabled: boolean | null
           live_chat_greeting: string | null
           live_chat_offline_message: string | null
+          live_chat_require_email: boolean | null
+          live_chat_require_name: boolean | null
+          live_chat_require_phone: boolean | null
           name: string
           position: string
           preview_video_height: number | null
@@ -524,9 +528,13 @@ export type Database = {
           live_chat_agent_name?: string | null
           live_chat_auto_open?: boolean | null
           live_chat_color?: string | null
+          live_chat_custom_fields?: string | null
           live_chat_enabled?: boolean | null
           live_chat_greeting?: string | null
           live_chat_offline_message?: string | null
+          live_chat_require_email?: boolean | null
+          live_chat_require_name?: boolean | null
+          live_chat_require_phone?: boolean | null
           name?: string
           position?: string
           preview_video_height?: number | null
@@ -561,9 +569,13 @@ export type Database = {
           live_chat_agent_name?: string | null
           live_chat_auto_open?: boolean | null
           live_chat_color?: string | null
+          live_chat_custom_fields?: string | null
           live_chat_enabled?: boolean | null
           live_chat_greeting?: string | null
           live_chat_offline_message?: string | null
+          live_chat_require_email?: boolean | null
+          live_chat_require_name?: boolean | null
+          live_chat_require_phone?: boolean | null
           name?: string
           position?: string
           preview_video_height?: number | null

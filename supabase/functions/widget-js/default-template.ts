@@ -35,19 +35,125 @@ const defaultJavaScriptLogic = `
         mainModal.style.opacity = '0';
       }
       
+      // Setup pre-chat form
+      setupPreChatForm();
+      
       // Show live chat modal
       liveChatModal.style.display = 'flex';
       liveChatModal.style.visibility = 'visible';
       liveChatModal.style.opacity = '1';
+    }
+  }
+
+  function setupPreChatForm() {
+    // Show pre-chat form, hide chat interface
+    var prechatForm = document.querySelector('#lovable-prechat-form');
+    var chatMessages = document.querySelector('#lovable-livechat-messages');
+    var chatInput = document.querySelector('#lovable-livechat-input-area');
+    
+    if (prechatForm) prechatForm.style.display = 'flex';
+    if (chatMessages) chatMessages.style.display = 'none';
+    if (chatInput) chatInput.style.display = 'none';
+    
+    // Configure form fields based on settings
+    var config = {{WIDGET_CONFIG}};
+    var nameField = document.querySelector('[data-field="name"]');
+    var emailField = document.querySelector('[data-field="email"]');
+    var phoneField = document.querySelector('[data-field="phone"]');
+    var customFieldsContainer = document.querySelector('#prechat-custom-fields');
+    
+    // Show/hide required fields
+    if (nameField) nameField.style.display = config.liveChatRequireName ? 'flex' : 'none';
+    if (emailField) emailField.style.display = config.liveChatRequireEmail ? 'flex' : 'none';
+    if (phoneField) phoneField.style.display = config.liveChatRequirePhone ? 'flex' : 'none';
+    
+    // Add custom fields
+    if (customFieldsContainer && config.liveChatCustomFields) {
+      var customFields = config.liveChatCustomFields.split(',').map(f => f.trim()).filter(f => f);
+      customFieldsContainer.innerHTML = '';
       
-      // Add initial message from agent
-      var messagesDiv = document.querySelector('#lovable-livechat-messages');
-      if (messagesDiv && messagesDiv.children.length === 0) {
-        var initialMessage = document.createElement('div');
-        initialMessage.className = 'chat-message agent-message';
-        initialMessage.innerHTML = '<div class="message-content">{{LIVE_CHAT_GREETING}}</div>';
-        messagesDiv.appendChild(initialMessage);
+      customFields.forEach(function(fieldName, index) {
+        var fieldDiv = document.createElement('div');
+        fieldDiv.className = 'prechat-field';
+        fieldDiv.innerHTML = 
+          '<label for="prechat-custom-' + index + '">' + fieldName + '</label>' +
+          '<input type="text" id="prechat-custom-' + index + '" placeholder="Enter ' + fieldName.toLowerCase() + '" />';
+        customFieldsContainer.appendChild(fieldDiv);
+      });
+    }
+  }
+
+  function submitPreChatForm() {
+    var config = {{WIDGET_CONFIG}};
+    var isValid = true;
+    var userData = {};
+    
+    // Validate required fields
+    if (config.liveChatRequireName) {
+      var nameInput = document.querySelector('#prechat-name');
+      if (!nameInput || !nameInput.value.trim()) {
+        isValid = false;
+        if (nameInput) nameInput.style.borderColor = '#ef4444';
+      } else {
+        userData.name = nameInput.value.trim();
+        nameInput.style.borderColor = '#d1d5db';
       }
+    }
+    
+    if (config.liveChatRequireEmail) {
+      var emailInput = document.querySelector('#prechat-email');
+      var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailInput || !emailInput.value.trim() || !emailRegex.test(emailInput.value.trim())) {
+        isValid = false;
+        if (emailInput) emailInput.style.borderColor = '#ef4444';
+      } else {
+        userData.email = emailInput.value.trim();
+        emailInput.style.borderColor = '#d1d5db';
+      }
+    }
+    
+    if (config.liveChatRequirePhone) {
+      var phoneInput = document.querySelector('#prechat-phone');
+      if (phoneInput && phoneInput.value.trim()) {
+        userData.phone = phoneInput.value.trim();
+      }
+    }
+    
+    // Collect custom fields
+    var customFields = config.liveChatCustomFields ? config.liveChatCustomFields.split(',').map(f => f.trim()).filter(f => f) : [];
+    customFields.forEach(function(fieldName, index) {
+      var customInput = document.querySelector('#prechat-custom-' + index);
+      if (customInput && customInput.value.trim()) {
+        userData[fieldName] = customInput.value.trim();
+      }
+    });
+    
+    if (!isValid) {
+      return;
+    }
+    
+    // Store user data for later use
+    window.liveChatUserData = userData;
+    
+    // Hide pre-chat form, show chat interface
+    var prechatForm = document.querySelector('#lovable-prechat-form');
+    var chatMessages = document.querySelector('#lovable-livechat-messages');
+    var chatInput = document.querySelector('#lovable-livechat-input-area');
+    
+    if (prechatForm) prechatForm.style.display = 'none';
+    if (chatMessages) chatMessages.style.display = 'flex';
+    if (chatInput) chatInput.style.display = 'flex';
+    
+    // Add initial message from agent with user's name
+    if (chatMessages && chatMessages.children.length === 0) {
+      var initialMessage = document.createElement('div');
+      initialMessage.className = 'chat-message agent-message';
+      var greeting = config.liveChatGreeting || 'Hello! How can we help you today?';
+      if (userData.name) {
+        greeting = 'Hello ' + userData.name + '! How can we help you today?';
+      }
+      initialMessage.innerHTML = '<div class="message-content">' + greeting + '</div>';
+      chatMessages.appendChild(initialMessage);
     }
   }
 
@@ -436,6 +542,7 @@ const defaultJavaScriptLogic = `
     var liveChatClose = document.querySelector('#lovable-livechat-close');
     var liveChatSend = document.querySelector('#lovable-livechat-send');
     var liveChatInput = document.querySelector('#lovable-livechat-input');
+    var prechatSubmit = document.querySelector('#prechat-submit');
     
     if (liveChatBtn) {
       liveChatBtn.addEventListener('click', function(e) {
@@ -467,6 +574,14 @@ const defaultJavaScriptLogic = `
           e.preventDefault();
           sendMessage();
         }
+      });
+    }
+    
+    if (prechatSubmit) {
+      prechatSubmit.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        submitPreChatForm();
       });
     }
     

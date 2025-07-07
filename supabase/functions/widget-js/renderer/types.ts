@@ -24,4 +24,9 @@ export interface TemplateConfig {
   liveChatEnabled?: boolean;
   liveChatGreeting?: string;
   liveChatColor?: string;
+  // Pre-chat form fields
+  liveChatRequireEmail?: boolean;
+  liveChatRequireName?: boolean;
+  liveChatRequirePhone?: boolean;
+  liveChatCustomFields?: string;
 }
