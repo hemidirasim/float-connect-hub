@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Channel, FormData } from "./types";
@@ -37,12 +36,13 @@ export const useWidgetActions = (
     toast.success('Channel removed!');
   };
 
+  // Updated to handle both value and label
   const handleEditChannel = (id: string, newValue: string, newLabel: string) => {
     setChannels(channels.map(channel =>
       channel.id === id ? { 
         ...channel, 
         value: newValue,
-        label: newLabel
+        label: newLabel // Make sure to update the label
       } : channel
     ));
     toast.success('Channel updated!');
@@ -67,7 +67,7 @@ export const useWidgetActions = (
     try {
       console.log('Saving widget to database with channels:', channels);
       
-      // Create widget data with live chat settings
+      // Create widget data without widget dimensions
       const widgetData = {
         name: websiteName,
         website_url: websiteUrl,
@@ -87,17 +87,10 @@ export const useWidgetActions = (
         preview_video_height: formData.previewVideoHeight,
         template_id: formData.templateId || 'default',
         channels: channels,
-        user_id: user?.id,
-        // Live chat settings
-        live_chat_enabled: formData.liveChatEnabled,
-        live_chat_greeting: formData.liveChatGreeting,
-        live_chat_color: formData.liveChatColor,
-        live_chat_auto_open: formData.liveChatAutoOpen,
-        live_chat_offline_message: formData.liveChatOfflineMessage,
-        live_chat_agent_name: formData.liveChatAgentName || null
+        user_id: user?.id
       };
 
-      console.log('Widget data for database with live chat:', widgetData);
+      console.log('Widget data for database with channels:', widgetData);
 
       let savedWidget;
 
@@ -132,7 +125,7 @@ export const useWidgetActions = (
         toast.success('Widget created!');
       }
       
-      console.log('Widget saved to database successfully with live chat:', savedWidget);
+      console.log('Widget saved to database successfully with channels:', savedWidget);
       
       return { success: true, widget: savedWidget };
     } catch (error) {

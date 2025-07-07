@@ -1,439 +1,106 @@
-export const defaultUtilityFunctions = `
-// HiClient Widget JavaScript Functionality
-(function() {
-  const widgetId = '{{WIDGET_ID}}';
-  const liveChatEnabled = {{LIVE_CHAT_ENABLED}};
-  const liveChatGreeting = '{{LIVE_CHAT_GREETING}}';
-  const liveChatColor = '{{LIVE_CHAT_COLOR}}';
-  const liveChatAutoOpen = {{LIVE_CHAT_AUTO_OPEN}};
-  const liveChatOfflineMessage = '{{LIVE_CHAT_OFFLINE_MESSAGE}}';
-  
-  let currentChatSession = null;
-  let chatMessages = [];
-  let liveChatVisible = false;
-  
-  // Generate unique visitor ID
-  function generateVisitorId() {
-    return 'visitor_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-  }
-  
-  // Get or create visitor ID
-  function getVisitorId() {
-    let visitorId = localStorage.getItem('hiclient_visitor_id');
-    if (!visitorId) {
-      visitorId = generateVisitorId();
-      localStorage.setItem('hiclient_visitor_id', visitorId);
-    }
-    return visitorId;
-  }
-
-  // Function to open a channel link
-  window.openChannel = function(url) {
-    window.open(url, '_blank');
-  };
-
-  // Function to record widget view
-  function recordWidgetView() {
-    fetch('{{SUPABASE_URL}}/functions/v1/record-widget-view', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer {{SUPABASE_ANON_KEY}}'
-      },
-      body: JSON.stringify({ widget_id: widgetId })
-    }).then(res => res.json())
-      .then(data => console.log('Widget view recorded:', data))
-      .catch(error => console.error('Error recording widget view:', error));
-  }
-
-  // Initialize widget
-  function initializeWidget() {
-    // Record widget view
-    recordWidgetView();
-
-    // Button element
-    const btn = document.getElementById('hiclient-btn');
-    if (btn) {
-      btn.addEventListener('click', openModal);
-    }
-
-    // Modal elements
-    const modal = document.getElementById('hiclient-modal');
-    const closeBtn = document.getElementById('hiclient-close-btn');
-    const modalOverlay = document.getElementById('hiclient-modal-overlay');
-
-    // Open modal function
-    function openModal() {
-      if (modal) {
-        modal.style.display = 'block';
-        // Show live chat section if enabled
-        if (liveChatEnabled) {
-          const liveChatSection = document.getElementById('hiclient-live-chat-section');
-          if (liveChatSection) {
-            liveChatSection.style.display = 'block';
-          }
-        }
-      }
-    }
-
-    // Close modal function
-    function closeModal() {
-      if (modal) {
-        modal.style.display = 'none';
-      }
-    }
-
-    // Close modal when clicking the close button
-    if (closeBtn) {
-      closeBtn.addEventListener('click', closeModal);
-    }
-
-    // Close modal when clicking outside the modal content
-    if (modalOverlay) {
-      modalOverlay.addEventListener('click', closeModal);
-    }
-
-    // Tooltip elements
-    const tooltip = document.getElementById('hiclient-tooltip');
-    const tooltipDisplay = '{{TOOLTIP_DISPLAY}}';
-
-    // Show tooltip on hover
-    if (btn && tooltip && tooltipDisplay === 'hover') {
-      btn.addEventListener('mouseenter', () => {
-        tooltip.style.display = 'block';
-      });
-
-      btn.addEventListener('mouseleave', () => {
-        tooltip.style.display = 'none';
-      });
-    }
-
-    // Show tooltip always
-    if (tooltip && tooltipDisplay === 'always') {
-      tooltip.style.display = 'block';
-    }
-
-    // Channel data
-    const channelsData = JSON.parse('{{CHANNELS_DATA}}');
-    const channelsGrid = document.getElementById('hiclient-channels-grid');
-
-    // Populate channels
-    if (channelsGrid && channelsData && channelsData.length > 0) {
-      channelsData.forEach(channel => {
-        const channelElement = document.createElement('div');
-        channelElement.className = 'hiclient-channel';
-        channelElement.innerHTML = \`<a href="\${channel.value}" target="_blank" rel="noopener noreferrer">\${channel.label}</a>\`;
-        channelsGrid.appendChild(channelElement);
-      });
-    }
-    
-    // Show live chat section if enabled
-    if (liveChatEnabled) {
-      const liveChatSection = document.getElementById('hiclient-live-chat-section');
-      if (liveChatSection) {
-        liveChatSection.style.display = 'block';
-      }
-    }
-  }
-
-  // Live Chat Functions
-  async function startLiveChat() {
-    try {
-      const visitorId = getVisitorId();
-      const response = await fetch('{{SUPABASE_URL}}/functions/v1/live-chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer {{SUPABASE_ANON_KEY}}'
-        },
-        body: JSON.stringify({
-          action: 'create_session',
-          widget_id: widgetId,
-          visitor_id: visitorId,
-          visitor_name: null,
-          visitor_email: null,
-          user_agent: navigator.userAgent,
-          ip_address: null // Will be handled server-side
-        })
-      });
-      
-      const data = await response.json();
-      if (data.success) {
-        currentChatSession = data.session_id;
-        showLiveChat();
-        closeModal();
-      }
-    } catch (error) {
-      console.error('Error starting live chat:', error);
-    }
-  }
-  
-  function showLiveChat() {
-    const chatModal = document.getElementById('hiclient-live-chat-modal');
-    if (chatModal) {
-      chatModal.style.display = 'flex';
-      liveChatVisible = true;
-      loadChatMessages();
-    }
-  }
-  
-  function hideLiveChat() {
-    const chatModal = document.getElementById('hiclient-live-chat-modal');
-    if (chatModal) {
-      chatModal.style.display = 'none';
-      liveChatVisible = false;
-    }
-  }
-  
-  async function sendMessage(message) {
-    if (!currentChatSession || !message.trim()) return;
-    
-    try {
-      const response = await fetch('{{SUPABASE_URL}}/functions/v1/live-chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer {{SUPABASE_ANON_KEY}}'
-        },
-        body: JSON.stringify({
-          action: 'send_message',
-          session_id: currentChatSession,
-          sender_type: 'visitor',
-          sender_id: getVisitorId(),
-          message: message
-        })
-      });
-      
-      const data = await response.json();
-      if (data.success) {
-        displayMessage('visitor', message, new Date());
-        document.getElementById('hiclient-live-chat-input').value = '';
-      }
-    } catch (error) {
-      console.error('Error sending message:', error);
-    }
-  }
-  
-  async function loadChatMessages() {
-    if (!currentChatSession) return;
-    
-    try {
-      const response = await fetch('{{SUPABASE_URL}}/functions/v1/live-chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer {{SUPABASE_ANON_KEY}}'
-        },
-        body: JSON.stringify({
-          action: 'get_messages',
-          session_id: currentChatSession
-        })
-      });
-      
-      const data = await response.json();
-      if (data.success) {
-        data.messages.forEach(msg => {
-          displayMessage(msg.sender_type, msg.message, new Date(msg.created_at));
-        });
-      }
-    } catch (error) {
-      console.error('Error loading messages:', error);
-    }
-  }
-  
-  function displayMessage(senderType, message, timestamp) {
-    const messagesContainer = document.getElementById('hiclient-live-chat-messages');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = \`hiclient-live-chat-message \${senderType}\`;
-    
-    const time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    
-    messageDiv.innerHTML = \`
-      <div class="hiclient-live-chat-message-bubble">\${message}</div>
-      <div class="hiclient-live-chat-message-time">\${time}</div>
-    \`;
-    
-    messagesContainer.appendChild(messageDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-  }
-
-  // Initialize widget
-  function initializeWidget() {
-    // Record widget view
-    recordWidgetView();
-
-    // Button element
-    const btn = document.getElementById('hiclient-btn');
-    if (btn) {
-      btn.addEventListener('click', openModal);
-    }
-
-    // Modal elements
-    const modal = document.getElementById('hiclient-modal');
-    const closeBtn = document.getElementById('hiclient-close-btn');
-    const modalOverlay = document.getElementById('hiclient-modal-overlay');
-
-    // Open modal function
-    function openModal() {
-      if (modal) {
-        modal.style.display = 'block';
-        // Show live chat section if enabled
-        if (liveChatEnabled) {
-          const liveChatSection = document.getElementById('hiclient-live-chat-section');
-          if (liveChatSection) {
-            liveChatSection.style.display = 'block';
-          }
-        }
-      }
-    }
-
-    // Close modal function
-    function closeModal() {
-      if (modal) {
-        modal.style.display = 'none';
-      }
-    }
-
-    // Close modal when clicking the close button
-    if (closeBtn) {
-      closeBtn.addEventListener('click', closeModal);
-    }
-
-    // Close modal when clicking outside the modal content
-    if (modalOverlay) {
-      modalOverlay.addEventListener('click', closeModal);
-    }
-
-    // Tooltip elements
-    const tooltip = document.getElementById('hiclient-tooltip');
-    const tooltipDisplay = '{{TOOLTIP_DISPLAY}}';
-
-    // Show tooltip on hover
-    if (btn && tooltip && tooltipDisplay === 'hover') {
-      btn.addEventListener('mouseenter', () => {
-        tooltip.style.display = 'block';
-      });
-
-      btn.addEventListener('mouseleave', () => {
-        tooltip.style.display = 'none';
-      });
-    }
-
-    // Show tooltip always
-    if (tooltip && tooltipDisplay === 'always') {
-      tooltip.style.display = 'block';
-    }
-
-    // Channel data
-    const channelsData = JSON.parse('{{CHANNELS_DATA}}');
-    const channelsGrid = document.getElementById('hiclient-channels-grid');
-
-    // Populate channels
-    if (channelsGrid && channelsData && channelsData.length > 0) {
-      channelsData.forEach(channel => {
-        const channelElement = document.createElement('div');
-        channelElement.className = 'hiclient-channel';
-        channelElement.innerHTML = \`<a href="\${channel.value}" target="_blank" rel="noopener noreferrer">\${channel.label}</a>\`;
-        channelsGrid.appendChild(channelElement);
-      });
-    }
-    
-    // Show live chat section if enabled
-    if (liveChatEnabled) {
-      const liveChatSection = document.getElementById('hiclient-live-chat-section');
-      if (liveChatSection) {
-        liveChatSection.style.display = 'block';
-      }
-      
-      // Live chat button event
-      const startLiveChatBtn = document.getElementById('hiclient-start-live-chat');
-      if (startLiveChatBtn) {
-        startLiveChatBtn.addEventListener('click', startLiveChat);
-      }
-      
-      // Live chat modal events
-      const liveChatClose = document.getElementById('hiclient-live-chat-close');
-      const liveChatMinimize = document.getElementById('hiclient-live-chat-minimize');
-      const liveChatSend = document.getElementById('hiclient-live-chat-send');
-      const liveChatInput = document.getElementById('hiclient-live-chat-input');
-      
-      if (liveChatClose) {
-        liveChatClose.addEventListener('click', hideLiveChat);
-      }
-      
-      if (liveChatMinimize) {
-        liveChatMinimize.addEventListener('click', hideLiveChat);
-      }
-      
-      if (liveChatSend) {
-        liveChatSend.addEventListener('click', () => {
-          const message = liveChatInput.value;
-          sendMessage(message);
-        });
-      }
-      
-      if (liveChatInput) {
-        liveChatInput.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            const message = liveChatInput.value;
-            sendMessage(message);
-          }
-        });
-      }
-      
-      // Auto-open live chat if enabled
-      if (liveChatAutoOpen) {
-        setTimeout(() => {
-          startLiveChat();
-        }, 3000);
-      }
-    }
-  }
-
-  // Initialize the widget when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeWidget);
-  } else {
-    initializeWidget();
-  }
-})();
-`
-
-export function getChannelUrl(type: string, value: string): string {
-  switch (type.toLowerCase()) {
+export function getChannelUrl(channel: any): string {
+  switch (channel.type) {
     case 'whatsapp':
-      return `https://wa.me/${value.replace(/\D/g, '')}`;
+      return 'https://wa.me/' + channel.value.replace(/[^0-9]/g, '');
     case 'telegram':
-      return value.startsWith('@') ? `https://t.me/${value.slice(1)}` : `https://t.me/${value}`;
-    case 'instagram':
-      return value.startsWith('http') ? value : `https://instagram.com/${value}`;
+      return 'https://t.me/' + channel.value.replace('@', '');
     case 'email':
-      return `mailto:${value}`;
+      return 'mailto:' + channel.value;
     case 'phone':
-      return `tel:${value}`;
+      return 'tel:' + channel.value;
+    case 'instagram':
+      return channel.value.startsWith('http') ? channel.value : 'https://instagram.com/' + channel.value.replace('@', '');
+    case 'facebook':
+      return channel.value.startsWith('http') ? channel.value : 'https://facebook.com/' + channel.value;
+    case 'x':
+      return channel.value.startsWith('http') ? channel.value : 'https://x.com/' + channel.value.replace('@', '');
+    case 'linkedin':
+      return channel.value.startsWith('http') ? channel.value : 'https://linkedin.com/in/' + channel.value;
+    case 'youtube':
+      return channel.value.startsWith('http') ? channel.value : 'https://youtube.com/@' + channel.value;
+    case 'github':
+      return channel.value.startsWith('http') ? channel.value : 'https://github.com/' + channel.value;
+    case 'tiktok':
+      return channel.value.startsWith('http') ? channel.value : 'https://tiktok.com/@' + channel.value;
+    case 'messenger':
+      return channel.value.startsWith('http') ? channel.value : 'https://m.me/' + channel.value;
+    case 'dribble':
+      return channel.value.startsWith('http') ? channel.value : 'https://dribble.com/' + channel.value;
+    case 'viber':
+      return 'viber://chat?number=' + channel.value.replace(/[^0-9]/g, '');
+    case 'discord':
+      return channel.value;
+    case 'website':
+      return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
+    case 'custom':
+      return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
     default:
-      return value.startsWith('http') ? value : `https://${value}`;
+      return channel.value;
   }
 }
 
-export function getChannelIcon(type: string): string {
+export function getChannelIcon(type: string, customIcon?: string): string {
+  // If it's a custom link and has a custom icon, use it
+  if (type === 'custom' && customIcon) {
+    return `<img src="${customIcon}" style="width: 20px; height: 20px; object-fit: contain;" alt="Custom icon">`;
+  }
+
+  // For all other cases (including custom links without custom icons), use platform icons
   const icons = {
-    whatsapp: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/></svg>`,
-    telegram: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>`,
-    instagram: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>`,
-    email: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>`,
-    phone: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>`
+    whatsapp: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.465 3.516"/></svg>',
+    telegram: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>',
+    email: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>',
+    phone: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>',
+    instagram: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>',
+    facebook: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>',
+    twitter: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>',
+    linkedin: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>',
+    youtube: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>',
+    github: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>',
+    tiktok: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>',
+    messenger: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 4.975 0 11.111c0 3.497 1.745 6.616 4.472 8.652V24l4.086-2.242c1.09.301 2.246.464 3.442.464 6.626 0 12-4.974 12-11.111C24 4.975 18.626 0 12 0zm1.191 14.963l-3.055-3.26-5.963 3.26L10.732 8.1l3.13 3.26L19.745 8.1l-6.554 6.863z"/></svg>',
+    viber: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M13.199 1.596c5.38.205 9.291 4.384 9.012 9.72-.024.571-.092 1.141-.203 1.705-.024.129-.129.129-.153 0-.024-.528-.048-1.08-.072-1.608-.072-1.584-.336-3.096-.816-4.584-.528-1.632-1.296-3.12-2.328-4.416-.96-1.224-2.136-2.256-3.456-3.024-.528-.312-1.08-.576-1.656-.768-.048-.024-.096-.048-.144-.072-.048-.024-.048-.096.024-.096.264.024.528.072.792.143zm-1.032.264c4.032.888 6.96 4.608 6.888 8.76-.024.312-.048.624-.096.936-.024.096-.168.072-.168-.024 0-.264-.024-.528-.048-.792-.096-2.256-.888-4.368-2.208-6.168-.672-.912-1.488-1.704-2.4-2.328-.888-.6-1.872-1.032-2.904-1.296-.096-.024-.168-.048-.264-.072-.048-.024-.024-.096.048-.072.384.024.768.024 1.152.056zm-.96.408c2.304.648 4.056 2.784 4.248 5.184.024.264.024.528 0 .792 0 .096-.144.096-.168 0-.024-.216-.048-.432-.096-.648-.192-1.656-1.056-3.168-2.328-4.248-.624-.528-1.344-.936-2.112-1.176-.096-.024-.192-.072-.288-.096-.072-.024-.048-.096.024-.072.24.072.48.168.72.264zm7.176 5.712c.072 0 .144.072.144.144v.744c0 .072-.072.144-.144.144h-.72c-.072 0-.144-.072-.144-.144v-.744c0-.072.072-.144.144-.144h.72zm-7.896-.12c1.296.384 2.208 1.632 2.088 3.024-.024.264-.072.528-.144.792-.024.072-.12.072-.144 0-.048-.216-.072-.432-.096-.648-.072-.888-.48-1.704-1.176-2.256-.264-.216-.576-.384-.912-.48-.048-.024-.096-.048-.144-.072-.048-.024-.024-.096.048-.072.168.024.336.072.48.144z"/></svg>',
+    discord: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419-.0002 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1568 2.4189Z"/></svg>',
+    behance: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M6.938 4.503c.702 0 1.34.06 1.92.188.577.13 1.07.33 1.485.61.41.28.733.65.96 1.12.225.47.34 1.05.34 1.73 0 .74-.17 1.36-.507 1.86-.338.5-.837.9-1.502 1.22.906.26 1.576.72 2.022 1.37.448.66.665 1.45.665 2.36 0 .75-.13 1.39-.41 1.93-.28.55-.67 1-1.16 1.35-.48.348-1.05.6-1.69.767-.64.17-1.35.25-2.134.25H0V4.51h6.938v-.007zM16.94 16.665c.44.428 1.073.64 1.894.64.59 0 1.1-.148 1.53-.45.424-.3.68-.61.77-.93h2.588c-.403 1.28-1.048 2.2-1.9 2.75-.85.56-1.884.83-3.08.83-.837 0-1.584-.13-2.272-.4-.673-.27-1.24-.65-1.7-1.14-.46-.49-.81-1.073-1.06-1.75-.25-.676-.37-1.423-.37-2.235 0-.81.12-1.55.37-2.234.25-.686.6-1.27 1.06-1.75.46-.48 1.027-.86 1.7-1.14.688-.28 1.435-.42 2.272-.42.906 0 1.685.16 2.38.48.695.32 1.267.77 1.728 1.35.46.58.94 1.27 1.06 2.058.12.79.17 1.64.11 2.54h-7.69c.12.918.44 1.615.882 2.04zm-8.77-9.67c-.31-.25-.6-.35-.9-.35-.43 0-.78.1-1.06.3-.28.2-.43.5-.43.9 0 .4.15.72.45.96.3.25.7.37 1.2.37H9.8V9.55c0-.69-.18-1.17-.54-1.44-.37-.27-.85-.41-1.47-.41-.97 0-1.67.42-2.1 1.26h-.84c.13-.55.4-1 .82-1.35.42-.35.98-.53 1.68-.53.55 0 1.02.1 1.42.3.4.2.72.48.94.84.22.36.33.78.33 1.26v3.55c0 .41-.04.78-.13 1.1-.09.32-.22.58-.4.78-.18.2-.4.35-.66.45-.26.1-.55.15-.87.15-.68 0-1.22-.18-1.64-.54-.42-.36-.63-.86-.63-1.5 0-.64.21-1.14.63-1.5.42-.36.96-.54 1.64-.54.32 0 .61.05.87.15.26.1.48.25.66.45.18.2.31.46.4.78.09.32.13.69.13 1.1v-3.55c0-.48-.11-.9-.33-1.26-.22-.36-.54-.64-.94-.84-.4-.2-.87-.3-1.42-.3-.7 0-1.26.18-1.68.53-.42.35-.69.8-.82 1.35h.84c.43-.84 1.13-1.26 2.1-1.26.62 0 1.1.14 1.47.41.36.27.54.75.54 1.44v.37H7.71c-.5 0-.9-.12-1.2-.37-.3-.24-.45-.56-.45-.96 0-.4.15-.7.43-.9.28-.2.63-.3 1.06-.3.3 0 .59.1.9.35z"/></svg>',
+    dribble: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.374 0 12s5.374 12 12 12 12-5.374 12-12S18.626 0 12 0zm7.568 5.302c1.4 1.5 2.252 3.464 2.338 5.608-2.202-.466-4.676-.466-7.192 0 .466-1.064.932-2.128 1.398-3.192 1.244.466 2.488.932 3.456 1.398-.466-1.398-1.398-2.802-2.8-3.814zm-4.676 1.398c-.466 1.064-.932 2.128-1.398 3.192-3.5-.932-6.532-2.8-8.26-5.142C6.532 3.052 9.064 2.12 12 2.12c1.398 0 2.802.466 4.012 1.244-1.244 1.012-2.488 2.416-2.8 3.814-.466-.932-.932-1.864-1.398-2.8zm-5.608 3.814c1.728 2.342 4.76 4.21 8.26 5.142-.466 1.862-.932 3.724-1.398 5.608-2.488-.466-4.676-1.862-6.064-3.724-.466-.932-.932-1.864-1.398-2.8.466-1.398 1.012-2.8 1.6-4.226zm7.724 6.532c.466-1.884.932-3.746 1.398-5.608 2.516.466 4.99.466 7.192 0-.086 2.144-.938 4.108-2.338 5.608-1.012-.466-2.256-.932-3.456-1.398-.932.932-1.864 1.398-2.796 1.398z"/></svg>',
+    pinterest: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.163-1.507-.7-2.448-2.893-2.448-4.658 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.357-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.12.017 0z"/></svg>',
+    figma: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M15.852 8.981h-4.588V0h4.588c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.491-4.49 4.491zM12.735 7.51h3.117c1.665 0 3.019-1.355 3.019-3.019s-1.354-3.019-3.019-3.019h-3.117v6.038zm0 1.471H8.148c-2.476 0-4.49-2.014-4.49-4.49S5.672 0 8.148 0h4.588v8.981zm-4.587-7.51c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.019 3.019 3.019h3.117V1.471H8.148zm4.587 15.019H8.148c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h4.588v8.98zM8.148 8.981c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.019 3.019 3.019h3.117v-6.038H8.148zm7.704 0c-2.476 0-4.49 2.014-4.49 4.49s2.014 4.49 4.49 4.49 4.49-2.014 4.49-4.49-2.014-4.49-4.49-4.49zm0 7.51c-1.665 0-3.019-1.355-3.019-3.019s1.354-3.019 3.019-3.019 3.019 1.354 3.019 3.019-1.354 3.019-3.019 3.019z"/></svg>',
+    upwork: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M18.561 13.158c-1.102 0-2.135-.467-3.074-1.227l.228-1.076.008-.042c.207-1.143.849-3.06 2.839-3.06 1.492 0 2.703 1.212 2.703 2.703-.001 1.489-1.212 2.702-2.704 2.702zm0-8.14c-2.539 0-4.51 1.649-5.31 4.366-1.22-1.834-2.148-4.036-2.687-5.892H7.828v7.112c-.002 1.406-1.141 2.546-2.547 2.548-1.405-.002-2.543-1.143-2.545-2.548V3.492H0v7.112c0 2.914 2.37 5.303 5.281 5.303 2.913 0 5.283-2.389 5.283-5.303v-1.19c.529 1.107 1.182 2.229 1.974 3.221l-1.673 7.873h2.797l1.213-5.71c1.063.679 2.285 1.109 3.686 1.109 3 0 5.439-2.452 5.439-5.45 0-3.002-2.439-5.454-5.439-5.454z"/></svg>',
+    fiverr: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M23.004 15.588a.995.995 0 1 1 .993.995.995.995 0 0 1-.993-.995zM18.892 9.297c0-3.044-2.474-5.517-5.517-5.517a5.517 5.517 0 1 0 0 11.034c3.043 0 5.517-2.474 5.517-5.517zm-5.517 4.02a4.021 4.021 0 1 1 0-8.041 4.021 4.021 0 0 1 0 8.04zM9.108 10.552a.995.995 0 1 1-.995-.995.995.995 0 0 1 .995.995zM.996 18.665a.995.995 0 1 1 .995.995.995.995 0 0 1-.995-.995zM.996 5.321a.995.995 0 1 1 .995.995.995.995 0 0 1-.995-.995z"/></svg>',
+    freelancer: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M14.096 3.076l1.634 2.292L24 3.076M5.904 20.924l1.634-2.292L0 20.924m18.104-9.74L24 13.657 15.166 24l-8.018-8.976L0 24V12.924l7.166-8.976L0 0h24v12.924z"/></svg>',
+    website: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>',
+    // Default link icon for custom links without custom icons
+    custom: '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v8a2 2 0 002 2h4v-2H6V8h4V6zM14 6v2h4v8h-4v2h4a2 2 0 002-2V8a2 2 0 00-2-2h-4zM12 11h-2v2h2v-2z"/></svg>'
   };
-  return icons[type.toLowerCase()] || `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`;
+  
+  return icons[type as keyof typeof icons] || '<svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>';
 }
 
 export function getChannelColor(type: string): string {
   const colors = {
-    whatsapp: '#25d366',
+    whatsapp: '#25D366',
     telegram: '#0088cc',
-    instagram: '#e4405f',
     email: '#ea4335',
-    phone: '#22c55e'
+    phone: '#22c55e',
+    instagram: '#e4405f',
+    facebook: '#1877f2',
+    twitter: '#1da1f2',
+    linkedin: '#0077b5',
+    youtube: '#ff0000',
+    github: '#333333',
+    tiktok: '#ff0050',
+    messenger: '#0084ff',
+    viber: '#665cac',
+    discord: '#5865f2',
+    behance: '#1769ff',
+    dribble: '#ea4c89',
+    pinterest: '#bd081c',
+    figma: '#f24e1e',
+    upwork: '#6fda44',
+    fiverr: '#1dbf73',
+    freelancer: '#0e4194',
+    website: '#6b7280',
+    custom: '#6b7280'
   };
-  return colors[type.toLowerCase()] || '#6b7280';
+  return colors[type as keyof typeof colors] || '#6B7280'
 }

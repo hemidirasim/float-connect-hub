@@ -7,10 +7,8 @@ import { WebsiteInfoForm } from './WebsiteInfoForm';
 import { ChannelManager } from './ChannelManager';
 import { VideoUpload } from './VideoUpload';
 import { CustomizationOptions } from './CustomizationOptions';
-import { LiveChatSettings } from './LiveChatSettings';
 import { Channel, FormData } from './types';
 import { TemplatePreview } from './TemplatePreview';
-import { WidgetPreviewButton } from './WidgetPreviewButton';
 
 interface WidgetFormProps {
   websiteName: string;
@@ -47,8 +45,6 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
   onCreateWidget,
   onCustomIconUpload
 }) => {
-  const [previewOpen, setPreviewOpen] = React.useState(false);
-
   return (
     <>
       <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
@@ -90,22 +86,6 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Live Chat Settings */}
-          <LiveChatSettings
-            liveChatEnabled={formData.liveChatEnabled}
-            liveChatGreeting={formData.liveChatGreeting}
-            liveChatColor={formData.liveChatColor}
-            liveChatAutoOpen={formData.liveChatAutoOpen}
-            liveChatOfflineMessage={formData.liveChatOfflineMessage}
-            liveChatAgentName={formData.liveChatAgentName}
-            onLiveChatEnabledChange={(enabled) => onFormDataChange('liveChatEnabled', enabled)}
-            onLiveChatGreetingChange={(greeting) => onFormDataChange('liveChatGreeting', greeting)}
-            onLiveChatColorChange={(color) => onFormDataChange('liveChatColor', color)}
-            onLiveChatAutoOpenChange={(autoOpen) => onFormDataChange('liveChatAutoOpen', autoOpen)}
-            onLiveChatOfflineMessageChange={(message) => onFormDataChange('liveChatOfflineMessage', message)}
-            onLiveChatAgentNameChange={(name) => onFormDataChange('liveChatAgentName', name)}
-          />
-
           {/* Video Upload & Icon Settings */}
           <VideoUpload
             video={formData.video}
@@ -165,19 +145,12 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
         </CardContent>
       </Card>
 
-      {/* Widget Preview Modal */}
+      {/* Live widget preview directly on the page */}
       <TemplatePreview
-        showWidget={previewOpen}
+        showWidget={channels.length > 0}
         formData={formData}
         channels={channels}
         editingWidget={editingWidget}
-      />
-
-      {/* Separate Fixed Widget Button */}
-      <WidgetPreviewButton
-        formData={formData}
-        showWidget={channels.length > 0 || formData.liveChatEnabled}
-        onButtonClick={() => setPreviewOpen(true)}
       />
     </>
   );

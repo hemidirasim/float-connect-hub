@@ -48,8 +48,7 @@ export class WidgetTemplateRenderer {
       videoUrl: this.config.videoUrl,
       videoHeight: this.config.videoHeight,
       useVideoPreview: this.config.useVideoPreview,
-      previewVideoHeight: this.config.previewVideoHeight,
-      liveChatEnabled: this.config.liveChatEnabled
+      previewVideoHeight: this.config.previewVideoHeight
     })
     
     let html = this.template.html
@@ -63,7 +62,6 @@ export class WidgetTemplateRenderer {
     console.log('Generated video content for template:', videoContent ? 'YES' : 'NO')
     console.log('Video content length:', videoContent.length)
     console.log('Using video preview as button:', this.config.useVideoPreview)
-    console.log('Live chat enabled:', this.config.liveChatEnabled)
 
     // Calculate responsive values
     const buttonSize = this.config.useVideoPreview ? (this.config.previewVideoHeight || 120) : (this.config.buttonSize || 60)
@@ -89,30 +87,22 @@ export class WidgetTemplateRenderer {
       '{{GREETING_MESSAGE}}': this.config.greetingMessage || 'Hi 👋\\nHow can we help you today?',
       '{{BUTTON_ICON}}': buttonIcon,
       '{{CHANNELS_DATA}}': JSON.stringify(this.config.channels),
-      '{{VIDEO_CONTENT}}': videoContent,
+      '{{VIDEO_CONTENT}}': videoContent, // Make sure this is included
       '{{CHANNELS_COUNT}}': this.config.channels.length.toString(),
       '{{POSITION}}': this.config.position,
       '{{CHANNEL_GAP}}': channelGap.toString(),
       '{{CHANNEL_BOTTOM_OFFSET}}': channelBottomOffset.toString(),
       '{{TOOLTIP_RIGHT_OFFSET}}': tooltipRightOffset.toString(),
       '{{MOBILE_CHANNEL_GAP}}': mobileChannelGap.toString(),
-      '{{MOBILE_TOOLTIP_RIGHT_OFFSET}}': mobileTooltipRightOffset.toString(),
-      // Live chat replacements (removed position)
-      '{{LIVE_CHAT_ENABLED}}': this.config.liveChatEnabled ? 'true' : 'false',
-      '{{LIVE_CHAT_GREETING}}': this.config.liveChatGreeting || 'Hello! How can we help you today?',
-      '{{LIVE_CHAT_COLOR}}': this.config.liveChatColor || '#4f46e5',
-      '{{LIVE_CHAT_AUTO_OPEN}}': this.config.liveChatAutoOpen ? 'true' : 'false',
-      '{{LIVE_CHAT_OFFLINE_MESSAGE}}': this.config.liveChatOfflineMessage || 'We are currently offline. Please leave a message and we will get back to you.'
+      '{{MOBILE_TOOLTIP_RIGHT_OFFSET}}': mobileTooltipRightOffset.toString()
     }
 
     console.log('Video content in replacements:', replacements['{{VIDEO_CONTENT}}'] ? 'YES' : 'NO')
     console.log('Button icon type:', this.config.useVideoPreview ? 'VIDEO_PREVIEW' : 'STANDARD_ICON')
-    console.log('Live chat enabled in replacements:', replacements['{{LIVE_CHAT_ENABLED}}'])
 
     // Apply replacements with safe string handling
     Object.entries(replacements).forEach(([placeholder, value]) => {
-      if (placeholder === '{{GREETING_MESSAGE}}' || placeholder === '{{TOOLTIP_TEXT}}' || 
-          placeholder === '{{LIVE_CHAT_GREETING}}' || placeholder === '{{LIVE_CHAT_OFFLINE_MESSAGE}}') {
+      if (placeholder === '{{GREETING_MESSAGE}}' || placeholder === '{{TOOLTIP_TEXT}}') {
         // These are used in JavaScript strings, so escape them properly
         html = safeStringReplace(html, placeholder, value)
         css = safeStringReplace(css, placeholder, value)
@@ -127,7 +117,6 @@ export class WidgetTemplateRenderer {
     })
 
     console.log('Final HTML contains video:', html.includes('hiclient-video') ? 'YES' : 'NO')
-    console.log('Final HTML contains live chat:', html.includes('hiclient-live-chat') ? 'YES' : 'NO')
 
     // Escape content for template literals to prevent syntax errors
     const escapedHtml = escapeTemplateContent(html)
@@ -163,7 +152,6 @@ export class WidgetTemplateRenderer {
 `
 
     console.log('Final script contains video references:', finalScript.includes('hiclient-video') ? 'YES' : 'NO')
-    console.log('Final script contains live chat references:', finalScript.includes('hiclient-live-chat') ? 'YES' : 'NO')
     return finalScript
   }
 }
