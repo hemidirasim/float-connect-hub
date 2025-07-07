@@ -90,7 +90,7 @@ export function generateDefaultChannelsHtml(channels: Channel[]): string {
         </div>
       `
     } else if (channel.childChannels && channel.childChannels.length > 0) {
-      // Handle child channels for default template
+      // Handle child channels for default template with fixed design
       const iconSvg = getChannelIcon(channel.type, channel.customIcon, false)
       const channelColor = getChannelColor(channel.type)
       const dropdownId = `dropdown-${channel.id}`
@@ -102,7 +102,7 @@ export function generateDefaultChannelsHtml(channels: Channel[]): string {
         `<a href="${parentUrl}" target="_blank" class="lovable-group-item" onclick="window.openChannel && window.openChannel('${parentUrl}')">
           <div class="lovable-group-item-icon" style="background: ${channelColor}; color: white;">${iconSvg}</div>
           <div class="lovable-group-item-info">
-            <div class="lovable-group-item-label">${channel.label} (Primary)</div>
+            <div class="lovable-group-item-label">${channel.label} (Əsas)</div>
             <div class="lovable-group-item-value">${channel.value}</div>
           </div>
         </a>`,
@@ -124,14 +124,13 @@ export function generateDefaultChannelsHtml(channels: Channel[]): string {
       
       return `
         <div class="lovable-channel-group">
-          <div class="lovable-channel-button lovable-group-trigger" onclick="toggleDropdown('${dropdownId}')">
-            <div class="lovable-channel-icon" style="background: ${channelColor}; color: white;">${iconSvg}</div>
-            <div class="lovable-channel-info">
-              <div class="lovable-channel-label">${channel.label}</div>
-              <div class="lovable-channel-value">${channel.childChannels.length + 1} seçim</div>
+          <div class="channel-item lovable-group-trigger" onclick="window.toggleDropdown('${dropdownId}')">
+            <div class="channel-icon" style="background: ${channelColor}; color: white;">${iconSvg}</div>
+            <div class="channel-info">
+              <div class="channel-label">${channel.label}</div>
+              <div class="channel-value">${channel.childChannels.length + 1} seçim</div>
             </div>
-            <div class="lovable-channel-arrow">→</div>
-            <span class="lovable-group-count">${channel.childChannels.length + 1}</span>
+            <div class="channel-arrow">▼</div>
           </div>
           <div class="dropdown" id="${dropdownId}">
             ${childItemsHtml}

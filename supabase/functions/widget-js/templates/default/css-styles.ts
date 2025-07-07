@@ -746,22 +746,102 @@ export const defaultCssStyles = `
     border-radius: 16px;
   }
 
-  /* Channel groups and dropdowns */
-  .channel-group, .channel-dropdown {
+  /* Channel groups and dropdowns - Fixed Design */
+  .lovable-channel-group {
     position: relative;
+    margin-bottom: 12px;
   }
   
-  .group-items, .dropdown-items {
+  .lovable-group-trigger {
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  
+  .lovable-group-trigger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .lovable-group-trigger::after {
+    content: '';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%) rotate(0deg);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #94a3b8;
+    transition: transform 0.3s ease;
+  }
+  
+  .lovable-group-trigger.open::after {
+    transform: translateY(-50%) rotate(180deg);
+  }
+  
+  .dropdown {
     display: none;
     margin-top: 8px;
-    padding-left: 20px;
-    border-left: 2px solid #f1f5f9;
-    gap: 8px;
-    flex-direction: column;
+    margin-left: 20px;
+    padding: 12px 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
   }
   
-  .group-items.open, .dropdown-items.open {
+  .dropdown.open {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .lovable-group-item {
     display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+  }
+  
+  .lovable-group-item:hover {
+    background: #f8fafc;
+    border-left-color: #4f46e5;
+    transform: translateX(4px);
+  }
+  
+  .lovable-group-item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+  
+  .lovable-group-item-info {
+    flex: 1;
+  }
+  
+  .lovable-group-item-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 2px;
+  }
+  
+  .lovable-group-item-value {
+    font-size: 12px;
+    color: #64748b;
   }
   
   .group-toggle, .dropdown-toggle {

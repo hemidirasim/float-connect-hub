@@ -1,3 +1,39 @@
+// Function to toggle dropdown visibility
+export function toggleDropdown(dropdownId: string): void {
+  const dropdown = document.getElementById(dropdownId);
+  const trigger = document.querySelector(`[onclick*="${dropdownId}"]`);
+  
+  if (dropdown && trigger) {
+    const isOpen = dropdown.classList.contains('open');
+    
+    // Close all other dropdowns
+    document.querySelectorAll('.dropdown.open').forEach(dd => {
+      if (dd.id !== dropdownId) {
+        dd.classList.remove('open');
+        const ddTrigger = document.querySelector(`[onclick*="${dd.id}"]`);
+        if (ddTrigger) ddTrigger.classList.remove('open');
+      }
+    });
+    
+    // Toggle current dropdown
+    if (isOpen) {
+      dropdown.classList.remove('open');
+      trigger.classList.remove('open');
+    } else {
+      dropdown.classList.add('open');
+      trigger.classList.add('open');
+      
+      // Add animation delay for smooth opening
+      setTimeout(() => {
+        dropdown.style.display = 'block';
+      }, 10);
+    }
+  }
+}
+
+// Make function globally available
+(window as any).toggleDropdown = toggleDropdown;
+
 export function getChannelUrl(channel: any): string {
   switch (channel.type) {
     case 'whatsapp':

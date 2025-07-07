@@ -33,9 +33,9 @@ export function generateVideoContent(config: TemplateConfig): string {
   // Process video URL to ensure it works properly
   let processedVideoUrl = config.videoUrl.trim()
   
-  // Determine vertical alignment styles
+  // Use video alignment and object fit from system config
   let alignmentStyle = '';
-  switch (config.videoAlignment) {
+  switch (config.videoAlignment || 'center') {
     case 'top':
       alignmentStyle = 'align-items: flex-start;';
       break;
