@@ -1,4 +1,3 @@
-
 import type { WidgetTemplate } from './template-types.ts'
 
 export function getDefaultTemplate(): WidgetTemplate {
@@ -7,10 +6,10 @@ export function getDefaultTemplate(): WidgetTemplate {
     name: 'Default Template',
     description: 'Classic floating widget with customizable colors and positioning',
     html: `
-<div id="lovable-widget-container" style="position: fixed; {{POSITION_STYLE}} bottom: 20px; z-index: 99999; pointer-events: auto;">
-  <div id="lovable-widget-relative-container" style="position: relative;">
+<div id="lovable-widget-container" style="position: fixed !important; {{POSITION_STYLE}} bottom: 20px !important; z-index: 99999 !important; pointer-events: auto !important;">
+  <div id="lovable-widget-relative-container" style="position: relative !important;">
     <div id="lovable-widget-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
-    <button id="lovable-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}} display: flex !important; visibility: visible !important; opacity: 1 !important;">
+    <button id="lovable-widget-button" style="width: {{BUTTON_SIZE}}px !important; height: {{BUTTON_SIZE}}px !important; background-color: {{BUTTON_COLOR}} !important; {{BUTTON_OFFSET_STYLE}} display: flex !important; visibility: visible !important; opacity: 1 !important; border: none !important; border-radius: 50% !important; cursor: pointer !important; position: relative !important; z-index: 100000 !important;">
       {{BUTTON_ICON}}
     </button>
   </div>
@@ -31,14 +30,16 @@ export function getDefaultTemplate(): WidgetTemplate {
 </div>
 `,
     css: `
-      /* Widget button - ensure visibility */
+      /* Force widget button visibility */
       #lovable-widget-button {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
         border: none !important;
         border-radius: 50% !important;
         cursor: pointer !important;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
         transition: all 0.3s ease !important;
-        display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         color: white !important;
@@ -46,8 +47,6 @@ export function getDefaultTemplate(): WidgetTemplate {
         text-decoration: none !important;
         z-index: 100000 !important;
         position: relative !important;
-        visibility: visible !important;
-        opacity: 1 !important;
         pointer-events: auto !important;
       }
       
@@ -57,6 +56,9 @@ export function getDefaultTemplate(): WidgetTemplate {
         z-index: 99999 !important;
         bottom: 20px !important;
         pointer-events: auto !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
       }
       
       #lovable-widget-button:hover {
@@ -284,16 +286,22 @@ export function getDefaultTemplate(): WidgetTemplate {
         }
       }
       
-      /* Force visibility for everything */
+      /* Force visibility for everything - CRITICAL */
       #lovable-widget-container,
       #lovable-widget-container *,
-      #lovable-widget-button {
+      #lovable-widget-button,
+      #lovable-widget-relative-container {
         visibility: visible !important;
         opacity: 1 !important;
+        display: block !important;
+      }
+      
+      #lovable-widget-button {
+        display: flex !important;
       }
     `,
     js: `
-      console.log('Widget script starting execution...');
+      console.log('🔥 Widget script starting - FORCED VISIBILITY VERSION');
       
       // Widget configuration
       let channels = [];
@@ -311,18 +319,67 @@ export function getDefaultTemplate(): WidgetTemplate {
         liveChatAgentName = '{{LIVE_CHAT_AGENT_NAME}}' || 'Support Team';
         widgetPosition = '{{POSITION}}' || 'right';
         
-        console.log('Widget config parsed:', {
+        console.log('🔥 Widget config:', {
           channels: channels.length,
           position: widgetPosition,
           liveChatEnabled: liveChatEnabled
         });
       } catch (e) {
-        console.error('Error parsing widget data:', e);
+        console.error('❌ Error parsing widget data:', e);
+      }
+
+      // FORCE BUTTON VISIBILITY FUNCTION
+      function forceButtonVisibility() {
+        const button = document.getElementById('lovable-widget-button');
+        const container = document.getElementById('lovable-widget-container');
+        
+        if (button) {
+          console.log('🔥 FORCING BUTTON VISIBILITY');
+          button.style.display = 'flex';
+          button.style.visibility = 'visible';
+          button.style.opacity = '1';
+          button.style.pointerEvents = 'auto';
+          button.style.position = 'relative';
+          button.style.zIndex = '100000';
+          button.style.width = '{{BUTTON_SIZE}}px';
+          button.style.height = '{{BUTTON_SIZE}}px';
+          button.style.backgroundColor = '{{BUTTON_COLOR}}';
+          button.style.border = 'none';
+          button.style.borderRadius = '50%';
+          button.style.cursor = 'pointer';
+          button.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+          button.style.alignItems = 'center';
+          button.style.justifyContent = 'center';
+          button.style.color = 'white';
+          button.style.fontSize = '24px';
+          
+          console.log('✅ Button visibility forced:', button.style.cssText);
+        } else {
+          console.error('❌ Button element not found!');
+        }
+        
+        if (container) {
+          console.log('🔥 FORCING CONTAINER VISIBILITY');
+          container.style.display = 'block';
+          container.style.visibility = 'visible';
+          container.style.opacity = '1';
+          container.style.position = 'fixed';
+          container.style.bottom = '20px';
+          container.style.zIndex = '99999';
+          container.style.pointerEvents = 'auto';
+          
+          console.log('✅ Container visibility forced:', container.style.cssText);
+        } else {
+          console.error('❌ Container element not found!');
+        }
       }
 
       // Initialize widget immediately
       function initializeWidget() {
-        console.log('Initializing widget elements...');
+        console.log('🔥 Initializing widget elements...');
+        
+        // Force visibility first
+        forceButtonVisibility();
         
         // Get DOM elements
         const modal = document.getElementById('lovable-widget-modal');
@@ -332,26 +389,12 @@ export function getDefaultTemplate(): WidgetTemplate {
         const liveChatContainer = document.getElementById('lovable-live-chat-container');
         const tooltip = document.getElementById('lovable-widget-tooltip');
 
-        console.log('DOM elements found:', {
+        console.log('🔥 DOM elements found:', {
           modal: !!modal,
           button: !!button,
           closeBtn: !!closeBtn,
           channelsContainer: !!channelsContainer
         });
-
-        // Force button visibility
-        if (button) {
-          button.style.display = 'flex';
-          button.style.visibility = 'visible';
-          button.style.opacity = '1';
-          button.style.pointerEvents = 'auto';
-          button.style.position = 'relative';
-          button.style.zIndex = '100000';
-          console.log('Button forced visible:', button.style.cssText);
-        } else {
-          console.error('Button element not found!');
-          return;
-        }
 
         // Set modal position class
         if (modal) {
@@ -379,7 +422,7 @@ export function getDefaultTemplate(): WidgetTemplate {
           button.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('Button clicked, opening modal');
+            console.log('🔥 Button clicked, opening modal');
             
             if (modal) {
               modal.style.display = 'flex';
@@ -390,11 +433,13 @@ export function getDefaultTemplate(): WidgetTemplate {
               if (content) {
                 content.style.transform = 'translateY(0)';
               }
-              console.log('Modal opened');
+              console.log('✅ Modal opened');
             }
           });
           
-          console.log('Button event listeners attached');
+          console.log('✅ Button event listeners attached');
+        } else {
+          console.error('❌ Button element not found for event listeners!');
         }
 
         // Close button event listener
@@ -402,7 +447,7 @@ export function getDefaultTemplate(): WidgetTemplate {
           closeBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('Close button clicked');
+            console.log('🔥 Close button clicked');
             
             if (modal) {
               modal.style.opacity = '0';
@@ -429,6 +474,11 @@ export function getDefaultTemplate(): WidgetTemplate {
           });
         }
 
+        // Re-force visibility after initialization
+        setTimeout(forceButtonVisibility, 100);
+        setTimeout(forceButtonVisibility, 500);
+        setTimeout(forceButtonVisibility, 1000);
+
         // Render channels
         renderChannels();
         
@@ -437,7 +487,7 @@ export function getDefaultTemplate(): WidgetTemplate {
           initLiveChat();
         }
         
-        console.log('Widget initialization complete');
+        console.log('✅ Widget initialization complete');
       }
 
       // Channel rendering functions
@@ -445,7 +495,7 @@ export function getDefaultTemplate(): WidgetTemplate {
         const channelsContainer = document.getElementById('lovable-widget-channels');
         if (!channelsContainer) return;
         
-        console.log('Rendering channels:', channels.length);
+        console.log('🔥 Rendering channels:', channels.length);
         
         if (channels.length === 0) {
           const emptyState = document.querySelector('.lovable-empty-state');
@@ -467,7 +517,7 @@ export function getDefaultTemplate(): WidgetTemplate {
         }).join('');
         
         channelsContainer.innerHTML = channelsHtml;
-        console.log('Channels rendered');
+        console.log('✅ Channels rendered');
       }
 
       function getChannelIcon(type) {
@@ -507,7 +557,7 @@ export function getDefaultTemplate(): WidgetTemplate {
 
       // Global function for opening channels
       window.openChannel = function(url) {
-        console.log('Opening channel:', url);
+        console.log('🔥 Opening channel:', url);
         window.open(url, '_blank');
       };
 
@@ -516,7 +566,7 @@ export function getDefaultTemplate(): WidgetTemplate {
         const liveChatContainer = document.getElementById('lovable-live-chat-container');
         if (!liveChatContainer) return;
         
-        console.log('Initializing live chat');
+        console.log('🔥 Initializing live chat');
         
         liveChatContainer.style.display = 'block';
         liveChatContainer.innerHTML = '<div class="lovable-live-chat-header">' +
@@ -578,15 +628,34 @@ export function getDefaultTemplate(): WidgetTemplate {
         }
       }
 
-      // Initialize immediately when script loads
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeWidget);
+      // Multiple initialization attempts
+      console.log('🔥 Starting widget initialization process...');
+      
+      // Try immediate initialization
+      if (document.readyState === 'complete') {
+        console.log('🔥 DOM already complete, initializing immediately');
+        initializeWidget();
+      } else if (document.readyState === 'interactive') {
+        console.log('🔥 DOM interactive, initializing with small delay');
+        setTimeout(initializeWidget, 50);
       } else {
-        // DOM is already ready
-        setTimeout(initializeWidget, 100);
+        console.log('🔥 DOM still loading, waiting for DOMContentLoaded');
+        document.addEventListener('DOMContentLoaded', initializeWidget);
       }
       
-      console.log('Widget script loaded');
+      // Backup initialization
+      setTimeout(function() {
+        console.log('🔥 Backup initialization trigger');
+        initializeWidget();
+      }, 200);
+      
+      // Final backup
+      setTimeout(function() {
+        console.log('🔥 Final backup initialization trigger');
+        initializeWidget();
+      }, 1000);
+      
+      console.log('✅ Widget script loaded with forced visibility');
     `
   };
 }
