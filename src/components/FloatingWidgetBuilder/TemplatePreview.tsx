@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -139,7 +138,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       {liveChatOpen && formData.liveChatEnabled && (
         <div 
           className={`fixed bottom-20 ${position} w-80 h-96 bg-white rounded-lg shadow-xl border z-50`}
-          style={{ zIndex: 9999 }}
+          style={{ position: 'fixed', zIndex: 9999 }}
         >
           {/* Chat Header */}
           <div 
@@ -207,8 +206,8 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
         </div>
       )}
 
-      {/* Main Widget Button */}
-      <div className={`fixed bottom-4 ${position} z-40`}>
+      {/* Main Widget Button - Fixed Position */}
+      <div className={`fixed bottom-4 ${position}`} style={{ position: 'fixed', zIndex: 40 }}>
         <div className="relative group">
           {/* Tooltip */}
           {formData.tooltip && formData.tooltipDisplay === 'hover' && (
@@ -233,7 +232,8 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
               width: `${buttonSize}px`,
               height: `${buttonSize}px`,
               padding: 0,
-              border: 'none'
+              border: 'none',
+              position: 'fixed'
             }}
           >
             <MessageCircle className="w-6 h-6 text-white" />
