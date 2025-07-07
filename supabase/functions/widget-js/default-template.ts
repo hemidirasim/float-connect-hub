@@ -1,5 +1,4 @@
 
-
 import type { WidgetTemplate } from './template-types.ts'
 
 export function getDefaultTemplate(): WidgetTemplate {
@@ -293,7 +292,7 @@ export function getDefaultTemplate(): WidgetTemplate {
 
       // Set modal position class based on widget position
       if (modal) {
-        modal.className = 'position-' + widgetPosition;
+        modal.classList.add('position-' + widgetPosition);
       }
 
       function showTooltip() {
@@ -312,22 +311,22 @@ export function getDefaultTemplate(): WidgetTemplate {
         button.addEventListener('mouseenter', showTooltip);
         button.addEventListener('mouseleave', hideTooltip);
         button.addEventListener('click', function() {
+          console.log('Button clicked, opening modal');
           if (modal) {
             modal.style.display = 'flex';
-            setTimeout(() => {
-              modal.style.visibility = 'visible';
-              modal.style.opacity = '1';
-              const content = document.getElementById('lovable-modal-content');
-              if (content) {
-                content.style.transform = 'translateY(0)';
-              }
-            }, 10);
+            modal.style.visibility = 'visible';
+            modal.style.opacity = '1';
+            const content = document.getElementById('lovable-modal-content');
+            if (content) {
+              content.style.transform = 'translateY(0)';
+            }
           }
         });
       }
 
       if (closeBtn) {
         closeBtn.addEventListener('click', function() {
+          console.log('Close button clicked');
           if (modal) {
             modal.style.opacity = '0';
             const content = document.getElementById('lovable-modal-content');
@@ -363,15 +362,13 @@ export function getDefaultTemplate(): WidgetTemplate {
 
         channelsContainer.innerHTML = channels.map(channel => {
           const iconHtml = channel.customIcon 
-            ? \`<img src="\${channel.customIcon}" alt="\${channel.label}" class="lovable-channel-icon" />\`
+            ? '<img src="' + channel.customIcon + '" alt="' + channel.label + '" class="lovable-channel-icon" />'
             : getChannelIcon(channel.type);
           
-          return \`
-            <div class="lovable-channel-item" onclick="openChannel('\${getChannelUrl(channel)}')">
-              \${iconHtml}
-              <span>\${channel.label}</span>
-            </div>
-          \`;
+          return '<div class="lovable-channel-item" onclick="openChannel(\'' + getChannelUrl(channel) + '\')">' +
+            iconHtml +
+            '<span>' + channel.label + '</span>' +
+          '</div>';
         }).join('');
       }
 
@@ -396,15 +393,15 @@ export function getDefaultTemplate(): WidgetTemplate {
       function getChannelUrl(channel) {
         switch (channel.type) {
           case 'whatsapp':
-            return \`https://wa.me/\${channel.value.replace(/[^0-9]/g, '')}\`;
+            return 'https://wa.me/' + channel.value.replace(/[^0-9]/g, '');
           case 'telegram':
-            return \`https://t.me/\${channel.value.replace('@', '')}\`;
+            return 'https://t.me/' + channel.value.replace('@', '');
           case 'email':
-            return \`mailto:\${channel.value}\`;
+            return 'mailto:' + channel.value;
           case 'phone':
-            return \`tel:\${channel.value}\`;
+            return 'tel:' + channel.value;
           case 'instagram':
-            return channel.value.startsWith('http') ? channel.value : \`https://instagram.com/\${channel.value}\`;
+            return channel.value.startsWith('http') ? channel.value : 'https://instagram.com/' + channel.value;
           default:
             return channel.value;
         }
@@ -419,22 +416,20 @@ export function getDefaultTemplate(): WidgetTemplate {
         if (!liveChatEnabled || !liveChatContainer) return;
         
         liveChatContainer.style.display = 'block';
-        liveChatContainer.innerHTML = \`
-          <div class="lovable-live-chat-header">
-            <span>💬</span>
-            <span>Chat with \${liveChatAgentName}</span>
-          </div>
-          <div class="lovable-live-chat-messages" id="lovable-chat-messages">
-            <div class="lovable-chat-message agent">
-              <div class="lovable-chat-message-sender">\${liveChatAgentName}</div>
-              <div>Hello! How can we help you today?</div>
-            </div>
-          </div>
-          <div class="lovable-chat-input-container">
-            <input type="text" class="lovable-chat-input" id="lovable-chat-message-input" placeholder="Type your message..." />
-            <button class="lovable-chat-send-btn" id="lovable-chat-send-btn">Send</button>
-          </div>
-        \`;
+        liveChatContainer.innerHTML = '<div class="lovable-live-chat-header">' +
+          '<span>💬</span>' +
+          '<span>Chat with ' + liveChatAgentName + '</span>' +
+        '</div>' +
+        '<div class="lovable-live-chat-messages" id="lovable-chat-messages">' +
+          '<div class="lovable-chat-message agent">' +
+            '<div class="lovable-chat-message-sender">' + liveChatAgentName + '</div>' +
+            '<div>Hello! How can we help you today?</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="lovable-chat-input-container">' +
+          '<input type="text" class="lovable-chat-input" id="lovable-chat-message-input" placeholder="Type your message..." />' +
+          '<button class="lovable-chat-send-btn" id="lovable-chat-send-btn">Send</button>' +
+        '</div>';
 
         const messageInput = document.getElementById('lovable-chat-message-input');
         const sendBtn = document.getElementById('lovable-chat-send-btn');
@@ -447,10 +442,8 @@ export function getDefaultTemplate(): WidgetTemplate {
           // Add visitor message
           const messageEl = document.createElement('div');
           messageEl.className = 'lovable-chat-message visitor';
-          messageEl.innerHTML = \`
-            <div class="lovable-chat-message-sender">You</div>
-            <div>\${message}</div>
-          \`;
+          messageEl.innerHTML = '<div class="lovable-chat-message-sender">You</div>' +
+            '<div>' + message + '</div>';
           messagesContainer.appendChild(messageEl);
           
           messageInput.value = '';
@@ -463,10 +456,8 @@ export function getDefaultTemplate(): WidgetTemplate {
           setTimeout(() => {
             const responseEl = document.createElement('div');
             responseEl.className = 'lovable-chat-message agent';
-            responseEl.innerHTML = \`
-              <div class="lovable-chat-message-sender">\${liveChatAgentName}</div>
-              <div>Thank you for your message! We'll get back to you shortly.</div>
-            \`;
+            responseEl.innerHTML = '<div class="lovable-chat-message-sender">' + liveChatAgentName + '</div>' +
+              '<div>Thank you for your message! We will get back to you shortly.</div>';
             messagesContainer.appendChild(responseEl);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
           }, 1000);
@@ -488,7 +479,10 @@ export function getDefaultTemplate(): WidgetTemplate {
       // Initialize components
       renderChannels();
       initLiveChat();
+      
+      console.log('Widget initialized with position:', widgetPosition);
+      console.log('Live chat enabled:', liveChatEnabled);
+      console.log('Channels:', channels.length);
     `
   };
 }
-
