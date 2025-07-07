@@ -37,18 +37,21 @@ interface DashboardTabsProps {
   userCredits: UserCredits;
   onRefreshWidgets: () => void;
   onRefreshCredits: () => void;
+  userEmail: string;
 }
 
 export const DashboardTabs: React.FC<DashboardTabsProps> = ({ 
   widgets, 
   userCredits, 
   onRefreshWidgets, 
-  onRefreshCredits 
+  onRefreshCredits,
+  userEmail
 }) => {
   return (
     <Tabs defaultValue="widgets" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-4">
+      <TabsList className="grid w-full grid-cols-5">
         <TabsTrigger value="widgets">My Websites</TabsTrigger>
+        <TabsTrigger value="live-chat">Live Chat</TabsTrigger>
         <TabsTrigger value="billing">Billing</TabsTrigger>
         <TabsTrigger value="profile">Profile</TabsTrigger>
         <TabsTrigger value="support">Support</TabsTrigger>
@@ -56,6 +59,10 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
 
       <TabsContent value="widgets" className="space-y-6">
         <WebsitesList widgets={widgets} onRefresh={onRefreshWidgets} />
+      </TabsContent>
+
+      <TabsContent value="live-chat">
+        <LiveChatManager widgets={widgets} userEmail={userEmail} />
       </TabsContent>
 
       <TabsContent value="billing">

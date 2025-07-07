@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageCircle, Send, Clock, User, X, Minimize2, Archive } from 'lucide-react';
+import { MessageCircle, Send, Clock, User, X, Minimize2, Archive, MessageSquare } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { DashboardHeader } from "./DashboardHeader";
 
 interface LiveChatMessage {
   id: string;
@@ -42,9 +43,10 @@ interface Widget {
 
 interface LiveChatManagerProps {
   widgets: Widget[];
+  userEmail: string;
 }
 
-export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => {
+export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userEmail }) => {
   const [selectedWidget, setSelectedWidget] = useState<string>('');
   const [selectedSession, setSelectedSession] = useState<string>('');
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -132,7 +134,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
         if (selectedSession) {
           fetchMessages();
         }
-      }, 2000); // Poll every 2 seconds
+      }, 1000); // Poll every 1 second for faster updates
 
       return () => {
         console.log('Cleaning up dashboard subscriptions');
@@ -301,14 +303,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
   return (
     <div className="space-y-6">
       {/* Dashboard Header */}
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            Live Chat Management
-          </h1>
-          <p className="text-gray-600">Real-time customer support dashboard</p>
-        </div>
-      </div>
+      <DashboardHeader userEmail={userEmail} />
       
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[700px]">
         {/* Widget and Sessions */}
@@ -385,19 +380,20 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
                            <div>Başladı: {formatRelativeTime(session.started_at)}</div>
                            <div>Son mesaj: {formatRelativeTime(session.last_message_at)}</div>
                          </div>
-                         {session.status === 'active' && selectedSession !== session.id && (
-                           <Button
-                             size="sm"
-                             variant="outline"
-                             onClick={(e) => {
-                               e.stopPropagation();
-                               setSelectedSession(session.id);
-                             }}
-                             className="mt-2 w-full"
-                           >
-                             Söhbətə Qoşul
-                           </Button>
-                         )}
+                          {session.status === 'active' && selectedSession !== session.id && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedSession(session.id);
+                              }}
+                              className="mt-2 w-full"
+                            >
+                              <MessageSquare className="w-4 h-4 mr-1" />
+                              Söhbətə Qoşul
+                            </Button>
+                          )}
                        </div>
                      ))}
                    </div>
@@ -429,22 +425,25 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
                 </div>
                 <div className="flex items-center gap-2">
                   {getSessionStatusBadge(selectedSessionData?.status || '')}
-                  {selectedSessionData?.status === 'active' && (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={endSession}
-                    >
-                      <X className="w-4 h-4 mr-1" />
-                      Söhbəti Bitir
-                    </Button>
-                  )}
                 </div>
               </CardHeader>
               
               <CardContent className="flex-1 flex flex-col p-0">
                 {/* Messages */}
-                <ScrollArea className="flex-1 p-4">
+                <div className="relative">
+                  {selectedSessionData?.status === 'active' && (
+                    <div className="absolute top-2 right-2 z-10">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={endSession}
+                      >
+                        <X className="w-4 h-4 mr-1" />
+                        Söhbəti Bitir
+                      </Button>
+                    </div>
+                  )}
+                  <ScrollArea className="flex-1 p-4 h-[500px]">
                   <div className="space-y-4">
                     {messages.map((message) => (
                       <div
@@ -478,24 +477,33 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
                     ))}
                     <div ref={messagesEndRef} />
                   </div>
-                </ScrollArea>
+                  </ScrollArea>
+                </div>
 
                 {/* Message Input */}
-                <div className="flex gap-2 p-4 border-t">
-                  <Input
-                    placeholder={selectedSessionData?.status === 'active' ? "Mesajınızı yazın..." : "Söhbət bitib - mesaj göndərmək mümkün deyil"}
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && selectedSessionData?.status === 'active' && sendMessage()}
-                    className="flex-1"
-                    disabled={selectedSessionData?.status !== 'active'}
-                  />
-                  <Button 
-                    onClick={sendMessage} 
-                    disabled={!newMessage.trim() || selectedSessionData?.status !== 'active'}
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
+                <div className="border-t p-4">
+                  {selectedSessionData?.status === 'active' ? (
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Mesajınızı yazın..."
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                        className="flex-1"
+                      />
+                      <Button 
+                        onClick={sendMessage} 
+                        disabled={!newMessage.trim()}
+                      >
+                        <Send className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="text-center text-muted-foreground p-4 bg-muted/50 rounded-lg">
+                      <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p>Söhbət bitib - mesaj göndərmək mümkün deyil</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

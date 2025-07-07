@@ -145,6 +145,7 @@ const Dashboard = () => {
           userCredits={userCredits}
           onRefreshWidgets={fetchWidgets}
           onRefreshCredits={fetchUserCredits}
+          userEmail={user.email || ''}
         />
       </div>
     </div>
