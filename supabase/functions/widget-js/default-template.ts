@@ -24,24 +24,24 @@ const defaultJavaScriptLogic = `
 
   function openLiveChat() {
     console.log('Opening live chat');
-    var liveChatModal = document.querySelector('#lovable-livechat-modal');
-    var mainModal = document.querySelector('#lovable-widget-modal');
+    var liveChatContent = document.querySelector('#lovable-livechat-content');
+    var mainContent = document.querySelector('#lovable-widget-channels');
+    var liveChatButton = document.querySelector('.live-chat-section');
+    var modalHeader = document.querySelector('#lovable-modal-header');
+    var videoContent = document.querySelector('.hiclient-video-container');
     
-    if (liveChatModal) {
-      // Hide main modal
-      if (mainModal) {
-        mainModal.style.display = 'none';
-        mainModal.style.visibility = 'hidden';
-        mainModal.style.opacity = '0';
-      }
+    if (liveChatContent && mainContent) {
+      // Hide main modal content
+      mainContent.style.display = 'none';
+      if (liveChatButton) liveChatButton.style.display = 'none';
+      if (modalHeader) modalHeader.style.display = 'none';
+      if (videoContent) videoContent.style.display = 'none';
+      
+      // Show live chat content
+      liveChatContent.style.display = 'block';
       
       // Setup pre-chat form
       setupPreChatForm();
-      
-      // Show live chat modal
-      liveChatModal.style.display = 'flex';
-      liveChatModal.style.visibility = 'visible';
-      liveChatModal.style.opacity = '1';
     }
   }
 
@@ -159,11 +159,30 @@ const defaultJavaScriptLogic = `
 
   function closeLiveChat() {
     console.log('Closing live chat');
-    var liveChatModal = document.querySelector('#lovable-livechat-modal');
-    if (liveChatModal) {
-      liveChatModal.style.display = 'none';
-      liveChatModal.style.visibility = 'hidden';
-      liveChatModal.style.opacity = '0';
+    var liveChatContent = document.querySelector('#lovable-livechat-content');
+    var mainContent = document.querySelector('#lovable-widget-channels');
+    var liveChatButton = document.querySelector('.live-chat-section');
+    var modalHeader = document.querySelector('#lovable-modal-header');
+    var videoContent = document.querySelector('.hiclient-video-container');
+    
+    if (liveChatContent && mainContent) {
+      // Hide live chat content
+      liveChatContent.style.display = 'none';
+      
+      // Show main modal content
+      mainContent.style.display = 'block';
+      if (liveChatButton) liveChatButton.style.display = 'block';
+      if (modalHeader) modalHeader.style.display = 'block';
+      if (videoContent) videoContent.style.display = 'block';
+      
+      // Reset pre-chat form
+      var prechatForm = document.querySelector('#lovable-prechat-form');
+      var chatMessages = document.querySelector('#lovable-livechat-messages');
+      var chatInput = document.querySelector('#lovable-livechat-input-area');
+      
+      if (prechatForm) prechatForm.style.display = 'block';
+      if (chatMessages) chatMessages.style.display = 'none';
+      if (chatInput) chatInput.style.display = 'none';
     }
   }
 
@@ -539,7 +558,7 @@ const defaultJavaScriptLogic = `
     
     // Initialize live chat
     var liveChatBtn = document.querySelector('#lovable-livechat-btn');
-    var liveChatClose = document.querySelector('#lovable-livechat-close');
+    var liveChatBack = document.querySelector('#lovable-livechat-back');
     var liveChatSend = document.querySelector('#lovable-livechat-send');
     var liveChatInput = document.querySelector('#lovable-livechat-input');
     var prechatSubmit = document.querySelector('#prechat-submit');
@@ -552,8 +571,8 @@ const defaultJavaScriptLogic = `
       });
     }
     
-    if (liveChatClose) {
-      liveChatClose.addEventListener('click', function(e) {
+    if (liveChatBack) {
+      liveChatBack.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
         closeLiveChat();
