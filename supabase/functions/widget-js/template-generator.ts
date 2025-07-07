@@ -41,8 +41,8 @@ function safeStringReplace(template: string, placeholder: string, value: string)
 export class WidgetTemplateRenderer {
   constructor(private template: WidgetTemplate, private config: TemplateConfig) {}
 
-  generateLiveChatButton(config: TemplateConfig): string {
-    if (!config.liveChatEnabled) {
+  generateLiveChatButton(): string {
+    if (!this.config.liveChatEnabled) {
       return '';
     }
 
@@ -113,7 +113,7 @@ export class WidgetTemplateRenderer {
       '{{MOBILE_CHANNEL_GAP}}': mobileChannelGap.toString(),
       '{{MOBILE_TOOLTIP_RIGHT_OFFSET}}': mobileTooltipRightOffset.toString(),
       // Live chat placeholders
-      '{{LIVE_CHAT_BUTTON}}': this.generateLiveChatButton(this.config),
+      '{{LIVE_CHAT_BUTTON}}': this.generateLiveChatButton(),
       '{{LIVE_CHAT_GREETING}}': this.config.liveChatGreeting || 'Hello! How can we help you today?',
       '{{LIVE_CHAT_COLOR}}': this.config.liveChatColor || '#4f46e5'
     }
