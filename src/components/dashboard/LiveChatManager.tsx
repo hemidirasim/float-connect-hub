@@ -1,21 +1,36 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, Send, Clock, User } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MessageCircle, Send, Clock, User, X, Minimize2, Archive } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface LiveChatMessage {
   id: string;
+  session_id?: string;
   widget_id: string;
   sender_name: string;
   sender_email?: string;
   message: string;
   is_from_visitor: boolean;
   created_at: string;
+}
+
+interface ChatSession {
+  id: string;
+  widget_id: string;
+  visitor_name: string;
+  visitor_email?: string;
+  visitor_phone?: string;
+  custom_fields?: any;
+  status: 'active' | 'ended' | 'abandoned';
+  started_at: string;
+  ended_at?: string;
+  last_message_at: string;
 }
 
 interface Widget {
@@ -30,24 +45,33 @@ interface LiveChatManagerProps {
 
 export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => {
   const [selectedWidget, setSelectedWidget] = useState<string>('');
+  const [selectedSession, setSelectedSession] = useState<string>('');
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [messages, setMessages] = useState<LiveChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (selectedWidget) {
+      fetchSessions();
+    }
+  }, [selectedWidget]);
+
+  useEffect(() => {
+    if (selectedSession) {
       fetchMessages();
       
-      // Subscribe to real-time messages
+      // Subscribe to real-time messages for this session
       const channel = supabase
-        .channel('live-chat-messages')
+        .channel(`session-${selectedSession}`)
         .on(
           'postgres_changes',
           {
             event: 'INSERT',
             schema: 'public',
             table: 'live_chat_messages',
-            filter: `widget_id=eq.${selectedWidget}`
+            filter: `session_id=eq.${selectedSession}`
           },
           (payload) => {
             setMessages(prev => [...prev, payload.new as LiveChatMessage]);
@@ -59,17 +83,51 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
         supabase.removeChannel(channel);
       };
     }
-  }, [selectedWidget]);
+  }, [selectedSession]);
 
-  const fetchMessages = async () => {
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const fetchSessions = async () => {
     if (!selectedWidget) return;
     
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('live_chat_messages')
+        .from('chat_sessions')
         .select('*')
         .eq('widget_id', selectedWidget)
+        .order('last_message_at', { ascending: false });
+
+      if (error) throw error;
+      setSessions(data || []);
+      
+      // Select first active session if available
+      const activeSession = data?.find(s => s.status === 'active');
+      if (activeSession && !selectedSession) {
+        setSelectedSession(activeSession.id);
+      }
+    } catch (error) {
+      console.error('Error fetching sessions:', error);
+      toast.error('Söhbətləri yükləyərkən xəta baş verdi');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMessages = async () => {
+    if (!selectedSession) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('live_chat_messages')
+        .select('*')
+        .eq('session_id', selectedSession)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -77,18 +135,17 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast.error('Mesajları yükləyərkən xəta baş verdi');
-    } finally {
-      setLoading(false);
     }
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedWidget) return;
+    if (!newMessage.trim() || !selectedSession) return;
 
     try {
       const { error } = await supabase
         .from('live_chat_messages')
         .insert([{
+          session_id: selectedSession,
           widget_id: selectedWidget,
           sender_name: 'Support Agent',
           message: newMessage.trim(),
@@ -104,6 +161,34 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
     }
   };
 
+  const endSession = async () => {
+    if (!selectedSession) return;
+
+    try {
+      const { error } = await supabase
+        .from('chat_sessions')
+        .update({ 
+          status: 'ended', 
+          ended_at: new Date().toISOString() 
+        })
+        .eq('id', selectedSession);
+
+      if (error) throw error;
+      
+      // Refresh sessions
+      fetchSessions();
+      
+      // Clear selected session
+      setSelectedSession('');
+      setMessages([]);
+      
+      toast.success('Söhbət bitirildi');
+    } catch (error) {
+      console.error('Error ending session:', error);
+      toast.error('Söhbəti bitirərkən xəta baş verdi');
+    }
+  };
+
   const formatTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleString('az-AZ', {
       day: '2-digit',
@@ -114,128 +199,215 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
     });
   };
 
+  const formatRelativeTime = (timestamp: string) => {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'İndi';
+    if (diffInMinutes < 60) return `${diffInMinutes} dəqiqə əvvəl`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} saat əvvəl`;
+    return `${Math.floor(diffInMinutes / 1440)} gün əvvəl`;
+  };
+
+  const getSessionStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Badge variant="default" className="bg-green-500">Aktiv</Badge>;
+      case 'ended':
+        return <Badge variant="secondary">Bitdi</Badge>;
+      case 'abandoned':
+        return <Badge variant="destructive">Tərk edildi</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  const selectedWidgetData = widgets.find(w => w.id === selectedWidget);
+  const selectedSessionData = sessions.find(s => s.id === selectedSession);
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Widget Selection */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5" />
-              Saytlar
-            </CardTitle>
-            <CardDescription>
-              Mesajlarını izləmək üçün sayt seçin
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {widgets.length === 0 ? (
-              <p className="text-muted-foreground text-sm">
-                Həələ widget yaradılmayıb
-              </p>
-            ) : (
-              widgets.map((widget) => (
-                <Button
-                  key={widget.id}
-                  variant={selectedWidget === widget.id ? "default" : "outline"}
-                  className="w-full justify-start"
-                  onClick={() => setSelectedWidget(widget.id)}
-                >
-                  <div className="text-left">
-                    <div className="font-medium">{widget.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {widget.website_url}
-                    </div>
-                  </div>
-                </Button>
-              ))
-            )}
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[700px]">
+        {/* Widget and Sessions */}
+        <div className="lg:col-span-1 space-y-4">
+          {/* Widget Selection */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Sayt Seçimi</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Select value={selectedWidget} onValueChange={setSelectedWidget}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sayt seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  {widgets.map((widget) => (
+                    <SelectItem key={widget.id} value={widget.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{widget.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {widget.website_url}
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
 
-        {/* Chat Messages */}
-        <div className="lg:col-span-2">
-          {selectedWidget ? (
-            <Card className="h-[600px] flex flex-col">
-              <CardHeader>
-                <CardTitle>Canlı Söhbət</CardTitle>
+          {/* Sessions List */}
+          {selectedWidget && (
+            <Card className="flex-1">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Söhbətlər</CardTitle>
                 <CardDescription>
-                  {widgets.find(w => w.id === selectedWidget)?.name} üçün mesajlar
+                  {selectedWidgetData?.name} üçün söhbətlər
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col">
-                {/* Messages */}
-                <ScrollArea className="flex-1 pr-4">
+              <CardContent className="p-0">
+                <ScrollArea className="h-[500px]">
                   {loading ? (
-                    <div className="flex items-center justify-center h-32">
-                      <div className="text-muted-foreground">Yüklənir...</div>
+                    <div className="p-4 text-center text-muted-foreground">
+                      Yüklənir...
                     </div>
-                  ) : messages.length === 0 ? (
-                    <div className="flex items-center justify-center h-32">
-                      <div className="text-center text-muted-foreground">
-                        <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                        <p>Hələ mesaj yoxdur</p>
-                      </div>
+                  ) : sessions.length === 0 ? (
+                    <div className="p-4 text-center text-muted-foreground">
+                      <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p>Söhbət yoxdur</p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      {messages.map((message) => (
+                    <div className="p-2 space-y-2">
+                      {sessions.map((session) => (
                         <div
-                          key={message.id}
-                          className={`flex ${message.is_from_visitor ? 'justify-start' : 'justify-end'}`}
+                          key={session.id}
+                          className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                            selectedSession === session.id
+                              ? 'bg-primary/10 border border-primary/20'
+                              : 'bg-muted/50 hover:bg-muted'
+                          }`}
+                          onClick={() => setSelectedSession(session.id)}
                         >
-                          <div
-                            className={`max-w-[70%] rounded-lg p-3 ${
-                              message.is_from_visitor
-                                ? 'bg-muted'
-                                : 'bg-primary text-primary-foreground'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 mb-1">
-                              <div className="flex items-center gap-1">
-                                <User className="w-3 h-3" />
-                                <span className="text-xs font-medium">
-                                  {message.sender_name}
-                                </span>
-                              </div>
-                              {message.is_from_visitor && (
-                                <Badge variant="secondary" className="text-xs">
-                                  Ziyarətçi
-                                </Badge>
-                              )}
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <User className="w-4 h-4" />
+                              <span className="font-medium text-sm">
+                                {session.visitor_name}
+                              </span>
                             </div>
-                            <p className="text-sm">{message.message}</p>
-                            <div className="flex items-center gap-1 mt-2 text-xs opacity-70">
-                              <Clock className="w-3 h-3" />
-                              {formatTime(message.created_at)}
-                            </div>
+                            {getSessionStatusBadge(session.status)}
+                          </div>
+                          
+                          <div className="text-xs text-muted-foreground">
+                            <div>Başladı: {formatRelativeTime(session.started_at)}</div>
+                            <div>Son mesaj: {formatRelativeTime(session.last_message_at)}</div>
                           </div>
                         </div>
                       ))}
                     </div>
                   )}
                 </ScrollArea>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Chat Messages */}
+        <div className="lg:col-span-3">
+          {selectedSession ? (
+            <Card className="h-full flex flex-col">
+              <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="w-5 h-5" />
+                    {selectedSessionData?.visitor_name}
+                  </CardTitle>
+                  <CardDescription>
+                    {selectedSessionData?.visitor_email && (
+                      <span className="mr-4">📧 {selectedSessionData.visitor_email}</span>
+                    )}
+                    {selectedSessionData?.visitor_phone && (
+                      <span>📞 {selectedSessionData.visitor_phone}</span>
+                    )}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  {getSessionStatusBadge(selectedSessionData?.status || '')}
+                  {selectedSessionData?.status === 'active' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={endSession}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      Söhbəti Bitir
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              
+              <CardContent className="flex-1 flex flex-col p-0">
+                {/* Messages */}
+                <ScrollArea className="flex-1 p-4">
+                  <div className="space-y-4">
+                    {messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.is_from_visitor ? 'justify-start' : 'justify-end'}`}
+                      >
+                        <div
+                          className={`max-w-[70%] rounded-lg p-3 ${
+                            message.is_from_visitor
+                              ? 'bg-muted text-foreground'
+                              : 'bg-primary text-primary-foreground'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-medium">
+                              {message.sender_name}
+                            </span>
+                            {message.is_from_visitor && (
+                              <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+                                Ziyarətçi
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm">{message.message}</p>
+                          <div className="flex items-center gap-1 mt-2 text-xs opacity-70">
+                            <Clock className="w-3 h-3" />
+                            {formatTime(message.created_at)}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </ScrollArea>
 
                 {/* Message Input */}
-                <div className="flex gap-2 mt-4 pt-4 border-t">
-                  <Input
-                    placeholder="Mesajınızı yazın..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                    className="flex-1"
-                  />
-                  <Button onClick={sendMessage} disabled={!newMessage.trim()}>
-                    <Send className="w-4 h-4" />
-                  </Button>
-                </div>
+                {selectedSessionData?.status === 'active' && (
+                  <div className="flex gap-2 p-4 border-t">
+                    <Input
+                      placeholder="Mesajınızı yazın..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                      className="flex-1"
+                    />
+                    <Button onClick={sendMessage} disabled={!newMessage.trim()}>
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ) : (
-            <Card className="h-[600px] flex items-center justify-center">
+            <Card className="h-full flex items-center justify-center">
               <div className="text-center text-muted-foreground">
                 <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Mesajları görmək üçün sayt seçin</p>
+                <p>Söhbəti görmək üçün sayt və söhbət seçin</p>
               </div>
             </Card>
           )}

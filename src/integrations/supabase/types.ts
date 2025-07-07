@@ -86,6 +86,59 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_sessions: {
+        Row: {
+          created_at: string
+          custom_fields: Json | null
+          ended_at: string | null
+          id: string
+          last_message_at: string | null
+          started_at: string
+          status: string
+          updated_at: string
+          visitor_email: string | null
+          visitor_name: string
+          visitor_phone: string | null
+          widget_id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_fields?: Json | null
+          ended_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          visitor_email?: string | null
+          visitor_name: string
+          visitor_phone?: string | null
+          widget_id: string
+        }
+        Update: {
+          created_at?: string
+          custom_fields?: Json | null
+          ended_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          visitor_email?: string | null
+          visitor_name?: string
+          visitor_phone?: string | null
+          widget_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_sessions_widget_id_fkey"
+            columns: ["widget_id"]
+            isOneToOne: false
+            referencedRelation: "widgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       faqs: {
         Row: {
           answer: string
@@ -127,6 +180,7 @@ export type Database = {
           message: string
           sender_email: string | null
           sender_name: string
+          session_id: string | null
           updated_at: string
           widget_id: string
         }
@@ -137,6 +191,7 @@ export type Database = {
           message: string
           sender_email?: string | null
           sender_name: string
+          session_id?: string | null
           updated_at?: string
           widget_id: string
         }
@@ -147,10 +202,18 @@ export type Database = {
           message?: string
           sender_email?: string | null
           sender_name?: string
+          session_id?: string | null
           updated_at?: string
           widget_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "live_chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "chat_sessions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "live_chat_messages_widget_id_fkey"
             columns: ["widget_id"]

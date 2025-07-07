@@ -27,7 +27,10 @@ export const defaultHtmlTemplate = `
     <div id="lovable-livechat-content" style="display: none;">
       <div id="lovable-livechat-header">
         <h3>{{LIVE_CHAT_GREETING}}</h3>
-        <button id="lovable-livechat-back">← Back</button>
+        <div class="livechat-controls">
+          <button id="lovable-livechat-back">← Back</button>
+          <button id="lovable-livechat-end" class="end-chat-btn">Söhbəti Bitir</button>
+        </div>
       </div>
       
       <!-- Pre-chat form -->

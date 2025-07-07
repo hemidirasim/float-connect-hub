@@ -114,8 +114,6 @@ export const defaultCssStyles = `
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
-    position: absolute;
-    left: 20px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -128,6 +126,32 @@ export const defaultCssStyles = `
     background: rgba(255, 255, 255, 0.25);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .livechat-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .end-chat-btn {
+    background: rgba(239, 68, 68, 0.9);
+    border: none;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .end-chat-btn:hover {
+    background: rgba(220, 38, 38, 0.95);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
   }
 
   /* Pre-chat Form */

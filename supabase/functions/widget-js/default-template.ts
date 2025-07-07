@@ -642,6 +642,7 @@ const defaultJavaScriptLogic = `
   window.openLiveChat = openLiveChat;
   window.closeLiveChat = closeLiveChat;
   window.sendMessage = sendMessage;
+  window.endChatSession = endChatSession;
   
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initWidget);
