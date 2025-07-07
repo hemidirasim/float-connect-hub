@@ -45,6 +45,9 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
   onCreateWidget,
   onCustomIconUpload
 }) => {
+  // Show widget preview if there are channels OR if video is uploaded
+  const shouldShowWidget = channels.length > 0 || formData.video || formData.videoUrl || editingWidget?.video_url;
+
   return (
     <>
       <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
@@ -147,7 +150,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
 
       {/* Live widget preview directly on the page */}
       <TemplatePreview
-        showWidget={channels.length > 0}
+        showWidget={shouldShowWidget}
         formData={formData}
         channels={channels}
         editingWidget={editingWidget}
