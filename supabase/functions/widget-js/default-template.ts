@@ -137,26 +137,32 @@ const defaultJavaScriptLogic = `
     startChatSession(userData, customFieldsData);
   }
 
-  // Improved polling system with faster agent message detection
+  // Real-time message polling system
   let messagePollInterval = null;
   let lastMessageTime = null;
   
   function setupMessagePolling(sessionId) {
+    console.log('Setting up message polling for session:', sessionId);
+    
     // Clear any existing polling
     if (messagePollInterval) {
       clearInterval(messagePollInterval);
     }
     
-    // Set up very fast polling for agent messages - every 500ms for immediate sync
+    // Immediate check for messages
+    checkForNewMessages(sessionId);
+    
+    // Set up rapid polling for instant message sync
     messagePollInterval = setInterval(function() {
       if (!window.liveChatSessionId) {
+        console.log('Session ended, stopping polling');
         clearInterval(messagePollInterval);
         return;
       }
       
       checkForNewMessages(sessionId);
       checkSessionStatus(sessionId);
-    }, 500); // Very fast polling - 500ms for instant agent response
+    }, 1000); // 1 second polling for reliable sync
   }
   
   function checkForNewMessages(sessionId) {
@@ -168,13 +174,20 @@ const defaultJavaScriptLogic = `
         'Content-Type': 'application/json'
       }
     })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('HTTP ' + response.status);
+      }
+      return response.json();
+    })
     .then(messages => {
-      if (messages && messages.length > 0) {
+      if (messages && Array.isArray(messages) && messages.length > 0) {
         console.log('New agent messages received:', messages.length);
         messages.forEach(function(message) {
-          addAgentMessageToChat(message.message, message.sender_name);
-          lastMessageTime = message.created_at;
+          if (message && message.message && message.created_at) {
+            addAgentMessageToChat(message.message, message.sender_name || 'Support Agent');
+            lastMessageTime = message.created_at;
+          }
         });
       }
     })
@@ -269,7 +282,7 @@ const defaultJavaScriptLogic = `
         window.liveChatSessionId = data.session_id;
         window.liveChatUserData = userData;
         console.log('Chat session started:', data.session_id);
-        // Setup very fast message polling for instant agent responses
+        // Setup message polling for instant agent responses
         setupMessagePolling(data.session_id);
         showChatInterface();
       } else {
@@ -436,7 +449,7 @@ const defaultJavaScriptLogic = `
               if (window.liveChatSessionId) {
                 checkForNewMessages(window.liveChatSessionId);
               }
-            }, 200);
+            }, 500);
           } else {
             console.error('Failed to save message:', data);
           }
