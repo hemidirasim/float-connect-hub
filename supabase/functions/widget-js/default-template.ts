@@ -1,4 +1,3 @@
-
 import type { WidgetTemplate } from './template-types.ts'
 import { defaultHtmlTemplate } from './templates/default/html-template.ts'
 import { defaultCssStyles } from './templates/default/css-styles.ts'
@@ -138,85 +137,78 @@ const defaultJavaScriptLogic = `
     startChatSession(userData, customFieldsData);
   }
 
-  // Realtime setup using Supabase client approach
-  let realtimeChannel = null;
+  // Improved polling system with immediate response checking
+  let messagePollInterval = null;
+  let lastMessageTime = null;
   
-  function setupRealtimeSubscription(sessionId) {
-    if (realtimeChannel) {
-      realtimeChannel.unsubscribe();
+  function setupMessagePolling(sessionId) {
+    // Clear any existing polling
+    if (messagePollInterval) {
+      clearInterval(messagePollInterval);
     }
     
-    // Use Supabase client-like approach for realtime
-    fetch('https://ttzioshkresaqmsodhfb.supabase.co/rest/v1/live_chat_messages?select=*&session_id=eq.' + sessionId + '&order=created_at.desc&limit=1', {
+    // Set up fast polling - every 1 second for better sync
+    messagePollInterval = setInterval(function() {
+      if (!window.liveChatSessionId) {
+        clearInterval(messagePollInterval);
+        return;
+      }
+      
+      checkForNewMessages(sessionId);
+      checkSessionStatus(sessionId);
+    }, 1000); // Reduced from 2000ms to 1000ms for faster sync
+  }
+  
+  function checkForNewMessages(sessionId) {
+    var timeQuery = lastMessageTime ? '&created_at=gt.' + lastMessageTime : '';
+    
+    fetch('https://ttzioshkresaqmsodhfb.supabase.co/rest/v1/live_chat_messages?select=*&session_id=eq.' + sessionId + '&is_from_visitor=eq.false&order=created_at.asc' + timeQuery, {
       headers: {
         'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0emlvc2hrcmVzYXFtc29kaGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NDM3NjksImV4cCI6MjA2NjAxOTc2OX0.2haK7pikLtZOmf4nsmcb8wcvjbYaZLzR7ESug0R4oX0',
         'Content-Type': 'application/json'
       }
-    });
-    
-    // Set up polling for new messages every 2 seconds
-    window.messagePollInterval = setInterval(function() {
-      if (!window.liveChatSessionId) {
-        clearInterval(window.messagePollInterval);
-        return;
+    })
+    .then(response => response.json())
+    .then(messages => {
+      if (messages && messages.length > 0) {
+        messages.forEach(function(message) {
+          addAgentMessageToChat(message.message, message.sender_name);
+          lastMessageTime = message.created_at;
+        });
       }
-      
-      fetch('https://ttzioshkresaqmsodhfb.supabase.co/rest/v1/live_chat_messages?select=*&session_id=eq.' + sessionId + '&is_from_visitor=eq.false&order=created_at.desc&limit=10', {
-        headers: {
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0emlvc2hrcmVzYXFtc29kaGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NDM3NjksImV4cCI6MjA2NjAxOTc2OX0.2haK7pikLtZOmf4nsmcb8wcvjbYaZLzR7ESug0R4oX0',
-          'Content-Type': 'application/json'
+    })
+    .catch(error => {
+      console.log('Error polling messages:', error);
+    });
+  }
+  
+  function checkSessionStatus(sessionId) {
+    fetch('https://ttzioshkresaqmsodhfb.supabase.co/rest/v1/chat_sessions?select=status&id=eq.' + sessionId, {
+      headers: {
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0emlvc2hrcmVzYXFtc29kaGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NDM3NjksImV4cCI6MjA2NjAxOTc2OX0.2haK7pikLtZOmf4nsmcb8wcvjbYaZLzR7ESug0R4oX0',
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(sessions => {
+      if (sessions && sessions.length > 0 && sessions[0].status === 'ended') {
+        showSessionEndedMessage();
+        window.liveChatSessionId = null;
+        if (messagePollInterval) {
+          clearInterval(messagePollInterval);
+          messagePollInterval = null;
         }
-      })
-      .then(response => response.json())
-      .then(messages => {
-        if (messages && messages.length > 0) {
-          // Check for new messages that aren't already displayed
-          var messagesDiv = document.querySelector('#lovable-livechat-messages');
-          if (messagesDiv) {
-            var existingMessages = messagesDiv.querySelectorAll('.agent-message');
-            var existingCount = existingMessages.length - 1; // Subtract 1 for initial greeting
-            
-            if (messages.length > existingCount) {
-              // Add new messages
-              for (var i = existingCount; i < messages.length; i++) {
-                var message = messages[messages.length - 1 - i]; // Reverse order since we get desc
-                if (!message.is_from_visitor) {
-                  addAgentMessageToChat(message.message, message.sender_name);
-                }
-              }
-            }
-          }
-        }
-      })
-      .catch(error => {
-        console.log('Error polling messages:', error);
-      });
-      
-      // Check session status
-      fetch('https://ttzioshkresaqmsodhfb.supabase.co/rest/v1/chat_sessions?select=status&id=eq.' + sessionId, {
-        headers: {
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0emlvc2hrcmVzYXFtc29kaGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NDM3NjksImV4cCI6MjA2NjAxOTc2OX0.2haK7pikLtZOmf4nsmcb8wcvjbYaZLzR7ESug0R4oX0',
-          'Content-Type': 'application/json'
-        }
-      })
-      .then(response => response.json())
-      .then(sessions => {
-        if (sessions && sessions.length > 0 && sessions[0].status === 'ended') {
-          showSessionEndedMessage();
-          window.liveChatSessionId = null;
-          clearInterval(window.messagePollInterval);
-        }
-      })
-      .catch(error => {
-        console.log('Error checking session status:', error);
-      });
-    }, 2000);
+      }
+    })
+    .catch(error => {
+      console.log('Error checking session status:', error);
+    });
   }
   
   function addAgentMessageToChat(messageText, senderName) {
     var messagesDiv = document.querySelector('#lovable-livechat-messages');
     if (messagesDiv) {
-      // Check if this message already exists
+      // Check if this message already exists to prevent duplicates
       var existingMessages = messagesDiv.querySelectorAll('.agent-message .message-content');
       for (var i = 0; i < existingMessages.length; i++) {
         if (existingMessages[i].textContent === messageText) {
@@ -274,8 +266,8 @@ const defaultJavaScriptLogic = `
       if (data.session_id) {
         window.liveChatSessionId = data.session_id;
         window.liveChatUserData = userData;
-        // Setup message polling
-        setupRealtimeSubscription(data.session_id);
+        // Setup message polling with improved sync
+        setupMessagePolling(data.session_id);
         showChatInterface();
       } else {
         console.error('Failed to start chat session:', data);
@@ -312,6 +304,9 @@ const defaultJavaScriptLogic = `
       }
       initialMessage.innerHTML = '<div class="message-content">' + greeting + '</div>';
       chatMessages.appendChild(initialMessage);
+      
+      // Set initial timestamp for polling
+      lastMessageTime = new Date().toISOString();
       
       // Scroll to bottom
       chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -351,9 +346,9 @@ const defaultJavaScriptLogic = `
     console.log('Ending chat session');
     
     // Clear polling interval
-    if (window.messagePollInterval) {
-      clearInterval(window.messagePollInterval);
-      window.messagePollInterval = null;
+    if (messagePollInterval) {
+      clearInterval(messagePollInterval);
+      messagePollInterval = null;
     }
     
     // Send end session request to server if session exists
@@ -386,6 +381,7 @@ const defaultJavaScriptLogic = `
     // Clear session data
     window.liveChatSessionId = null;
     window.liveChatUserData = null;
+    lastMessageTime = null;
     
     // Close live chat UI
     closeLiveChat();
@@ -405,10 +401,8 @@ const defaultJavaScriptLogic = `
       userMessage.innerHTML = '<div class="message-content">' + escapeHtml(messageText) + '</div>';
       messagesDiv.appendChild(userMessage);
       
-      // Clear input
+      // Clear input and scroll
       input.value = '';
-      
-      // Scroll to bottom
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
       
       // Send message to server if session exists
@@ -434,6 +428,12 @@ const defaultJavaScriptLogic = `
         .then(data => {
           if (data.success) {
             console.log('Message saved to database');
+            // Immediately check for responses after sending
+            setTimeout(function() {
+              if (window.liveChatSessionId) {
+                checkForNewMessages(window.liveChatSessionId);
+              }
+            }, 500);
           } else {
             console.error('Failed to save message:', data);
           }
