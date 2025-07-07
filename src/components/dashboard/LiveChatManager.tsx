@@ -38,13 +38,11 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
           (payload) => {
             console.log('New session created:', payload);
             const newSession = payload.new as ChatSession;
-            // Mark new session as unread
-            const sessionWithUnread = { ...newSession, unread: true };
             setSessions(prev => {
               // Check if session already exists to prevent duplicates
               const exists = prev.some(s => s.id === newSession.id);
               if (exists) return prev;
-              return [sessionWithUnread, ...prev];
+              return [newSession, ...prev];
             });
             toast.success(`Yeni söhbət: ${newSession.visitor_name}`);
           }
@@ -61,14 +59,10 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
     if (selectedSession) {
       fetchMessages();
       
-      // Mark selected session as read
-      setSessions(prev => prev.map(session => 
-        session.id === selectedSession 
-          ? { ...session, unread: false }
-          : session
-      ));
+      // Mark session as read when joining
+      markSessionAsRead(selectedSession);
       
-      // Subscribe to real-time messages for this session with faster polling
+      // Subscribe to real-time messages for this session
       const messagesChannel = supabase
         .channel(`session-messages-${selectedSession}`)
         .on(
@@ -118,7 +112,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
             
             // Update sessions list with new status
             setSessions(prev => prev.map(session => 
-              session.id === updatedSession.id ? { ...updatedSession, unread: session.unread } : session
+              session.id === updatedSession.id ? updatedSession : session
             ));
             
             if (updatedSession.status === 'ended' && selectedSession === updatedSession.id) {
@@ -132,54 +126,42 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
           console.log('Dashboard session subscription status:', status);
         });
 
-      // Additional polling for faster updates (fallback)
-      const pollInterval = setInterval(() => {
-        if (selectedSession) {
-          fetchMessages();
-        }
-      }, 1000); // Poll every 1 second for faster updates
-
       return () => {
         console.log('Cleaning up dashboard subscriptions');
         supabase.removeChannel(messagesChannel);
         supabase.removeChannel(sessionChannel);
-        clearInterval(pollInterval);
       };
     }
   }, [selectedSession]);
 
-  // Subscribe to new messages for unselected sessions to mark them as unread
+  // Subscribe to session updates to get unread count changes
   useEffect(() => {
     if (selectedWidget && sessions.length > 0) {
-      const unreadMessagesChannel = supabase
-        .channel(`unread-messages-${selectedWidget}`)
+      const sessionUpdatesChannel = supabase
+        .channel(`session-updates-${selectedWidget}`)
         .on(
           'postgres_changes',
           {
-            event: 'INSERT',
+            event: 'UPDATE',
             schema: 'public',
-            table: 'live_chat_messages',
+            table: 'chat_sessions',
             filter: `widget_id=eq.${selectedWidget}`
           },
           (payload) => {
-            const newMessage = payload.new as LiveChatMessage;
-            // If message is for a different session and it's from visitor, mark as unread
-            if (newMessage.session_id !== selectedSession && newMessage.is_from_visitor) {
-              setSessions(prev => prev.map(session => 
-                session.id === newMessage.session_id 
-                  ? { ...session, unread: true, last_message_at: newMessage.created_at }
-                  : session
-              ));
-            }
+            const updatedSession = payload.new as ChatSession;
+            // Update the session in the list with new unread count
+            setSessions(prev => prev.map(session => 
+              session.id === updatedSession.id ? updatedSession : session
+            ));
           }
         )
         .subscribe();
 
       return () => {
-        supabase.removeChannel(unreadMessagesChannel);
+        supabase.removeChannel(sessionUpdatesChannel);
       };
     }
-  }, [selectedWidget, selectedSession, sessions.length]);
+  }, [selectedWidget, sessions.length]);
 
   const fetchSessions = async () => {
     if (!selectedWidget) return;
@@ -194,13 +176,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
 
       if (error) throw error;
       
-      // Mark all sessions as unread initially, except if one is already selected
-      const sessionsWithUnread = (data || []).map(session => ({
-        ...session,
-        unread: session.id !== selectedSession
-      }));
-      
-      setSessions(sessionsWithUnread);
+      setSessions(data || []);
       
       // Select first active session if available and no session is selected
       const activeSession = data?.find(s => s.status === 'active');
@@ -233,16 +209,31 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
     }
   };
 
+  const markSessionAsRead = async (sessionId: string) => {
+    try {
+      const { error } = await supabase.rpc('mark_session_as_read', {
+        session_id: sessionId
+      });
+
+      if (error) throw error;
+      
+      // Update local state
+      setSessions(prev => prev.map(session => 
+        session.id === sessionId 
+          ? { ...session, unread_count: 0 }
+          : session
+      ));
+    } catch (error) {
+      console.error('Error marking session as read:', error);
+    }
+  };
+
   const handleJoinConversation = async (sessionId: string) => {
     console.log('Joining conversation:', sessionId);
     setSelectedSession(sessionId);
     
     // Mark session as read when joining
-    setSessions(prev => prev.map(session => 
-      session.id === sessionId 
-        ? { ...session, unread: false }
-        : session
-    ));
+    await markSessionAsRead(sessionId);
     
     // Immediately fetch messages for this session
     try {

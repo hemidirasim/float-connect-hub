@@ -95,6 +95,7 @@ export type Database = {
           last_message_at: string | null
           started_at: string
           status: string
+          unread_count: number | null
           updated_at: string
           visitor_email: string | null
           visitor_name: string
@@ -109,6 +110,7 @@ export type Database = {
           last_message_at?: string | null
           started_at?: string
           status?: string
+          unread_count?: number | null
           updated_at?: string
           visitor_email?: string | null
           visitor_name: string
@@ -123,6 +125,7 @@ export type Database = {
           last_message_at?: string | null
           started_at?: string
           status?: string
+          unread_count?: number | null
           updated_at?: string
           visitor_email?: string | null
           visitor_name?: string
@@ -680,6 +683,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: boolean
+      }
+      mark_session_as_read: {
+        Args: { session_id: string }
+        Returns: undefined
       }
       record_widget_view: {
         Args: {

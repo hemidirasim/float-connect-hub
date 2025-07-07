@@ -59,10 +59,10 @@ export const SessionsList: React.FC<SessionsListProps> = ({
                   }`}
                   onClick={() => onJoinConversation(session.id)}
                 >
-                  {session.unread && selectedSession !== session.id && (
+                  {session.unread_count > 0 && selectedSession !== session.id && (
                     <div className="absolute top-2 right-2">
                       <Badge variant="destructive" className="px-1.5 py-0.5 text-xs">
-                        Yeni
+                        {session.unread_count}
                       </Badge>
                     </div>
                   )}
@@ -73,7 +73,7 @@ export const SessionsList: React.FC<SessionsListProps> = ({
                       <span className="font-medium text-sm">
                         {session.visitor_name}
                       </span>
-                      {session.unread && selectedSession !== session.id && (
+                      {session.unread_count > 0 && selectedSession !== session.id && (
                         <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                       )}
                     </div>
