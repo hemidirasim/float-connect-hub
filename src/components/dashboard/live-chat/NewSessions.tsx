@@ -35,7 +35,7 @@ export const NewSessions: React.FC<NewSessionsProps> = ({
   onMoveToMain
 }) => {
   const [newSessions, setNewSessions] = useState<ChatSession[]>([]);
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Function to play notification sound
   const playNotificationSound = () => {
