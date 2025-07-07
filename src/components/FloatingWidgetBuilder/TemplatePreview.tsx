@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -79,12 +78,15 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     window.open(url, '_blank');
   };
 
-  if (!showWidget || channels.length === 0) {
+  // Show widget if there are channels OR live chat is enabled
+  const shouldShowWidget = showWidget && (channels.length > 0 || formData.liveChatEnabled);
+
+  if (!shouldShowWidget) {
     return (
       <div className="fixed bottom-4 right-4 p-4 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 text-center">
         <MessageCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
         <p className="text-sm text-gray-500">
-          {channels.length === 0 ? 'Add channels to see preview' : 'Widget preview will appear here'}
+          {channels.length === 0 && !formData.liveChatEnabled ? 'Add channels or enable live chat to see preview' : 'Widget preview will appear here'}
         </p>
       </div>
     );
@@ -177,7 +179,9 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
                 >
                   <MessageCircle className="w-5 h-5 mr-3" />
                   <div className="text-left">
-                    <div className="font-medium">Live Chat</div>
+                    <div className="font-medium">
+                      {formData.liveChatAgentName ? `Chat with ${formData.liveChatAgentName}` : 'Live Chat'}
+                    </div>
                     <div className="text-xs text-gray-500">{formData.liveChatGreeting}</div>
                   </div>
                 </Button>

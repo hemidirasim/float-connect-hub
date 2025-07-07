@@ -34,10 +34,11 @@ export interface FormData {
   buttonSize: number;
   previewVideoHeight: number;
   templateId: string;
-  // Live chat settings (removed liveChatPosition)
+  // Live chat settings
   liveChatEnabled: boolean;
   liveChatGreeting: string;
   liveChatColor: string;
   liveChatAutoOpen: boolean;
   liveChatOfflineMessage: string;
+  liveChatAgentName: string;
 }

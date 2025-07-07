@@ -93,7 +93,8 @@ export const useWidgetActions = (
         live_chat_greeting: formData.liveChatGreeting,
         live_chat_color: formData.liveChatColor,
         live_chat_auto_open: formData.liveChatAutoOpen,
-        live_chat_offline_message: formData.liveChatOfflineMessage
+        live_chat_offline_message: formData.liveChatOfflineMessage,
+        live_chat_agent_name: formData.liveChatAgentName || null
       };
 
       console.log('Widget data for database with live chat:', widgetData);

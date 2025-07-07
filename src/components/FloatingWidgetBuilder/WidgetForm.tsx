@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -94,11 +93,13 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             liveChatColor={formData.liveChatColor}
             liveChatAutoOpen={formData.liveChatAutoOpen}
             liveChatOfflineMessage={formData.liveChatOfflineMessage}
+            liveChatAgentName={formData.liveChatAgentName}
             onLiveChatEnabledChange={(enabled) => onFormDataChange('liveChatEnabled', enabled)}
             onLiveChatGreetingChange={(greeting) => onFormDataChange('liveChatGreeting', greeting)}
             onLiveChatColorChange={(color) => onFormDataChange('liveChatColor', color)}
             onLiveChatAutoOpenChange={(autoOpen) => onFormDataChange('liveChatAutoOpen', autoOpen)}
             onLiveChatOfflineMessageChange={(message) => onFormDataChange('liveChatOfflineMessage', message)}
+            onLiveChatAgentNameChange={(name) => onFormDataChange('liveChatAgentName', name)}
           />
 
           {/* Video Upload & Icon Settings */}
@@ -162,7 +163,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
 
       {/* Live widget preview directly on the page */}
       <TemplatePreview
-        showWidget={channels.length > 0}
+        showWidget={true}
         formData={formData}
         channels={channels}
         editingWidget={editingWidget}

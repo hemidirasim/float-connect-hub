@@ -37,7 +37,8 @@ export const useWidgetState = (user: any) => {
     liveChatGreeting: 'Hello! How can we help you today?',
     liveChatColor: '#4f46e5',
     liveChatAutoOpen: false,
-    liveChatOfflineMessage: 'We are currently offline. Please leave a message and we will get back to you.'
+    liveChatOfflineMessage: 'We are currently offline. Please leave a message and we will get back to you.',
+    liveChatAgentName: ''
   });
 
   // Check for editing widget on load
@@ -88,7 +89,8 @@ export const useWidgetState = (user: any) => {
           liveChatGreeting: data.live_chat_greeting || 'Hello! How can we help you today?',
           liveChatColor: data.live_chat_color || '#4f46e5',
           liveChatAutoOpen: data.live_chat_auto_open || false,
-          liveChatOfflineMessage: data.live_chat_offline_message || 'We are currently offline. Please leave a message and we will get back to you.'
+          liveChatOfflineMessage: data.live_chat_offline_message || 'We are currently offline. Please leave a message and we will get back to you.',
+          liveChatAgentName: data.live_chat_agent_name || ''
         });
 
         // Scroll to widget form
@@ -133,7 +135,8 @@ export const useWidgetState = (user: any) => {
       liveChatGreeting: 'Hello! How can we help you today?',
       liveChatColor: '#4f46e5',
       liveChatAutoOpen: false,
-      liveChatOfflineMessage: 'We are currently offline. Please leave a message and we will get back to you.'
+      liveChatOfflineMessage: 'We are currently offline. Please leave a message and we will get back to you.',
+      liveChatAgentName: ''
     });
   };
 

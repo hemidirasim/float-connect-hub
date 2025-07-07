@@ -443,6 +443,7 @@ export type Database = {
           greeting_message: string | null
           id: string
           is_active: boolean | null
+          live_chat_agent_name: string | null
           live_chat_auto_open: boolean | null
           live_chat_color: string | null
           live_chat_enabled: boolean | null
@@ -479,6 +480,7 @@ export type Database = {
           greeting_message?: string | null
           id?: string
           is_active?: boolean | null
+          live_chat_agent_name?: string | null
           live_chat_auto_open?: boolean | null
           live_chat_color?: string | null
           live_chat_enabled?: boolean | null
@@ -515,6 +517,7 @@ export type Database = {
           greeting_message?: string | null
           id?: string
           is_active?: boolean | null
+          live_chat_agent_name?: string | null
           live_chat_auto_open?: boolean | null
           live_chat_color?: string | null
           live_chat_enabled?: boolean | null
