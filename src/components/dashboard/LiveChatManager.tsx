@@ -78,6 +78,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
               if (exists) return prev;
               return [newSession, ...prev];
             });
+            toast.success(`Yeni söhbət: ${newSession.visitor_name}`);
           }
         )
         .subscribe();
