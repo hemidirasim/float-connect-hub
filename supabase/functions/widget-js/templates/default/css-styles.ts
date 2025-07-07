@@ -25,7 +25,7 @@ export const defaultCssStyles = `
     padding: 20px;
     border-top: 1px solid #e2e8f0;
     background: linear-gradient(135deg, #fefefe 0%, #f8fafc 100%);
-    border-radius: 16px;
+    z-index: 10;
   }
   
   .live-chat-button {
@@ -502,6 +502,8 @@ export const defaultCssStyles = `
     height: auto !important;
     border-radius: 12px;
     margin-bottom: 20px;
+    z-index: 1;
+    position: relative;
   }
   
   .hiclient-video-container {
