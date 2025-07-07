@@ -160,12 +160,11 @@ const defaultJavaScriptLogic = `
   }
   
   function checkForNewMessages(sessionId) {
-    // Check for agent messages (is_from_visitor=false) with timestamp filter
-    var timeQuery = lastMessageTime ? '&created_at=gt.' + lastMessageTime : '';
+    // Use edge function to securely fetch agent messages
+    var timeQuery = lastMessageTime ? '?session_id=' + sessionId + '&last_message_time=' + encodeURIComponent(lastMessageTime) : '?session_id=' + sessionId;
     
-    fetch('https://ttzioshkresaqmsodhfb.supabase.co/rest/v1/live_chat_messages?select=*&session_id=eq.' + sessionId + '&is_from_visitor=eq.false&order=created_at.asc' + timeQuery, {
+    fetch('https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/widget-chat' + timeQuery, {
       headers: {
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0emlvc2hrcmVzYXFtc29kaGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0NDM3NjksImV4cCI6MjA2NjAxOTc2OX0.2haK7pikLtZOmf4nsmcb8wcvjbYaZLzR7ESug0R4oX0',
         'Content-Type': 'application/json'
       }
     })
