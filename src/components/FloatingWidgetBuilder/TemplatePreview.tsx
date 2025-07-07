@@ -46,6 +46,9 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
   useEffect(() => {
     if (!showWidget) {
       setPreviewHtml('');
+      // Remove existing widgets when hiding
+      const existingWidgets = document.querySelectorAll('[data-widget-preview]');
+      existingWidgets.forEach(widget => widget.remove());
       return;
     }
 
@@ -157,12 +160,13 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 
   // Execute inline scripts after HTML is inserted
   useEffect(() => {
+    // Always remove existing widgets first (even if no new previewHtml)
+    const existingWidgets = document.querySelectorAll('[data-widget-preview]');
+    existingWidgets.forEach(widget => widget.remove());
+    
     if (previewHtml) {
       const timer = setTimeout(() => {
         try {
-          // Remove any existing preview widgets first
-          const existingWidgets = document.querySelectorAll('[data-widget-preview]');
-          existingWidgets.forEach(widget => widget.remove());
 
           // Create a temporary container to parse the HTML
           const tempDiv = document.createElement('div');

@@ -46,7 +46,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
   onCustomIconUpload
 }) => {
   // Show widget preview if there are channels OR if video is uploaded
-  const shouldShowWidget = channels.length > 0 || formData.video || formData.videoUrl || editingWidget?.video_url;
+  const shouldShowWidget = channels.length > 0 || Boolean(formData.video) || Boolean(formData.videoUrl) || Boolean(editingWidget?.video_url);
 
   return (
     <>
