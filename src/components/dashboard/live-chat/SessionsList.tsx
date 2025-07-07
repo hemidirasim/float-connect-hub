@@ -49,7 +49,14 @@ export const SessionsList: React.FC<SessionsListProps> = ({
             </div>
           ) : (
             <div className="p-2 space-y-2">
-              {sessions.map((session) => (
+              {sessions
+                .sort((a, b) => {
+                  // Yeni sessionlar üsttə olsun
+                  const aTime = new Date(a.last_message_at || a.started_at).getTime();
+                  const bTime = new Date(b.last_message_at || b.started_at).getTime();
+                  return bTime - aTime;
+                })
+                .map((session) => (
                 <div
                   key={session.id}
                   className={`p-3 rounded-lg cursor-pointer transition-colors relative ${
@@ -98,9 +105,9 @@ export const SessionsList: React.FC<SessionsListProps> = ({
                        Söhbətə Qoşul
                      </Button>
                    )}
-               </div>
-             ))}
-           </div>
+                </div>
+              ))}
+            </div>
           )}
         </ScrollArea>
       </CardContent>
