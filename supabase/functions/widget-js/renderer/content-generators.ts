@@ -132,3 +132,38 @@ export function generateButtonIcon(customIconUrl?: string, useVideoPreview?: boo
      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
    </svg>`
 }
+
+export function generateLiveChatButton(config: TemplateConfig): string {
+  if (!config.liveChatEnabled) {
+    return '';
+  }
+
+  const buttonText = config.liveChatButtonText || 'Start Live Chat';
+  const liveChatColor = config.liveChatColor || '#4f46e5';
+  
+  return `
+    <div class="live-chat-section" style="margin: 20px 0; padding: 0;">
+      <button id="lovable-livechat-btn" 
+              style="width: 100%; 
+                     padding: 12px 20px; 
+                     background: ${liveChatColor}; 
+                     color: white; 
+                     border: none; 
+                     border-radius: 8px; 
+                     font-size: 14px; 
+                     font-weight: 500; 
+                     cursor: pointer; 
+                     transition: opacity 0.2s ease;
+                     display: flex;
+                     align-items: center;
+                     justify-content: center;
+                     gap: 8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" 
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        ${buttonText}
+      </button>
+    </div>
+  `;
+}

@@ -2,7 +2,7 @@
 import type { WidgetTemplate } from './template-types.ts'
 import type { TemplateConfig } from './renderer/types.ts'
 import { getPositionStyle, getTooltipPositionStyle, getModalPositionStyle, getModalContentPositionStyle, getButtonOffsetStyle } from './renderer/position-utils.ts'
-import { generateVideoContent, generateButtonIcon } from './renderer/content-generators.ts'
+import { generateVideoContent, generateButtonIcon, generateLiveChatButton } from './renderer/content-generators.ts'
 
 export type { TemplateConfig }
 
@@ -41,21 +41,8 @@ function safeStringReplace(template: string, placeholder: string, value: string)
 export class WidgetTemplateRenderer {
   constructor(private template: WidgetTemplate, private config: TemplateConfig) {}
 
-  generateLiveChatButton(): string {
-    if (!this.config.liveChatEnabled) {
-      return '';
-    }
-
-    return `
-      <div class="live-chat-section">
-        <button id="lovable-livechat-btn" class="live-chat-button">
-           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-             <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-           </svg>
-           ${this.config.liveChatButtonText || 'Start Live Chat'}
-        </button>
-      </div>
-    `;
+  generateLiveChatButtonContent(): string {
+    return generateLiveChatButton(this.config);
   }
 
   generateWidgetScript(): string {
@@ -113,7 +100,7 @@ export class WidgetTemplateRenderer {
       '{{MOBILE_CHANNEL_GAP}}': mobileChannelGap.toString(),
       '{{MOBILE_TOOLTIP_RIGHT_OFFSET}}': mobileTooltipRightOffset.toString(),
       // Live chat placeholders
-      '{{LIVE_CHAT_BUTTON}}': this.generateLiveChatButton(),
+      '{{LIVE_CHAT_BUTTON}}': this.generateLiveChatButtonContent(),
       '{{LIVE_CHAT_GREETING}}': this.config.liveChatGreeting || 'Hello! How can we help you today?',
       '{{LIVE_CHAT_COLOR}}': this.config.liveChatColor || '#4f46e5',
       '{{PRECHAT_FORM_TITLE}}': 'Please provide your information to start the chat',

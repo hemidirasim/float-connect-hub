@@ -63,6 +63,14 @@ export function generateWidgetScript(widget: any): string {
     useVideoPreview: config.useVideoPreview,
     buttonSize: config.buttonSize,
     previewVideoHeight: config.previewVideoHeight,
+    // Live chat fields
+    liveChatEnabled: config.liveChatEnabled,
+    liveChatGreeting: config.liveChatGreeting,
+    liveChatColor: config.liveChatColor,
+    liveChatRequireEmail: config.liveChatRequireEmail,
+    liveChatRequireName: config.liveChatRequireName,
+    liveChatRequirePhone: config.liveChatRequirePhone,
+    liveChatCustomFields: config.liveChatCustomFields,
     liveChatButtonText: config.liveChatButtonText
   }
 
