@@ -546,7 +546,8 @@ export function getDefaultTemplate(): WidgetTemplate {
             ? '<img src="' + channel.customIcon + '" alt="' + channel.label + '" class="lovable-channel-icon" />'
             : getChannelIcon(channel.type);
           
-          return '<div class="lovable-channel-item" onclick="openChannel(\\'' + getChannelUrl(channel) + '\\')">' +
+          const channelUrl = getChannelUrl(channel);
+          return '<div class="lovable-channel-item" onclick="openChannel(' + "'" + channelUrl + "'" + ')">' +
             iconHtml +
             '<span>' + channel.label + '</span>' +
           '</div>';
