@@ -84,11 +84,13 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
             
             // If it's a visitor message, show notification
             if (newMessage.is_from_visitor && newMessage.session_id !== selectedSession) {
-              // Find the session to get visitor name
-              const session = sessions.find(s => s.id === newMessage.session_id);
-              if (session) {
-                toast.info(`Yeni mesaj: ${session.visitor_name}`);
-              }
+              setSessions(prev => {
+                const session = prev.find(s => s.id === newMessage.session_id);
+                if (session) {
+                  toast.info(`Yeni mesaj: ${session.visitor_name}`);
+                }
+                return prev;
+              });
             }
           }
         )
@@ -102,7 +104,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
         supabase.removeChannel(widgetMessagesChannel);
       };
     }
-  }, [selectedWidget, sessions]);
+  }, [selectedWidget]);
 
   useEffect(() => {
     if (selectedSession) {
