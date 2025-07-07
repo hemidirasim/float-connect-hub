@@ -13,7 +13,9 @@ export const defaultHtmlTemplate = `
   <div id="lovable-modal-content" style="transform: translateY(20px);">
     <div id="lovable-modal-header">{{GREETING_MESSAGE}}</div>
     <button id="lovable-widget-close">×</button>
-    {{VIDEO_CONTENT}}
+    <div style="position: relative; z-index: 1;">
+      {{VIDEO_CONTENT}}
+    </div>
     {{LIVE_CHAT_BUTTON}}
     <div id="lovable-widget-channels"></div>
     <div class="lovable-empty-state" style="display: none;">
@@ -45,7 +47,7 @@ export const defaultHtmlTemplate = `
             <input type="tel" id="prechat-phone" placeholder="{{PHONE_PLACEHOLDER}}" />
           </div>
           <div id="prechat-custom-fields"></div>
-          <button id="prechat-submit" class="prechat-submit-btn">Start Chat</button>
+          <button id="prechat-submit" class="prechat-submit-btn">{{LIVE_CHAT_BUTTON_TEXT}}</button>
         </div>
       </div>
       

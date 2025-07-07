@@ -56,4 +56,5 @@ export interface FormData {
   liveChatEmailPlaceholder: string;
   liveChatPhoneLabel: string;
   liveChatPhonePlaceholder: string;
+  liveChatButtonText: string;
 }

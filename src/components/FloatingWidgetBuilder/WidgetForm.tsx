@@ -153,6 +153,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             liveChatEmailPlaceholder={formData.liveChatEmailPlaceholder}
             liveChatPhoneLabel={formData.liveChatPhoneLabel}
             liveChatPhonePlaceholder={formData.liveChatPhonePlaceholder}
+            liveChatButtonText={formData.liveChatButtonText}
             onLiveChatEnabledChange={(enabled) => onFormDataChange('liveChatEnabled', enabled)}
             onLiveChatAgentNameChange={(name) => onFormDataChange('liveChatAgentName', name)}
             onLiveChatGreetingChange={(greeting) => onFormDataChange('liveChatGreeting', greeting)}
@@ -169,6 +170,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             onLiveChatEmailPlaceholderChange={(placeholder) => onFormDataChange('liveChatEmailPlaceholder', placeholder)}
             onLiveChatPhoneLabelChange={(label) => onFormDataChange('liveChatPhoneLabel', label)}
             onLiveChatPhonePlaceholderChange={(placeholder) => onFormDataChange('liveChatPhonePlaceholder', placeholder)}
+            onLiveChatButtonTextChange={(text) => onFormDataChange('liveChatButtonText', text)}
           />
 
           <Button
@@ -184,7 +186,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
 
       {/* Live widget preview directly on the page */}
       <TemplatePreview
-        showWidget={channels.length > 0}
+        showWidget={true}
         formData={formData}
         channels={channels}
         editingWidget={editingWidget}

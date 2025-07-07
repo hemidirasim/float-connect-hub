@@ -62,7 +62,8 @@ export function generateWidgetScript(widget: any): string {
     videoObjectFit: config.videoObjectFit,
     useVideoPreview: config.useVideoPreview,
     buttonSize: config.buttonSize,
-    previewVideoHeight: config.previewVideoHeight
+    previewVideoHeight: config.previewVideoHeight,
+    liveChatButtonText: config.liveChatButtonText
   }
 
   console.log('Template config created with video preview settings:', {

@@ -44,4 +44,5 @@ export interface WidgetConfig {
   liveChatRequireName?: boolean;
   liveChatRequirePhone?: boolean;
   liveChatCustomFields?: string;
+  liveChatButtonText?: string;
 }

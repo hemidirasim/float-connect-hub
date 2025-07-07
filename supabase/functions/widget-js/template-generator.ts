@@ -49,10 +49,10 @@ export class WidgetTemplateRenderer {
     return `
       <div class="live-chat-section">
         <button id="lovable-livechat-btn" class="live-chat-button">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-          </svg>
-          Start Live Chat
+           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+             <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+           </svg>
+           ${this.config.liveChatButtonText || 'Start Live Chat'}
         </button>
       </div>
     `;
@@ -123,6 +123,7 @@ export class WidgetTemplateRenderer {
       '{{EMAIL_PLACEHOLDER}}': 'your@email.com',
       '{{PHONE_LABEL}}': this.config.liveChatRequirePhone ? 'Phone *' : 'Phone',
       '{{PHONE_PLACEHOLDER}}': '+1 (555) 123-4567',
+      '{{LIVE_CHAT_BUTTON_TEXT}}': this.config.liveChatButtonText || 'Start Live Chat',
       // Widget config for JavaScript access
       '{{WIDGET_CONFIG}}': JSON.stringify(this.config)
     }

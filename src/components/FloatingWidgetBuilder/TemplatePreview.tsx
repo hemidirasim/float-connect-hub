@@ -44,7 +44,9 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 
   // Generate preview HTML when template or config changes - USE SAME SYSTEM AS EDGE FUNCTION
   useEffect(() => {
-    if (!showWidget) {
+    // Show widget if channels exist, video exists, or live chat is enabled
+    const hasContent = channels.length > 0 || formData.videoUrl || formData.liveChatEnabled;
+    if (!hasContent) {
       setPreviewHtml('');
       return;
     }
@@ -94,7 +96,8 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       liveChatRequireEmail: formData.liveChatRequireEmail,
       liveChatRequireName: formData.liveChatRequireName,
       liveChatRequirePhone: formData.liveChatRequirePhone,
-      liveChatCustomFields: JSON.stringify(formData.liveChatCustomFields)
+      liveChatCustomFields: JSON.stringify(formData.liveChatCustomFields),
+      liveChatButtonText: formData.liveChatButtonText
     };
 
     // Use SAME renderer as edge function
@@ -172,6 +175,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     formData.liveChatRequireName,
     formData.liveChatRequirePhone,
     formData.liveChatCustomFields,
+    formData.liveChatButtonText,
     channels,
     editingWidget?.video_url,
     getTemplate

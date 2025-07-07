@@ -29,4 +29,5 @@ export interface TemplateConfig {
   liveChatRequireName?: boolean;
   liveChatRequirePhone?: boolean;
   liveChatCustomFields?: string;
+  liveChatButtonText?: string;
 }

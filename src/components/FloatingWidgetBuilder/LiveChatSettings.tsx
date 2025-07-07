@@ -25,6 +25,7 @@ interface LiveChatSettingsProps {
   liveChatEmailPlaceholder: string;
   liveChatPhoneLabel: string;
   liveChatPhonePlaceholder: string;
+  liveChatButtonText: string;
   onLiveChatEnabledChange: (enabled: boolean) => void;
   onLiveChatAgentNameChange: (name: string) => void;
   onLiveChatGreetingChange: (greeting: string) => void;
@@ -41,6 +42,7 @@ interface LiveChatSettingsProps {
   onLiveChatEmailPlaceholderChange: (placeholder: string) => void;
   onLiveChatPhoneLabelChange: (label: string) => void;
   onLiveChatPhonePlaceholderChange: (placeholder: string) => void;
+  onLiveChatButtonTextChange: (text: string) => void;
 }
 
 export const LiveChatSettings: React.FC<LiveChatSettingsProps> = ({
@@ -60,6 +62,7 @@ export const LiveChatSettings: React.FC<LiveChatSettingsProps> = ({
   liveChatEmailPlaceholder,
   liveChatPhoneLabel,
   liveChatPhonePlaceholder,
+  liveChatButtonText,
   onLiveChatEnabledChange,
   onLiveChatAgentNameChange,
   onLiveChatGreetingChange,
@@ -75,7 +78,8 @@ export const LiveChatSettings: React.FC<LiveChatSettingsProps> = ({
   onLiveChatEmailLabelChange,
   onLiveChatEmailPlaceholderChange,
   onLiveChatPhoneLabelChange,
-  onLiveChatPhonePlaceholderChange
+  onLiveChatPhonePlaceholderChange,
+  onLiveChatButtonTextChange
 }) => {
   return (
     <Card>
@@ -151,6 +155,16 @@ export const LiveChatSettings: React.FC<LiveChatSettingsProps> = ({
                 value={liveChatOfflineMessage}
                 onChange={(e) => onLiveChatOfflineMessageChange(e.target.value)}
                 rows={2}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="liveChatButtonText">Live Chat Button Text</Label>
+              <Input
+                id="liveChatButtonText"
+                placeholder="Start Live Chat"
+                value={liveChatButtonText}
+                onChange={(e) => onLiveChatButtonTextChange(e.target.value)}
               />
             </div>
 

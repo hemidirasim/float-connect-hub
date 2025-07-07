@@ -50,7 +50,8 @@ export const useWidgetState = (user: any) => {
     liveChatEmailLabel: 'Email',
     liveChatEmailPlaceholder: 'your@email.com',
     liveChatPhoneLabel: 'Phone',
-    liveChatPhonePlaceholder: '+1 (555) 123-4567'
+    liveChatPhonePlaceholder: '+1 (555) 123-4567',
+    liveChatButtonText: 'Start Live Chat'
   });
 
   // Check for editing widget on load
@@ -114,7 +115,8 @@ export const useWidgetState = (user: any) => {
           liveChatEmailLabel: 'Email',
           liveChatEmailPlaceholder: 'your@email.com',
           liveChatPhoneLabel: 'Phone',
-          liveChatPhonePlaceholder: '+1 (555) 123-4567'
+          liveChatPhonePlaceholder: '+1 (555) 123-4567',
+          liveChatButtonText: data.live_chat_button_text || 'Start Live Chat'
         });
 
         // Scroll to widget form
@@ -172,7 +174,8 @@ export const useWidgetState = (user: any) => {
       liveChatEmailLabel: 'Email',
       liveChatEmailPlaceholder: 'your@email.com',
       liveChatPhoneLabel: 'Phone',
-      liveChatPhonePlaceholder: '+1 (555) 123-4567'
+      liveChatPhonePlaceholder: '+1 (555) 123-4567',
+      liveChatButtonText: 'Start Live Chat'
     });
   };
 

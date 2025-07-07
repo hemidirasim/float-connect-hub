@@ -55,7 +55,8 @@ export function createWidgetConfig(widget: any): WidgetConfig {
     liveChatRequireEmail: Boolean(widget.live_chat_require_email),
     liveChatRequireName: Boolean(widget.live_chat_require_name),
     liveChatRequirePhone: Boolean(widget.live_chat_require_phone),
-    liveChatCustomFields: widget.live_chat_custom_fields || ''
+    liveChatCustomFields: widget.live_chat_custom_fields || '',
+    liveChatButtonText: widget.live_chat_button_text || 'Start Live Chat'
   }
 
   console.log('Final widget config created:', {
