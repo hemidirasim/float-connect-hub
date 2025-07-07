@@ -1,4 +1,3 @@
-
 export interface Channel {
   id: string;
   type: string;
@@ -6,6 +5,13 @@ export interface Channel {
   label: string;
   color?: string;
   icon?: string;
+  customIcon?: string;
+  // Channel grouping properties
+  isGroup?: boolean;
+  groupItems?: Channel[];
+  displayMode?: 'individual' | 'grouped';
+  childChannels?: Channel[];
+  parentId?: string;
 }
 
 export interface WidgetConfig {
