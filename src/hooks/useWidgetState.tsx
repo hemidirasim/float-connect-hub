@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -35,7 +36,6 @@ export const useWidgetState = (user: any) => {
     liveChatEnabled: false,
     liveChatGreeting: 'Hello! How can we help you today?',
     liveChatColor: '#4f46e5',
-    liveChatPosition: 'bottom-right',
     liveChatAutoOpen: false,
     liveChatOfflineMessage: 'We are currently offline. Please leave a message and we will get back to you.'
   });
@@ -87,7 +87,6 @@ export const useWidgetState = (user: any) => {
           liveChatEnabled: data.live_chat_enabled || false,
           liveChatGreeting: data.live_chat_greeting || 'Hello! How can we help you today?',
           liveChatColor: data.live_chat_color || '#4f46e5',
-          liveChatPosition: data.live_chat_position || 'bottom-right',
           liveChatAutoOpen: data.live_chat_auto_open || false,
           liveChatOfflineMessage: data.live_chat_offline_message || 'We are currently offline. Please leave a message and we will get back to you.'
         });
@@ -133,7 +132,6 @@ export const useWidgetState = (user: any) => {
       liveChatEnabled: false,
       liveChatGreeting: 'Hello! How can we help you today?',
       liveChatColor: '#4f46e5',
-      liveChatPosition: 'bottom-right',
       liveChatAutoOpen: false,
       liveChatOfflineMessage: 'We are currently offline. Please leave a message and we will get back to you.'
     });

@@ -37,13 +37,12 @@ export const useWidgetActions = (
     toast.success('Channel removed!');
   };
 
-  // Updated to handle both value and label
   const handleEditChannel = (id: string, newValue: string, newLabel: string) => {
     setChannels(channels.map(channel =>
       channel.id === id ? { 
         ...channel, 
         value: newValue,
-        label: newLabel // Make sure to update the label
+        label: newLabel
       } : channel
     ));
     toast.success('Channel updated!');
@@ -93,7 +92,6 @@ export const useWidgetActions = (
         live_chat_enabled: formData.liveChatEnabled,
         live_chat_greeting: formData.liveChatGreeting,
         live_chat_color: formData.liveChatColor,
-        live_chat_position: formData.liveChatPosition,
         live_chat_auto_open: formData.liveChatAutoOpen,
         live_chat_offline_message: formData.liveChatOfflineMessage
       };

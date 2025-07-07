@@ -1,24 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
+
+import React, { useState } from 'react';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { MessageCircle, Phone, Mail, Send, Instagram, Zap, Globe, Users, Heart, Star, Square, Circle } from 'lucide-react';
 import { Channel, FormData } from './types';
-
-// Import template definitions from the same source as edge function
-import { getDefaultTemplate } from '../../../supabase/functions/widget-js/default-template';
-import { getDarkTemplate } from '../../../supabase/functions/widget-js/templates/dark-template';
-import { getMinimalTemplate } from '../../../supabase/functions/widget-js/templates/minimal-template';
-import { getModernTemplate } from '../../../supabase/functions/widget-js/templates/modern-template';
-import { getElegantTemplate } from '../../../supabase/functions/widget-js/templates/elegant-template';
-
-// Import the SAME template renderer as edge functions
-import { WidgetTemplateRenderer } from '../../../supabase/functions/widget-js/template-generator';
-
-// Use the same template registry as edge functions
-const TEMPLATE_REGISTRY = {
-  'default': getDefaultTemplate,
-  'dark': getDarkTemplate,
-  'minimal': getMinimalTemplate,
-  'modern': getModernTemplate,
-  'elegant': getElegantTemplate
-} as const;
 
 interface TemplatePreviewProps {
   showWidget: boolean;
@@ -33,184 +19,212 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
   channels,
   editingWidget
 }) => {
-  const [previewHtml, setPreviewHtml] = useState<string>('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
 
-  // Memoize template getter to prevent infinite re-renders
-  const getTemplate = useCallback((templateId: string) => {
-    const templateFunction = TEMPLATE_REGISTRY[templateId as keyof typeof TEMPLATE_REGISTRY] || TEMPLATE_REGISTRY['default'];
-    const template = templateFunction();
-    return template;
-  }, []);
-
-  // Generate preview HTML when template or config changes - USE SAME SYSTEM AS EDGE FUNCTION
-  useEffect(() => {
-    if (!showWidget) {
-      setPreviewHtml('');
-      return;
+  const getChannelIcon = (type: string) => {
+    switch (type) {
+      case 'whatsapp':
+      case 'telegram':
+        return MessageCircle;
+      case 'phone':
+        return Phone;
+      case 'email':
+        return Mail;
+      case 'instagram':
+        return Instagram;
+      default:
+        return MessageCircle;
     }
+  };
 
-    const templateId = formData.templateId || 'default';
-    const template = getTemplate(templateId);
-
-    console.log('Generating floating widget preview with SAME template system:', {
-      templateId,
-      templateName: template.name,
-      channels: channels.length,
-      buttonColor: formData.buttonColor,
-      position: formData.position,
-      greetingMessage: formData.greetingMessage
-    });
-
-    // Use EXACT SAME config structure as edge function template-generator.ts
-    const templateConfig = {
-      channels,
-      buttonColor: formData.buttonColor,
-      position: formData.position,
-      tooltip: formData.tooltip,
-      tooltipDisplay: formData.tooltipDisplay,
-      tooltipPosition: formData.tooltipPosition,
-      greetingMessage: formData.greetingMessage,
-      customIconUrl: formData.customIcon === 'custom' ? formData.customIconUrl : null,
-      videoEnabled: Boolean(formData.videoUrl),
-      videoUrl: formData.videoUrl || editingWidget?.video_url,
-      videoHeight: formData.videoHeight,
-      videoAlignment: formData.videoAlignment,
-      videoObjectFit: formData.videoObjectFit,
-      useVideoPreview: formData.useVideoPreview,
-      buttonSize: formData.buttonSize,
-      previewVideoHeight: formData.previewVideoHeight,
-      templateId: templateId,
-      widgetWidth: 400, // Default value
-      widgetHeight: 600 // Default value
-    };
-
-    // Use SAME renderer as edge function
-    const renderer = new WidgetTemplateRenderer(template, templateConfig);
-    const completeScript = renderer.generateWidgetScript();
-    
-    // Parse and clean the generated script to extract HTML, CSS, and JS
-    const htmlMatch = completeScript.match(/widgetDiv\.innerHTML = `([^`]+)`/);
-    const cssMatch = completeScript.match(/style\.textContent = `([^`]+)`/);
-    const jsMatch = completeScript.match(/\/\/ Execute JavaScript\s*([\s\S]*?)(?=\}\)\(\);)/);
-    
-    let finalHtml = '';
-    
-    if (htmlMatch && cssMatch) {
-      const html = htmlMatch[1]
-        .replace(/\\n/g, '\n')
-        .replace(/\\t/g, '\t')
-        .replace(/\\'/g, "'")
-        .replace(/\\"/g, '"');
-      
-      const css = cssMatch[1]
-        .replace(/\\n/g, '\n')
-        .replace(/\\t/g, '\t')
-        .replace(/\\'/g, "'")
-        .replace(/\\"/g, '"');
-      
-      let js = '';
-      if (jsMatch) {
-        js = jsMatch[1]
-          .replace(/\\n/g, '\n')
-          .replace(/\\t/g, '\t')
-          .replace(/\\'/g, "'")
-          .replace(/\\"/g, '"');
-      }
-      
-      finalHtml = `
-        <style>${css}</style>
-        ${html}
-        <script>
-          (function() {
-            ${js}
-          })();
-        </script>
-      `;
-    } else {
-      // Fallback - use the complete script
-      finalHtml = `<div id="temp-container"></div><script>${completeScript}</script>`;
+  const getChannelColor = (type: string) => {
+    switch (type) {
+      case 'whatsapp':
+        return '#25d366';
+      case 'telegram':
+        return '#0088cc';
+      case 'phone':
+        return '#22c55e';
+      case 'email':
+        return '#ea4335';
+      case 'instagram':
+        return '#e4405f';
+      default:
+        return formData.buttonColor;
     }
-    
-    setPreviewHtml(finalHtml);
-    console.log('Floating widget preview generated using SAME system as edge function');
-  }, [
-    showWidget,
-    formData.templateId,
-    formData.buttonColor,
-    formData.position,
-    formData.tooltip,
-    formData.tooltipDisplay,
-    formData.tooltipPosition,
-    formData.greetingMessage,
-    formData.customIconUrl,
-    formData.videoUrl,
-    formData.videoHeight,
-    formData.videoAlignment,
-    formData.videoObjectFit,
-    formData.useVideoPreview,
-    formData.buttonSize,
-    formData.previewVideoHeight,
-    channels,
-    editingWidget?.video_url,
-    getTemplate
-  ]);
+  };
 
-  // Execute inline scripts after HTML is inserted
-  useEffect(() => {
-    if (previewHtml) {
-      const timer = setTimeout(() => {
-        try {
-          // Remove any existing preview widgets first
-          const existingWidgets = document.querySelectorAll('[data-widget-preview]');
-          existingWidgets.forEach(widget => widget.remove());
+  const handleChannelClick = (channel: Channel) => {
+    let url = '';
+    switch (channel.type) {
+      case 'whatsapp':
+        url = `https://wa.me/${channel.value}`;
+        break;
+      case 'telegram':
+        url = `https://t.me/${channel.value}`;
+        break;
+      case 'instagram':
+        url = channel.value.startsWith('http') ? channel.value : `https://instagram.com/${channel.value}`;
+        break;
+      case 'email':
+        url = `mailto:${channel.value}`;
+        break;
+      case 'phone':
+        url = `tel:${channel.value}`;
+        break;
+      default:
+        url = channel.value;
+    }
+    window.open(url, '_blank');
+  };
 
-          // Create a temporary container to parse the HTML
-          const tempDiv = document.createElement('div');
-          tempDiv.innerHTML = previewHtml;
+  if (!showWidget || channels.length === 0) {
+    return (
+      <div className="fixed bottom-4 right-4 p-4 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 text-center">
+        <MessageCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+        <p className="text-sm text-gray-500">
+          {channels.length === 0 ? 'Add channels to see preview' : 'Widget preview will appear here'}
+        </p>
+      </div>
+    );
+  }
+
+  const buttonSize = formData.buttonSize || 60;
+  const position = formData.position === 'left' ? 'left-4' : 'right-4';
+
+  return (
+    <>
+      {/* Main Widget Button */}
+      <div className={`fixed bottom-4 ${position} z-50`}>
+        <div className="relative group">
+          {/* Tooltip */}
+          {formData.tooltip && formData.tooltipDisplay === 'hover' && (
+            <div className={`absolute bottom-full mb-2 ${formData.position === 'left' ? 'left-0' : 'right-0'} 
+              bg-gray-800 text-white px-3 py-1 rounded-lg text-sm whitespace-nowrap
+              opacity-0 group-hover:opacity-100 transition-opacity duration-200
+              ${formData.tooltipPosition === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'}`}>
+              {formData.tooltip}
+              <div className={`absolute ${formData.tooltipPosition === 'top' ? 'top-full' : 'bottom-full'} 
+                ${formData.position === 'left' ? 'left-4' : 'right-4'} 
+                w-0 h-0 border-l-4 border-r-4 border-transparent
+                ${formData.tooltipPosition === 'top' ? 'border-t-4 border-t-gray-800' : 'border-b-4 border-b-gray-800'}`}>
+              </div>
+            </div>
+          )}
           
-          // Add all elements to the body
-          const elements = Array.from(tempDiv.children);
-          elements.forEach(element => {
-            element.setAttribute('data-widget-preview', 'true');
-            document.body.appendChild(element);
-          });
+          <Button
+            onClick={() => setIsOpen(true)}
+            className="rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110"
+            style={{
+              backgroundColor: formData.buttonColor,
+              width: `${buttonSize}px`,
+              height: `${buttonSize}px`,
+              padding: 0,
+              border: 'none'
+            }}
+          >
+            <MessageCircle className="w-6 h-6 text-white" />
+          </Button>
+        </div>
+      </div>
 
-          // Wait a bit for DOM to be ready, then execute any inline scripts
-          setTimeout(() => {
-            // Find and execute script tags
-            const scripts = document.querySelectorAll('script[data-widget-preview]');
-            scripts.forEach(script => {
-              if (script.textContent && script.textContent.trim()) {
-                console.log('Executing widget script for preview...');
-                try {
-                  // Create a new function from the script content and execute it
-                  const scriptContent = script.textContent;
-                  const scriptFunction = new Function(scriptContent);
-                  scriptFunction();
-                } catch (e) {
-                  console.error('Script execution error:', e);
-                }
-              }
-            });
-          }, 100);
+      {/* Widget Modal */}
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageCircle className="w-5 h-5" style={{ color: formData.buttonColor }} />
+              {formData.greetingMessage || 'Contact us!'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-3">
+            {/* Video Preview */}
+            {formData.useVideoPreview && (formData.videoUrl || editingWidget?.video_url) && (
+              <div className="mb-4">
+                <div 
+                  className="relative cursor-pointer rounded-lg overflow-hidden"
+                  style={{ height: `${formData.previewVideoHeight}px` }}
+                  onClick={() => setVideoModalOpen(true)}
+                >
+                  <video
+                    src={formData.videoUrl || editingWidget?.video_url}
+                    className="w-full h-full object-cover"
+                    style={{ objectFit: formData.videoObjectFit as any }}
+                    muted
+                    playsInline
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                    <div className="w-12 h-12 bg-white bg-opacity-90 rounded-full flex items-center justify-center">
+                      <div className="w-0 h-0 border-l-4 border-r-0 border-t-2 border-b-2 border-transparent border-l-gray-800 ml-1"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
-        } catch (error) {
-          console.error('Error rendering floating widget:', error);
-        }
-      }, 100);
+            {/* Live Chat Option */}
+            {formData.liveChatEnabled && (
+              <div className="mb-3">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start h-12"
+                  style={{ 
+                    borderColor: formData.liveChatColor,
+                    color: formData.liveChatColor
+                  }}
+                >
+                  <MessageCircle className="w-5 h-5 mr-3" />
+                  <div className="text-left">
+                    <div className="font-medium">Live Chat</div>
+                    <div className="text-xs text-gray-500">{formData.liveChatGreeting}</div>
+                  </div>
+                </Button>
+              </div>
+            )}
 
-      return () => clearTimeout(timer);
-    }
-  }, [previewHtml]);
+            {/* Contact Channels */}
+            {channels.map((channel) => {
+              const Icon = getChannelIcon(channel.type);
+              const color = getChannelColor(channel.type);
+              
+              return (
+                <Button
+                  key={channel.id}
+                  variant="outline"
+                  className="w-full justify-start h-12 hover:bg-gray-50"
+                  onClick={() => handleChannelClick(channel)}
+                  style={{ borderColor: color }}
+                >
+                  <Icon className="w-5 h-5 mr-3" style={{ color }} />
+                  <div className="text-left">
+                    <div className="font-medium">{channel.label}</div>
+                    <div className="text-xs text-gray-500">{channel.value}</div>
+                  </div>
+                </Button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      const existingWidgets = document.querySelectorAll('[data-widget-preview]');
-      existingWidgets.forEach(widget => widget.remove());
-    };
-  }, []);
-
-  // Don't render any visible component - the widget is injected directly into the page
-  return null;
+      {/* Video Modal */}
+      <Dialog open={videoModalOpen} onOpenChange={setVideoModalOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Video</DialogTitle>
+          </DialogHeader>
+          <div className="aspect-video">
+            <video
+              src={formData.videoUrl || editingWidget?.video_url}
+              className="w-full h-full rounded-lg"
+              controls
+              autoPlay
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 };

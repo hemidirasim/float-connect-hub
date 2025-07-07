@@ -443,6 +443,11 @@ export type Database = {
           greeting_message: string | null
           id: string
           is_active: boolean | null
+          live_chat_auto_open: boolean | null
+          live_chat_color: string | null
+          live_chat_enabled: boolean | null
+          live_chat_greeting: string | null
+          live_chat_offline_message: string | null
           name: string
           position: string
           preview_video_height: number | null
@@ -474,6 +479,11 @@ export type Database = {
           greeting_message?: string | null
           id?: string
           is_active?: boolean | null
+          live_chat_auto_open?: boolean | null
+          live_chat_color?: string | null
+          live_chat_enabled?: boolean | null
+          live_chat_greeting?: string | null
+          live_chat_offline_message?: string | null
           name?: string
           position?: string
           preview_video_height?: number | null
@@ -505,6 +515,11 @@ export type Database = {
           greeting_message?: string | null
           id?: string
           is_active?: boolean | null
+          live_chat_auto_open?: boolean | null
+          live_chat_color?: string | null
+          live_chat_enabled?: boolean | null
+          live_chat_greeting?: string | null
+          live_chat_offline_message?: string | null
           name?: string
           position?: string
           preview_video_height?: number | null
