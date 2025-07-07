@@ -15,10 +15,6 @@ export const defaultHtmlTemplate = `
     <button id="lovable-widget-close">×</button>
     {{VIDEO_CONTENT}}
     <div id="lovable-widget-channels"></div>
-    <div class="lovable-empty-state" style="display: none;">
-      <div class="lovable-empty-icon">📱</div>
-      <p>No channels configured</p>
-    </div>
   </div>
 </div>
 `;
