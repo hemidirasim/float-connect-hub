@@ -36,15 +36,22 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
             filter: `widget_id=eq.${selectedWidget}`
           },
           (payload) => {
-            console.log('New session created:', payload);
+            console.log('New session created via realtime:', payload);
             const newSession = payload.new as ChatSession;
-            setSessions(prev => {
-              // Check if session already exists to prevent duplicates
-              const exists = prev.some(s => s.id === newSession.id);
-              if (exists) return prev;
-              return [newSession, ...prev];
-            });
-            toast.success(`Yeni söhbət: ${newSession.visitor_name}`);
+            
+            // Only add if it doesn't exist and matches current widget
+            if (newSession.widget_id === selectedWidget) {
+              setSessions(prev => {
+                const exists = prev.some(s => s.id === newSession.id);
+                if (exists) {
+                  console.log('Session already exists, skipping duplicate');
+                  return prev;
+                }
+                console.log('Adding new session to list:', newSession);
+                return [newSession, ...prev];
+              });
+              toast.success(`Yeni söhbət: ${newSession.visitor_name}`);
+            }
           }
         )
         .on(
@@ -192,6 +199,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
     
     setLoading(true);
     try {
+      console.log('Fetching sessions for widget:', selectedWidget);
       const { data, error } = await supabase
         .from('chat_sessions')
         .select('*')
@@ -200,6 +208,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets, userE
 
       if (error) throw error;
       
+      console.log('Fetched sessions:', data);
       setSessions(data || []);
       
       // Select first active session if available and no session is selected
