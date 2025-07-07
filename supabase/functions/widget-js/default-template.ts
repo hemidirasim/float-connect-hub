@@ -1,4 +1,5 @@
-import type { WidgetTemplate } from '../../template-types.ts'
+
+import type { WidgetTemplate } from './template-types.ts'
 
 export function getDefaultTemplate(): WidgetTemplate {
   return {
