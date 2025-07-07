@@ -248,11 +248,15 @@ const defaultJavaScriptLogic = `
       messagesDiv.appendChild(endMessage);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
       
-      // Disable input
+      // Disable input and mark session as inactive
       var input = document.querySelector('#lovable-livechat-input');
       var sendBtn = document.querySelector('#lovable-livechat-send');
-      if (input) input.disabled = true;
+      if (input) {
+        input.disabled = true;
+        input.placeholder = 'Chat session has ended';
+      }
       if (sendBtn) sendBtn.disabled = true;
+      window.liveChatSessionActive = false;
     }
   }
 
@@ -309,6 +313,9 @@ const defaultJavaScriptLogic = `
     if (prechatForm) prechatForm.style.display = 'none';
     if (chatMessages) chatMessages.style.display = 'flex';
     if (chatInput) chatInput.style.display = 'flex';
+    
+    // Mark session as active
+    window.liveChatSessionActive = true;
     
     // Add initial message from agent with user's name
     if (chatMessages && chatMessages.children.length === 0) {
@@ -407,6 +414,12 @@ const defaultJavaScriptLogic = `
     var input = document.querySelector('#lovable-livechat-input');
     var messagesDiv = document.querySelector('#lovable-livechat-messages');
     var userData = window.liveChatUserData || {};
+    
+    // Check if session is still active
+    if (!window.liveChatSessionActive) {
+      console.log('Cannot send message - session is not active');
+      return;
+    }
     
     if (input && messagesDiv && input.value.trim()) {
       var messageText = input.value.trim();

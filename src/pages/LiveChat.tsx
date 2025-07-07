@@ -342,29 +342,28 @@ const LiveChat = () => {
                   </ScrollArea>
 
                   {/* Message Input */}
-                  {selectedSession.status === 'active' && (
-                    <div className="border-t p-4">
-                      <div className="flex gap-2">
-                        <Input
-                          value={newMessage}
-                          onChange={(e) => setNewMessage(e.target.value)}
-                          placeholder="Type your message..."
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault();
-                              sendMessage();
-                            }
-                          }}
-                        />
-                        <Button 
-                          onClick={sendMessage} 
-                          disabled={!newMessage.trim() || sendingMessage}
-                        >
-                          <Send className="w-4 h-4" />
-                        </Button>
-                      </div>
+                  <div className="border-t p-4">
+                    <div className="flex gap-2">
+                      <Input
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        placeholder={selectedSession.status === 'active' ? "Type your message..." : "Chat session has ended - cannot send messages"}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey && selectedSession.status === 'active') {
+                            e.preventDefault();
+                            sendMessage();
+                          }
+                        }}
+                        disabled={selectedSession.status !== 'active'}
+                      />
+                      <Button 
+                        onClick={sendMessage} 
+                        disabled={!newMessage.trim() || sendingMessage || selectedSession.status !== 'active'}
+                      >
+                        <Send className="w-4 h-4" />
+                      </Button>
                     </div>
-                  )}
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-[600px] text-gray-500">
