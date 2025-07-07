@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -62,7 +63,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
     if (selectedSession) {
       fetchMessages();
       
-      // Subscribe to real-time messages for this session
+      // Subscribe to real-time messages for this session with better configuration
       const messagesChannel = supabase
         .channel(`session-messages-${selectedSession}`)
         .on(
@@ -74,10 +75,19 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
             filter: `session_id=eq.${selectedSession}`
           },
           (payload) => {
-            setMessages(prev => [...prev, payload.new as LiveChatMessage]);
+            console.log('Real-time message received in dashboard:', payload);
+            const newMessage = payload.new as LiveChatMessage;
+            setMessages(prev => {
+              // Check if message already exists to prevent duplicates
+              const exists = prev.some(msg => msg.id === newMessage.id);
+              if (exists) return prev;
+              return [...prev, newMessage];
+            });
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Dashboard messages subscription status:', status);
+        });
 
       // Subscribe to session status updates
       const sessionChannel = supabase
@@ -91,6 +101,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
             filter: `id=eq.${selectedSession}`
           },
           (payload) => {
+            console.log('Session status update received:', payload);
             const updatedSession = payload.new as ChatSession;
             if (updatedSession.status === 'ended') {
               // Session ended, refresh sessions list
@@ -101,9 +112,12 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
             }
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Dashboard session subscription status:', status);
+        });
 
       return () => {
+        console.log('Cleaning up dashboard subscriptions');
         supabase.removeChannel(messagesChannel);
         supabase.removeChannel(sessionChannel);
       };
@@ -167,6 +181,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
     if (!newMessage.trim() || !selectedSession) return;
 
     try {
+      console.log('Sending agent message:', newMessage);
       const { error } = await supabase
         .from('live_chat_messages')
         .insert([{
@@ -179,6 +194,7 @@ export const LiveChatManager: React.FC<LiveChatManagerProps> = ({ widgets }) => 
 
       if (error) throw error;
       setNewMessage('');
+      console.log('Agent message sent successfully');
       toast.success('Mesaj göndərildi');
     } catch (error) {
       console.error('Error sending message:', error);

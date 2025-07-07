@@ -137,7 +137,7 @@ const defaultJavaScriptLogic = `
     startChatSession(userData, customFieldsData);
   }
 
-  // Improved polling system with immediate response checking
+  // Improved polling system with faster agent message detection
   let messagePollInterval = null;
   let lastMessageTime = null;
   
@@ -147,7 +147,7 @@ const defaultJavaScriptLogic = `
       clearInterval(messagePollInterval);
     }
     
-    // Set up fast polling - every 1 second for better sync
+    // Set up very fast polling for agent messages - every 500ms for immediate sync
     messagePollInterval = setInterval(function() {
       if (!window.liveChatSessionId) {
         clearInterval(messagePollInterval);
@@ -156,10 +156,11 @@ const defaultJavaScriptLogic = `
       
       checkForNewMessages(sessionId);
       checkSessionStatus(sessionId);
-    }, 1000); // Reduced from 2000ms to 1000ms for faster sync
+    }, 500); // Very fast polling - 500ms for instant agent response
   }
   
   function checkForNewMessages(sessionId) {
+    // Check for agent messages (is_from_visitor=false) with timestamp filter
     var timeQuery = lastMessageTime ? '&created_at=gt.' + lastMessageTime : '';
     
     fetch('https://ttzioshkresaqmsodhfb.supabase.co/rest/v1/live_chat_messages?select=*&session_id=eq.' + sessionId + '&is_from_visitor=eq.false&order=created_at.asc' + timeQuery, {
@@ -171,6 +172,7 @@ const defaultJavaScriptLogic = `
     .then(response => response.json())
     .then(messages => {
       if (messages && messages.length > 0) {
+        console.log('New agent messages received:', messages.length);
         messages.forEach(function(message) {
           addAgentMessageToChat(message.message, message.sender_name);
           lastMessageTime = message.created_at;
@@ -216,6 +218,7 @@ const defaultJavaScriptLogic = `
         }
       }
       
+      console.log('Adding agent message to chat:', messageText);
       var agentMessage = document.createElement('div');
       agentMessage.className = 'chat-message agent-message';
       agentMessage.innerHTML = '<div class="message-content">' + escapeHtml(messageText) + '</div>';
@@ -266,7 +269,8 @@ const defaultJavaScriptLogic = `
       if (data.session_id) {
         window.liveChatSessionId = data.session_id;
         window.liveChatUserData = userData;
-        // Setup message polling with improved sync
+        console.log('Chat session started:', data.session_id);
+        // Setup very fast message polling for instant agent responses
         setupMessagePolling(data.session_id);
         showChatInterface();
       } else {
@@ -428,12 +432,12 @@ const defaultJavaScriptLogic = `
         .then(data => {
           if (data.success) {
             console.log('Message saved to database');
-            // Immediately check for responses after sending
+            // Check for agent responses immediately after sending
             setTimeout(function() {
               if (window.liveChatSessionId) {
                 checkForNewMessages(window.liveChatSessionId);
               }
-            }, 500);
+            }, 200);
           } else {
             console.error('Failed to save message:', data);
           }
