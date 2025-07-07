@@ -22,7 +22,7 @@ export const CodePreview: React.FC<CodePreviewProps> = ({
   }
 
   return (
-    <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+    <Card id="generated-code" className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Copy className="w-5 h-5 text-green-600" />
