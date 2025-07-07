@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Globe, Settings, Code, Trash2 } from 'lucide-react';
+import { Globe, Settings, Code, Trash2, MessageCircle } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -78,6 +78,10 @@ export const WebsitesList: React.FC<WebsitesListProps> = ({ widgets, onRefresh }
     const code = `<script src="https://ttzioshkresaqmsodhfb.supabase.co/functions/v1/widget-js/${widget.id}"></script>`;
     navigator.clipboard.writeText(code);
     toast.success('Code copied!');
+  };
+
+  const handleLiveChat = (widgetId: string) => {
+    navigate(`/live-chat/${widgetId}`);
   };
 
   return (
@@ -158,6 +162,18 @@ export const WebsitesList: React.FC<WebsitesListProps> = ({ widgets, onRefresh }
                       onClick={() => copyCode(widget)}
                     >
                       <Code className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => handleLiveChat(widget.id)}
+                      className="flex-1"
+                    >
+                      <MessageCircle className="w-4 h-4 mr-1" />
+                      Enter Live Chat
                     </Button>
                   </div>
                   

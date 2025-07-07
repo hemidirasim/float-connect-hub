@@ -17,6 +17,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import Sitemap from "./pages/Sitemap";
+import LiveChat from "./pages/LiveChat";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/live-chat/:widgetId" element={<LiveChat />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/password-reset" element={<PasswordReset />} />
             <Route path="/faq" element={<FAQ />} />

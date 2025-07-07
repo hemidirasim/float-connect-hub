@@ -47,9 +47,8 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
 }) => {
   return (
     <Tabs defaultValue="widgets" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-5">
+      <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="widgets">My Websites</TabsTrigger>
-        <TabsTrigger value="livechat">Live Chat</TabsTrigger>
         <TabsTrigger value="billing">Billing</TabsTrigger>
         <TabsTrigger value="profile">Profile</TabsTrigger>
         <TabsTrigger value="support">Support</TabsTrigger>
@@ -57,10 +56,6 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
 
       <TabsContent value="widgets" className="space-y-6">
         <WebsitesList widgets={widgets} onRefresh={onRefreshWidgets} />
-      </TabsContent>
-
-      <TabsContent value="livechat">
-        <LiveChatManager widgets={widgets} />
       </TabsContent>
 
       <TabsContent value="billing">
