@@ -256,64 +256,9 @@ serve(async (req) => {
       }
 
       console.log('✅ Transaction recorded:', insertedTransaction.id);
-
-      // Update user credits
-      const { data: currentCredits } = await supabase
-        .from('user_credits')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      let newBalance;
-      if (!currentCredits) {
-        // Create new credits record
-        newBalance = 100 + creditsToAdd;
-        
-        const { error: insertError } = await supabase
-          .from('user_credits')
-          .insert({
-            user_id: user.id,
-            balance: newBalance,
-            total_spent: 0
-          });
-
-        if (insertError) {
-          console.error('❌ Error creating user credits:', insertError);
-          return new Response(JSON.stringify({
-            success: false,
-            error: 'Error creating credits'
-          }), { 
-            status: 500, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          });
-        }
-
-        console.log('✅ Created new user credits:', newBalance);
-      } else {
-        // Update existing credits
-        newBalance = currentCredits.balance + creditsToAdd;
-        
-        const { error: updateError } = await supabase
-          .from('user_credits')
-          .update({ 
-            balance: newBalance,
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', user.id);
-
-        if (updateError) {
-          console.error('❌ Error updating user credits:', updateError);
-          return new Response(JSON.stringify({
-            success: false,
-            error: 'Error updating credits'
-          }), { 
-            status: 500, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          });
-        }
-
-        console.log('✅ Updated user credits to:', newBalance);
-      }
+      
+      // Credits will be automatically added by the trigger function
+      console.log('🎯 Credits will be added automatically by trigger function');
 
       console.log('🎉 SUCCESS: Payment processed successfully');
       
@@ -321,8 +266,7 @@ serve(async (req) => {
         success: true,
         message: 'Payment processed successfully',
         transaction_id: transactionId,
-        credits_added: creditsToAdd,
-        new_balance: newBalance
+        credits_added: creditsToAdd
       }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
