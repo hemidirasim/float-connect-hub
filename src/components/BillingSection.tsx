@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { CreditBalance } from './billing/CreditBalance';
 import { CreditPackages } from './billing/CreditPackages';
-import { SubscriptionManager } from './billing/SubscriptionManager';
 import { CreditCostInfo } from './billing/CreditCostInfo';
 
 interface UserCredits {
@@ -17,12 +17,6 @@ interface BillingSectionProps {
 }
 
 const creditPackages = [
-  { 
-    credits: 10, 
-    price: 1, 
-    productId: 'pri_01jygks56v6vpvncqxn5harqae',
-    popular: false 
-  },
   { 
     credits: 200, 
     price: 10, 
@@ -53,7 +47,6 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
   const [loading, setLoading] = useState(false);
   const [paddleLoaded, setPaddleLoaded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [managingSubscription, setManagingSubscription] = useState(false);
 
   useEffect(() => {
     initializePaddle();
@@ -197,46 +190,6 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
     }
   };
 
-  const handleManageSubscription = async () => {
-    try {
-      setManagingSubscription(true);
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error('Please log in to manage subscription');
-        return;
-      }
-
-      // Call edge function to create customer portal session
-      const { data, error } = await supabase.functions.invoke('customer-portal', {
-        body: {
-          customer_email: user.email,
-          return_url: window.location.origin + '/dashboard'
-        }
-      });
-      
-      if (error) {
-        console.error('Error creating customer portal session:', error);
-        toast.error('Failed to open subscription management. Please try again or contact support.');
-        return;
-      }
-
-      if (data?.success && data?.portal_url) {
-        // Open customer portal in new tab
-        window.open(data.portal_url, '_blank');
-        toast.success('Customer portal opened in new tab');
-      } else {
-        console.error('No portal URL received:', data);
-        toast.error('Subscription management is not available at the moment. Please contact support.');
-      }
-    } catch (error) {
-      console.error('Error managing subscription:', error);
-      toast.error('Failed to open subscription management');
-    } finally {
-      setManagingSubscription(false);
-    }
-  };
-
   const handlePurchaseCredits = async (credits: number, price: number, productId: string) => {
     if (!paddleLoaded || !window.Paddle) {
       toast.error('Payment system is still loading, please wait...');
@@ -317,11 +270,6 @@ export const BillingSection: React.FC<BillingSectionProps> = ({ userCredits, onC
         onPurchase={handlePurchaseCredits}
         loading={loading}
         paddleLoaded={paddleLoaded}
-      />
-
-      <SubscriptionManager
-        onManageSubscription={handleManageSubscription}
-        managingSubscription={managingSubscription}
       />
 
       <CreditCostInfo />
