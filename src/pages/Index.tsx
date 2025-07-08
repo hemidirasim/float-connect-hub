@@ -169,45 +169,57 @@ const Index = () => {
 
   const handleCustomIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      try {
-        setUploading(true);
-        
-        // Upload to Supabase storage
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `icons/${fileName}`;
+    if (!file) return;
 
-        const { error } = await supabase.storage
-          .from('icons')
-          .upload(filePath, file);
+    if (!user) {
+      toast.error('You must be logged in to upload icons', {
+        description: 'Please sign in to your account'
+      });
+      setAuthModalOpen(true);
+      return;
+    }
 
-        if (error) {
-          console.error('Upload error:', error);
-          toast.error('Failed to upload icon');
-          return;
-        }
+    try {
+      setUploading(true);
+      
+      // Upload to Supabase storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const filePath = `icons/${fileName}`;
 
-        // Get public URL
-        const { data } = supabase.storage
-          .from('icons')
-          .getPublicUrl(filePath);
+      const { error } = await supabase.storage
+        .from('icons')
+        .upload(filePath, file);
 
-        setFormData(prev => ({
-          ...prev,
-          customIcon: 'custom',
-          customIconUrl: data.publicUrl
-        }));
-        
-        toast.success('Custom icon uploaded!', {
-          description: 'You can now use it in your widget'
-        });
-      } catch (error) {
+      if (error) {
         console.error('Upload error:', error);
-        toast.error('Failed to upload icon');
-      } finally {
-        setUploading(false);
+        toast.error('Failed to upload icon', {
+          description: error.message
+        });
+        return;
       }
+
+      // Get public URL
+      const { data } = supabase.storage
+        .from('icons')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({
+        ...prev,
+        customIcon: 'custom',
+        customIconUrl: data.publicUrl
+      }));
+      
+      toast.success('Custom icon uploaded!', {
+        description: 'You can now use it in your widget'
+      });
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload icon', {
+        description: 'Please try again'
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
