@@ -301,8 +301,8 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
         label: channelLabel.trim() || platform?.label || 'Custom',
         displayMode: 'individual',
         childChannels: [],
-        // Only add customIcon if it's provided and it's a custom link
-        ...(selectedChannelType === 'custom' && customIconUrl ? { customIcon: customIconUrl } : {})
+        // Add customIcon if it's provided for any channel type
+        ...(customIconUrl ? { customIcon: customIconUrl } : {})
       };
       
       onChannelsChange([...channels, newChannel]);
@@ -481,8 +481,8 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
                 />
               </div>
 
-              {/* Custom Icon Upload - Only show for custom links */}
-              {selectedChannelType === 'custom' && (
+              {/* Custom Icon Upload - Show for any channel type */}
+              {selectedChannelType && (
                 <div>
                   <Label>Special icon (Optional)</Label>
                   <div className="flex items-center gap-2">
