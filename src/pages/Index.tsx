@@ -168,10 +168,17 @@ const Index = () => {
   };
 
   const handleCustomIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('Custom icon upload triggered');
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
+
+    console.log('File selected:', file.name, file.size);
 
     if (!user) {
+      console.log('No user authenticated');
       toast.error('You must be logged in to upload icons', {
         description: 'Please sign in to your account'
       });
@@ -179,6 +186,7 @@ const Index = () => {
       return;
     }
 
+    console.log('User authenticated, starting upload');
     try {
       setUploading(true);
       
@@ -186,6 +194,8 @@ const Index = () => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       const filePath = `icons/${fileName}`;
+
+      console.log('Uploading to:', filePath);
 
       const { error } = await supabase.storage
         .from('icons')
@@ -199,10 +209,14 @@ const Index = () => {
         return;
       }
 
+      console.log('Upload successful, getting public URL');
+
       // Get public URL
       const { data } = supabase.storage
         .from('icons')
         .getPublicUrl(filePath);
+
+      console.log('Public URL:', data.publicUrl);
 
       setFormData(prev => ({
         ...prev,
