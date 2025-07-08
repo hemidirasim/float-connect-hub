@@ -17,7 +17,7 @@ export function generateVideoContent(config: any): string {
   const videoAlignment = config.videoAlignment || 'center';
   const videoObjectFit = config.videoObjectFit || 'cover';
 
-  // Detect if it's a YouTube URL and create appropriate embed
+  // Detect video platform and create appropriate embed
   if (config.videoUrl.includes('youtube.com') || config.videoUrl.includes('youtu.be')) {
     let videoId = '';
     
@@ -34,9 +34,51 @@ export function generateVideoContent(config: any): string {
           <iframe 
             class="hiclient-video-player" 
             src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&controls=0" 
-            style="width: 100%; height: ${videoHeight}px; object-fit: ${videoObjectFit};" 
+            style="width: 100%; height: ${videoHeight}px;" 
             frameborder="0" 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+          </iframe>
+        </div>
+      `;
+    }
+  }
+
+  // Vimeo support
+  if (config.videoUrl.includes('vimeo.com')) {
+    const vimeoMatch = config.videoUrl.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch && vimeoMatch[1]) {
+      const videoId = vimeoMatch[1];
+      console.log('Creating Vimeo embed for video ID:', videoId);
+      return `
+        <div class="hiclient-video-container" style="text-align: ${videoAlignment};">
+          <iframe 
+            class="hiclient-video-player" 
+            src="https://player.vimeo.com/video/${videoId}?background=1&autoplay=0&loop=0&byline=0&title=0" 
+            style="width: 100%; height: ${videoHeight}px;" 
+            frameborder="0" 
+            allow="autoplay; fullscreen; picture-in-picture" 
+            allowfullscreen>
+          </iframe>
+        </div>
+      `;
+    }
+  }
+
+  // Dailymotion support
+  if (config.videoUrl.includes('dailymotion.com')) {
+    const dailymotionMatch = config.videoUrl.match(/dailymotion\.com\/video\/([a-zA-Z0-9]+)/);
+    if (dailymotionMatch && dailymotionMatch[1]) {
+      const videoId = dailymotionMatch[1];
+      console.log('Creating Dailymotion embed for video ID:', videoId);
+      return `
+        <div class="hiclient-video-container" style="text-align: ${videoAlignment};">
+          <iframe 
+            class="hiclient-video-player" 
+            src="https://www.dailymotion.com/embed/video/${videoId}?autoplay=0&mute=0" 
+            style="width: 100%; height: ${videoHeight}px;" 
+            frameborder="0" 
+            allow="autoplay; fullscreen" 
             allowfullscreen>
           </iframe>
         </div>
@@ -92,6 +134,22 @@ export function generateButtonIcon(customIconUrl: string, useVideoPreview: boole
             src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0" 
             style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover;"
             allow="autoplay"
+            frameborder="0">
+          </iframe>
+        `;
+      }
+    }
+
+    // Check if it's a Vimeo URL
+    if (videoUrl.includes('vimeo.com')) {
+      const vimeoMatch = videoUrl.match(/vimeo\.com\/(\d+)/);
+      if (vimeoMatch && vimeoMatch[1]) {
+        const videoId = vimeoMatch[1];
+        return `
+          <iframe 
+            src="https://player.vimeo.com/video/${videoId}?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1" 
+            style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover;"
+            allow="autoplay; fullscreen"
             frameborder="0">
           </iframe>
         `;

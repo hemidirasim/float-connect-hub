@@ -93,6 +93,8 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           <VideoUpload
             video={formData.video}
             videoUrl={formData.videoUrl || editingWidget?.video_url}
+            videoType={formData.videoType}
+            videoLink={formData.videoLink}
             useVideoPreview={formData.useVideoPreview}
             videoHeight={formData.videoHeight}
             videoAlignment={formData.videoAlignment}
@@ -104,6 +106,8 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             uploading={uploading}
             onVideoUpload={onVideoUpload}
             onVideoRemove={onVideoRemove}
+            onVideoTypeChange={(type) => onFormDataChange('videoType', type)}
+            onVideoLinkChange={(link) => onFormDataChange('videoLink', link)}
             onVideoPreviewChange={(checked) => onFormDataChange('useVideoPreview', checked)}
             onVideoHeightChange={(height) => onFormDataChange('videoHeight', height)}
             onVideoAlignmentChange={(alignment) => onFormDataChange('videoAlignment', alignment)}

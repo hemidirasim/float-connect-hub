@@ -59,7 +59,7 @@ export const useWidgetActions = (
       return { success: false };
     }
 
-    if (channels.length === 0 && !formData.videoUrl) {
+    if (channels.length === 0 && !formData.videoUrl && !formData.videoLink) {
       toast.error('At least 1 contact channel is required');
       return { success: false };
     }
@@ -78,7 +78,7 @@ export const useWidgetActions = (
         tooltip_position: formData.tooltipPosition || 'top',
         greeting_message: formData.greetingMessage || 'Hello! How can we help you today?',
         video_enabled: formData.useVideoPreview,
-        video_url: formData.videoUrl || null,
+        video_url: formData.videoType === 'link' ? formData.videoLink : formData.videoUrl || null,
         video_height: formData.videoHeight,
         video_alignment: formData.videoAlignment,
         video_object_fit: formData.videoObjectFit,

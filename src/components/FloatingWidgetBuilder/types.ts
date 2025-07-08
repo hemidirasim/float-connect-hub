@@ -25,6 +25,8 @@ export interface FormData {
   greetingMessage: string;
   video: File | null;
   videoUrl?: string;
+  videoType: 'upload' | 'link'; // New field to distinguish between upload and link
+  videoLink?: string; // For video links from platforms
   useVideoPreview: boolean;
   videoHeight: number;
   videoAlignment: string;

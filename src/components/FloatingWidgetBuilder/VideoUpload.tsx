@@ -5,14 +5,17 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Upload, Trash2, MessageCircle, Info, Play, X } from 'lucide-react';
+import { Upload, Trash2, MessageCircle, Info, Play, X, Link, Youtube, Video } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { VideoSettings } from './VideoSettings';
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface VideoUploadProps {
   video: File | null;
   videoUrl?: string;
+  videoType: 'upload' | 'link';
+  videoLink?: string;
   useVideoPreview: boolean;
   videoHeight: number;
   videoAlignment: string;
@@ -24,6 +27,8 @@ interface VideoUploadProps {
   uploading?: boolean;
   onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onVideoRemove: () => void;
+  onVideoTypeChange: (type: 'upload' | 'link') => void;
+  onVideoLinkChange: (link: string) => void;
   onVideoPreviewChange: (checked: boolean) => void;
   onVideoHeightChange: (height: number) => void;
   onVideoAlignmentChange: (alignment: string) => void;
@@ -37,6 +42,8 @@ interface VideoUploadProps {
 export const VideoUpload: React.FC<VideoUploadProps> = ({
   video,
   videoUrl,
+  videoType,
+  videoLink,
   useVideoPreview,
   videoHeight,
   videoAlignment,
@@ -48,6 +55,8 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
   uploading = false,
   onVideoUpload,
   onVideoRemove,
+  onVideoTypeChange,
+  onVideoLinkChange,
   onVideoPreviewChange,
   onVideoHeightChange,
   onVideoAlignmentChange,
@@ -57,7 +66,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
   onButtonSizeChange,
   onPreviewVideoHeightChange
 }) => {
-  const hasVideo = video || videoUrl;
+  const hasVideo = video || videoUrl || videoLink;
   const [videoModalOpen, setVideoModalOpen] = useState(false);
 
   const handleVideoPreview = () => {
@@ -77,12 +86,41 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
   };
 
   const getVideoSrc = () => {
-    if (videoUrl) {
+    if (videoType === 'link' && videoLink) {
+      return videoLink;
+    } else if (videoUrl) {
       return videoUrl;
     } else if (video) {
       return URL.createObjectURL(video);
     }
     return '';
+  };
+
+  const isYouTubeUrl = (url: string) => {
+    return url.includes('youtube.com') || url.includes('youtu.be');
+  };
+
+  const isVimeoUrl = (url: string) => {
+    return url.includes('vimeo.com');
+  };
+
+  const getYouTubeVideoId = (url: string) => {
+    if (url.includes('youtube.com/watch?v=')) {
+      return url.split('v=')[1]?.split('&')[0] || '';
+    } else if (url.includes('youtu.be/')) {
+      return url.split('youtu.be/')[1]?.split('?')[0] || '';
+    }
+    return '';
+  };
+
+  const getVimeoVideoId = (url: string) => {
+    const match = url.match(/vimeo\.com\/(\d+)/);
+    return match ? match[1] : '';
+  };
+
+  const validateVideoLink = (link: string) => {
+    if (!link) return false;
+    return isYouTubeUrl(link) || isVimeoUrl(link) || link.includes('dailymotion.com') || link.includes('twitch.tv');
   };
 
   // Fixed icon size for the Design & Appearance section - does not change with button size
@@ -218,37 +256,96 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
-              Video is automatically activated when uploaded. Each video view costs 2 credits.
+              Video upload costs 2 credits per view, video links cost 1 credit per view.
             </AlertDescription>
           </Alert>
 
-          <div className="space-y-4">
-            {/* Video Upload */}
-            <div className="space-y-2">
-              <Label>Upload Video (max 10MB)</Label>
-              <input
-                type="file"
-                accept="video/*"
-                onChange={onVideoUpload}
-                className="hidden"
-                id="video-upload"
-              />
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => document.getElementById('video-upload')?.click()}
-                  disabled={uploading}
-                  className="flex-1 min-w-0"
-                >
-                  <Upload className="w-4 h-4 mr-2 flex-shrink-0" />
-                  <span className="truncate">
-                    {uploading ? 'Uploading...' : hasVideo ? getVideoDisplayName() : 'Choose Video'}
-                  </span>
-                </Button>
-                
-                {hasVideo && (
-                  <>
+          <Tabs value={videoType} onValueChange={(value) => onVideoTypeChange(value as 'upload' | 'link')}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="upload" className="flex items-center gap-2">
+                <Upload className="w-4 h-4" />
+                Upload Video
+              </TabsTrigger>
+              <TabsTrigger value="link" className="flex items-center gap-2">
+                <Link className="w-4 h-4" />
+                Video Link
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="upload" className="space-y-4">
+              <div className="space-y-2">
+                <Label>Upload Video (max 10MB) - 2 credits per view</Label>
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={onVideoUpload}
+                  className="hidden"
+                  id="video-upload"
+                />
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('video-upload')?.click()}
+                    disabled={uploading}
+                    className="flex-1 min-w-0"
+                  >
+                    <Upload className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">
+                      {uploading ? 'Uploading...' : (video ? getVideoDisplayName() : 'Choose Video')}
+                    </span>
+                  </Button>
+                  
+                  {video && (
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleVideoPreview}
+                        title="Preview Video"
+                      >
+                        <Play className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={onVideoRemove}
+                        title="Remove Video"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="link" className="space-y-4">
+              <div className="space-y-2">
+                <Label>Video Link - 1 credit per view</Label>
+                <div className="flex items-center gap-2">
+                  <Youtube className="w-4 h-4 text-red-600" />
+                  <Video className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm text-gray-600">YouTube, Vimeo, Dailymotion, Twitch supported</span>
+                </div>
+                <Input
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  value={videoLink || ''}
+                  onChange={(e) => onVideoLinkChange(e.target.value)}
+                  className="w-full"
+                />
+                {videoLink && !validateVideoLink(videoLink) && (
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertDescription>
+                      Please enter a valid YouTube, Vimeo, Dailymotion, or Twitch URL.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {videoLink && validateVideoLink(videoLink) && (
+                  <div className="flex gap-2">
                     <Button
                       type="button"
                       variant="outline"
@@ -262,62 +359,62 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={onVideoRemove}
+                      onClick={() => onVideoLinkChange('')}
                       title="Remove Video"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
-                  </>
+                  </div>
                 )}
               </div>
-            </div>
+            </TabsContent>
+          </Tabs>
 
-            {hasVideo && (
-              <>
-                <VideoSettings
-                  videoHeight={videoHeight}
-                  videoAlignment={videoAlignment}
-                  videoObjectFit={videoObjectFit}
-                  onVideoHeightChange={onVideoHeightChange}
-                  onVideoAlignmentChange={onVideoAlignmentChange}
-                  onVideoObjectFitChange={onVideoObjectFitChange}
-                />
+          {hasVideo && (
+            <>
+              <VideoSettings
+                videoHeight={videoHeight}
+                videoAlignment={videoAlignment}
+                videoObjectFit={videoObjectFit}
+                onVideoHeightChange={onVideoHeightChange}
+                onVideoAlignmentChange={onVideoAlignmentChange}
+                onVideoObjectFitChange={onVideoObjectFitChange}
+              />
 
-                {/* Video Preview Option */}
-                <div className="space-y-4 p-4 border rounded-lg bg-blue-50">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-base font-medium">Use Video Preview as Button</Label>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Replace the button with a 3-4 second video preview instead of an icon
-                      </p>
-                    </div>
-                    <Switch
-                      checked={useVideoPreview}
-                      onCheckedChange={onVideoPreviewChange}
-                    />
+              {/* Video Preview Option */}
+              <div className="space-y-4 p-4 border rounded-lg bg-blue-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base font-medium">Use Video Preview as Button</Label>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Replace the button with a 3-4 second video preview instead of an icon
+                    </p>
                   </div>
-
-                  {useVideoPreview && (
-                    <div className="space-y-2">
-                      <Label>Preview Video Height: {previewVideoHeight}px</Label>
-                      <Input
-                        type="range"
-                        min="80"
-                        max="150"
-                        value={previewVideoHeight}
-                        onChange={(e) => onPreviewVideoHeightChange(Number(e.target.value))}
-                        className="w-full"
-                      />
-                      <p className="text-xs text-gray-500">
-                        This will show a looping preview of your video as the floating button
-                      </p>
-                    </div>
-                  )}
+                  <Switch
+                    checked={useVideoPreview}
+                    onCheckedChange={onVideoPreviewChange}
+                  />
                 </div>
-              </>
-            )}
-          </div>
+
+                {useVideoPreview && (
+                  <div className="space-y-2">
+                    <Label>Preview Video Height: {previewVideoHeight}px</Label>
+                    <Input
+                      type="range"
+                      min="80"
+                      max="150"
+                      value={previewVideoHeight}
+                      onChange={(e) => onPreviewVideoHeightChange(Number(e.target.value))}
+                      className="w-full"
+                    />
+                    <p className="text-xs text-gray-500">
+                      This will show a looping preview of your video as the floating button
+                    </p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -338,14 +435,36 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
           </DialogHeader>
           <div className="p-6 pt-2">
             {hasVideo && (
-              <video
-                src={getVideoSrc()}
-                controls
-                className="w-full max-h-[70vh] rounded-lg"
-                autoPlay={false}
-              >
-                Your browser does not support the video tag.
-              </video>
+              <div>
+                {videoType === 'link' && videoLink && isYouTubeUrl(videoLink) ? (
+                  <iframe
+                    src={`https://www.youtube.com/embed/${getYouTubeVideoId(videoLink)}`}
+                    className="w-full max-h-[70vh] rounded-lg"
+                    style={{ aspectRatio: '16/9' }}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : videoType === 'link' && videoLink && isVimeoUrl(videoLink) ? (
+                  <iframe
+                    src={`https://player.vimeo.com/video/${getVimeoVideoId(videoLink)}`}
+                    className="w-full max-h-[70vh] rounded-lg"
+                    style={{ aspectRatio: '16/9' }}
+                    frameBorder="0"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video
+                    src={getVideoSrc()}
+                    controls
+                    className="w-full max-h-[70vh] rounded-lg"
+                    autoPlay={false}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+              </div>
             )}
           </div>
         </DialogContent>
