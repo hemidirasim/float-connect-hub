@@ -167,18 +167,47 @@ const Index = () => {
     });
   };
 
-  const handleCustomIconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCustomIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const url = URL.createObjectURL(file);
-      setFormData(prev => ({
-        ...prev,
-        customIcon: 'custom',
-        customIconUrl: url
-      }));
-      toast.success('Custom icon uploaded!', {
-        description: 'You can now use it in your widget'
-      });
+      try {
+        setUploading(true);
+        
+        // Upload to Supabase storage
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `icons/${fileName}`;
+
+        const { error } = await supabase.storage
+          .from('icons')
+          .upload(filePath, file);
+
+        if (error) {
+          console.error('Upload error:', error);
+          toast.error('Failed to upload icon');
+          return;
+        }
+
+        // Get public URL
+        const { data } = supabase.storage
+          .from('icons')
+          .getPublicUrl(filePath);
+
+        setFormData(prev => ({
+          ...prev,
+          customIcon: 'custom',
+          customIconUrl: data.publicUrl
+        }));
+        
+        toast.success('Custom icon uploaded!', {
+          description: 'You can now use it in your widget'
+        });
+      } catch (error) {
+        console.error('Upload error:', error);
+        toast.error('Failed to upload icon');
+      } finally {
+        setUploading(false);
+      }
     }
   };
 
