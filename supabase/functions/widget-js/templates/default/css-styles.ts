@@ -64,6 +64,9 @@ export const defaultCssStyles = `
   }
   
   .hiclient-video-player {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 20px;
     object-fit: {{VIDEO_OBJECT_FIT}};
   }
   
