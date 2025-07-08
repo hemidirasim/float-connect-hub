@@ -85,9 +85,13 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
     return '';
   };
 
-  // Calculate icon size based on button size - make it proportional
-  const getIconSize = () => {
-    // Icon should be roughly 60-70% of button size
+  // Fixed icon size for the Design & Appearance section - does not change with button size
+  const getFixedIconSize = () => {
+    return 20; // Fixed size regardless of button size
+  };
+
+  // Icon size for the widget button itself - scales with button size
+  const getWidgetIconSize = () => {
     return Math.max(20, Math.min(40, Math.round(buttonSize * 0.65)));
   };
 
@@ -113,7 +117,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
               <label htmlFor="standard-icon" className="flex items-center gap-2">
                 <MessageCircle 
                   className="text-green-600" 
-                  size={getIconSize()}
+                  size={getFixedIconSize()}
                 />
                 <span>Standard Chat Icon</span>
               </label>
@@ -176,8 +180,8 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                         alt="Custom icon" 
                         className="object-contain"
                         style={{ 
-                          width: `${getIconSize()}px`, 
-                          height: `${getIconSize()}px` 
+                          width: `${getWidgetIconSize()}px`, 
+                          height: `${getWidgetIconSize()}px` 
                         }}
                       />
                     </div>
@@ -199,7 +203,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
               className="w-full"
             />
             <div className="text-sm text-gray-500">
-              Icon size: {getIconSize()}px (adjusts automatically)
+              Icon size: {getWidgetIconSize()}px (adjusts automatically)
             </div>
           </div>
         </CardContent>
