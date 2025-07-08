@@ -1,4 +1,3 @@
-
 export function generateVideoContent(config: any): string {
   console.log('Generating video content with config:', {
     videoUrl: config.videoUrl,
@@ -34,8 +33,8 @@ export function generateVideoContent(config: any): string {
         <div class="hiclient-video-container" style="text-align: ${videoAlignment};">
           <iframe 
             class="hiclient-video-player" 
-            src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&controls=1" 
-            style="height: ${videoHeight}px; object-fit: ${videoObjectFit};" 
+            src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&controls=0" 
+            style="width: 100%; height: ${videoHeight}px; object-fit: ${videoObjectFit};" 
             frameborder="0" 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
             allowfullscreen>
@@ -45,15 +44,17 @@ export function generateVideoContent(config: any): string {
     }
   }
 
-  // For regular video files, create a video element
+  // For regular video files, create a video element with no controls and 100% width
   console.log('Creating video element for regular video file');
   return `
     <div class="hiclient-video-container" style="text-align: ${videoAlignment};">
       <video 
         class="hiclient-video-player" 
         src="${config.videoUrl}" 
-        style="height: ${videoHeight}px; object-fit: ${videoObjectFit};" 
-        controls 
+        style="width: 100%; height: ${videoHeight}px; object-fit: ${videoObjectFit};" 
+        autoplay 
+        muted 
+        loop
         preload="metadata">
         Your browser does not support the video tag.
       </video>
