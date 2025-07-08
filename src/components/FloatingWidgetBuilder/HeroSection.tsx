@@ -47,7 +47,7 @@ export const HeroSection: React.FC = () => {
                 Try Free Now
               </a>
               <a 
-                href="#faq" 
+                href="/faq" 
                 className="px-8 py-4 bg-white/80 backdrop-blur-sm text-gray-700 font-semibold rounded-xl border border-gray-200 hover:bg-white hover:shadow-lg transition-all duration-200"
               >
                 FAQ
