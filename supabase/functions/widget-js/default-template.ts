@@ -22,6 +22,11 @@ const defaultJavaScriptLogic = `
   }
 
   function getChannelIcon(channel) {
+    // Check if channel has a custom icon first
+    if (channel.customIcon) {
+      return '<img src="' + channel.customIcon + '" alt="' + (channel.label || 'Custom') + '" className="w-8 h-8" style="width: 32px; height: 32px; object-fit: contain;" />';
+    }
+    
     var icons = {
       whatsapp: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/007-social.png" alt="Whatsapp" className="w-8 h-8" />',
       telegram: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/006-telegram.png" alt="Telegram" className="w-8 h-8" />',
