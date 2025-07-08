@@ -524,8 +524,9 @@ export const getModernTemplate = (): WidgetTemplate => ({
   }
   
   function getChannelIcon(channel) {
+    // If custom icon is provided (for any channel type), use it
     if (channel.customIcon) {
-      return '<img src="' + channel.customIcon + '" style="width: 20px; height: 20px;" alt="' + channel.type + '">';
+      return '<img src="' + channel.customIcon + '" style="width: 20px; height: 20px; object-fit: contain;" alt="' + channel.type + '">';
     }
 
     const icons = {

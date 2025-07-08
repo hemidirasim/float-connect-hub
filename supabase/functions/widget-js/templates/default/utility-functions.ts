@@ -40,8 +40,8 @@ export function getChannelUrl(channel: any): string {
 }
 
 export function getChannelIcon(type: string, customIcon?: string): string {
-  // If it's a custom link and has a custom icon, use it
-  if (type === 'custom' && customIcon) {
+  // If custom icon is provided (for any channel type), use it
+  if (customIcon) {
     return `<img src="${customIcon}" style="width: 20px; height: 20px; object-fit: contain;" alt="Custom icon">`;
   }
 

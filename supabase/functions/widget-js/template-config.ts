@@ -9,7 +9,7 @@ export function createWidgetConfig(widget: any): WidgetConfig {
     button_size: widget.button_size
   })
 
-  // Parse channels with fallback
+  // Parse channels with fallback and ensure customIcon is preserved
   let channels = []
   if (widget.channels) {
     if (typeof widget.channels === 'string') {
@@ -23,6 +23,23 @@ export function createWidgetConfig(widget: any): WidgetConfig {
       channels = widget.channels
     }
   }
+
+  // Ensure all channels have proper structure and preserve customIcon
+  channels = channels.map((channel: any) => ({
+    ...channel,
+    customIcon: channel.customIcon || undefined,
+    childChannels: (channel.childChannels || []).map((child: any) => ({
+      ...child,
+      customIcon: child.customIcon || undefined
+    }))
+  }))
+
+  console.log('Parsed channels with custom icons:', channels.map((ch: any) => ({
+    type: ch.type,
+    label: ch.label,
+    hasCustomIcon: !!ch.customIcon,
+    customIcon: ch.customIcon
+  })))
 
   const config: WidgetConfig = {
     channels: channels,

@@ -21,7 +21,7 @@ export function getChannelColor(channelType: string): string {
 }
 
 export function getChannelIcon(channelType: string, customIcon?: string, isMinimalTemplate: boolean = false): string {
-  // If custom icon is provided, use it
+  // If custom icon is provided (for any channel type), use it
   if (customIcon) {
     return `<img src="${customIcon}" style="width: 20px; height: 20px; object-fit: contain;" alt="Custom icon">`
   }
