@@ -369,6 +369,8 @@ function initializeWidget() {
     video.muted = true;
     video.pause();
     video.currentTime = 0;
+    // Preload video for better performance
+    video.preload = 'auto';
   }
   
   // Show/hide empty state based on channels
@@ -388,17 +390,26 @@ function initializeWidget() {
       if (video) {
         video.muted = false;
         video.currentTime = 0;
-        video.play().catch(function(error) {
-          console.log("Video play error:", error);
-        });
+        // Ensure video is loaded before playing
+        if (video.readyState >= 2) {
+          video.play().catch(function(error) {
+            console.log("Video play error:", error);
+          });
+        } else {
+          video.addEventListener('canplay', function() {
+            video.play().catch(function(error) {
+              console.log("Video play error:", error);
+            });
+          }, { once: true });
+        }
       }
     });
     
     function closeModal() {
       modal.classList.remove("show");
       if (video) {
-        video.muted = true;
         video.pause();
+        video.muted = true;
       }
     }
     

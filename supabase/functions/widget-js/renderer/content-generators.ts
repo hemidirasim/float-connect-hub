@@ -52,10 +52,8 @@ export function generateVideoContent(config: any): string {
         class="hiclient-video-player" 
         src="${config.videoUrl}" 
         style="width: 100%; height: ${videoHeight}px; object-fit: ${videoObjectFit};" 
-        autoplay 
-        muted 
         loop
-        preload="metadata">
+        preload="auto">
         Your browser does not support the video tag.
       </video>
     </div>
