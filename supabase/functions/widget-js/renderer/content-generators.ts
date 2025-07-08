@@ -1,134 +1,126 @@
 
-import type { TemplateConfig } from './types.ts'
-import type { Channel } from '../types.ts'
-import { generateMinimalChannelsHtml, generateDefaultChannelsHtml } from './template-generators.ts'
-
-export function generateChannelsHtml(config: TemplateConfig, templateId: string): string {
-  if (templateId === 'minimal') {
-    return generateMinimalChannelsHtml(config.channels)
-  }
-  
-  // Default template logic
-  return generateDefaultChannelsHtml(config.channels)
-}
-
-export function generateVideoContent(config: TemplateConfig): string {
-  console.log('generateVideoContent called with:', {
-    videoEnabled: config.videoEnabled,
+export function generateVideoContent(config: any): string {
+  console.log('Generating video content with config:', {
     videoUrl: config.videoUrl,
+    videoEnabled: config.videoEnabled,
     videoHeight: config.videoHeight,
     videoAlignment: config.videoAlignment,
     videoObjectFit: config.videoObjectFit
-  })
+  });
 
-  // Check if video is enabled AND has a URL
-  if (!config.videoEnabled || !config.videoUrl || config.videoUrl.trim() === '') {
-    console.log('Video not enabled or no URL provided:', {
-      videoEnabled: config.videoEnabled,
-      hasVideoUrl: Boolean(config.videoUrl && config.videoUrl.trim() !== '')
-    })
-    return ''
+  // Only generate video content if video is enabled and there's a video URL
+  if (!config.videoEnabled || !config.videoUrl) {
+    console.log('Video not enabled or no video URL provided');
+    return '';
   }
-  
-  // Process video URL to ensure it works properly
-  let processedVideoUrl = config.videoUrl.trim()
-  
-  // Determine vertical alignment styles
-  let alignmentStyle = '';
-  switch (config.videoAlignment) {
-    case 'top':
-      alignmentStyle = 'align-items: flex-start;';
-      break;
-    case 'bottom':
-      alignmentStyle = 'align-items: flex-end;';
-      break;
-    case 'center':
-    default:
-      alignmentStyle = 'align-items: center;';
-      break;
-  }
-  
-  // Handle different video types
-  if (processedVideoUrl.includes('youtube.com') || processedVideoUrl.includes('youtu.be')) {
-    // Convert YouTube URL to embed format
-    let videoId = ''
-    if (processedVideoUrl.includes('youtube.com/watch?v=')) {
-      videoId = processedVideoUrl.split('v=')[1]?.split('&')[0]
-    } else if (processedVideoUrl.includes('youtu.be/')) {
-      videoId = processedVideoUrl.split('youtu.be/')[1]?.split('?')[0]
-    }
+
+  const videoHeight = config.videoHeight || 200;
+  const videoAlignment = config.videoAlignment || 'center';
+  const videoObjectFit = config.videoObjectFit || 'cover';
+
+  // Detect if it's a YouTube URL and create appropriate embed
+  if (config.videoUrl.includes('youtube.com') || config.videoUrl.includes('youtu.be')) {
+    let videoId = '';
     
+    if (config.videoUrl.includes('youtube.com/watch?v=')) {
+      videoId = config.videoUrl.split('v=')[1]?.split('&')[0] || '';
+    } else if (config.videoUrl.includes('youtu.be/')) {
+      videoId = config.videoUrl.split('youtu.be/')[1]?.split('?')[0] || '';
+    }
+
     if (videoId) {
-      // Use iframe for YouTube videos with vertical alignment
-      const videoHeight = config.videoHeight || 200
-      
-      const youtubeHtml = `<div class="hiclient-video-container" style="display: flex; ${alignmentStyle} justify-content: center; margin-bottom: 20px;">
-         <iframe class="hiclient-video-player" 
-                src="https://www.youtube.com/embed/${videoId}?loop=1&playlist=${videoId}&enablejsapi=1" 
-                style="height: ${videoHeight}px; width: 100%; border-radius: 12px; border: none; object-fit: ${config.videoObjectFit || 'cover'};" 
-                allow="autoplay; encrypted-media" 
-                allowfullscreen>
-         </iframe>
-       </div>`
-      
-      console.log('Generated YouTube iframe video content with vertical alignment')
-      return youtubeHtml
+      console.log('Creating YouTube embed for video ID:', videoId);
+      return `
+        <div class="hiclient-video-container" style="text-align: ${videoAlignment};">
+          <iframe 
+            class="hiclient-video-player" 
+            src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&controls=1" 
+            style="height: ${videoHeight}px; object-fit: ${videoObjectFit};" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+          </iframe>
+        </div>
+      `;
     }
   }
-  
-  // For direct video files (mp4, webm, etc.) with vertical alignment
-  const videoHeight = config.videoHeight || 200
-  const videoObjectFit = config.videoObjectFit || 'cover'
-  
-  console.log('Generated video content with vertical alignment and object-fit:', processedVideoUrl, videoObjectFit)
-  
-  const videoHtml = `<div class="hiclient-video-container" style="display: flex; ${alignmentStyle} justify-content: center; margin-bottom: 20px;">
-     <video class="hiclient-video-player" src="${processedVideoUrl}" 
-            style="height: ${videoHeight}px; width: 100%; border-radius: 12px; object-fit: ${videoObjectFit};" 
-            loop playsinline webkit-playsinline preload="metadata">
-       Your browser does not support the video tag.
-     </video>
-   </div>`
 
-  console.log('Final video HTML generated with vertical alignment:', videoHtml)
-  return videoHtml
+  // For regular video files, create a video element
+  console.log('Creating video element for regular video file');
+  return `
+    <div class="hiclient-video-container" style="text-align: ${videoAlignment};">
+      <video 
+        class="hiclient-video-player" 
+        src="${config.videoUrl}" 
+        style="height: ${videoHeight}px; object-fit: ${videoObjectFit};" 
+        controls 
+        preload="metadata">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  `;
 }
 
-export function generateButtonIcon(customIconUrl?: string, useVideoPreview?: boolean, videoUrl?: string, previewVideoHeight?: number): string {
-  // If using video preview, generate video button instead of icon
+export function generateButtonIcon(customIconUrl: string, useVideoPreview: boolean, videoUrl: string, previewVideoHeight: number, buttonSize?: number): string {
+  console.log('Generating button icon with params:', {
+    customIconUrl,
+    useVideoPreview,
+    videoUrl,
+    previewVideoHeight,
+    buttonSize
+  });
+
+  // Calculate icon size based on button size - make it proportional  
+  const iconSize = buttonSize ? Math.max(20, Math.min(50, Math.round(buttonSize * 0.65))) : 32;
+
   if (useVideoPreview && videoUrl) {
-    const height = previewVideoHeight || 120;
-    const width = height; // Keep it square for button
+    console.log('Using video preview as button icon');
+    const videoHeight = previewVideoHeight || 120;
     
+    // Check if it's a YouTube URL
     if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
-      // Handle YouTube videos for preview
-      let videoId = ''
-      if (videoUrl.includes('youtube.com/watch?v=')) {
-        videoId = videoUrl.split('v=')[1]?.split('&')[0]
-      } else if (videoUrl.includes('youtu.be/')) {
-        videoId = videoUrl.split('youtu.be/')[1]?.split('?')[0]
-      }
+      let videoId = '';
       
-      if (videoId) {
-        return `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1" 
-                       style="width: ${width}px; height: ${height}px; border-radius: 50%; border: none; object-fit: cover; pointer-events: none;" 
-                       allow="autoplay; encrypted-media"></iframe>`
+      if (videoUrl.includes('youtube.com/watch?v=')) {
+        videoId = videoUrl.split('v=')[1]?.split('&')[0] || '';
+      } else if (videoUrl.includes('youtu.be/')) {
+        videoId = videoUrl.split('youtu.be/')[1]?.split('?')[0] || '';
       }
-    } else {
-      // Handle direct video files for preview
-      return `<video src="${videoUrl}" 
-                     style="width: ${width}px; height: ${height}px; border-radius: 50%; object-fit: cover; pointer-events: none;" 
-                     autoplay muted loop playsinline webkit-playsinline preload="metadata">
-              </video>`
+
+      if (videoId) {
+        return `
+          <iframe 
+            src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0" 
+            style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover;"
+            allow="autoplay"
+            frameborder="0">
+          </iframe>
+        `;
+      }
     }
+    
+    // For regular video files
+    return `
+      <video 
+        src="${videoUrl}" 
+        style="width: 100%; height: ${videoHeight}px; border-radius: 8px; object-fit: cover;" 
+        autoplay 
+        muted 
+        loop 
+        playsinline>
+      </video>
+    `;
   }
-  
-  // Standard icon logic
+
   if (customIconUrl) {
-    return `<img src="${customIconUrl}" style="width: 24px; height: 24px; object-fit: contain;" alt="Contact">`
+    console.log('Using custom icon:', customIconUrl);
+    return `<img src="${customIconUrl}" alt="Custom icon" style="width: ${iconSize}px; height: ${iconSize}px; object-fit: contain;" />`;
   }
-  
-  return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-   </svg>`
+
+  console.log('Using default message icon with size:', iconSize);
+  return `
+    <svg width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+    </svg>
+  `;
 }

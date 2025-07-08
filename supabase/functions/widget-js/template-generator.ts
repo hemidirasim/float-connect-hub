@@ -1,4 +1,3 @@
-
 import type { WidgetTemplate } from './template-types.ts'
 import type { TemplateConfig } from './renderer/types.ts'
 import { getPositionStyle, getTooltipPositionStyle, getModalPositionStyle, getModalContentPositionStyle, getButtonOffsetStyle } from './renderer/position-utils.ts'
@@ -55,9 +54,15 @@ export class WidgetTemplateRenderer {
     let css = this.template.css
     let js = this.template.js
 
-    // Generate common content (video, button icon) - Make sure video is generated
+    // Generate common content (video, button icon) - Pass buttonSize to generateButtonIcon
     const videoContent = generateVideoContent(this.config)
-    const buttonIcon = generateButtonIcon(this.config.customIconUrl, this.config.useVideoPreview, this.config.videoUrl, this.config.previewVideoHeight)
+    const buttonIcon = generateButtonIcon(
+      this.config.customIconUrl, 
+      this.config.useVideoPreview, 
+      this.config.videoUrl, 
+      this.config.previewVideoHeight,
+      this.config.buttonSize  // Pass button size for icon scaling
+    )
 
     console.log('Generated video content for template:', videoContent ? 'YES' : 'NO')
     console.log('Video content length:', videoContent.length)
