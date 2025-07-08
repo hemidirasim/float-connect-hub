@@ -181,8 +181,9 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
 
           // Wait a bit for DOM to be ready, then execute any inline scripts
           setTimeout(() => {
-            // Find and execute script tags
-            const scripts = document.querySelectorAll('script[data-widget-preview]');
+            // Find and execute script tags - check both with and without data-widget-preview
+            const scripts = document.querySelectorAll('script[data-widget-preview], script:last-of-type');
+            console.log('Found scripts for execution:', scripts.length);
             scripts.forEach(script => {
               if (script.textContent && script.textContent.trim()) {
                 console.log('Executing widget script for preview...');
