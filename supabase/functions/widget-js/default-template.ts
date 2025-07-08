@@ -1,8 +1,7 @@
-
 import type { WidgetTemplate } from './template-types.ts'
-import { htmlTemplate } from './templates/default/html-template.ts'
+import { defaultHtmlTemplate } from './templates/default/html-template.ts'
 import { defaultCssStyles } from './templates/default/css-styles.ts'
-import { utilityFunctions } from './templates/default/utility-functions.ts'
+import { getChannelUrl, getChannelIcon, getChannelColor } from './templates/default/utility-functions.ts'
 
 // JavaScript logic with proper utility injection and fixed string escaping
 const defaultJavaScriptLogic = `
@@ -186,118 +185,80 @@ const defaultJavaScriptLogic = `
       .replace(/'/g, '&#39;');
   }
   
-  // Preload video metadata for better performance
-  function preloadVideoMetadata() {
-    console.log('Preloading video metadata');
-    const videos = document.querySelectorAll('.hiclient-video-player');
-    console.log('Preloading ' + videos.length + ' videos metadata');
-    videos.forEach(function(video) {
-      if (video.tagName === 'VIDEO') {
-        video.preload = 'metadata';
-      }
-    });
-  }
-
-  // Play video with sound when modal opens
   function playVideo() {
-    console.log('playVideo function called');
-    const videos = document.querySelectorAll('.hiclient-video-player');
-    console.log('Found videos: ' + videos.length);
-    
-    videos.forEach(function(video, index) {
-      console.log('Processing video ' + index + ' with src: ' + video.src);
-      if (video.tagName === 'VIDEO') {
-        // Unmute and play the video
-        video.muted = false;
-        video.currentTime = 0; // Start from beginning
-        
-        var playPromise = video.play();
-        if (playPromise !== undefined) {
-          playPromise.then(function() {
-            console.log('Video ' + index + ' started playing successfully with sound');
-          }).catch(function(error) {
-            console.log('Video ' + index + ' autoplay failed, trying muted:', error);
-            // If autoplay with sound fails, try muted
-            video.muted = true;
-            video.play().then(function() {
-              console.log('Video ' + index + ' started playing muted');
-            }).catch(function(mutedError) {
-              console.log('Video ' + index + ' failed to play even muted:', mutedError);
-            });
-          });
-        }
-      } else if (video.tagName === 'IFRAME') {
-        // Handle YouTube iframe videos
-        console.log('Processing YouTube iframe', index);
-        var currentSrc = video.src;
-        // Add autoplay parameter to YouTube iframe when modal opens
-        if (currentSrc && !currentSrc.includes('autoplay=1')) {
-          var separator = currentSrc.includes('?') ? '&' : '?';
-          video.src = currentSrc + separator + 'autoplay=1';
-          console.log('YouTube iframe', index, 'autoplay enabled');
-        }
+    try {
+      console.log('playVideo function called');
+      var videos = document.querySelectorAll('.hiclient-video-player');
+      console.log('Found videos:', videos.length);
+      
+      if (videos.length > 0) {
+        videos.forEach(function(video, index) {
+          console.log('Processing video', index, 'with src:', video.src);
+          
+          if (video.tagName === 'VIDEO') {
+            // Handle HTML5 video elements
+            if (video.src && video.src !== '') {
+              video.currentTime = 0;
+              // Enable sound for video playback
+              
+              var playPromise = video.play();
+              if (playPromise !== undefined) {
+                playPromise.then(function() {
+                  console.log('Video', index, 'started playing successfully with sound');
+                }).catch(function(error) {
+                  console.log('Video', index, 'autoplay failed:', error);
+                  // Force play after small delay
+                  setTimeout(function() {
+                    try {
+                      video.play().then(function() {
+                        console.log('Video', index, 'started on retry with sound');
+                      }).catch(function(retryError) {
+                        console.log('Video', index, 'retry failed:', retryError);
+                      });
+                    } catch (e) {
+                      console.log('Video', index, 'retry exception:', e);
+                    }
+                  }, 500);
+                });
+              }
+            } else {
+              console.log('Video', index, 'has no valid src');
+            }
+          } else if (video.tagName === 'IFRAME') {
+            // Handle YouTube iframe videos
+            console.log('Processing YouTube iframe', index);
+            var currentSrc = video.src;
+            // Add autoplay parameter to YouTube iframe when modal opens
+            if (currentSrc && !currentSrc.includes('autoplay=1')) {
+              var separator = currentSrc.includes('?') ? '&' : '?';
+              video.src = currentSrc + separator + 'autoplay=1';
+              console.log('YouTube iframe', index, 'autoplay enabled');
+            }
+          }
+        });
+      } else {
+        console.log('No video elements found with class hiclient-video-player');
       }
-    });
-  }
-
-  // Pause video when modal closes
-  function pauseVideo() {
-    console.log('pauseVideo function called');
-    const videos = document.querySelectorAll('.hiclient-video-player');
-    videos.forEach(function(video) {
-      if (video.tagName === 'VIDEO') {
-        video.pause();
-        console.log('Video paused');
-      } else if (video.tagName === 'IFRAME') {
-        // Remove autoplay from YouTube iframe when modal closes
-        var currentSrc = video.src;
-        if (currentSrc && currentSrc.includes('autoplay=1')) {
-          video.src = currentSrc.replace(/[?&]autoplay=1/, '').replace(/autoplay=1[&]?/, '');
-          console.log('YouTube iframe autoplay disabled');
-        }
-      }
-    });
-  }
-
-  // Show modal and play video
-  function showModal() {
-    console.log('Button clicked, showing modal');
-    const modal = document.getElementById('hiclient-modal');
-    if (modal) {
-      modal.style.display = 'flex';
-      // Small delay to ensure modal is visible before playing video
-      setTimeout(function() {
-        console.log('Attempting to play video after modal open');
-        playVideo();
-      }, 100);
-    }
-  }
-
-  // Hide modal and pause video
-  function hideModal() {
-    console.log('Hiding modal');
-    const modal = document.getElementById('hiclient-modal');
-    if (modal) {
-      modal.style.display = 'none';
-      pauseVideo();
+    } catch (error) {
+      console.log('Error in playVideo function:', error);
     }
   }
   
   function initWidget() {
     console.log('Initializing widget...');
     
-    var channelsContainer = document.querySelector('#hiclient-channels-container');
+    var channelsContainer = document.querySelector('#lovable-widget-channels');
     if (channelsContainer) {
       var generatedHtml = generateChannelsHtml();
       channelsContainer.innerHTML = generatedHtml;
       console.log('Channels HTML generated and inserted');
     }
     
-    var button = document.querySelector('#hiclient-button');
-    var modal = document.querySelector('#hiclient-modal');
-    var modalContent = document.querySelector('.hiclient-modal-content');
-    var tooltip = document.querySelector('#hiclient-tooltip');
-    var closeBtn = document.querySelector('.hiclient-close');
+    var button = document.querySelector('#lovable-widget-button');
+    var modal = document.querySelector('#lovable-widget-modal');
+    var modalContent = document.querySelector('#lovable-modal-content');
+    var tooltip = document.querySelector('#lovable-widget-tooltip');
+    var closeBtn = document.querySelector('#lovable-widget-close');
     
     if (!button || !modal) {
       console.error('Missing widget elements:', { button: !!button, modal: !!modal });
@@ -415,12 +376,20 @@ const defaultJavaScriptLogic = `
     
     // Only preload video metadata on widget init, do NOT start playing
     setTimeout(function() {
-      preloadVideoMetadata();
+      var videos = document.querySelectorAll('.hiclient-video-player');
+      if (videos.length > 0) {
+        console.log('Preloading', videos.length, 'videos metadata');
+        videos.forEach(function(video) {
+          if (video.tagName === 'VIDEO') {
+            video.preload = 'metadata'; // Only preload metadata, not full video
+          }
+        });
+      }
     }, 100);
   }
   
   window.refreshWidget = function() {
-    var channelsContainer = document.querySelector('#hiclient-channels-container');
+    var channelsContainer = document.querySelector('#lovable-widget-channels');
     if (channelsContainer) {
       var generatedHtml = generateChannelsHtml();
       channelsContainer.innerHTML = generatedHtml;
@@ -442,7 +411,7 @@ export const defaultTemplate: WidgetTemplate = {
   id: 'default',
   name: 'Modern Clean Template', 
   description: 'Modern and clean floating widget with green accent',
-  html: htmlTemplate,
+  html: defaultHtmlTemplate,
   css: defaultCssStyles,
   js: defaultJavaScriptLogic
 };
