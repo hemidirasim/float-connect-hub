@@ -44,7 +44,7 @@ export const HeroSection: React.FC = () => {
                 href="#widget-form" 
                 className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
               >
-                Start Building Now
+                Try free Now
               </a>
               <a 
                 href="#features" 
