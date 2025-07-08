@@ -73,6 +73,7 @@ const Dashboard = () => {
         .maybeSingle();
 
       if (error && error.code === 'PGRST116') {
+        // No credits record found, try to create one
         console.log('No user credits found, creating default record...');
         const { data: newCredits, error: insertError } = await supabase
           .from('user_credits')
@@ -84,9 +85,22 @@ const Dashboard = () => {
           .select()
           .single();
 
-        if (insertError) {
+        if (insertError && insertError.code === '23505') {
+          // Duplicate key error - record already exists, try to fetch again
+          console.log('Credits record already exists, fetching...');
+          const { data: existingCredits, error: fetchError } = await supabase
+            .from('user_credits')
+            .select('*')
+            .maybeSingle();
+            
+          if (fetchError) {
+            console.error('Error fetching existing credits:', fetchError);
+            setUserCredits({ balance: 100, total_spent: 0 });
+          } else {
+            setUserCredits(existingCredits || { balance: 100, total_spent: 0 });
+          }
+        } else if (insertError) {
           console.error('Error creating user credits:', insertError);
-          toast.error('Error initializing credits');
           setUserCredits({ balance: 100, total_spent: 0 });
         } else {
           console.log('Created new user credits record:', newCredits);
@@ -95,7 +109,6 @@ const Dashboard = () => {
         }
       } else if (error) {
         console.error('Error fetching credits:', error);
-        toast.error('Error loading credits');
         setUserCredits({ balance: 100, total_spent: 0 });
       } else {
         setUserCredits(data || { balance: 100, total_spent: 0 });

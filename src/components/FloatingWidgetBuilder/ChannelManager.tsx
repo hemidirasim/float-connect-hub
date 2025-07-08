@@ -13,6 +13,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { platformOptions } from './constants';
 import { Channel } from './types';
 import { EditChannelModal } from './EditChannelModal';
+import { supabase } from "@/integrations/supabase/client";
 
 // SortableChannelItem component for drag and drop
 const SortableChannelItem = ({ channel, onEdit, onRemove, onAddChild }) => {
@@ -247,15 +248,41 @@ export const ChannelManager: React.FC<ChannelManagerProps> = ({
     }
   };
 
-  const handleCustomIconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCustomIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && (file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'image/svg+xml')) {
       if (file.size <= 1024 * 1024) { // 1MB limit
-        setCustomIcon(file);
-        // Create a temporary URL for preview
-        const url = URL.createObjectURL(file);
-        setCustomIconUrl(url);
-        toast.success("Icon loaded!");
+        try {
+          toast.info("Icon uploading...");
+          
+          // Upload file to Supabase Storage
+          const fileName = `custom-icon-${Date.now()}-${file.name}`;
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('icons')
+            .upload(`custom/${fileName}`, file);
+
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+            toast.error("Icon upload failed!");
+            return;
+          }
+
+          // Get public URL
+          const { data } = supabase.storage
+            .from('icons')
+            .getPublicUrl(`custom/${fileName}`);
+
+          if (data?.publicUrl) {
+            setCustomIcon(file);
+            setCustomIconUrl(data.publicUrl);
+            toast.success("Icon uploaded successfully!");
+          } else {
+            toast.error("Failed to get icon URL!");
+          }
+        } catch (error) {
+          console.error('File upload error:', error);
+          toast.error("Icon upload failed!");
+        }
       } else {
         toast.error("Icon file must be less than 1MB");
       }
