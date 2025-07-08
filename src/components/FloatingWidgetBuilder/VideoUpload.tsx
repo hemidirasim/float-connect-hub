@@ -85,6 +85,12 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
     return '';
   };
 
+  // Calculate icon size based on button size - make it proportional
+  const getIconSize = () => {
+    // Icon should be roughly 60-70% of button size
+    return Math.max(20, Math.min(40, Math.round(buttonSize * 0.65)));
+  };
+
   return (
     <div className="space-y-6">
       {/* Button Icon Selection */}
@@ -105,7 +111,10 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                 className="w-4 h-4"
               />
               <label htmlFor="standard-icon" className="flex items-center gap-2">
-                <MessageCircle className="w-5 h-5 text-green-600" />
+                <MessageCircle 
+                  className="text-green-600" 
+                  size={getIconSize()}
+                />
                 <span>Standard Chat Icon</span>
               </label>
             </div>
@@ -155,8 +164,22 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                     )}
                   </div>
                   {customIconUrl && (
-                    <div className="w-12 h-12 border rounded flex items-center justify-center bg-gray-50">
-                      <img src={customIconUrl} alt="Custom icon" className="w-8 h-8 object-contain" />
+                    <div 
+                      className="border rounded flex items-center justify-center bg-gray-50"
+                      style={{ 
+                        width: `${buttonSize}px`, 
+                        height: `${buttonSize}px` 
+                      }}
+                    >
+                      <img 
+                        src={customIconUrl} 
+                        alt="Custom icon" 
+                        className="object-contain"
+                        style={{ 
+                          width: `${getIconSize()}px`, 
+                          height: `${getIconSize()}px` 
+                        }}
+                      />
                     </div>
                   )}
                 </div>
@@ -175,6 +198,9 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
               onChange={(e) => onButtonSizeChange(Number(e.target.value))}
               className="w-full"
             />
+            <div className="text-sm text-gray-500">
+              Icon size: {getIconSize()}px (adjusts automatically)
+            </div>
           </div>
         </CardContent>
       </Card>
