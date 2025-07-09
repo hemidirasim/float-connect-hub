@@ -79,7 +79,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       videoHeight: formData.videoHeight,
       videoAlignment: formData.videoAlignment,
       videoObjectFit: formData.videoObjectFit,
-      useVideoPreview: formData.useVideoPreview,
+      useVideoPreview: formData.useVideoPreview && Boolean(formData.videoType === 'link' ? formData.videoLink : formData.videoUrl),
       buttonSize: formData.buttonSize,
       previewVideoHeight: formData.previewVideoHeight,
       templateId: templateId,
