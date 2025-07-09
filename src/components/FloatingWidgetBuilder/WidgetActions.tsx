@@ -59,8 +59,10 @@ export const useWidgetActions = (
       return { success: false };
     }
 
-    if (channels.length === 0 && !formData.videoUrl && !formData.videoLink) {
-      toast.error('At least 1 contact channel is required');
+    // Allow widget creation if either channels exist OR video is present
+    const hasVideo = formData.videoUrl || formData.videoLink;
+    if (channels.length === 0 && !hasVideo) {
+      toast.error('At least 1 contact channel or a video is required');
       return { success: false };
     }
 
