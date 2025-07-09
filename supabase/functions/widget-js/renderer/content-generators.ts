@@ -155,6 +155,22 @@ export function generateButtonIcon(customIconUrl: string, useVideoPreview: boole
         `;
       }
     }
+
+    // Check if it's a Dailymotion URL
+    if (videoUrl.includes('dailymotion.com')) {
+      const dailymotionMatch = videoUrl.match(/dailymotion\.com\/video\/([a-zA-Z0-9]+)/);
+      if (dailymotionMatch && dailymotionMatch[1]) {
+        const videoId = dailymotionMatch[1];
+        return `
+          <iframe 
+            src="https://www.dailymotion.com/embed/video/${videoId}?autoplay=1&mute=1&loop=1" 
+            style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover;"
+            allow="autoplay; fullscreen"
+            frameborder="0">
+          </iframe>
+        `;
+      }
+    }
     
     // For regular video files
     return `
