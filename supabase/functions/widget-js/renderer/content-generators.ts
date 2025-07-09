@@ -131,8 +131,8 @@ export function generateButtonIcon(customIconUrl: string, useVideoPreview: boole
       if (videoId) {
         return `
           <iframe 
-            src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0" 
-            style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover;"
+            src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1" 
+            style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover; pointer-events: none;"
             allow="autoplay"
             frameborder="0">
           </iframe>
@@ -147,8 +147,8 @@ export function generateButtonIcon(customIconUrl: string, useVideoPreview: boole
         const videoId = vimeoMatch[1];
         return `
           <iframe 
-            src="https://player.vimeo.com/video/${videoId}?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1" 
-            style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover;"
+            src="https://player.vimeo.com/video/${videoId}?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1&controls=0" 
+            style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover; pointer-events: none;"
             allow="autoplay; fullscreen"
             frameborder="0">
           </iframe>
@@ -163,8 +163,8 @@ export function generateButtonIcon(customIconUrl: string, useVideoPreview: boole
         const videoId = dailymotionMatch[1];
         return `
           <iframe 
-            src="https://www.dailymotion.com/embed/video/${videoId}?autoplay=1&mute=1&loop=1" 
-            style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover;"
+            src="https://www.dailymotion.com/embed/video/${videoId}?autoplay=1&mute=1&loop=1&controls=0" 
+            style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover; pointer-events: none;"
             allow="autoplay; fullscreen"
             frameborder="0">
           </iframe>
