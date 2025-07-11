@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { Channel, FormData } from './types';
 
@@ -61,9 +62,16 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       channels: channels.length,
       buttonColor: formData.buttonColor,
       position: formData.position,
-      greetingMessage: formData.greetingMessage
+      greetingMessage: formData.greetingMessage,
+      useVideoPreview: formData.useVideoPreview,
+      videoType: formData.videoType,
+      videoLink: formData.videoLink,
+      videoUrl: formData.videoUrl || editingWidget?.video_url
     });
 
+    // Determine the actual video URL to use
+    const actualVideoUrl = formData.videoType === 'link' ? formData.videoLink : (formData.videoUrl || editingWidget?.video_url);
+    
     // Use EXACT SAME config structure as edge function template-generator.ts
     const templateConfig = {
       channels,
@@ -74,18 +82,25 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       tooltipPosition: formData.tooltipPosition,
       greetingMessage: formData.greetingMessage,
       customIconUrl: formData.customIcon === 'custom' ? formData.customIconUrl : null,
-      videoEnabled: Boolean(formData.videoType === 'link' ? formData.videoLink : formData.videoUrl),
-      videoUrl: formData.videoType === 'link' ? formData.videoLink : (formData.videoUrl || editingWidget?.video_url),
+      videoEnabled: Boolean(actualVideoUrl),
+      videoUrl: actualVideoUrl,
       videoHeight: formData.videoHeight,
       videoAlignment: formData.videoAlignment,
       videoObjectFit: formData.videoObjectFit,
-      useVideoPreview: formData.useVideoPreview && Boolean(formData.videoType === 'link' ? formData.videoLink : formData.videoUrl),
+      useVideoPreview: formData.useVideoPreview && Boolean(actualVideoUrl),
       buttonSize: formData.buttonSize,
       previewVideoHeight: formData.previewVideoHeight,
       templateId: templateId,
       widgetWidth: 400, // Default value
       widgetHeight: 600 // Default value
     };
+
+    console.log('Template config for preview:', {
+      videoEnabled: templateConfig.videoEnabled,
+      videoUrl: templateConfig.videoUrl,
+      useVideoPreview: templateConfig.useVideoPreview,
+      videoType: formData.videoType
+    });
 
     // Use SAME renderer as edge function
     const renderer = new WidgetTemplateRenderer(template, templateConfig);
