@@ -94,12 +94,12 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       customIconUrl: formData.customIcon === 'custom' ? formData.customIconUrl : null,
       videoEnabled: Boolean(actualVideoUrl),
       videoUrl: actualVideoUrl,
-      videoHeight: formData.videoHeight,
-      videoAlignment: formData.videoAlignment,
-      videoObjectFit: formData.videoObjectFit,
-      useVideoPreview: formData.useVideoPreview && Boolean(actualVideoUrl),
-      buttonSize: formData.buttonSize,
-      previewVideoHeight: formData.previewVideoHeight,
+      videoHeight: formData.videoHeight || 398,
+      videoAlignment: formData.videoAlignment || 'center',
+      videoObjectFit: formData.videoObjectFit || 'cover',
+      useVideoPreview: Boolean(formData.useVideoPreview && actualVideoUrl),
+      buttonSize: formData.buttonSize || 60,
+      previewVideoHeight: formData.previewVideoHeight || 150,
       templateId: templateId,
       widgetWidth: 400, // Default value
       widgetHeight: 600 // Default value
