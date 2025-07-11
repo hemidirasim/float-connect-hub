@@ -33,11 +33,11 @@ export function generateVideoContent(config: any): string {
         <div class="hiclient-video-container" style="text-align: ${videoAlignment};">
           <iframe 
             class="hiclient-video-player" 
-            src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&controls=0" 
-            style="width: 100%; height: ${videoHeight}px;" 
+            src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&controls=0&showinfo=0&iv_load_policy=3&cc_load_policy=0&fs=0&playsinline=1&disablekb=1" 
+            style="width: 100%; height: ${videoHeight}px; pointer-events: none;" 
             frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen>
+            allow="autoplay"
+            allowfullscreen="false">
           </iframe>
         </div>
       `;
@@ -54,11 +54,11 @@ export function generateVideoContent(config: any): string {
         <div class="hiclient-video-container" style="text-align: ${videoAlignment};">
           <iframe 
             class="hiclient-video-player" 
-            src="https://player.vimeo.com/video/${videoId}?background=1&autoplay=0&loop=0&byline=0&title=0" 
-            style="width: 100%; height: ${videoHeight}px;" 
+            src="https://player.vimeo.com/video/${videoId}?background=1&autoplay=0&loop=0&byline=0&title=0&portrait=0&controls=0&transparent=0" 
+            style="width: 100%; height: ${videoHeight}px; pointer-events: none;" 
             frameborder="0" 
-            allow="autoplay; fullscreen; picture-in-picture" 
-            allowfullscreen>
+            allow="autoplay"
+            allowfullscreen="false">
           </iframe>
         </div>
       `;
@@ -75,11 +75,11 @@ export function generateVideoContent(config: any): string {
         <div class="hiclient-video-container" style="text-align: ${videoAlignment};">
           <iframe 
             class="hiclient-video-player" 
-            src="https://www.dailymotion.com/embed/video/${videoId}?autoplay=0&mute=0" 
-            style="width: 100%; height: ${videoHeight}px;" 
+            src="https://www.dailymotion.com/embed/video/${videoId}?autoplay=0&mute=0&controls=0&ui-logo=0&sharing-enable=0&ui-start-screen-info=0&ui-highlight=0" 
+            style="width: 100%; height: ${videoHeight}px; pointer-events: none;" 
             frameborder="0" 
-            allow="autoplay; fullscreen" 
-            allowfullscreen>
+            allow="autoplay"
+            allowfullscreen="false">
           </iframe>
         </div>
       `;
@@ -131,10 +131,11 @@ export function generateButtonIcon(customIconUrl: string, useVideoPreview: boole
       if (videoId) {
         return `
           <iframe 
-            src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1" 
-            style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover; pointer-events: none;"
+            src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&cc_load_policy=0&fs=0&playsinline=1" 
+            style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover; pointer-events: none; position: relative; z-index: 1;"
             allow="autoplay"
-            frameborder="0">
+            frameborder="0"
+            allowfullscreen="false">
           </iframe>
         `;
       }
@@ -147,10 +148,11 @@ export function generateButtonIcon(customIconUrl: string, useVideoPreview: boole
         const videoId = vimeoMatch[1];
         return `
           <iframe 
-            src="https://player.vimeo.com/video/${videoId}?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1&controls=0" 
-            style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover; pointer-events: none;"
+            src="https://player.vimeo.com/video/${videoId}?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1&controls=0&portrait=0&transparent=0" 
+            style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover; pointer-events: none; position: relative; z-index: 1;"
             allow="autoplay; fullscreen"
-            frameborder="0">
+            frameborder="0"
+            allowfullscreen="false">
           </iframe>
         `;
       }
@@ -163,10 +165,11 @@ export function generateButtonIcon(customIconUrl: string, useVideoPreview: boole
         const videoId = dailymotionMatch[1];
         return `
           <iframe 
-            src="https://www.dailymotion.com/embed/video/${videoId}?autoplay=1&mute=1&loop=1&controls=0" 
-            style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover; pointer-events: none;"
+            src="https://www.dailymotion.com/embed/video/${videoId}?autoplay=1&mute=1&loop=1&controls=0&ui-logo=0&sharing-enable=0&ui-start-screen-info=0&ui-highlight=0" 
+            style="width: 100%; height: ${videoHeight}px; border: none; border-radius: 8px; object-fit: cover; pointer-events: none; position: relative; z-index: 1;"
             allow="autoplay; fullscreen"
-            frameborder="0">
+            frameborder="0"
+            allowfullscreen="false">
           </iframe>
         `;
       }
