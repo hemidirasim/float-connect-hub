@@ -56,7 +56,17 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     const templateId = formData.templateId || 'default';
     const template = getTemplate(templateId);
 
-    console.log('Generating floating widget preview with SAME template system:', {
+    // Determine the actual video URL to use - prioritize video link over uploaded video
+    let actualVideoUrl = '';
+    if (formData.videoType === 'link' && formData.videoLink) {
+      actualVideoUrl = formData.videoLink;
+    } else if (formData.videoUrl) {
+      actualVideoUrl = formData.videoUrl;
+    } else if (editingWidget?.video_url) {
+      actualVideoUrl = editingWidget.video_url;
+    }
+
+    console.log('Generating floating widget preview with video configuration:', {
       templateId,
       templateName: template.name,
       channels: channels.length,
@@ -66,11 +76,11 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       useVideoPreview: formData.useVideoPreview,
       videoType: formData.videoType,
       videoLink: formData.videoLink,
-      videoUrl: formData.videoUrl || editingWidget?.video_url
+      videoUrl: formData.videoUrl,
+      editingWidgetVideoUrl: editingWidget?.video_url,
+      actualVideoUrl: actualVideoUrl,
+      videoEnabled: Boolean(actualVideoUrl)
     });
-
-    // Determine the actual video URL to use
-    const actualVideoUrl = formData.videoType === 'link' ? formData.videoLink : (formData.videoUrl || editingWidget?.video_url);
     
     // Use EXACT SAME config structure as edge function template-generator.ts
     const templateConfig = {
@@ -95,11 +105,11 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       widgetHeight: 600 // Default value
     };
 
-    console.log('Template config for preview:', {
+    console.log('Final template config for preview:', {
       videoEnabled: templateConfig.videoEnabled,
       videoUrl: templateConfig.videoUrl,
       useVideoPreview: templateConfig.useVideoPreview,
-      videoType: formData.videoType
+      actualVideoUrl
     });
 
     // Use SAME renderer as edge function
@@ -150,7 +160,10 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     }
     
     setPreviewHtml(finalHtml);
-    console.log('Floating widget preview generated using SAME system as edge function');
+    console.log('Floating widget preview generated with video config:', {
+      hasVideo: Boolean(actualVideoUrl),
+      useVideoPreview: templateConfig.useVideoPreview
+    });
   }, [
     showWidget,
     formData.templateId,
