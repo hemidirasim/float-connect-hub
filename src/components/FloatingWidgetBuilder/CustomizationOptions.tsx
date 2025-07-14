@@ -123,7 +123,18 @@ export const CustomizationOptions: React.FC<CustomizationOptionsProps> = ({
           value={greetingMessage}
           onChange={(e) => onGreetingMessageChange(e.target.value)}
           rows={3}
+          maxLength={150}
         />
+        <div className="flex justify-between text-xs text-gray-500">
+          <span>
+            {greetingMessage.length < 10 ? (
+              <span className="text-red-500">Minimum 10 simvol tələb olunur</span>
+            ) : (
+              <span className="text-green-600">✓ Yetərli</span>
+            )}
+          </span>
+          <span>{greetingMessage.length}/150</span>
+        </div>
       </div>
     </>
   );
