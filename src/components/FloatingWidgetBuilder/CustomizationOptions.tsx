@@ -128,9 +128,9 @@ export const CustomizationOptions: React.FC<CustomizationOptionsProps> = ({
         <div className="flex justify-between text-xs text-gray-500">
           <span>
             {greetingMessage.length < 10 ? (
-              <span className="text-red-500">Minimum 10 simvol tələb olunur</span>
+              <span className="text-red-500">Minimum 10 characters required</span>
             ) : (
-              <span className="text-green-600">✓ Yetərli</span>
+              <span className="text-green-600">✓ Enough</span>
             )}
           </span>
           <span>{greetingMessage.length}/150</span>
