@@ -330,6 +330,12 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                   <Video className="w-4 h-4 text-blue-600" />
                   <span className="text-sm text-gray-600">YouTube, Vimeo, Dailymotion, Twitch supported</span>
                 </div>
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Note:</strong> Video preview as button feature is only available for uploaded videos, not for video links.
+                  </AlertDescription>
+                </Alert>
                 <Input
                   placeholder="https://www.youtube.com/watch?v=..."
                   value={videoLink || ''}
@@ -381,7 +387,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                 onVideoObjectFitChange={onVideoObjectFitChange}
               />
 
-              {/* Video Preview Option */}
+              {/* Video Preview Option - Only for uploaded videos */}
               <div className="space-y-4 p-4 border rounded-lg bg-blue-50">
                 <div className="flex items-center justify-between">
                   <div>
@@ -389,14 +395,24 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                     <p className="text-sm text-gray-600 mt-1">
                       Replace the button with a 3-4 second video preview instead of an icon
                     </p>
+                    {videoType === 'link' && (
+                      <p className="text-xs text-orange-600 mt-1">
+                        ⚠️ This feature is only available for uploaded videos
+                      </p>
+                    )}
                   </div>
                   <Switch
-                    checked={useVideoPreview}
-                    onCheckedChange={onVideoPreviewChange}
+                    checked={useVideoPreview && videoType === 'upload'}
+                    onCheckedChange={(checked) => {
+                      if (videoType === 'upload') {
+                        onVideoPreviewChange(checked);
+                      }
+                    }}
+                    disabled={videoType === 'link'}
                   />
                 </div>
 
-                {useVideoPreview && (
+                {useVideoPreview && videoType === 'upload' && (
                   <div className="space-y-2">
                     <Label>Preview Video Height: {previewVideoHeight}px</Label>
                     <Input

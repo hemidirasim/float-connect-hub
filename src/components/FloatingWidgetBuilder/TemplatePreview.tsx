@@ -97,7 +97,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       videoHeight: formData.videoHeight || 398,
       videoAlignment: formData.videoAlignment || 'center',
       videoObjectFit: formData.videoObjectFit || 'cover',
-      useVideoPreview: Boolean(formData.useVideoPreview && actualVideoUrl),
+      useVideoPreview: Boolean(formData.useVideoPreview && actualVideoUrl && formData.videoType === 'upload'),
       buttonSize: formData.buttonSize || 60,
       previewVideoHeight: formData.previewVideoHeight || 150,
       templateId: templateId,
