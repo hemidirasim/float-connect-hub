@@ -84,7 +84,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     
     // Use EXACT SAME config structure as edge function template-generator.ts
     const templateConfig = {
-      channels,
+      channels: channels.length > 0 ? channels : [], // Ensure channels is always an array
       buttonColor: formData.buttonColor,
       position: formData.position,
       tooltip: formData.tooltip,
@@ -102,7 +102,9 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
       previewVideoHeight: formData.previewVideoHeight || 150,
       templateId: templateId,
       widgetWidth: 400, // Default value
-      widgetHeight: 600 // Default value
+      widgetHeight: 600, // Default value
+      // Ensure video preview works even without channels
+      showWidget: Boolean(actualVideoUrl && formData.useVideoPreview) || channels.length > 0
     };
 
     console.log('Final template config for preview:', {
