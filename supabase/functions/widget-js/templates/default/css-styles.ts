@@ -351,4 +351,10 @@ export const defaultCssStyles = `
       margin-top: 5px;
     }
   }
+  
+  /* Powered by styles */
+  #lovable-powered-by a:hover {
+    opacity: 1 !important;
+    color: #666 !important;
+  }
 `;

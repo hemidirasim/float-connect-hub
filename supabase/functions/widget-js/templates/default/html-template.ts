@@ -15,6 +15,11 @@ export const defaultHtmlTemplate = `
     <button id="lovable-widget-close">×</button>
     {{VIDEO_CONTENT}}
     <div id="lovable-widget-channels"></div>
+    <div id="lovable-powered-by" style="text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #e0e0e0;">
+      <a href="https://hiclient.co" target="_blank" style="color: #888; font-size: 11px; text-decoration: none; opacity: 0.7; transition: opacity 0.3s;">
+        Powered by HiClient.co
+      </a>
+    </div>
   </div>
 </div>
 `;
