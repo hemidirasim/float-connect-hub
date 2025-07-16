@@ -84,7 +84,7 @@ The blog should highlight how Hiclient's floating contact widgets improve custom
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'grok-beta',
+        model: 'grok-2-1212',
         messages: [
           {
             role: 'system',
@@ -107,6 +107,12 @@ The blog should highlight how Hiclient's floating contact widgets improve custom
     }
 
     const grokData = await grokResponse.json();
+    
+    if (!grokData.choices || !grokData.choices[0] || !grokData.choices[0].message) {
+      console.error('Invalid Grok API response:', grokData);
+      throw new Error('Invalid response from Grok API');
+    }
+
     const blogContent = grokData.choices[0].message.content;
 
     console.log('Blog content generated successfully');
