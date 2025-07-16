@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "@/hooks/useAuth";
@@ -12,7 +13,7 @@ import { AdminBlogs } from "@/components/admin/AdminBlogs";
 import { BlogGenerator } from "@/components/admin/BlogGenerator";
 
 export default function AdminDashboard() {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("users");
 
@@ -51,7 +52,7 @@ export default function AdminDashboard() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     navigate('/admin/login');
     return null;
   }
