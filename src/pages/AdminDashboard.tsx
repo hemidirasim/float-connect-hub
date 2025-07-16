@@ -16,35 +16,45 @@ export default function AdminDashboard() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("users");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminLoading, setAdminLoading] = useState(true);
 
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (user) {
+        setAdminLoading(true);
+        console.log('Checking admin status for user:', user.id);
+        
         const { data, error } = await supabase
-          .from('admin_users')
-          .select('*')
+          .from('user_roles')
+          .select('role')
           .eq('user_id', user.id)
-          .single();
+          .eq('role', 'admin')
+          .maybeSingle();
 
         if (error) {
           console.error("Error fetching admin status:", error);
-          toast.error("Error fetching admin status. Please try again.");
+          toast.error("Admin statusu yoxlanılarkən xəta baş verdi.");
+          setIsAdmin(false);
+        } else if (data) {
+          console.log('User has admin role');
+          setIsAdmin(true);
+        } else {
+          console.log('User does not have admin role');
+          toast.error("Bu səhifəyə giriş icazəniz yoxdur.");
+          setIsAdmin(false);
           navigate('/');
         }
-
-        if (!data) {
-          toast.error("You are not authorized to view this page.");
-          navigate('/');
-        }
+        setAdminLoading(false);
       }
     };
 
-    if (user) {
+    if (user && !loading) {
       checkAdminStatus();
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
-  if (loading) {
+  if (loading || adminLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
@@ -55,6 +65,17 @@ export default function AdminDashboard() {
   if (!user) {
     navigate('/admin/login');
     return null;
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Giriş Qadağandır</h2>
+          <p className="text-gray-600">Bu səhifəyə giriş icazəniz yoxdur.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
