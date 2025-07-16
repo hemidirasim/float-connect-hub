@@ -11,6 +11,7 @@ import { AdminUsers } from "@/components/admin/AdminUsers";
 import { AdminWidgets } from "@/components/admin/AdminWidgets";
 import { AdminBlogs } from "@/components/admin/AdminBlogs";
 import { BlogGenerator } from "@/components/admin/BlogGenerator";
+import { AdminSEO } from "@/components/admin/AdminSEO";
 
 export default function AdminDashboard() {
   const { user, loading } = useAuth();
@@ -147,6 +148,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="users" onClick={() => setActiveTab("users")}>Users</TabsTrigger>
             <TabsTrigger value="widgets" onClick={() => setActiveTab("widgets")}>Widgets</TabsTrigger>
             <TabsTrigger value="blogs" onClick={() => setActiveTab("blogs")}>Blogs</TabsTrigger>
+            <TabsTrigger value="seo" onClick={() => setActiveTab("seo")}>SEO</TabsTrigger>
           </TabsList>
           <TabsContent value="users">
             <AdminUsers />
@@ -156,6 +158,9 @@ export default function AdminDashboard() {
           </TabsContent>
           <TabsContent value="blogs">
             <AdminBlogs />
+          </TabsContent>
+          <TabsContent value="seo">
+            <AdminSEO />
           </TabsContent>
         </Tabs>
       </div>
