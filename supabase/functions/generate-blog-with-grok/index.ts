@@ -40,24 +40,57 @@ serve(async (req) => {
     // Initialize Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Blog topics about Hiclient services
-    const blogTopics = [
-      'The Ultimate Guide to Floating Chat Widgets for Website Conversion',
-      'How Floating Contact Buttons Boost Customer Engagement by 300%',
-      'Mobile-First Website Design: Why Floating Widgets Are Essential',
-      'Comparing Live Chat vs Floating Contact Widgets: Which Converts Better?',
-      'The Psychology Behind Floating Action Buttons on Websites',
-      'From WhatsApp to Telegram: Multi-Channel Contact Strategies',
-      'Video Integration in Floating Widgets: The New Customer Experience Trend',
-      'ROI Analysis: How Floating Contact Widgets Pay for Themselves',
-      'Accessibility and Floating Widgets: Making Your Site Inclusive',
-      'The Evolution of Customer Support: From Call Centers to Smart Widgets'
+    // Blog topics about Hiclient services with corresponding images
+    const blogTopicsWithImages = [
+      {
+        topic: 'The Ultimate Guide to Floating Chat Widgets for Website Conversion',
+        image: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=1200&h=630&fit=crop'
+      },
+      {
+        topic: 'How Floating Contact Buttons Boost Customer Engagement by 300%',
+        image: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=1200&h=630&fit=crop'
+      },
+      {
+        topic: 'Mobile-First Website Design: Why Floating Widgets Are Essential',
+        image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1200&h=630&fit=crop'
+      },
+      {
+        topic: 'Comparing Live Chat vs Floating Contact Widgets: Which Converts Better?',
+        image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1200&h=630&fit=crop'
+      },
+      {
+        topic: 'The Psychology Behind Floating Action Buttons on Websites',
+        image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&h=630&fit=crop'
+      },
+      {
+        topic: 'From WhatsApp to Telegram: Multi-Channel Contact Strategies',
+        image: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=1200&h=630&fit=crop'
+      },
+      {
+        topic: 'Video Integration in Floating Widgets: The New Customer Experience Trend',
+        image: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=1200&h=630&fit=crop'
+      },
+      {
+        topic: 'ROI Analysis: How Floating Contact Widgets Pay for Themselves',
+        image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1200&h=630&fit=crop'
+      },
+      {
+        topic: 'Accessibility and Floating Widgets: Making Your Site Inclusive',
+        image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1200&h=630&fit=crop'
+      },
+      {
+        topic: 'The Evolution of Customer Support: From Call Centers to Smart Widgets',
+        image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&h=630&fit=crop'
+      }
     ];
 
-    // Select a random topic
-    const randomTopic = blogTopics[Math.floor(Math.random() * blogTopics.length)];
+    // Select a random topic with image
+    const randomBlogData = blogTopicsWithImages[Math.floor(Math.random() * blogTopicsWithImages.length)];
+    const randomTopic = randomBlogData.topic;
+    const featuredImage = randomBlogData.image;
     
     console.log('Selected blog topic:', randomTopic);
+    console.log('Selected featured image:', featuredImage);
 
     // Generate blog content with Grok API
     const grokPrompt = `Write a comprehensive, SEO-optimized blog post about "${randomTopic}" for Hiclient.co - a service that provides floating chat widgets for websites. 
@@ -139,7 +172,7 @@ The blog should highlight how Hiclient's floating contact widgets improve custom
         content: blogContent,
         excerpt: excerpt,
         status: 'published',
-        featured_image: 'https://hiclient.co/logo.png', // Default featured image
+        featured_image: featuredImage,
       })
       .select()
       .single();
@@ -158,6 +191,7 @@ The blog should highlight how Hiclient's floating contact widgets improve custom
         id: blogData.id,
         title: blogData.title,
         slug: blogData.slug,
+        featured_image: blogData.featured_image,
         url: `https://hiclient.co/${blogData.slug}`
       }
     }), {
