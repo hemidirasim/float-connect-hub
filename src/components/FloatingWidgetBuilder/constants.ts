@@ -26,13 +26,3 @@ export const platformOptions = [
   { value: 'phone', label: 'Phone', icon: Phone, color: '#22c55e' },
   { value: 'custom', label: 'Custom Link', icon: Link, color: '#6b7280' }
 ];
-
-// Demo button styling for consistent design
-export const demoButtonStyles = {
-  base: "relative group overflow-hidden rounded-2xl px-8 py-4 font-semibold text-white transition-all duration-300 transform hover:scale-105 hover:shadow-2xl",
-  gradient: "bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600",
-  glow: "shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40",
-  glassmorphism: "backdrop-blur-sm border border-white/20",
-  shimmer: "before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700"
-};
-
