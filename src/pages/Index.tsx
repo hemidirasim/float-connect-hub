@@ -525,40 +525,154 @@ const Index = () => {
         <main>
           <HeroSection />
           
-          <section className="py-20 bg-white/30 backdrop-blur-sm" id="widget-form">
-            <div className="container mx-auto px-4">
-              <div className="max-w-4xl mx-auto space-y-6">
-                <WidgetForm
-                  websiteName={websiteName}
-                  websiteUrl={websiteUrl}
-                  channels={channels}
-                  formData={formData}
-                  editingWidget={editingWidget}
-                  saving={saving}
-                  uploading={uploading}
-                  onWebsiteNameChange={setWebsiteName}
-                  onWebsiteUrlChange={setWebsiteUrl}
-                  onChannelsChange={setChannels}
-                  onVideoUpload={handleVideoUpload}
-                  onVideoRemove={handleVideoRemove}
-                  onFormDataChange={handleFormDataChange}
-                  onCreateWidget={handleCreateWidgetWrapper}
-                  onCustomIconUpload={handleCustomIconUpload}
-                />
-                
-                {shouldShowCodePreview && (
-                  <CodePreview
-                    generatedCode={generatedCode}
-                    copied={copied}
-                    onCopy={handleCopyCode}
-                  />
-                )}
+          {/* Widget Form Section - matching HeroSection style */}
+          <section className="relative py-20 overflow-hidden" id="widget-form">
+            {/* Modern Background matching HeroSection */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(59,130,246,0.1),transparent_50%)]"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(147,51,234,0.1),transparent_50%)]"></div>
+              <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.1)_25%,rgba(255,255,255,0.1)_50%,transparent_50%,transparent_75%,rgba(255,255,255,0.1)_75%)] bg-[length:20px_20px] opacity-30"></div>
+            </div>
+
+            {/* Floating Elements */}
+            <div className="absolute top-20 left-10 w-16 h-16 bg-gradient-to-r from-green-400 to-green-600 rounded-full opacity-20 animate-pulse"></div>
+            <div className="absolute bottom-20 right-10 w-24 h-24 bg-gradient-to-r from-pink-400 to-pink-600 rounded-full opacity-15 animate-pulse delay-1000"></div>
+
+            <div className="relative z-10">
+              <div className="max-w-6xl mx-auto px-4">
+                {/* Section Header */}
+                <div className="text-center mb-12">
+                  <div className="inline-block mb-6 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full border border-white/20 shadow-sm">
+                    <span className="text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      ✨ Widget Builder
+                    </span>
+                  </div>
+                  <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                    Create Your
+                    <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent block">
+                      Floating Widget
+                    </span>
+                  </h2>
+                  <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
+                    Customize your contact widget with multiple channels and optional video messages to boost engagement on your website.
+                  </p>
+                  <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto"></div>
+                </div>
+
+                <div className="max-w-4xl mx-auto space-y-6">
+                  <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-8 border border-white/30 shadow-xl">
+                    <WidgetForm
+                      websiteName={websiteName}
+                      websiteUrl={websiteUrl}
+                      channels={channels}
+                      formData={formData}
+                      editingWidget={editingWidget}
+                      saving={saving}
+                      uploading={uploading}
+                      onWebsiteNameChange={setWebsiteName}
+                      onWebsiteUrlChange={setWebsiteUrl}
+                      onChannelsChange={setChannels}
+                      onVideoUpload={handleVideoUpload}
+                      onVideoRemove={handleVideoRemove}
+                      onFormDataChange={handleFormDataChange}
+                      onCreateWidget={handleCreateWidgetWrapper}
+                      onCustomIconUpload={handleCustomIconUpload}
+                    />
+                  </div>
+                  
+                  {shouldShowCodePreview && (
+                    <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-8 border border-white/30 shadow-xl">
+                      <CodePreview
+                        generatedCode={generatedCode}
+                        copied={copied}
+                        onCopy={handleCopyCode}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </section>
 
-          <HomeBlogs />
-          <HomeFAQ />
+          {/* Blogs Section - matching design */}
+          <section className="relative py-20 overflow-hidden">
+            {/* Modern Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(147,51,234,0.1),transparent_50%)]"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(59,130,246,0.1),transparent_50%)]"></div>
+            </div>
+
+            {/* Floating Elements */}
+            <div className="absolute top-20 right-10 w-20 h-20 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full opacity-20 animate-pulse delay-500"></div>
+            <div className="absolute bottom-20 left-10 w-28 h-28 bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-full opacity-15 animate-pulse delay-700"></div>
+
+            <div className="relative z-10">
+              <div className="max-w-6xl mx-auto px-4">
+                {/* Section Header */}
+                <div className="text-center mb-12">
+                  <div className="inline-block mb-6 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full border border-white/20 shadow-sm">
+                    <span className="text-sm font-medium bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      📚 Latest Articles
+                    </span>
+                  </div>
+                  <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                    Learn &
+                    <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent block">
+                      Get Inspired
+                    </span>
+                  </h2>
+                  <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
+                    Discover tips, tutorials, and best practices for creating effective contact widgets and improving customer engagement.
+                  </p>
+                  <div className="w-24 h-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full mx-auto"></div>
+                </div>
+
+                <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-8 border border-white/30 shadow-xl">
+                  <HomeBlogs />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* FAQ Section - matching design */}
+          <section className="relative py-20 overflow-hidden">
+            {/* Modern Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-teal-50 to-blue-50">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(34,197,94,0.1),transparent_50%)]"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,rgba(20,184,166,0.1),transparent_50%)]"></div>
+            </div>
+
+            {/* Floating Elements */}
+            <div className="absolute top-20 left-10 w-18 h-18 bg-gradient-to-r from-green-400 to-green-600 rounded-full opacity-20 animate-pulse delay-300"></div>
+            <div className="absolute bottom-20 right-10 w-26 h-26 bg-gradient-to-r from-teal-400 to-teal-600 rounded-full opacity-15 animate-pulse delay-900"></div>
+
+            <div className="relative z-10">
+              <div className="max-w-6xl mx-auto px-4">
+                {/* Section Header */}
+                <div className="text-center mb-12">
+                  <div className="inline-block mb-6 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full border border-white/20 shadow-sm">
+                    <span className="text-sm font-medium bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
+                      ❓ Frequently Asked Questions
+                    </span>
+                  </div>
+                  <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                    Got
+                    <span className="bg-gradient-to-r from-green-600 via-teal-600 to-blue-600 bg-clip-text text-transparent block">
+                      Questions?
+                    </span>
+                  </h2>
+                  <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
+                    Find answers to common questions about creating and implementing floating contact widgets on your website.
+                  </p>
+                  <div className="w-24 h-1 bg-gradient-to-r from-green-600 to-teal-600 rounded-full mx-auto"></div>
+                </div>
+
+                <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-8 border border-white/30 shadow-xl">
+                  <HomeFAQ />
+                </div>
+              </div>
+            </div>
+          </section>
         </main>
 
         <Footer />
