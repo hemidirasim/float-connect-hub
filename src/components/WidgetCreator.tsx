@@ -217,65 +217,81 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 bg-gradient-to-br from-purple-50/50 via-pink-50/30 to-blue-50/50 min-h-screen p-6">
       {/* Basic Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Əsas məlumatlar</CardTitle>
+      <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-purple-600/10 to-pink-600/10 border-b border-white/20">
+          <CardTitle className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Əsas məlumatlar
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent className="space-y-6 p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="name">Widget adı</Label>
+              <Label htmlFor="name" className="text-sm font-semibold text-gray-700">Widget adı</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder="Məsələn: Ana səhifə widget-i"
+                className="bg-white/70 border-white/30 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition-all duration-300"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="website_url">Veb sayt URL</Label>
+              <Label htmlFor="website_url" className="text-sm font-semibold text-gray-700">Veb sayt URL</Label>
               <Input
                 id="website_url"
                 value={formData.website_url}
                 onChange={(e) => handleInputChange('website_url', e.target.value)}
                 placeholder="https://example.com"
+                className="bg-white/70 border-white/30 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition-all duration-300"
               />
             </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="tooltip">Tooltip mətn</Label>
+            <Label htmlFor="tooltip" className="text-sm font-semibold text-gray-700">Tooltip mətn</Label>
             <Input
               id="tooltip"
               value={formData.tooltip}
               onChange={(e) => handleInputChange('tooltip', e.target.value)}
               placeholder="Bizimlə əlaqə saxlayın!"
+              className="bg-white/70 border-white/30 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition-all duration-300"
             />
           </div>
         </CardContent>
       </Card>
 
       {/* Channels */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Communication channels</CardTitle>
-          <CardDescription>You can change the order of channels by sliding them.</CardDescription>
+      <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 border-b border-white/20">
+          <CardTitle className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Əlaqə kanalları
+          </CardTitle>
+          <CardDescription className="text-gray-600">
+            Kanalların sırasını sürüşdürərək dəyişə bilərsiniz.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6 p-6">
           {/* Add Channel */}
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 space-y-3">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="bg-gradient-to-r from-purple-50/80 to-pink-50/80 backdrop-blur-sm border-2 border-dashed border-purple-300/50 rounded-2xl p-6 space-y-4 hover:border-purple-400/70 transition-all duration-300">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Select value={selectedChannelType} onValueChange={setSelectedChannelType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose platform" />
+                <SelectTrigger className="bg-white/70 border-white/30 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition-all duration-300">
+                  <SelectValue placeholder="Platform seç" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white/95 backdrop-blur-sm border-white/30 rounded-xl shadow-xl">
                   {platformOptions.map((platform) => (
-                    <SelectItem key={platform.value} value={platform.value}>
-                      <div className="flex items-center gap-2">
-                        <platform.icon className="w-4 h-4" style={{ color: platform.color }} />
+                    <SelectItem key={platform.value} value={platform.value} className="rounded-lg hover:bg-purple-50/50 transition-colors duration-200">
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="w-6 h-6 rounded-lg flex items-center justify-center text-white shadow-sm"
+                          style={{ 
+                            background: `linear-gradient(135deg, ${platform.color}, ${platform.color}80)` 
+                          }}
+                        >
+                          <platform.icon className="w-3 h-3" />
+                        </div>
                         {platform.label}
                       </div>
                     </SelectItem>
@@ -287,14 +303,16 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
                 placeholder={getPlaceholderText()}
                 value={channelValue}
                 onChange={(e) => setChannelValue(e.target.value)}
+                className="bg-white/70 border-white/30 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition-all duration-300"
               />
               
               <Button 
                 onClick={addChannel}
                 disabled={!selectedChannelType || !channelValue.trim()}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Add
+                Əlavə et
               </Button>
             </div>
           </div>
@@ -307,7 +325,7 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
               onDragEnd={handleDragEnd}
             >
               <SortableContext items={channels.map(c => c.id)} strategy={verticalListSortingStrategy}>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {channels.map((channel) => (
                     <SortableChannelItem
                       key={channel.id}
@@ -325,21 +343,23 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
       </Card>
 
       {/* Appearance */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Appearance settings</CardTitle>
+      <Card className="bg-white/80 backdrop-blur-sm border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-pink-600/10 to-blue-600/10 border-b border-white/20">
+          <CardTitle className="text-xl font-bold bg-gradient-to-r from-pink-600 to-blue-600 bg-clip-text text-transparent">
+            Görünüş ayarları
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CardContent className="space-y-6 p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
-              <Label>Button shape</Label>
+              <Label className="text-sm font-semibold text-gray-700">Düymə forması</Label>
               <Select value={formData.button_style} onValueChange={(value) => handleInputChange('button_style', value)}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white/70 border-white/30 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition-all duration-300">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white/95 backdrop-blur-sm border-white/30 rounded-xl shadow-xl">
                   {buttonStyles.map((style) => (
-                    <SelectItem key={style.value} value={style.value}>
+                    <SelectItem key={style.value} value={style.value} className="rounded-lg hover:bg-purple-50/50 transition-colors duration-200">
                       <div className="flex items-center gap-2">
                         <style.icon className="w-4 h-4" />
                         {style.label}
@@ -351,75 +371,78 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
             </div>
 
             <div className="space-y-2">
-              <Label>Color</Label>
-              <div className="flex items-center gap-2">
+              <Label className="text-sm font-semibold text-gray-700">Rəng</Label>
+              <div className="flex items-center gap-3">
                 <input
                   type="color"
                   value={formData.button_color}
                   onChange={(e) => handleInputChange('button_color', e.target.value)}
-                  className="w-12 h-10 rounded border"
+                  className="w-12 h-12 rounded-xl border-2 border-white/30 shadow-lg cursor-pointer transition-transform duration-200 hover:scale-110"
                 />
                 <Input
                   value={formData.button_color}
                   onChange={(e) => handleInputChange('button_color', e.target.value)}
-                  className="flex-1"
+                  className="flex-1 bg-white/70 border-white/30 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition-all duration-300"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Position</Label>
+              <Label className="text-sm font-semibold text-gray-700">Mövqe</Label>
               <Select value={formData.position} onValueChange={(value) => handleInputChange('position', value)}>
-                <SelectTrigger>
+                <SelectTrigger className="bg-white/70 border-white/30 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400 transition-all duration-300">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="left">Left</SelectItem>
-                  <SelectItem value="right">right</SelectItem>
+                <SelectContent className="bg-white/95 backdrop-blur-sm border-white/30 rounded-xl shadow-xl">
+                  <SelectItem value="left" className="rounded-lg hover:bg-purple-50/50 transition-colors duration-200">Sol</SelectItem>
+                  <SelectItem value="right" className="rounded-lg hover:bg-purple-50/50 transition-colors duration-200">Sağ</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           {/* Device Settings */}
-          <div className="flex items-center justify-between p-4 border rounded-lg">
+          <div className="flex items-center justify-between p-6 bg-gradient-to-r from-blue-50/80 to-purple-50/80 backdrop-blur-sm border border-white/30 rounded-2xl shadow-lg">
             <div>
-              <Label className="text-base">Cihaz görünümü</Label>
-              <p className="text-sm text-gray-600">Widget-in hansı cihazlarda görünəcəyini seçin</p>
+              <Label className="text-base font-semibold text-gray-800">Cihaz görünümü</Label>
+              <p className="text-sm text-gray-600 mt-1">Widget-in hansı cihazlarda görünəcəyini seçin</p>
             </div>
-            <div className="flex gap-4">
-              <div className="flex items-center space-x-2">
+            <div className="flex gap-6">
+              <div className="flex items-center space-x-3">
                 <Switch
                   checked={formData.show_on_mobile}
                   onCheckedChange={(checked) => handleInputChange('show_on_mobile', checked)}
+                  className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-purple-500 data-[state=checked]:to-pink-500"
                 />
-                <Label>Mobil</Label>
+                <Label className="font-medium text-gray-700">Mobil</Label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <Switch
                   checked={formData.show_on_desktop}
                   onCheckedChange={(checked) => handleInputChange('show_on_desktop', checked)}
+                  className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-purple-500 data-[state=checked]:to-pink-500"
                 />
-                <Label>Desktop</Label>
+                <Label className="font-medium text-gray-700">Desktop</Label>
               </div>
             </div>
           </div>
 
           {/* Video Upload */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between p-6 bg-gradient-to-r from-purple-50/80 to-pink-50/80 backdrop-blur-sm border border-white/30 rounded-2xl shadow-lg">
               <div>
-                <Label className="text-base">Video yükləmə (PRO)</Label>
-                <p className="text-sm text-gray-600">Promosyon videosu əlavə edin (max 10MB)</p>
+                <Label className="text-base font-semibold text-gray-800">Video yükləmə (PRO)</Label>
+                <p className="text-sm text-gray-600 mt-1">Promosyon videosu əlavə edin (max 10MB)</p>
               </div>
               <Switch
                 checked={formData.video_enabled}
                 onCheckedChange={(checked) => handleInputChange('video_enabled', checked)}
+                className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-purple-500 data-[state=checked]:to-pink-500"
               />
             </div>
 
             {formData.video_enabled && (
-              <div className="border-2 border-dashed border-purple-300 rounded-lg p-4 text-center bg-purple-50/50">
+              <div className="bg-gradient-to-r from-purple-100/50 to-pink-100/50 backdrop-blur-sm border-2 border-dashed border-purple-300/50 rounded-2xl p-8 text-center hover:border-purple-400/70 transition-all duration-300">
                 <input
                   type="file"
                   accept="video/*"
@@ -428,10 +451,12 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
                   id="video-upload"
                 />
                 <label htmlFor="video-upload" className="cursor-pointer">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Upload className="w-6 h-6 text-purple-600" />
+                  <div className="flex items-center justify-center gap-3 mb-3">
+                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                      <Upload className="w-6 h-6 text-white" />
+                    </div>
                   </div>
-                  <p className="text-sm text-purple-700 font-medium">
+                  <p className="text-sm font-semibold text-purple-700">
                     {formData.video ? formData.video.name : 'Video yükləyin'}
                   </p>
                 </label>
@@ -442,11 +467,19 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
       </Card>
 
       {/* Actions */}
-      <div className="flex justify-end gap-4">
-        <Button variant="outline" onClick={onCancel}>
+      <div className="flex justify-end gap-4 pt-4">
+        <Button 
+          variant="outline" 
+          onClick={onCancel}
+          className="bg-white/70 border-white/30 backdrop-blur-sm rounded-xl hover:bg-gray-50/80 transition-all duration-300 font-semibold"
+        >
           Ləğv et
         </Button>
-        <Button onClick={handleSave} disabled={loading}>
+        <Button 
+          onClick={handleSave} 
+          disabled={loading}
+          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+        >
           {loading ? 'Saxlanılır...' : (widget?.id ? 'Yenilə' : 'Yarat')}
         </Button>
       </div>
