@@ -132,6 +132,7 @@ export const defaultCssStyles = `
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     padding: 4px;
+    justify-items: center;
   }
   
   .channel-item {
@@ -139,31 +140,32 @@ export const defaultCssStyles = `
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 16px 12px;
+    padding: 16px 24px;
     border: none;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
+    background: transparent;
     text-decoration: none;
     color: white;
     font-weight: 600;
     transition: all 0.3s ease;
     position: relative;
-    border-radius: 25px;
+    border-radius: 50px;
     cursor: pointer;
     overflow: hidden;
     min-height: 50px;
     text-align: center;
     font-size: 14px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+    min-width: 140px;
   }
   
   .channel-item:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
   }
   
   .channel-item.whatsapp {
-    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    background: linear-gradient(135deg, #25d366 0%, #1ebe57 100%);
   }
   
   .channel-item.telegram {
@@ -270,27 +272,27 @@ export const defaultCssStyles = `
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 16px 12px;
+    padding: 16px 24px;
     border: none;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(10px);
+    background: transparent;
     text-decoration: none;
     color: white;
     font-weight: 600;
     transition: all 0.3s ease;
-    border-radius: 25px;
+    border-radius: 50px;
     cursor: pointer;
     width: 100%;
     position: relative;
     overflow: hidden;
     min-height: 50px;
     font-size: 14px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
   }
   
   .parent-channel:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
   }
   
   .dropdown-toggle {
@@ -361,16 +363,17 @@ export const defaultCssStyles = `
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 12px 8px;
+    padding: 12px 16px;
     text-decoration: none;
     color: white;
     transition: all 0.3s ease;
-    border-radius: 20px;
+    border-radius: 50px;
     font-size: 13px;
     font-weight: 500;
     margin-bottom: 8px;
     min-height: 40px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    min-width: 120px;
   }
   
   .dropdown-item:last-child {
@@ -379,7 +382,7 @@ export const defaultCssStyles = `
   
   .dropdown-item:hover {
     transform: translateY(-1px) scale(1.02);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   }
   
   .dropdown-icon {
@@ -438,13 +441,14 @@ export const defaultCssStyles = `
     }
     
     .channel-item {
-      padding: 14px 10px;
+      padding: 14px 20px;
       min-height: 45px;
       font-size: 13px;
+      min-width: 120px;
     }
     
     .parent-channel {
-      padding: 14px 10px;
+      padding: 14px 20px;
       min-height: 45px;
       font-size: 13px;
     }
