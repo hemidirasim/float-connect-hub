@@ -129,178 +129,192 @@ export const defaultCssStyles = `
     max-height: 320px;
     overflow-y: auto;
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
+    padding: 4px;
   }
   
   .channel-item {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 20px 16px;
-    border: 1px solid rgba(226, 232, 240, 0.6);
-    background: rgba(255, 255, 255, 0.7);
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 12px;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(10px);
     text-decoration: none;
-    color: #334155;
+    color: white;
     font-weight: 600;
-    transition: all 0.4s ease;
+    transition: all 0.3s ease;
     position: relative;
-    border-radius: 16px;
+    border-radius: 25px;
     cursor: pointer;
     overflow: hidden;
-  }
-  
-  .channel-item:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  
-  .channel-item:hover:before {
-    opacity: 1;
+    min-height: 50px;
+    text-align: center;
+    font-size: 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   }
   
   .channel-item:hover {
-    border-color: rgba(59, 130, 246, 0.4);
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(59, 130, 246, 0.2);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  .channel-item.whatsapp {
+    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+  }
+  
+  .channel-item.telegram {
+    background: linear-gradient(135deg, #0088cc 0%, #005a9e 100%);
+  }
+  
+  .channel-item.instagram {
+    background: linear-gradient(135deg, #e4405f 0%, #833ab4 50%, #f56040 100%);
+  }
+  
+  .channel-item.messenger {
+    background: linear-gradient(135deg, #006aff 0%, #0084ff 100%);
+  }
+  
+  .channel-item.viber {
+    background: linear-gradient(135deg, #665cac 0%, #59519c 100%);
+  }
+  
+  .channel-item.discord {
+    background: linear-gradient(135deg, #7289da 0%, #5865f2 100%);
+  }
+  
+  .channel-item.tiktok {
+    background: linear-gradient(135deg, #000000 0%, #333333 100%);
+  }
+  
+  .channel-item.youtube {
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+  }
+  
+  .channel-item.facebook {
+    background: linear-gradient(135deg, #1877f2 0%, #166fe5 100%);
+  }
+  
+  .channel-item.twitter {
+    background: linear-gradient(135deg, #1da1f2 0%, #1a91da 100%);
+  }
+  
+  .channel-item.linkedin {
+    background: linear-gradient(135deg, #0077b5 0%, #005885 100%);
+  }
+  
+  .channel-item.github {
+    background: linear-gradient(135deg, #333333 0%, #24292e 100%);
+  }
+  
+  .channel-item.website {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  }
+  
+  .channel-item.email {
+    background: linear-gradient(135deg, #ea4335 0%, #d33b2c 100%);
+  }
+  
+  .channel-item.phone {
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  }
+  
+  .channel-item.custom {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
   }
   
   .channel-icon {
-    width: 48px;
-    height: 48px;
+    width: 20px;
+    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    font-size: 20px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    font-size: 16px;
     flex-shrink: 0;
     color: white;
-    position: relative;
-    z-index: 2;
   }
   
   .channel-info {
-    flex: 1;
-    min-width: 0;
-    position: relative;
-    z-index: 2;
+    display: none;
   }
   
   .channel-label {
-    font-weight: 700;
-    font-size: 16px;
-    color: #1e293b;
-    margin: 0 0 4px 0;
-    line-height: 1.3;
+    font-weight: 600;
+    font-size: 14px;
+    color: white;
+    margin: 0;
+    line-height: 1.2;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   
   .channel-value {
-    font-size: 14px;
-    color: #64748b;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin: 0;
-    line-height: 1.3;
-    font-weight: 500;
+    display: none;
   }
   
   .channel-arrow {
-    width: 24px;
-    height: 24px;
-    color: #94a3b8;
-    flex-shrink: 0;
-    transition: all 0.3s ease;
-    font-size: 18px;
-    position: relative;
-    z-index: 2;
-  }
-  
-  .channel-item:hover .channel-arrow {
-    color: #3b82f6;
-    transform: translateX(6px);
+    display: none;
   }
 
-  /* Parent channel with dropdown */
+  /* Parent channel with dropdown - also styled as buttons */
   .parent-channel-wrapper {
     position: relative;
     margin-bottom: 16px;
+    grid-column: span 2;
   }
   
   .parent-channel {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 20px 16px;
-    border: 1px solid rgba(226, 232, 240, 0.6);
-    background: rgba(255, 255, 255, 0.7);
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 12px;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(10px);
     text-decoration: none;
-    color: #334155;
+    color: white;
     font-weight: 600;
-    transition: all 0.4s ease;
-    border-radius: 16px;
+    transition: all 0.3s ease;
+    border-radius: 25px;
     cursor: pointer;
     width: 100%;
     position: relative;
     overflow: hidden;
-  }
-  
-  .parent-channel:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  
-  .parent-channel:hover:before {
-    opacity: 1;
+    min-height: 50px;
+    font-size: 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   }
   
   .parent-channel:hover {
-    border-color: rgba(59, 130, 246, 0.4);
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(59, 130, 246, 0.2);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   }
   
   .dropdown-toggle {
     background: none;
     border: none;
-    padding: 12px;
+    padding: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     transition: all 0.3s ease;
-    margin-left: auto;
-    position: relative;
-    z-index: 2;
+    margin-left: 8px;
   }
   
   .dropdown-toggle:hover {
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(255, 255, 255, 0.2);
   }
   
   .dropdown-arrow {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     transition: transform 0.3s ease;
-    color: #64748b;
+    color: white;
   }
   
   .dropdown-arrow.rotated {
@@ -309,93 +323,90 @@ export const defaultCssStyles = `
   
   .child-count {
     position: absolute;
-    top: -10px;
-    right: 12px;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    color: white;
-    font-size: 12px;
+    top: -8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    font-size: 11px;
     font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 12px;
-    min-width: 20px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
     text-align: center;
     line-height: 1.2;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     z-index: 10;
   }
   
-  /* Dropdown */
+  /* Dropdown - keep similar but smaller buttons */
   .dropdown {
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.4s ease;
-    background: rgba(248, 250, 252, 0.9);
+    background: rgba(248, 250, 252, 0.95);
     backdrop-filter: blur(10px);
     border-radius: 16px;
     margin-top: 12px;
     border: 1px solid rgba(226, 232, 240, 0.5);
+    padding: 0 8px;
   }
   
   .dropdown.show {
     max-height: 320px;
+    padding: 12px 8px;
   }
   
   .dropdown-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 16px 20px;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 8px;
     text-decoration: none;
-    color: #374151;
+    color: white;
     transition: all 0.3s ease;
-    border-bottom: 1px solid rgba(226, 232, 240, 0.3);
-    font-size: 14px;
+    border-radius: 20px;
+    font-size: 13px;
     font-weight: 500;
+    margin-bottom: 8px;
+    min-height: 40px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
   
   .dropdown-item:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
   }
   
   .dropdown-item:hover {
-    background: rgba(59, 130, 246, 0.05);
-    color: #1f2937;
-    transform: translateX(4px);
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
   
   .dropdown-icon {
-    width: 36px;
-    height: 36px;
+    width: 16px;
+    height: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    font-size: 16px;
+    font-size: 14px;
     flex-shrink: 0;
     color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
   
   .dropdown-info {
-    flex: 1;
-    min-width: 0;
+    display: none;
   }
   
   .dropdown-label {
     font-weight: 600;
-    color: #1f2937;
-    margin: 0 0 2px 0;
-    line-height: 1.3;
+    color: white;
+    margin: 0;
+    line-height: 1.2;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   
   .dropdown-value {
-    font-size: 12px;
-    color: #6b7280;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin: 0;
-    line-height: 1.3;
+    display: none;
   }
 
   /* Desktop responsive */
@@ -403,6 +414,11 @@ export const defaultCssStyles = `
     #lovable-modal-content {
       max-width: 440px;
       max-height: 680px;
+    }
+    
+    #lovable-widget-channels {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
     }
   }
 
@@ -416,16 +432,25 @@ export const defaultCssStyles = `
       padding: 24px;
     }
     
-    .dropdown {
-      margin-top: 8px;
+    #lovable-widget-channels {
+      grid-template-columns: 1fr;
+      gap: 10px;
     }
     
     .channel-item {
-      padding: 16px 12px;
+      padding: 14px 10px;
+      min-height: 45px;
+      font-size: 13px;
     }
     
     .parent-channel {
-      padding: 16px 12px;
+      padding: 14px 10px;
+      min-height: 45px;
+      font-size: 13px;
+    }
+    
+    .dropdown {
+      margin-top: 8px;
     }
   }
   
