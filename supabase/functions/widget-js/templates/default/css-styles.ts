@@ -2,49 +2,38 @@
 export const defaultCssStyles = `
   #lovable-widget-button {
     border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    background-color: {{BUTTON_COLOR}};
     border: none;
     cursor: pointer;
-    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: box-shadow 0.3s ease, background 0.3s ease;
     color: white;
-    backdrop-filter: blur(10px);
     {{BUTTON_OFFSET_STYLE}}
   }
   
   #lovable-widget-button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 12px 40px rgba(59, 130, 246, 0.4);
-    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    box-shadow: 0 12px 35px rgba(34, 197, 94, 0.5);
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    /* Remove transform on hover to prevent movement */
   }
   
   #lovable-widget-tooltip {
     position: absolute;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.8);
     color: white;
-    padding: 12px 16px;
-    border-radius: 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
     font-size: 14px;
     white-space: nowrap;
     z-index: 100000;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     pointer-events: none;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     {{TOOLTIP_POSITION_STYLE}}
-  }
-  
-  #lovable-widget-tooltip:before {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 0;
-    border-style: solid;
   }
   
   #lovable-widget-modal {
@@ -53,246 +42,177 @@ export const defaultCssStyles = `
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.7);
     z-index: 100000;
     display: flex;
     {{MODAL_ALIGNMENT}}
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    transition: all 0.4s ease;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
   }
   
   #lovable-modal-content {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    padding: 32px;
-    border-radius: 24px;
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
     width: {{WIDGET_WIDTH}}px;
     height: {{WIDGET_HEIGHT}}px;
     {{MODAL_CONTENT_POSITION}}
     overflow-y: auto;
     position: relative;
-    transition: all 0.4s ease;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
   
   .hiclient-video-player {
     width: 100%;
-    border-radius: 16px;
-    margin-bottom: 24px;
+    border-radius: 8px;
+    margin-bottom: 20px;
     object-fit: {{VIDEO_OBJECT_FIT}};
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
   
   #lovable-modal-header {
-    margin: 0 0 24px 0;
-    font-size: 20px;
-    font-weight: 700;
-    color: #1e293b;
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
     text-align: center;
     line-height: 1.4;
     padding-right: 40px;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
   }
   
   #lovable-widget-close {
     position: absolute;
-    top: 20px;
-    right: 24px;
-    width: 36px;
-    height: 36px;
+    top: 16px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 20px;
-    color: #64748b;
+    font-size: 24px;
+    color: #9ca3af;
     border: none;
-    background: rgba(248, 250, 252, 0.8);
-    backdrop-filter: blur(10px);
+    background: transparent;
     border-radius: 50%;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     font-weight: 300;
   }
   
   #lovable-widget-close:hover {
     background: rgba(239, 68, 68, 0.1);
     color: #ef4444;
-    transform: rotate(90deg) scale(1.1);
+    transform: rotate(90deg);
   }
   
   #lovable-widget-channels {
-    max-height: 320px;
+    max-height: 300px;
     overflow-y: auto;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    padding: 4px;
-    justify-items: center;
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
   
   .channel-item {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 16px 24px;
-    border: none;
-    background: transparent;
+    gap: 16px;
+    padding: 16px 10px;
+    border: 1px solid #e2e8f0;
+    background: white;
     text-decoration: none;
-    color: white;
-    font-weight: 600;
+    color: #334155;
+    font-weight: 500;
     transition: all 0.3s ease;
     position: relative;
-    border-radius: 50px;
+    border-radius: 12px;
     cursor: pointer;
-    overflow: hidden;
-    min-height: 50px;
-    text-align: center;
-    font-size: 14px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(10px);
-    min-width: 140px;
   }
   
   .channel-item:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-  }
-  
-  .channel-item.whatsapp {
-    background: linear-gradient(135deg, #25d366 0%, #1ebe57 100%);
-  }
-  
-  .channel-item.telegram {
-    background: linear-gradient(135deg, #0088cc 0%, #005a9e 100%);
-  }
-  
-  .channel-item.instagram {
-    background: linear-gradient(135deg, #e4405f 0%, #833ab4 50%, #f56040 100%);
-  }
-  
-  .channel-item.messenger {
-    background: linear-gradient(135deg, #006aff 0%, #0084ff 100%);
-  }
-  
-  .channel-item.viber {
-    background: linear-gradient(135deg, #665cac 0%, #59519c 100%);
-  }
-  
-  .channel-item.discord {
-    background: linear-gradient(135deg, #7289da 0%, #5865f2 100%);
-  }
-  
-  .channel-item.tiktok {
-    background: linear-gradient(135deg, #000000 0%, #333333 100%);
-  }
-  
-  .channel-item.youtube {
-    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
-  }
-  
-  .channel-item.facebook {
-    background: linear-gradient(135deg, #1877f2 0%, #166fe5 100%);
-  }
-  
-  .channel-item.twitter {
-    background: linear-gradient(135deg, #1da1f2 0%, #1a91da 100%);
-  }
-  
-  .channel-item.linkedin {
-    background: linear-gradient(135deg, #0077b5 0%, #005885 100%);
-  }
-  
-  .channel-item.github {
-    background: linear-gradient(135deg, #333333 0%, #24292e 100%);
-  }
-  
-  .channel-item.website {
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-  }
-  
-  .channel-item.email {
-    background: linear-gradient(135deg, #ea4335 0%, #d33b2c 100%);
-  }
-  
-  .channel-item.phone {
-    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
-  }
-  
-  .channel-item.custom {
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    border-color: #22c55e;
+    background: #f0fdf4;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.15);
   }
   
   .channel-icon {
-    width: 20px;
-    height: 20px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    border-radius: 50%;
+    font-size: 18px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
     color: white;
   }
   
   .channel-info {
-    display: none;
+    flex: 1;
+    min-width: 0;
   }
   
   .channel-label {
     font-weight: 600;
-    font-size: 14px;
-    color: white;
-    margin: 0;
-    line-height: 1.2;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    color: #1e293b;
+    margin: 0 0 4px 0;
+    line-height: 1.3;
   }
   
   .channel-value {
-    display: none;
+    font-size: 14px;
+    color: #64748b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0;
+    line-height: 1.3;
   }
   
   .channel-arrow {
-    display: none;
+    width: 20px;
+    height: 20px;
+    color: #94a3b8;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    font-size: 16px;
+  }
+  
+  .channel-item:hover .channel-arrow {
+    color: #22c55e;
+    transform: translateX(4px);
   }
 
-  /* Parent channel with dropdown - also styled as buttons */
+  /* Parent channel with dropdown */
   .parent-channel-wrapper {
     position: relative;
-    margin-bottom: 16px;
-    grid-column: span 2;
+    margin-bottom: 12px;
   }
   
   .parent-channel {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 16px 24px;
-    border: none;
-    background: transparent;
+    gap: 16px;
+    padding: 16px 10px;
+    border: 1px solid #e2e8f0;
+    background: white;
     text-decoration: none;
-    color: white;
-    font-weight: 600;
+    color: #334155;
+    font-weight: 500;
     transition: all 0.3s ease;
-    border-radius: 50px;
+    border-radius: 12px;
     cursor: pointer;
     width: 100%;
-    position: relative;
-    overflow: hidden;
-    min-height: 50px;
-    font-size: 14px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(10px);
   }
   
   .parent-channel:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    border-color: #22c55e;
+    background: #f0fdf4;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.15);
   }
   
   .dropdown-toggle {
@@ -305,18 +225,18 @@ export const defaultCssStyles = `
     justify-content: center;
     border-radius: 50%;
     transition: all 0.3s ease;
-    margin-left: 8px;
+    margin-left: auto;
   }
   
   .dropdown-toggle:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(34, 197, 94, 0.1);
   }
   
   .dropdown-arrow {
     width: 16px;
     height: 16px;
     transition: transform 0.3s ease;
-    color: white;
+    color: #64748b;
   }
   
   .dropdown-arrow.rotated {
@@ -327,101 +247,94 @@ export const defaultCssStyles = `
     position: absolute;
     top: -8px;
     right: 8px;
-    background: rgba(255, 255, 255, 0.9);
-    color: #333;
+    background: #3b82f6;
+    color: white;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     padding: 2px 6px;
     border-radius: 10px;
     min-width: 18px;
     text-align: center;
     line-height: 1.2;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
     z-index: 10;
   }
   
-  /* Dropdown - keep similar but smaller buttons */
+  /* Dropdown */
   .dropdown {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.4s ease;
-    background: rgba(248, 250, 252, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    margin-top: 12px;
-    border: 1px solid rgba(226, 232, 240, 0.5);
-    padding: 0 8px;
+    transition: max-height 0.3s ease;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-top: 8px;
+    border: 1px solid #e9ecef;
   }
   
   .dropdown.show {
-    max-height: 320px;
-    padding: 12px 8px;
+    max-height: 300px;
   }
   
   .dropdown-item {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
+    gap: 12px;
     padding: 12px 16px;
     text-decoration: none;
-    color: white;
-    transition: all 0.3s ease;
-    border-radius: 50px;
-    font-size: 13px;
-    font-weight: 500;
-    margin-bottom: 8px;
-    min-height: 40px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    min-width: 120px;
+    color: #374151;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 14px;
   }
   
   .dropdown-item:last-child {
-    margin-bottom: 0;
+    border-bottom: none;
   }
   
   .dropdown-item:hover {
-    transform: translateY(-1px) scale(1.02);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    background: #e9ecef;
+    color: #1f2937;
   }
   
   .dropdown-icon {
-    width: 16px;
-    height: 16px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 50%;
     font-size: 14px;
     flex-shrink: 0;
     color: white;
   }
   
   .dropdown-info {
-    display: none;
+    flex: 1;
+    min-width: 0;
   }
   
   .dropdown-label {
-    font-weight: 600;
-    color: white;
-    margin: 0;
-    line-height: 1.2;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    font-weight: 500;
+    color: #1f2937;
+    margin: 0 0 2px 0;
+    line-height: 1.3;
   }
   
   .dropdown-value {
-    display: none;
+    font-size: 12px;
+    color: #6b7280;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0;
+    line-height: 1.3;
   }
 
   /* Desktop responsive */
   @media (min-width: 769px) {
     #lovable-modal-content {
-      max-width: 440px;
-      max-height: 680px;
-    }
-    
-    #lovable-widget-channels {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+      max-width: 420px;
+      max-height: 650px;
     }
   }
 
@@ -430,54 +343,18 @@ export const defaultCssStyles = `
     #lovable-modal-content {
       width: 95%;
       height: 90%;
-      max-width: 400px;
-      max-height: 620px;
-      padding: 24px;
-    }
-    
-    #lovable-widget-channels {
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-    
-    .channel-item {
-      padding: 14px 20px;
-      min-height: 45px;
-      font-size: 13px;
-      min-width: 120px;
-    }
-    
-    .parent-channel {
-      padding: 14px 20px;
-      min-height: 45px;
-      font-size: 13px;
+      max-width: 380px;
+      max-height: 600px;
     }
     
     .dropdown {
-      margin-top: 8px;
+      margin-top: 5px;
     }
   }
   
   /* Powered by styles */
-  #lovable-powered-by {
-    text-align: center;
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(226, 232, 240, 0.5);
-  }
-  
-  #lovable-powered-by a {
-    color: #94a3b8;
-    font-size: 11px;
-    text-decoration: none;
-    opacity: 0.8;
-    transition: all 0.3s ease;
-    font-weight: 500;
-  }
-  
   #lovable-powered-by a:hover {
     opacity: 1 !important;
-    color: #64748b !important;
-    transform: translateY(-1px);
+    color: #666 !important;
   }
 `;
