@@ -542,10 +542,14 @@ export const getModernTemplate = (): WidgetTemplate => ({
 
   // Toggle channel group - CLICK ONLY
   window.toggleChannelGroup = function(groupId) {
+    console.log('Toggling group:', groupId);
     const dropdown = document.getElementById(groupId);
     const trigger = document.querySelector('[onclick*="' + groupId + '"]');
     
-    if (!dropdown || !trigger) return;
+    if (!dropdown || !trigger) {
+      console.log('Elements not found for group:', groupId);
+      return;
+    }
     
     // Close other open groups
     if (currentOpenGroupId && currentOpenGroupId !== groupId) {
@@ -565,10 +569,12 @@ export const getModernTemplate = (): WidgetTemplate => ({
       dropdown.classList.remove('show');
       trigger.classList.remove('active');
       currentOpenGroupId = null;
+      console.log('Closed group:', groupId);
     } else {
       dropdown.classList.add('show');
       trigger.classList.add('active');
       currentOpenGroupId = groupId;
+      console.log('Opened group:', groupId);
     }
   };
 
