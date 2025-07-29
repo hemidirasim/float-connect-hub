@@ -8,14 +8,14 @@ import { Palette } from 'lucide-react';
 const AVAILABLE_TEMPLATES = [
   {
     id: 'default',
-    name: 'Standart Dizayn',
-    description: 'Klassik və asan istifadə edilən dizayn',
+    name: 'Standard Design',
+    description: 'Classic and easy-to-use design',
     is_default: true
   },
   {
     id: 'modern-floating',
     name: 'Modern Floating',
-    description: 'Hover edəndə aşağıdan yuxarıya açılan modern dizayn',
+    description: 'Modern design that opens from bottom to top on click',
     is_default: false
   }
 ];
@@ -41,15 +41,15 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Palette className="w-5 h-5 text-purple-600" />
-          Widget Dizaynı
+          Widget Design
         </CardTitle>
         <CardDescription>
-          Widget-inizin dizaynını seçin
+          Choose your widget design
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <Label htmlFor="template-selector">Template seçin</Label>
+          <Label htmlFor="template-selector">Select Template</Label>
           <RadioGroup
             value={selectedTemplateId}
             onValueChange={onTemplateChange}
