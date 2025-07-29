@@ -12,11 +12,11 @@ export function getModernCssStyles(): string {
   width: {{BUTTON_SIZE}}px;
   height: {{BUTTON_SIZE}}px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
   cursor: pointer;
   position: relative;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
   border: 3px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
 }
