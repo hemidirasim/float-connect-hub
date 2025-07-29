@@ -155,6 +155,41 @@ const modernFloatingCssStyles = `
     object-fit: contain;
   }
   
+  .modern-floating-child-channel-tooltip {
+    position: absolute;
+    right: calc({{BUTTON_SIZE}}px + 15px);
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 100002;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .modern-floating-child-channel-tooltip:before {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-left-color: rgba(0, 0, 0, 0.9);
+  }
+  
+  .modern-floating-child-channel-item:hover .modern-floating-child-channel-tooltip {
+    opacity: 1;
+    visibility: visible;
+  }
+  
   /* Mobile responsive */
   @media (max-width: 768px) {
     #modern-floating-channels {
@@ -162,6 +197,10 @@ const modernFloatingCssStyles = `
     }
     
     .modern-floating-child-channels {
+      right: calc({{BUTTON_SIZE}}px + 10px);
+    }
+    
+    .modern-floating-child-channel-tooltip {
       right: calc({{BUTTON_SIZE}}px + 10px);
     }
   }
@@ -262,6 +301,7 @@ const modernFloatingJavaScriptLogic = `
       
       html += '<a href="' + channelUrl + '" target="_blank" class="modern-floating-child-channel-item" style="background-color: ' + channelColor + ';" data-index="' + i + '">';
       html += channelIcon;
+      html += '<div class="modern-floating-child-channel-tooltip">' + (child.label || child.type) + '</div>';
       html += '</a>';
     }
     
