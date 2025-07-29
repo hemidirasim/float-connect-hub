@@ -62,7 +62,7 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
   const [formData, setFormData] = useState<Widget>({
     name: widget?.name || 'My Widget',
     website_url: widget?.website_url || '',
-    button_color: widget?.button_color || '#25d366',
+    button_color: widget?.button_color || '#5422c9',
     position: widget?.position || 'right',
     tooltip: widget?.tooltip || '',
     video_enabled: widget?.video_enabled || false,

@@ -14,7 +14,7 @@ export const useWidgetState = (user: any) => {
   const [copied, setCopied] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
-    buttonColor: '#25d366',
+    buttonColor: '#5422c9',
     position: 'right',
     tooltip: 'Contact us!',
     tooltipDisplay: 'hover',
@@ -61,7 +61,7 @@ export const useWidgetState = (user: any) => {
         setWebsiteUrl(data.website_url || '');
         setChannels(data.channels || []);
         setFormData({
-          buttonColor: data.button_color || '#25d366',
+          buttonColor: data.button_color || '#5422c9',
           position: data.position || 'right',
           tooltip: data.tooltip || 'Contact us!',
           tooltipDisplay: data.tooltip_display || 'hover',
@@ -102,7 +102,7 @@ export const useWidgetState = (user: any) => {
     setWebsiteUrl('');
     setChannels([]);
     setFormData({
-      buttonColor: '#25d366',
+      buttonColor: '#5422c9',
       position: 'right',
       tooltip: 'Contact us!',
       tooltipDisplay: 'hover',

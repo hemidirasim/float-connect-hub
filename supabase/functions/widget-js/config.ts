@@ -7,7 +7,7 @@ export const corsHeaders = {
 }
 
 export const defaultWidgetConfig = {
-  buttonColor: '#25d366',
+  buttonColor: '#5422c9',
   position: 'right',
   tooltip: 'Contact us!',
   tooltipDisplay: 'hover',

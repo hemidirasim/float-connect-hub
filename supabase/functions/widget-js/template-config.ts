@@ -43,7 +43,7 @@ export function createWidgetConfig(widget: any): WidgetConfig {
 
   const config: WidgetConfig = {
     channels: channels,
-    buttonColor: widget.button_color || '#25d366',
+    buttonColor: widget.button_color || '#5422c9',
     position: widget.position || 'right',
     tooltip: widget.tooltip || 'Contact us!',
     tooltipDisplay: widget.tooltip_display || 'hover',
