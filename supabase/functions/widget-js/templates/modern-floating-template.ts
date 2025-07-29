@@ -287,22 +287,32 @@ const modernFloatingJavaScriptLogic = `
   var isHoveringWidget = false;
   var currentChildChannels = null;
   
-  function generateChildChannelsHtml(childChannels) {
-    if (!childChannels || childChannels.length === 0) return '';
-    
+  function generateChildChannelsHtml(channel, childChannels) {
     var html = '<div class="modern-floating-child-channels">';
     
-    // Alt kanalları tersine çevir ki, altdan yuxarı sıralansınlar
-    for (var i = childChannels.length - 1; i >= 0; i--) {
-      var child = childChannels[i];
-      var channelUrl = getChannelUrl(child);
-      var channelIcon = getChannelIcon(child);
-      var channelColor = getChannelColor(child.type);
-      
-      html += '<a href="' + channelUrl + '" target="_blank" class="modern-floating-child-channel-item" style="background-color: ' + channelColor + ';" data-index="' + i + '">';
-      html += channelIcon;
-      html += '<div class="modern-floating-child-channel-tooltip">' + (child.label || child.type) + '</div>';
-      html += '</a>';
+    // Əvvəlcə əsas kanalı əlavə et
+    var mainChannelUrl = getChannelUrl(channel);
+    var mainChannelIcon = getChannelIcon(channel);
+    var mainChannelColor = getChannelColor(channel.type);
+    
+    html += '<a href="' + mainChannelUrl + '" target="_blank" class="modern-floating-child-channel-item" style="background-color: ' + mainChannelColor + ';">';
+    html += mainChannelIcon;
+    html += '<div class="modern-floating-child-channel-tooltip">' + (channel.label || channel.type) + '</div>';
+    html += '</a>';
+    
+    // Sonra alt kanalları əlavə et (tersine çevir ki, altdan yuxarı sıralansınlar)
+    if (childChannels && childChannels.length > 0) {
+      for (var i = childChannels.length - 1; i >= 0; i--) {
+        var child = childChannels[i];
+        var channelUrl = getChannelUrl(child);
+        var channelIcon = getChannelIcon(child);
+        var channelColor = getChannelColor(child.type);
+        
+        html += '<a href="' + channelUrl + '" target="_blank" class="modern-floating-child-channel-item" style="background-color: ' + channelColor + ';" data-index="' + i + '">';
+        html += channelIcon;
+        html += '<div class="modern-floating-child-channel-tooltip">' + (child.label || child.type) + '</div>';
+        html += '</a>';
+      }
     }
     
     html += '</div>';
@@ -323,10 +333,11 @@ const modernFloatingJavaScriptLogic = `
       
       // If channel has child channels, make it clickable to show child channels
       if (channel.childChannels && channel.childChannels.length > 0) {
+        var totalChannelCount = 1 + channel.childChannels.length; // əsas kanal + alt kanallar
         html += '<div class="modern-floating-channel-item" style="background-color: ' + channelColor + '; cursor: pointer;" data-index="' + i + '" data-has-children="true">';
         html += channelIcon;
-        html += '<div class="modern-floating-channel-count">' + channel.childChannels.length + '</div>';
-        html += generateChildChannelsHtml(channel.childChannels);
+        html += '<div class="modern-floating-channel-count">' + totalChannelCount + '</div>';
+        html += generateChildChannelsHtml(channel, channel.childChannels);
         html += '</div>';
       } else {
         var channelUrl = getChannelUrl(channel);
