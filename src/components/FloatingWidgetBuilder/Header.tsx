@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { MessageCircle, User, LayoutDashboard } from 'lucide-react';
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 
 interface HeaderProps {
   user: any;
@@ -13,12 +13,27 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ user, loading, onSignOut, onOpenAuth }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const scrollToWidgetForm = (e: React.MouseEvent) => {
     e.preventDefault();
-    const element = document.getElementById('widget-form');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    
+    // If we're not on the home page, navigate there first
+    if (location.pathname !== '/') {
+      navigate('/');
+      // Use setTimeout to ensure navigation completes before scrolling
+      setTimeout(() => {
+        const element = document.getElementById('widget-form');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      // If we're already on home page, just scroll
+      const element = document.getElementById('widget-form');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
