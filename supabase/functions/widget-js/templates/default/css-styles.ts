@@ -15,8 +15,7 @@ export const defaultCssStyles = `
   }
   
   #lovable-widget-button:hover {
-    box-shadow: 0 12px 35px rgba(34, 197, 94, 0.5);
-    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    box-shadow: 0 12px 35px rgba(59, 130, 246, 0.5);
     /* Remove transform on hover to prevent movement */
   }
   
