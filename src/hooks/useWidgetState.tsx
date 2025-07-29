@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -20,7 +19,7 @@ export const useWidgetState = (user: any) => {
     tooltip: 'Contact us!',
     tooltipDisplay: 'hover',
     tooltipPosition: 'top',
-    greetingMessage: '', // Completely empty by default
+    greetingMessage: 'Hi 👋 How can we help you today?', // Set correct default message
     video: null,
     videoUrl: undefined,
     videoType: 'upload',
@@ -67,7 +66,7 @@ export const useWidgetState = (user: any) => {
           tooltip: data.tooltip || 'Contact us!',
           tooltipDisplay: data.tooltip_display || 'hover',
           tooltipPosition: data.tooltip_position || 'top',
-          greetingMessage: data.greeting_message || '', // Keep empty if no message exists
+          greetingMessage: data.greeting_message || 'Hi 👋 How can we help you today?', // Use correct default
           video: null,
           videoUrl: data.video_url || undefined,
           videoType: data.video_url && (data.video_url.includes('youtube.com') || data.video_url.includes('vimeo.com') || data.video_url.includes('dailymotion.com')) ? 'link' : 'upload',
@@ -108,7 +107,7 @@ export const useWidgetState = (user: any) => {
       tooltip: 'Contact us!',
       tooltipDisplay: 'hover',
       tooltipPosition: 'top',
-      greetingMessage: '', // Always empty on reset
+      greetingMessage: 'Hi 👋 How can we help you today?', // Use correct default on reset
       video: null,
       videoUrl: undefined,
       videoType: 'upload',
