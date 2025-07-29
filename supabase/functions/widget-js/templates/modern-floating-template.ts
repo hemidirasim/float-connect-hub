@@ -2,7 +2,7 @@
 import type { WidgetTemplate } from '../template-types.ts'
 
 const modernFloatingHtmlTemplate = `
-<div id="modern-floating-widget-container" style="position: fixed; {{POSITION_STYLE}} bottom: 20px; z-index: 99999;">
+<div id="modern-floating-widget-container" class="modern-floating-widget-container" data-position="{{POSITION}}" style="position: fixed; {{POSITION_STYLE}} bottom: 20px; z-index: 99999;">
   <div id="modern-floating-widget-relative-container" style="position: relative;">    
     <!-- Channels container that appears on hover -->
     <div id="modern-floating-channels-container" style="position: absolute; {{POSITION_CHANNELS_STYLE}} bottom: {{CHANNEL_BOTTOM_OFFSET}}px; display: none; opacity: 0; transform: translateY(20px); transition: all 0.3s ease;">
@@ -105,7 +105,6 @@ const modernFloatingCssStyles = `
   
   .modern-floating-child-channels {
     position: absolute;
-    right: calc({{BUTTON_SIZE}}px + 15px);
     bottom: 0;
     display: flex;
     flex-direction: column;
@@ -116,6 +115,16 @@ const modernFloatingCssStyles = `
     transition: all 0.3s ease;
     z-index: 100001;
     pointer-events: none;
+  }
+
+  /* Position child channels based on widget position */
+  .modern-floating-widget-container[data-position="left"] .modern-floating-child-channels {
+    left: calc({{BUTTON_SIZE}}px + 15px);
+  }
+
+  .modern-floating-widget-container[data-position="right"] .modern-floating-child-channels,
+  .modern-floating-widget-container[data-position="center"] .modern-floating-child-channels {
+    right: calc({{BUTTON_SIZE}}px + 15px);
   }
   
   .modern-floating-child-channels.show {
@@ -157,7 +166,6 @@ const modernFloatingCssStyles = `
   
   .modern-floating-child-channel-tooltip {
     position: absolute;
-    right: calc({{BUTTON_SIZE}}px + 15px);
     top: 50%;
     transform: translateY(-50%);
     background-color: rgba(0, 0, 0, 0.9);
@@ -174,8 +182,29 @@ const modernFloatingCssStyles = `
     pointer-events: none;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
+
+  /* Position tooltips based on widget position */
+  .modern-floating-widget-container[data-position="left"] .modern-floating-child-channel-tooltip {
+    left: calc({{BUTTON_SIZE}}px + 15px);
+  }
+
+  .modern-floating-widget-container[data-position="left"] .modern-floating-child-channel-tooltip:before {
+    content: '';
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-right-color: rgba(0, 0, 0, 0.9);
+  }
+
+  .modern-floating-widget-container[data-position="right"] .modern-floating-child-channel-tooltip,
+  .modern-floating-widget-container[data-position="center"] .modern-floating-child-channel-tooltip {
+    right: calc({{BUTTON_SIZE}}px + 15px);
+  }
   
-  .modern-floating-child-channel-tooltip:before {
+  .modern-floating-widget-container[data-position="right"] .modern-floating-child-channel-tooltip:before,
+  .modern-floating-widget-container[data-position="center"] .modern-floating-child-channel-tooltip:before {
     content: '';
     position: absolute;
     left: 100%;
@@ -196,11 +225,21 @@ const modernFloatingCssStyles = `
       gap: 12px;
     }
     
-    .modern-floating-child-channels {
+    .modern-floating-widget-container[data-position="left"] .modern-floating-child-channels {
+      left: calc({{BUTTON_SIZE}}px + 10px);
+    }
+    
+    .modern-floating-widget-container[data-position="right"] .modern-floating-child-channels,
+    .modern-floating-widget-container[data-position="center"] .modern-floating-child-channels {
       right: calc({{BUTTON_SIZE}}px + 10px);
     }
     
-    .modern-floating-child-channel-tooltip {
+    .modern-floating-widget-container[data-position="left"] .modern-floating-child-channel-tooltip {
+      left: calc({{BUTTON_SIZE}}px + 10px);
+    }
+    
+    .modern-floating-widget-container[data-position="right"] .modern-floating-child-channel-tooltip,
+    .modern-floating-widget-container[data-position="center"] .modern-floating-child-channel-tooltip {
       right: calc({{BUTTON_SIZE}}px + 10px);
     }
   }
