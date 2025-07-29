@@ -582,7 +582,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
     
     console.log('Found elements:', { button: !!button, modal: !!modal, tooltip: !!tooltip, closeBtn: !!closeBtn });
     
-    // Modal açma - sadəcə klik ilə
+    // Modal açma - yalnız klik ilə
     button.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -663,27 +663,21 @@ export const getModernTemplate = (): WidgetTemplate => ({
       }
     });
     
-    // Tooltip handling - klik effekti ilə hover
+    // Tooltip yalnız hover ilə
     if (tooltip && button) {
       if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
-        let tooltipTimeout;
-        
         button.addEventListener('mouseenter', function() {
-          clearTimeout(tooltipTimeout);
           tooltip.style.display = 'block';
           tooltip.style.opacity = '1';
         });
         
         button.addEventListener('mouseleave', function() {
-          // Tooltip-i dərhal gizlətməyəcəyik, bir müddət gözləyəcəyik
-          tooltipTimeout = setTimeout(function() {
-            tooltip.style.opacity = '0';
-            setTimeout(function() {
-              if (tooltip.style.opacity === '0') {
-                tooltip.style.display = 'none';
-              }
-            }, 200);
-          }, 1000); // 1 saniyə gözlə
+          tooltip.style.opacity = '0';
+          setTimeout(function() {
+            if (tooltip.style.opacity === '0') {
+              tooltip.style.display = 'none';
+            }
+          }, 200);
         });
       } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
         tooltip.style.display = 'block';
