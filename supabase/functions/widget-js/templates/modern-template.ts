@@ -1,3 +1,4 @@
+
 import type { WidgetTemplate } from '../template-types.ts'
 
 export const getModernTemplate = (): WidgetTemplate => ({
@@ -663,29 +664,16 @@ export const getModernTemplate = (): WidgetTemplate => ({
       }
     });
     
-    // Tooltip yalnız hover ilə
+    // Tooltip - yalnız click əsaslı, hover funksiyası yoxdur
     if (tooltip && button) {
-      if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
-        button.addEventListener('mouseenter', function() {
-          tooltip.style.display = 'block';
-          tooltip.style.opacity = '1';
-        });
-        
-        button.addEventListener('mouseleave', function() {
-          tooltip.style.opacity = '0';
-          setTimeout(function() {
-            if (tooltip.style.opacity === '0') {
-              tooltip.style.display = 'none';
-            }
-          }, 200);
-        });
-      } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
+      if ('{{TOOLTIP_DISPLAY}}' === 'always') {
         tooltip.style.display = 'block';
         tooltip.style.opacity = '1';
       }
+      // hover funksiyası tamamilə silindi
     }
     
-    console.log('Modern template initialized with click-to-open modal');
+    console.log('Modern template initialized with click-only functionality');
   }
   
   window.openChannel = function(url) {
