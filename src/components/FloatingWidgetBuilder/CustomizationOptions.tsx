@@ -119,21 +119,21 @@ export const CustomizationOptions: React.FC<CustomizationOptionsProps> = ({
         <Label htmlFor="greetingMessage">Modal Greeting Message</Label>
         <Textarea
           id="greetingMessage"
-          placeholder="Salam! Sizə necə kömək edə bilərik?"
-          value={greetingMessage}
+          placeholder="Enter your greeting message..."
+          value={greetingMessage || "Hello! How can we help you today?"}
           onChange={(e) => onGreetingMessageChange(e.target.value)}
           rows={3}
           maxLength={150}
         />
         <div className="flex justify-between text-xs text-gray-500">
           <span>
-            {greetingMessage.length < 10 ? (
+            {(greetingMessage || "Hello! How can we help you today?").length < 10 ? (
               <span className="text-red-500">Minimum 10 characters required</span>
             ) : (
               <span className="text-green-600">✓ Enough</span>
             )}
           </span>
-          <span>{greetingMessage.length}/150</span>
+          <span>{(greetingMessage || "Hello! How can we help you today?").length}/150</span>
         </div>
       </div>
     </>
