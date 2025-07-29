@@ -1,7 +1,7 @@
 export const defaultCssStyles = `
   #lovable-widget-button {
     border-radius: 50%;
-    background-color: {{BUTTON_COLOR}};
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
     border: none;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -9,7 +9,7 @@ export const defaultCssStyles = `
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: box-shadow 0.3s ease, background 0.3s ease;
+    transition: all 0.3s ease;
     color: white;
     {{BUTTON_OFFSET_STYLE}}
   }
