@@ -21,18 +21,7 @@ export const defaultCssStyles = `
   }
   
   #lovable-widget-tooltip {
-    position: absolute;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    white-space: nowrap;
-    z-index: 100000;
-    transition: all 0.2s ease;
-    pointer-events: none;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    {{TOOLTIP_POSITION_STYLE}}
+    display: none !important;
   }
   
   #lovable-widget-modal {
