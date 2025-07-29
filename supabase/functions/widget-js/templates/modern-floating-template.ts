@@ -365,6 +365,14 @@ const modernFloatingJavaScriptLogic = `
     }
   }
   
+  function isHoveringChildChannels(target) {
+    return target && (
+      target.classList.contains('modern-floating-child-channels') ||
+      target.classList.contains('modern-floating-child-channel-item') ||
+      target.closest('.modern-floating-child-channels')
+    );
+  }
+  
   function initWidget() {
     console.log('Initializing modern floating widget...');
     
@@ -401,12 +409,12 @@ const modernFloatingJavaScriptLogic = `
       showChannels();
     });
     
-    // Hide channels when leaving the entire widget area
+    // Hide channels when leaving the entire widget area, but check for child channels
     widgetContainer.addEventListener('mouseleave', function(e) {
-      // Check if we're moving to a child element
+      // Check if we're moving to a child channel or channels container
       var channelsContainerEl = document.querySelector('#modern-floating-channels-container');
-      if (channelsContainerEl && channelsContainerEl.contains(e.relatedTarget)) {
-        return; // Don't hide if moving to channels container
+      if (channelsContainerEl && (channelsContainerEl.contains(e.relatedTarget) || isHoveringChildChannels(e.relatedTarget))) {
+        return; // Don't hide if moving to channels container or child channels
       }
       
       hoverTimeout = setTimeout(function() {
@@ -422,7 +430,12 @@ const modernFloatingJavaScriptLogic = `
         isHoveringWidget = true;
       });
       
-      channelsContainerEl.addEventListener('mouseleave', function() {
+      channelsContainerEl.addEventListener('mouseleave', function(e) {
+        // Check if we're moving to a child channel
+        if (isHoveringChildChannels(e.relatedTarget)) {
+          return; // Don't hide if moving to child channels
+        }
+        
         hoverTimeout = setTimeout(function() {
           hideChannels();
         }, 200);
