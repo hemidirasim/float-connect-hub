@@ -3,7 +3,13 @@ import type { WidgetTemplate } from '../template-types.ts'
 
 const modernFloatingHtmlTemplate = `
 <div id="modern-floating-widget-container" class="modern-floating-widget-container" data-position="{{POSITION}}" style="position: fixed; {{POSITION_STYLE}} bottom: 40px; z-index: 99999;">
-  <div id="modern-floating-widget-relative-container" style="position: relative;">    
+  <div id="modern-floating-widget-relative-container" style="position: relative;">
+    
+    <!-- Powered by text -->
+    <div id="modern-floating-powered-by" style="position: absolute; right: calc(100% + 15px); top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.8); color: white; padding: 6px 10px; border-radius: 6px; font-size: 10px; white-space: nowrap; opacity: 0; visibility: hidden; transition: all 0.3s ease; pointer-events: none; display: none;">
+      powered by hiclient.co
+    </div>
+    
     <!-- Channels container that appears on hover -->
     <div id="modern-floating-channels-container" style="position: absolute; {{POSITION_CHANNELS_STYLE}} bottom: {{CHANNEL_BOTTOM_OFFSET}}px; display: none; opacity: 0; transform: translateY(20px); transition: all 0.3s ease;">
       <div id="modern-floating-channels"></div>
@@ -584,13 +590,27 @@ const modernFloatingJavaScriptLogic = `
       e.stopPropagation();
       
       var channelsContainer = document.querySelector('#modern-floating-channels-container');
+      var poweredByText = document.querySelector('#modern-floating-powered-by');
+      
       if (channelsContainer) {
         var isVisible = channelsContainer.classList.contains('show');
         
         if (isVisible) {
           hideChannels();
+          // Hide powered by text
+          if (poweredByText) {
+            poweredByText.style.display = 'none';
+            poweredByText.style.opacity = '0';
+            poweredByText.style.visibility = 'hidden';
+          }
         } else {
           showChannels();
+          // Show powered by text
+          if (poweredByText) {
+            poweredByText.style.display = 'block';
+            poweredByText.style.opacity = '1';
+            poweredByText.style.visibility = 'visible';
+          }
         }
       }
     });
@@ -599,11 +619,18 @@ const modernFloatingJavaScriptLogic = `
     document.addEventListener('click', function(e) {
       var channelsContainer = document.querySelector('#modern-floating-channels-container');
       var widgetContainer = document.querySelector('#modern-floating-widget-container');
+      var poweredByText = document.querySelector('#modern-floating-powered-by');
       
       if (channelsContainer && widgetContainer && 
           !widgetContainer.contains(e.target) && 
           !channelsContainer.contains(e.target)) {
         hideChannels();
+        // Hide powered by text
+        if (poweredByText) {
+          poweredByText.style.display = 'none';
+          poweredByText.style.opacity = '0';
+          poweredByText.style.visibility = 'hidden';
+        }
       }
       
       if (currentChildChannels && !currentChildChannels.contains(e.target)) {
