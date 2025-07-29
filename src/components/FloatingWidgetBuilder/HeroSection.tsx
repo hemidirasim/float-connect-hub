@@ -30,7 +30,7 @@ export const HeroSection: React.FC = () => {
               </h1>
               
               <p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-2xl">
-                Omnichannel solution enabling companies to connect with their customers in all messaging apps and social networks, via live chat and e-mail
+                Create floating contact buttons for your website that connect visitors to WhatsApp, Telegram, Email, Phone and other messaging platforms instantly
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 items-start">
