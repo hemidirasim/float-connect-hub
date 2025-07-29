@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -126,15 +127,9 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
               <CustomizationOptions
                 buttonColor={formData.buttonColor}
                 position={formData.position}
-                tooltip={formData.tooltip}
-                tooltipDisplay={formData.tooltipDisplay}
-                tooltipPosition={formData.tooltipPosition || 'top'}
                 greetingMessage={formData.greetingMessage || ''}
                 onButtonColorChange={(color) => onFormDataChange('buttonColor', color)}
                 onPositionChange={(position) => onFormDataChange('position', position)}
-                onTooltipChange={(tooltip) => onFormDataChange('tooltip', tooltip)}
-                onTooltipDisplayChange={(display) => onFormDataChange('tooltipDisplay', display)}
-                onTooltipPositionChange={(position) => onFormDataChange('tooltipPosition', position)}
                 onGreetingMessageChange={(message) => onFormDataChange('greetingMessage', message)}
               />
             </CardContent>
