@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MessageCircle, Twitter, Github, Linkedin, Mail, Heart, Sparkles } from 'lucide-react';
+import { MessageCircle, Mail, Heart, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const Footer: React.FC = () => {
@@ -73,30 +73,15 @@ export const Footer: React.FC = () => {
               <div className="absolute -bottom-2 left-0 w-12 h-0.5 bg-gradient-to-r from-green-500 to-blue-500 rounded-full"></div>
             </h4>
             <ul className="space-y-4">
-              {[
-                { name: 'Help Center', path: '/faq' },
-                { name: 'Contact Us', path: 'mailto:support@hiclient.co', external: true }
-              ].map((item, index) => (
-                <li key={index}>
-                  {item.external ? (
-                    <a 
-                      href={item.path} 
-                      className="text-gray-400 hover:text-white transition-all duration-300 flex items-center group"
-                    >
-                      <span className="w-0 group-hover:w-2 h-0.5 bg-green-400 mr-0 group-hover:mr-3 transition-all duration-300 rounded-full"></span>
-                      {item.name}
-                    </a>
-                  ) : (
-                    <Link 
-                      to={item.path} 
-                      className="text-gray-400 hover:text-white transition-all duration-300 flex items-center group"
-                    >
-                      <span className="w-0 group-hover:w-2 h-0.5 bg-green-400 mr-0 group-hover:mr-3 transition-all duration-300 rounded-full"></span>
-                      {item.name}
-                    </Link>
-                  )}
-                </li>
-              ))}
+              <li>
+                <a 
+                  href="mailto:support@hiclient.co" 
+                  className="text-gray-400 hover:text-white transition-all duration-300 flex items-center group"
+                >
+                  <span className="w-0 group-hover:w-2 h-0.5 bg-green-400 mr-0 group-hover:mr-3 transition-all duration-300 rounded-full"></span>
+                  Contact Us
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -131,25 +116,15 @@ export const Footer: React.FC = () => {
               <div className="absolute -bottom-2 left-0 w-12 h-0.5 bg-gradient-to-r from-pink-500 to-red-500 rounded-full"></div>
             </h4>
             <div className="space-y-4">
-              <p className="text-gray-400 text-sm">Follow us for updates</p>
-              <div className="flex space-x-4">
-                {[
-                  { icon: Twitter, href: '#', color: 'hover:text-blue-400' },
-                  { icon: Github, href: '#', color: 'hover:text-gray-300' },
-                  { icon: Linkedin, href: '#', color: 'hover:text-blue-500' },
-                  { icon: Mail, href: 'mailto:hello@hiclient.co', color: 'hover:text-red-400' }
-                ].map((social, index) => {
-                  const IconComponent = social.icon;
-                  return (
-                    <a
-                      key={index}
-                      href={social.href}
-                      className={`text-gray-500 ${social.color} transition-all duration-300 transform hover:scale-110 p-2 rounded-lg hover:bg-white/5`}
-                    >
-                      <IconComponent className="w-5 h-5" />
-                    </a>
-                  );
-                })}
+              <p className="text-gray-400 text-sm">Get in touch with us</p>
+              <div className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
+                <Mail className="w-5 h-5 text-red-400" />
+                <a
+                  href="mailto:support@hiclient.co"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  support@hiclient.co
+                </a>
               </div>
             </div>
           </div>
