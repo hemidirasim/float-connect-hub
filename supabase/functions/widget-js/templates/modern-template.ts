@@ -638,6 +638,31 @@ export const getModernTemplate = (): WidgetTemplate => ({
       }
     });
     
+    // Alt kontakt dropdown-larına keçid edərkən modalı bağlama
+    document.addEventListener('click', function(e) {
+      if (isModalOpen && currentOpenGroupId) {
+        var modalContent = document.getElementById('hiclient-modal-content');
+        var clickedInsideModal = modalContent && modalContent.contains(e.target);
+        var clickedOnTrigger = e.target.closest('.hiclient-group-trigger');
+        var clickedOnDropdown = e.target.closest('.hiclient-group-dropdown');
+        var clickedOnGroupItem = e.target.closest('.hiclient-group-item');
+        
+        // Alt kontaktlara və dropdown sahəsinə klik edərkən modalı bağlama
+        if (clickedOnDropdown || clickedOnGroupItem) {
+          return; // Modal açıq qalsın
+        }
+        
+        // Yalnız başqa group trigger-ə klik edəndə və ya modal xaricində klik edəndə dropdown-ı bağla
+        if (!clickedInsideModal || (clickedOnTrigger && !clickedOnTrigger.onclick.toString().includes(currentOpenGroupId))) {
+          var dropdown = document.getElementById(currentOpenGroupId);
+          if (dropdown) {
+            dropdown.classList.remove('show');
+          }
+          currentOpenGroupId = null;
+        }
+      }
+    });
+    
     // Tooltip handling - klik effekti ilə hover
     if (tooltip && button) {
       if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
