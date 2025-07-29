@@ -1,53 +1,182 @@
+
 import React from 'react';
-import { MessageCircle, Twitter, Github, Linkedin } from 'lucide-react';
+import { MessageCircle, Twitter, Github, Linkedin, Mail, Heart, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
 export const Footer: React.FC = () => {
-  return <footer className="bg-gray-900 text-white py-12 mt-16">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <MessageCircle className="w-5 h-5 text-white" />
+  return (
+    <footer className="relative bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 text-white overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-10 left-10 w-20 h-20 bg-blue-500 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute top-32 right-20 w-16 h-16 bg-purple-500 rounded-full blur-xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-20 left-1/3 w-24 h-24 bg-indigo-500 rounded-full blur-xl animate-pulse delay-2000"></div>
+        <div className="absolute bottom-10 right-10 w-18 h-18 bg-cyan-500 rounded-full blur-xl animate-pulse delay-500"></div>
+      </div>
+      
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 to-transparent"></div>
+      
+      <div className="relative container mx-auto px-4 py-16">
+        {/* Top section with brand and description */}
+        <div className="text-center mb-16">
+          <div className="flex items-center justify-center space-x-3 mb-6 group">
+            <div className="relative">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center transform group-hover:scale-110 transition-all duration-300 shadow-lg">
+                <MessageCircle className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold">Hiclient</h3>
+              <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-400 animate-pulse" />
             </div>
-            <p className="text-gray-400 text-sm">
-              Create beautiful floating contact widgets for your website in minutes.
-            </p>
-            
+            <h3 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
+              Hiclient
+            </h3>
           </div>
-          
-          <div>
-            <h4 className="font-semibold mb-4">Product</h4>
-            <ul className="space-y-2 text-gray-400 text-sm">
-              <li><Link to="/" className="hover:text-white transition-colors">Create Widget</Link></li>
-              <li><Link to="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
-              <li><Link to="/blogs" className="hover:text-white transition-colors">Blog</Link></li>
-              <li><Link to="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
+          <p className="text-gray-300 text-lg max-w-2xl mx-auto leading-relaxed">
+            Transform your website with beautiful, interactive floating widgets. 
+            <span className="text-blue-400 font-medium"> Boost engagement</span> and 
+            <span className="text-purple-400 font-medium"> increase conversions</span> effortlessly.
+          </p>
+        </div>
+
+        {/* Main footer content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          {/* Product Links */}
+          <div className="space-y-6">
+            <h4 className="text-xl font-semibold text-white relative">
+              Product
+              <div className="absolute -bottom-2 left-0 w-12 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+            </h4>
+            <ul className="space-y-4">
+              {[
+                { name: 'Create Widget', path: '/' },
+                { name: 'Dashboard', path: '/dashboard' },
+                { name: 'Blog', path: '/blogs' },
+                { name: 'FAQ', path: '/faq' }
+              ].map((item, index) => (
+                <li key={index}>
+                  <Link 
+                    to={item.path} 
+                    className="text-gray-400 hover:text-white transition-all duration-300 flex items-center group"
+                  >
+                    <span className="w-0 group-hover:w-2 h-0.5 bg-blue-400 mr-0 group-hover:mr-3 transition-all duration-300 rounded-full"></span>
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
-          
-          <div>
-            <h4 className="font-semibold mb-4">Support</h4>
-            <ul className="space-y-2 text-gray-400 text-sm">
-              <li><Link to="/faq" className="hover:text-white transition-colors">Help Center</Link></li>
-              <li><a href="mailto:support@hiclient.co" className="hover:text-white transition-colors">Contact Us</a></li>
+
+          {/* Support Links */}
+          <div className="space-y-6">
+            <h4 className="text-xl font-semibold text-white relative">
+              Support
+              <div className="absolute -bottom-2 left-0 w-12 h-0.5 bg-gradient-to-r from-green-500 to-blue-500 rounded-full"></div>
+            </h4>
+            <ul className="space-y-4">
+              {[
+                { name: 'Help Center', path: '/faq' },
+                { name: 'Contact Us', path: 'mailto:support@hiclient.co', external: true }
+              ].map((item, index) => (
+                <li key={index}>
+                  {item.external ? (
+                    <a 
+                      href={item.path} 
+                      className="text-gray-400 hover:text-white transition-all duration-300 flex items-center group"
+                    >
+                      <span className="w-0 group-hover:w-2 h-0.5 bg-green-400 mr-0 group-hover:mr-3 transition-all duration-300 rounded-full"></span>
+                      {item.name}
+                    </a>
+                  ) : (
+                    <Link 
+                      to={item.path} 
+                      className="text-gray-400 hover:text-white transition-all duration-300 flex items-center group"
+                    >
+                      <span className="w-0 group-hover:w-2 h-0.5 bg-green-400 mr-0 group-hover:mr-3 transition-all duration-300 rounded-full"></span>
+                      {item.name}
+                    </Link>
+                  )}
+                </li>
+              ))}
             </ul>
           </div>
-          
-          <div>
-            <h4 className="font-semibold mb-4">Legal</h4>
-            <ul className="space-y-2 text-gray-400 text-sm">
-              <li><Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-              <li><Link to="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link></li>
+
+          {/* Legal Links */}
+          <div className="space-y-6">
+            <h4 className="text-xl font-semibold text-white relative">
+              Legal
+              <div className="absolute -bottom-2 left-0 w-12 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+            </h4>
+            <ul className="space-y-4">
+              {[
+                { name: 'Privacy Policy', path: '/privacy-policy' },
+                { name: 'Terms of Service', path: '/terms-of-service' }
+              ].map((item, index) => (
+                <li key={index}>
+                  <Link 
+                    to={item.path} 
+                    className="text-gray-400 hover:text-white transition-all duration-300 flex items-center group"
+                  >
+                    <span className="w-0 group-hover:w-2 h-0.5 bg-purple-400 mr-0 group-hover:mr-3 transition-all duration-300 rounded-full"></span>
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
+          </div>
+
+          {/* Connect Section */}
+          <div className="space-y-6">
+            <h4 className="text-xl font-semibold text-white relative">
+              Connect
+              <div className="absolute -bottom-2 left-0 w-12 h-0.5 bg-gradient-to-r from-pink-500 to-red-500 rounded-full"></div>
+            </h4>
+            <div className="space-y-4">
+              <p className="text-gray-400 text-sm">Follow us for updates</p>
+              <div className="flex space-x-4">
+                {[
+                  { icon: Twitter, href: '#', color: 'hover:text-blue-400' },
+                  { icon: Github, href: '#', color: 'hover:text-gray-300' },
+                  { icon: Linkedin, href: '#', color: 'hover:text-blue-500' },
+                  { icon: Mail, href: 'mailto:hello@hiclient.co', color: 'hover:text-red-400' }
+                ].map((social, index) => {
+                  const IconComponent = social.icon;
+                  return (
+                    <a
+                      key={index}
+                      href={social.href}
+                      className={`text-gray-500 ${social.color} transition-all duration-300 transform hover:scale-110 p-2 rounded-lg hover:bg-white/5`}
+                    >
+                      <IconComponent className="w-5 h-5" />
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
         
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
-          <p>&copy; 2024 Hiclient. All rights reserved.</p>
+        {/* Bottom section */}
+        <div className="border-t border-gray-800 mt-16 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div className="flex items-center space-x-2 text-gray-400 text-sm">
+              <span>&copy; 2024 Hiclient. All rights reserved.</span>
+              <span className="hidden md:inline">•</span>
+              <span className="flex items-center space-x-1">
+                <span>Made with</span>
+                <Heart className="w-4 h-4 text-red-500 animate-pulse" />
+                <span>for your success</span>
+              </span>
+            </div>
+            
+            <div className="flex items-center space-x-4 text-sm text-gray-400">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span>All systems operational</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 };
