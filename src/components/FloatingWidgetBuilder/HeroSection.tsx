@@ -1,10 +1,7 @@
-
 import React from 'react';
 import { MessageCircle, Zap, Shield, Users, ArrowRight, Play, Star } from 'lucide-react';
-
 export const HeroSection: React.FC = () => {
-  return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50">
+  return <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50">
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/10 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
@@ -39,10 +36,7 @@ export const HeroSection: React.FC = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 items-center justify-center mb-12">
-            <a 
-              href="#widget-form" 
-              className="group relative px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300"
-            >
+            <a href="#widget-form" className="group relative px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300">
               <span className="relative z-10 flex items-center">
                 Start Building for Free
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
@@ -58,24 +52,11 @@ export const HeroSection: React.FC = () => {
             </button>
           </div>
 
-          <div className="text-sm text-gray-500">
-            ✨ No coding required • 30-second setup • Free forever plan
-          </div>
+          <div className="text-sm text-gray-500">✨ No coding required • 30-second setup • 100 Free credits</div>
         </div>
 
         {/* Hero Image/Illustration */}
-        <div className="relative mb-20">
-          <div className="relative mx-auto max-w-4xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl blur-3xl"></div>
-            <div className="relative bg-white/60 backdrop-blur-sm rounded-3xl p-8 border border-white/30 shadow-2xl">
-              <img 
-                src="https://blinger.io/img/presentation.svg" 
-                alt="Customer engagement platform illustration" 
-                className="w-full h-auto object-contain max-h-96"
-              />
-            </div>
-          </div>
-        </div>
+        
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-3 gap-8 mb-20">
@@ -136,23 +117,7 @@ export const HeroSection: React.FC = () => {
         </div>
 
         {/* CTA Section */}
-        <div className="text-center bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-16 border border-blue-100">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">Ready to boost your conversions?</h2>
-          <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-            Join thousands of businesses using our floating contact widgets to increase customer engagement and drive more sales
-          </p>
-          <a 
-            href="#widget-form"
-            className="inline-flex items-center px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-xl rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300"
-          >
-            Create Your Widget Now
-            <ArrowRight className="w-6 h-6 ml-3" />
-          </a>
-          <div className="mt-6 text-gray-500">
-            Start free • No credit card required
-          </div>
-        </div>
+        
       </div>
-    </section>
-  );
+    </section>;
 };
