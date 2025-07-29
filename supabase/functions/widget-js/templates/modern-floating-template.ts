@@ -404,46 +404,34 @@ const modernFloatingJavaScriptLogic = `
     
     console.log('Modern floating widget elements found:', { button: !!button, widgetContainer: !!widgetContainer });
     
-    // Show channels on button hover
-    button.addEventListener('mouseenter', function() {
-      showChannels();
+    // Show channels on button click only
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      var channelsContainer = document.querySelector('#modern-floating-channels-container');
+      if (channelsContainer) {
+        var isVisible = channelsContainer.classList.contains('show');
+        
+        if (isVisible) {
+          hideChannels();
+        } else {
+          showChannels();
+        }
+      }
     });
     
-    // Hide channels when leaving the entire widget area, but check for child channels
-    widgetContainer.addEventListener('mouseleave', function(e) {
-      // Check if we're moving to a child channel or channels container
-      var channelsContainerEl = document.querySelector('#modern-floating-channels-container');
-      if (channelsContainerEl && (channelsContainerEl.contains(e.relatedTarget) || isHoveringChildChannels(e.relatedTarget))) {
-        return; // Don't hide if moving to channels container or child channels
+    // Hide channels when clicking elsewhere
+    document.addEventListener('click', function(e) {
+      var channelsContainer = document.querySelector('#modern-floating-channels-container');
+      var widgetContainer = document.querySelector('#modern-floating-widget-container');
+      
+      if (channelsContainer && widgetContainer && 
+          !widgetContainer.contains(e.target) && 
+          !channelsContainer.contains(e.target)) {
+        hideChannels();
       }
       
-      hoverTimeout = setTimeout(function() {
-        hideChannels();
-      }, 200);
-    });
-    
-    // Keep channels visible when hovering over them
-    var channelsContainerEl = document.querySelector('#modern-floating-channels-container');
-    if (channelsContainerEl) {
-      channelsContainerEl.addEventListener('mouseenter', function() {
-        clearTimeout(hoverTimeout);
-        isHoveringWidget = true;
-      });
-      
-      channelsContainerEl.addEventListener('mouseleave', function(e) {
-        // Check if we're moving to a child channel
-        if (isHoveringChildChannels(e.relatedTarget)) {
-          return; // Don't hide if moving to child channels
-        }
-        
-        hoverTimeout = setTimeout(function() {
-          hideChannels();
-        }, 200);
-      });
-    }
-    
-    // Hide child channels when clicking elsewhere
-    document.addEventListener('click', function(e) {
       if (currentChildChannels && !currentChildChannels.contains(e.target)) {
         hideAllChildChannels();
       }
