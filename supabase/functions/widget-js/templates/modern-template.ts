@@ -10,6 +10,11 @@ export const getModernTemplate = (): WidgetTemplate => ({
 <!-- Modern Template -->
 <div class="hiclient-widget-container" style="position: fixed; {{POSITION_STYLE}} bottom: 24px; z-index: 99999;">
   
+  <!-- Powered by text -->
+  <div class="hiclient-powered-by" id="hiclient-powered-by" style="display: none;">
+    powered by hiclient.co
+  </div>
+  
   <!-- Main Button -->
   <div class="hiclient-widget-button" id="hiclient-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px;">
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white;"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
@@ -78,6 +83,30 @@ export const getModernTemplate = (): WidgetTemplate => ({
   color: white;
   font-size: 24px;
   z-index: 1;
+}
+
+/* Powered by text */
+.hiclient-powered-by {
+  position: absolute;
+  right: calc(100% + 15px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+}
+
+.hiclient-powered-by.show {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Tooltip */
@@ -581,6 +610,12 @@ export const getModernTemplate = (): WidgetTemplate => ({
       isModalOpen = true;
       modal.classList.add('show');
       
+      // Show powered by text
+      const poweredBy = document.getElementById('hiclient-powered-by');
+      if (poweredBy) {
+        poweredBy.classList.add('show');
+      }
+      
       // Hide tooltip when modal opens
       if (tooltip) {
         tooltip.style.display = 'none';
@@ -591,6 +626,12 @@ export const getModernTemplate = (): WidgetTemplate => ({
     function closeModal() {
       isModalOpen = false;
       modal.classList.remove('show');
+      
+      // Hide powered by text
+      const poweredBy = document.getElementById('hiclient-powered-by');
+      if (poweredBy) {
+        poweredBy.classList.remove('show');
+      }
       
       // Close any open groups
       if (currentOpenGroupId) {
