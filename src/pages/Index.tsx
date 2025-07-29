@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { HeroSection } from "@/components/FloatingWidgetBuilder/HeroSection";
@@ -22,6 +21,7 @@ const Index = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState('default');
 
   const {
     websiteName,
@@ -529,6 +529,8 @@ const Index = () => {
             <div className="container mx-auto px-4">
               <div className="max-w-4xl mx-auto space-y-6">
                 <WidgetForm
+                  selectedTemplate={selectedTemplate}
+                  onTemplateChange={setSelectedTemplate}
                   websiteName={websiteName}
                   websiteUrl={websiteUrl}
                   channels={channels}

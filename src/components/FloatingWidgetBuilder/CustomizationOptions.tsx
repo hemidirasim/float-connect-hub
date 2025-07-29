@@ -8,20 +8,28 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface CustomizationOptionsProps {
   buttonColor: string;
-  position: string;
-  greetingMessage: string;
+  position: 'left' | 'right';
+  tooltipText: string;
+  tooltipDisplay: 'hover' | 'always' | 'never';
+  tooltipPosition: 'top' | 'bottom' | 'left' | 'right';
   onButtonColorChange: (color: string) => void;
   onPositionChange: (position: string) => void;
-  onGreetingMessageChange: (message: string) => void;
+  onTooltipTextChange: (text: string) => void;
+  onTooltipDisplayChange: (display: 'hover' | 'always' | 'never') => void;
+  onTooltipPositionChange: (position: 'top' | 'bottom' | 'left' | 'right') => void;
 }
 
 export const CustomizationOptions: React.FC<CustomizationOptionsProps> = ({
   buttonColor,
   position,
-  greetingMessage,
+  tooltipText,
+  tooltipDisplay,
+  tooltipPosition,
   onButtonColorChange,
   onPositionChange,
-  onGreetingMessageChange
+  onTooltipTextChange,
+  onTooltipDisplayChange,
+  onTooltipPositionChange
 }) => {
   return (
     <>
@@ -52,7 +60,6 @@ export const CustomizationOptions: React.FC<CustomizationOptionsProps> = ({
             </SelectTrigger>
             <SelectContent className="bg-white">
               <SelectItem value="left">Left</SelectItem>
-              <SelectItem value="center">Center</SelectItem>
               <SelectItem value="right">Right</SelectItem>
             </SelectContent>
           </Select>
@@ -60,26 +67,43 @@ export const CustomizationOptions: React.FC<CustomizationOptionsProps> = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="greetingMessage">Modal Greeting Message</Label>
-        <Textarea
-          id="greetingMessage"
-          placeholder="Hi 👋 How can we help you today?"
-          value={greetingMessage}
-          onChange={(e) => onGreetingMessageChange(e.target.value)}
-          rows={3}
-          maxLength={150}
+        <Label htmlFor="tooltipText">Tooltip Text</Label>
+        <Input
+          id="tooltipText"
+          placeholder="Bizimlə əlaqə saxlayın"
+          value={tooltipText}
+          onChange={(e) => onTooltipTextChange(e.target.value)}
         />
-        <div className="flex justify-between text-xs text-gray-500">
-          <span>
-            {greetingMessage && greetingMessage.length < 10 ? (
-              <span className="text-red-500">Minimum 10 characters required</span>
-            ) : greetingMessage && greetingMessage.length >= 10 ? (
-              <span className="text-green-600">✓ Enough</span>
-            ) : (
-              <span className="text-gray-400">Start typing...</span>
-            )}
-          </span>
-          <span>{greetingMessage ? greetingMessage.length : 0}/150</span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Tooltip Display</Label>
+          <Select value={tooltipDisplay} onValueChange={onTooltipDisplayChange}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-white">
+              <SelectItem value="hover">On Hover</SelectItem>
+              <SelectItem value="always">Always Show</SelectItem>
+              <SelectItem value="never">Never Show</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Tooltip Position</Label>
+          <Select value={tooltipPosition} onValueChange={onTooltipPositionChange}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-white">
+              <SelectItem value="top">Top</SelectItem>
+              <SelectItem value="bottom">Bottom</SelectItem>
+              <SelectItem value="left">Left</SelectItem>
+              <SelectItem value="right">Right</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </>

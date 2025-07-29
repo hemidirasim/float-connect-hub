@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,9 +10,7 @@ import { VideoUpload } from './VideoUpload';
 import { ChannelManager } from './ChannelManager';
 import { CustomizationOptions } from './CustomizationOptions';
 import { TemplateSelector } from './TemplateSelector';
-import { CodePreview } from './CodePreview';
-import type { Channel, WidgetConfig } from './types';
-import { templates } from './constants';
+import type { Channel } from './types';
 
 interface WidgetFormProps {
   selectedTemplate: string;
