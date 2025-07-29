@@ -88,20 +88,19 @@ export const getModernTemplate = (): WidgetTemplate => ({
 /* Powered by text */
 .hiclient-powered-by {
   position: absolute;
-  right: calc(100% + 15px);
-  top: 50%;
+  right: calc(94% + 12px);
+  top: 100%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
+  color: rgb(0, 0, 0);
   padding: 6px 10px;
   border-radius: 6px;
   font-size: 10px;
   white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
+  opacity: 1;
+  visibility: visible;
+  transition: 0.3s;
   pointer-events: auto;
-  backdrop-filter: blur(10px);
+  display: block;
   text-decoration: none;
   cursor: pointer;
 }
