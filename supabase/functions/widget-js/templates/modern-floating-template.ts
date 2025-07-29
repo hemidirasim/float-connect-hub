@@ -1,3 +1,4 @@
+
 import type { WidgetTemplate } from '../template-types.ts'
 
 const modernFloatingHtmlTemplate = `
@@ -65,6 +66,7 @@ const modernFloatingCssStyles = `
     pointer-events: all;
     opacity: 0;
     transform: translateY(20px);
+    position: relative;
   }
   
   .modern-floating-channel-item:hover {
@@ -85,23 +87,23 @@ const modernFloatingCssStyles = `
   
   .modern-floating-child-channels {
     position: absolute;
-    left: -{{BUTTON_SIZE}}px;
-    top: 50%;
-    transform: translateY(-50%);
+    right: calc({{BUTTON_SIZE}}px + 15px);
+    bottom: 0;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 10px;
     align-items: center;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
     z-index: 100001;
+    pointer-events: none;
   }
   
   .modern-floating-child-channels.show {
     opacity: 1;
     visibility: visible;
-    left: calc(-{{BUTTON_SIZE}}px - 15px);
+    pointer-events: all;
   }
   
   .modern-floating-child-channel-item {
@@ -116,16 +118,16 @@ const modernFloatingCssStyles = `
     transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translateY(20px);
   }
   
   .modern-floating-child-channel-item.show {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
   
   .modern-floating-child-channel-item:hover {
-    transform: translateX(-5px) scale(1.1);
+    transform: translateY(-5px) scale(1.1);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
   }
   
@@ -139,6 +141,10 @@ const modernFloatingCssStyles = `
   @media (max-width: 768px) {
     #modern-floating-channels {
       gap: 12px;
+    }
+    
+    .modern-floating-child-channels {
+      right: calc({{BUTTON_SIZE}}px + 10px);
     }
   }
 `;
@@ -229,7 +235,8 @@ const modernFloatingJavaScriptLogic = `
     
     var html = '<div class="modern-floating-child-channels">';
     
-    for (var i = 0; i < childChannels.length; i++) {
+    // Alt kanalları tersine çevir ki, altdan yuxarı sıralansınlar
+    for (var i = childChannels.length - 1; i >= 0; i--) {
       var child = childChannels[i];
       var channelUrl = getChannelUrl(child);
       var channelIcon = getChannelIcon(child);
