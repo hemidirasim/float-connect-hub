@@ -14,6 +14,14 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ user, loading, onSignOut, onOpenAuth }) => {
   const navigate = useNavigate();
 
+  const scrollToWidgetForm = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const element = document.getElementById('widget-form');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
@@ -30,7 +38,12 @@ export const Header: React.FC<HeaderProps> = ({ user, loading, onSignOut, onOpen
           <nav className="hidden md:flex items-center space-x-8">
             <Link to="/faq" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">FAQ</Link>
             <Link to="/blogs" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Blog</Link>
-            <Link to="/" className="text-gray-600 hover:text-blue-600 transition-colors font-medium">Create Widget</Link>
+            <button 
+              onClick={scrollToWidgetForm}
+              className="text-gray-600 hover:text-blue-600 transition-colors font-medium cursor-pointer"
+            >
+              Create Widget
+            </button>
           </nav>
 
           <div className="flex items-center">
