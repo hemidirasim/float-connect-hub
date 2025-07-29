@@ -526,7 +526,6 @@ export const getModernTemplate = (): WidgetTemplate => ({
   }
   
   function getChannelIcon(channel) {
-    // If custom icon is provided (for any channel type), use it
     if (channel.customIcon) {
       return '<img src="' + channel.customIcon + '" style="width: 20px; height: 20px; object-fit: contain;" alt="' + channel.type + '">';
     }
@@ -583,6 +582,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
     
     console.log('Found elements:', { button: !!button, modal: !!modal, tooltip: !!tooltip, closeBtn: !!closeBtn });
     
+    // Modal açma - sadəcə klik ilə
     button.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -624,50 +624,41 @@ export const getModernTemplate = (): WidgetTemplate => ({
       });
     }
     
-    // Prevent modal from closing when clicking inside modal content
+    // Modal backdrop click to close
     modal.addEventListener('click', function(e) {
       if (e.target === modal) {
         closeModal();
       }
     });
     
+    // ESC key to close modal
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && modal.classList.contains('show')) {
         closeModal();
       }
     });
     
-    // Close dropdowns when clicking outside of modal content but keep modal open
-    document.addEventListener('click', function(e) {
-      if (isModalOpen && currentOpenGroupId) {
-        var modalContent = document.getElementById('hiclient-modal-content');
-        var clickedInsideModal = modalContent && modalContent.contains(e.target);
-        var clickedOnTrigger = e.target.closest('.hiclient-group-trigger');
-        var clickedOnDropdown = e.target.closest('.hiclient-group-dropdown');
-        
-        // Only close dropdown if clicked outside modal content or on a different group trigger
-        if (!clickedInsideModal || (clickedOnTrigger && !clickedOnTrigger.onclick.toString().includes(currentOpenGroupId))) {
-          var dropdown = document.getElementById(currentOpenGroupId);
-          if (dropdown) {
-            dropdown.classList.remove('show');
-          }
-          currentOpenGroupId = null;
-        }
-      }
-    });
-    
+    // Tooltip handling - klik effekti ilə hover
     if (tooltip && button) {
       if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
+        let tooltipTimeout;
+        
         button.addEventListener('mouseenter', function() {
+          clearTimeout(tooltipTimeout);
           tooltip.style.display = 'block';
           tooltip.style.opacity = '1';
         });
         
         button.addEventListener('mouseleave', function() {
-          tooltip.style.opacity = '0';
-          setTimeout(function() {
-            tooltip.style.display = 'none';
-          }, 200);
+          // Tooltip-i dərhal gizlətməyəcəyik, bir müddət gözləyəcəyik
+          tooltipTimeout = setTimeout(function() {
+            tooltip.style.opacity = '0';
+            setTimeout(function() {
+              if (tooltip.style.opacity === '0') {
+                tooltip.style.display = 'none';
+              }
+            }, 200);
+          }, 1000); // 1 saniyə gözlə
         });
       } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
         tooltip.style.display = 'block';
