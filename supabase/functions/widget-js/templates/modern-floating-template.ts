@@ -6,9 +6,9 @@ const modernFloatingHtmlTemplate = `
   <div id="modern-floating-widget-relative-container" style="position: relative;">
     
     <!-- Powered by text -->
-    <div id="modern-floating-powered-by" style="position: absolute; right: calc(100% + 15px); top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.8); color: white; padding: 6px 10px; border-radius: 6px; font-size: 10px; white-space: nowrap; opacity: 0; visibility: hidden; transition: all 0.3s ease; pointer-events: none; display: none;">
+    <a href="https://hiclient.co" target="_blank" id="modern-floating-powered-by" style="position: absolute; right: calc(100% + 15px); top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.8); color: white; padding: 6px 10px; border-radius: 6px; font-size: 10px; white-space: nowrap; opacity: 0; visibility: hidden; transition: all 0.3s ease; pointer-events: auto; display: none; text-decoration: none; cursor: pointer;">
       powered by hiclient.co
-    </div>
+    </a>
     
     <!-- Channels container that appears on hover -->
     <div id="modern-floating-channels-container" style="position: absolute; {{POSITION_CHANNELS_STYLE}} bottom: {{CHANNEL_BOTTOM_OFFSET}}px; display: none; opacity: 0; transform: translateY(20px); transition: all 0.3s ease;">

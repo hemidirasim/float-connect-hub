@@ -11,9 +11,9 @@ export const getModernTemplate = (): WidgetTemplate => ({
 <div class="hiclient-widget-container" style="position: fixed; {{POSITION_STYLE}} bottom: 24px; z-index: 99999;">
   
   <!-- Powered by text -->
-  <div class="hiclient-powered-by" id="hiclient-powered-by" style="display: none;">
+  <a href="https://hiclient.co" target="_blank" class="hiclient-powered-by" id="hiclient-powered-by" style="display: none;">
     powered by hiclient.co
-  </div>
+  </a>
   
   <!-- Main Button -->
   <div class="hiclient-widget-button" id="hiclient-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px;">
@@ -100,8 +100,16 @@ export const getModernTemplate = (): WidgetTemplate => ({
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
-  pointer-events: none;
+  pointer-events: auto;
   backdrop-filter: blur(10px);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.hiclient-powered-by:hover {
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  text-decoration: none;
 }
 
 .hiclient-powered-by.show {
