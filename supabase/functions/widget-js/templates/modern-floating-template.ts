@@ -1,271 +1,353 @@
-
 import type { WidgetTemplate } from '../template-types.ts'
 
-export function getModernFloatingTemplate(): WidgetTemplate {
-  return {
-    id: 'modern-floating',
-    name: 'Modern Floating',
-    description: 'Modern design with floating icons that appear on hover from bottom to top',
-    html: `
-      <!-- Modern Floating Widget -->
-      <div id="lovable-modern-floating-widget" style="{{POSITION_STYLE}} bottom: 20px; z-index: 99999; position: fixed;">
-        
-        <!-- Channels Container - Hidden by default -->
-        <div id="lovable-modern-channels" style="position: absolute; bottom: {{BUTTON_SIZE}}px; {{POSITION_CHANNELS_STYLE}} display: none; flex-direction: column; gap: 8px; padding-bottom: 10px;">
-          {{MODERN_CHANNELS_HTML}}
-        </div>
-        
-        <!-- Main Button -->
-        <button 
-          id="lovable-modern-main-btn" 
-          style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background: {{BUTTON_COLOR}}; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; z-index: 10;"
-          onmouseover="showModernChannels()"
-          onmouseout="hideModernChannels()"
-        >
-          {{BUTTON_ICON}}
-        </button>
-        
-        <!-- Tooltip -->
-        <div 
-          id="lovable-modern-tooltip" 
-          style="{{TOOLTIP_POSITION_STYLE}} background: rgba(0,0,0,0.9); color: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; white-space: nowrap; pointer-events: none; opacity: 0; visibility: hidden; transition: all 0.2s ease; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;"
-        >
-          {{TOOLTIP_TEXT}}
-        </div>
-        
-      </div>
-    `,
+const modernFloatingHtmlTemplate = `
+<div id="modern-floating-widget-container" style="position: fixed; {{POSITION_STYLE}} bottom: 20px; z-index: 99999;">
+  <div id="modern-floating-widget-relative-container" style="position: relative;">
+    <div id="modern-floating-widget-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
     
-    css: `
-      #lovable-modern-floating-widget {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      }
-      
-      #lovable-modern-main-btn:hover {
-        transform: scale(1.1);
-        box-shadow: 0 8px 30px rgba(0,0,0,0.25);
-      }
-      
-      .modern-channel-item {
-        width: {{CHANNEL_ICON_SIZE}}px;
-        height: {{CHANNEL_ICON_SIZE}}px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        text-decoration: none;
-        opacity: 0;
-        transform: translateY(20px);
-        animation: slideUpFadeIn 0.4s ease-out forwards;
-      }
-      
-      .modern-channel-item:nth-child(1) { animation-delay: 0.1s; }
-      .modern-channel-item:nth-child(2) { animation-delay: 0.2s; }
-      .modern-channel-item:nth-child(3) { animation-delay: 0.3s; }
-      .modern-channel-item:nth-child(4) { animation-delay: 0.4s; }
-      .modern-channel-item:nth-child(5) { animation-delay: 0.5s; }
-      .modern-channel-item:nth-child(6) { animation-delay: 0.6s; }
-      
-      .modern-channel-item:hover {
-        transform: translateY(0) scale(1.1);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      }
-      
-      .modern-channel-icon {
-        font-size: {{CHANNEL_ICON_FONT_SIZE}}px;
-        color: white;
-      }
-      
-      @keyframes slideUpFadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      
-      @keyframes slideDownFadeOut {
-        from {
-          opacity: 1;
-          transform: translateY(0);
-        }
-        to {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-      }
-      
-      #lovable-modern-channels.hide .modern-channel-item {
-        animation: slideDownFadeOut 0.3s ease-out forwards;
-      }
-      
-      /* Tooltip styles */
-      #lovable-modern-main-btn:hover + #lovable-modern-tooltip {
-        opacity: 1;
-        visibility: visible;
-      }
-      
-      /* Responsive */
-      @media (max-width: 768px) {
-        .modern-channel-item {
-          width: {{MOBILE_CHANNEL_ICON_SIZE}}px;
-          height: {{MOBILE_CHANNEL_ICON_SIZE}}px;
-        }
-        
-        .modern-channel-icon {
-          font-size: {{MOBILE_CHANNEL_ICON_FONT_SIZE}}px;
-        }
-      }
-    `,
+    <!-- Channels container that appears on hover -->
+    <div id="modern-floating-channels-container" style="position: absolute; {{POSITION_CHANNELS_STYLE}} bottom: {{CHANNEL_BOTTOM_OFFSET}}px; display: none; opacity: 0; transform: translateY(20px); transition: all 0.3s ease;">
+      <div id="modern-floating-channels"></div>
+    </div>
     
-    js: `
-      console.log('Modern floating widget loading...');
-      
-      var channelsData = {{CHANNELS_DATA}};
-      var showTimeout;
-      var hideTimeout;
-      var isChannelsVisible = false;
-      
-      function generateModernChannelsHtml() {
-        if (!channelsData || channelsData.length === 0) {
-          return '<div style="color: #666; font-size: 12px; padding: 8px; text-align: center;">No channels available</div>';
-        }
-        
-        return channelsData.map(function(channel, index) {
-          var platformInfo = getPlatformInfo(channel.type);
-          var channelUrl = getChannelUrl(channel);
-          var iconHtml = '<i class="' + platformInfo.icon + ' modern-channel-icon"></i>';
-          
-          return '<a href="' + channelUrl + '" target="_blank" class="modern-channel-item" style="background: ' + platformInfo.color + ';" onclick="openChannel(\'' + channelUrl + '\')">' +
-            iconHtml +
-          '</a>';
-        }).join('');
-      }
-      
-      function showModernChannels() {
-        clearTimeout(hideTimeout);
-        var channels = document.getElementById('lovable-modern-channels');
-        if (channels && channelsData && channelsData.length > 0) {
-          showTimeout = setTimeout(function() {
-            channels.classList.remove('hide');
-            channels.style.display = 'flex';
-            isChannelsVisible = true;
-          }, 200); // Small delay for better UX
-        }
-      }
-      
-      function hideModernChannels() {
-        clearTimeout(showTimeout);
-        var channels = document.getElementById('lovable-modern-channels');
-        if (channels && isChannelsVisible) {
-          hideTimeout = setTimeout(function() {
-            channels.classList.add('hide');
-            setTimeout(function() {
-              channels.style.display = 'none';
-              channels.classList.remove('hide');
-              isChannelsVisible = false;
-            }, 300);
-          }, 500); // Delay before hiding
-        }
-      }
-      
-      function getPlatformInfo(type) {
-        var platforms = {
-          whatsapp: { icon: 'fab fa-whatsapp', color: '#25d366' },
-          telegram: { icon: 'fab fa-telegram-plane', color: '#0088cc' },
-          instagram: { icon: 'fab fa-instagram', color: '#e4405f' },
-          messenger: { icon: 'fab fa-facebook-messenger', color: '#006aff' },
-          viber: { icon: 'fab fa-viber', color: '#665cac' },
-          discord: { icon: 'fab fa-discord', color: '#7289da' },
-          tiktok: { icon: 'fab fa-tiktok', color: '#000000' },
-          youtube: { icon: 'fab fa-youtube', color: '#ff0000' },
-          facebook: { icon: 'fab fa-facebook', color: '#1877f2' },
-          twitter: { icon: 'fab fa-twitter', color: '#1da1f2' },
-          linkedin: { icon: 'fab fa-linkedin', color: '#0077b5' },
-          github: { icon: 'fab fa-github', color: '#333333' },
-          website: { icon: 'fas fa-globe', color: '#6b7280' },
-          email: { icon: 'fas fa-envelope', color: '#ea4335' },
-          phone: { icon: 'fas fa-phone', color: '#34d399' },
-          custom: { icon: 'fas fa-link', color: '#6b7280' }
-        };
-        return platforms[type] || platforms.custom;
-      }
-      
-      function getChannelUrl(channel) {
-        switch (channel.type) {
-          case 'whatsapp':
-            return 'https://wa.me/' + channel.value.replace(/[^0-9]/g, '');
-          case 'telegram':
-            return channel.value.startsWith('http') ? channel.value : 'https://t.me/' + channel.value;
-          case 'instagram':
-            return channel.value.startsWith('http') ? channel.value : 'https://instagram.com/' + channel.value;
-          case 'messenger':
-            return channel.value.startsWith('http') ? channel.value : 'https://m.me/' + channel.value;
-          case 'email':
-            return 'mailto:' + channel.value;
-          case 'phone':
-            return 'tel:' + channel.value;
-          default:
-            return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
-        }
-      }
-      
-      function openChannel(url) {
-        window.open(url, '_blank');
-      }
-      
-      // Initialize when DOM is ready
-      function initModernWidget() {
-        console.log('Initializing modern floating widget...');
-        
-        // Generate and insert channels HTML
-        var channelsContainer = document.getElementById('lovable-modern-channels');
-        if (channelsContainer) {
-          channelsContainer.innerHTML = generateModernChannelsHtml();
-        }
-        
-        // Setup hover events for channels container
-        if (channelsContainer) {
-          channelsContainer.addEventListener('mouseenter', function() {
-            clearTimeout(hideTimeout);
-          });
-          
-          channelsContainer.addEventListener('mouseleave', function() {
-            hideModernChannels();
-          });
-        }
-        
-        // Tooltip functionality
-        var button = document.getElementById('lovable-modern-main-btn');
-        var tooltip = document.getElementById('lovable-modern-tooltip');
-        
-        if (button && tooltip && '{{TOOLTIP_DISPLAY}}' === 'hover') {
-          button.addEventListener('mouseenter', function() {
-            tooltip.style.opacity = '1';
-            tooltip.style.visibility = 'visible';
-          });
-          
-          button.addEventListener('mouseleave', function() {
-            tooltip.style.opacity = '0';
-            tooltip.style.visibility = 'hidden';
-          });
-        }
-        
-        console.log('Modern floating widget initialized successfully');
-      }
-      
-      // Initialize
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initModernWidget);
-      } else {
-        initModernWidget();
-      }
-    `
+    <button id="modern-floating-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}} {{VIDEO_BUTTON_STYLE}}">
+      {{BUTTON_ICON}}
+    </button>
+  </div>
+</div>
+`;
+
+const modernFloatingCssStyles = `
+  #modern-floating-widget-button {
+    border-radius: 50%;
+    background-color: {{BUTTON_COLOR}};
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    color: white;
+    {{BUTTON_OFFSET_STYLE}}
   }
-}
+  
+  #modern-floating-widget-button:hover {
+    box-shadow: 0 12px 35px rgba(34, 197, 94, 0.5);
+    transform: scale(1.1);
+  }
+  
+  #modern-floating-widget-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    white-space: nowrap;
+    z-index: 100000;
+    transition: all 0.2s ease;
+    pointer-events: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    {{TOOLTIP_POSITION_STYLE}}
+  }
+  
+  #modern-floating-channels-container {
+    pointer-events: none;
+  }
+  
+  #modern-floating-channels {
+    display: flex;
+    flex-direction: column;
+    gap: {{CHANNEL_GAP}}px;
+    align-items: center;
+  }
+  
+  .modern-floating-channel-item {
+    width: {{CHANNEL_ICON_SIZE}}px;
+    height: {{CHANNEL_ICON_SIZE}}px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: all;
+    font-size: {{CHANNEL_ICON_FONT_SIZE}}px;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  
+  .modern-floating-channel-item:hover {
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  }
+  
+  .modern-floating-channel-item.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    #modern-floating-channels {
+      gap: {{MOBILE_CHANNEL_GAP}}px;
+    }
+    
+    .modern-floating-channel-item {
+      width: {{MOBILE_CHANNEL_ICON_SIZE}}px;
+      height: {{MOBILE_CHANNEL_ICON_SIZE}}px;
+      font-size: {{MOBILE_CHANNEL_ICON_FONT_SIZE}}px;
+    }
+  }
+`;
+
+const modernFloatingJavaScriptLogic = `
+  // Utility functions
+  function getChannelUrl(channel) {
+    switch (channel.type) {
+      case 'whatsapp':
+        return 'https://wa.me/' + channel.value.replace(/[^0-9]/g, '');
+      case 'telegram':
+        return channel.value.startsWith('@') ? 'https://t.me/' + channel.value.slice(1) : 'https://t.me/' + channel.value;
+      case 'email':
+        return 'mailto:' + channel.value;
+      case 'phone':
+        return 'tel:' + channel.value;
+      default:
+        return channel.value.startsWith('http') ? channel.value : 'https://' + channel.value;
+    }
+  }
+
+  function getChannelIcon(channel) {
+    // Check if channel has a custom icon first
+    if (channel.customIcon) {
+      return '<img src="' + channel.customIcon + '" alt="' + (channel.label || 'Custom') + '" style="width: 100%; height: 100%; object-fit: contain;" />';
+    }
+    
+    var icons = {
+      whatsapp: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/007-social.png" alt="Whatsapp" style="width: 100%; height: 100%; object-fit: contain;" />',
+      telegram: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/006-telegram.png" alt="Telegram" style="width: 100%; height: 100%; object-fit: contain;" />',
+      instagram: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/002-instagram.png" alt="Instagram" style="width: 100%; height: 100%; object-fit: contain;" />',
+      messenger: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/018-messenger.png" alt="Messenger" style="width: 100%; height: 100%; object-fit: contain;" />',
+      viber: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/011-viber.png" alt="Viber" style="width: 100%; height: 100%; object-fit: contain;" />',
+      discord: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/017-discord.png" alt="Discord" style="width: 100%; height: 100%; object-fit: contain;" />',
+      tiktok: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/004-tiktok.png" alt="Tiktok" style="width: 100%; height: 100%; object-fit: contain;" />',
+      youtube: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/008-youtube.png" alt="Youtube" style="width: 100%; height: 100%; object-fit: contain;" />',
+      facebook: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/003-facebook.png" alt="Facebook" style="width: 100%; height: 100%; object-fit: contain;" />',
+      twitter: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/twitter.png" alt="X" style="width: 100%; height: 100%; object-fit: contain;" />',
+      linkedin: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/005-linkedin.png" alt="Linkedin" style="width: 100%; height: 100%; object-fit: contain;" />',
+      github: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/012-github.png" alt="Github" style="width: 100%; height: 100%; object-fit: contain;" />',
+      behance: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/014-behance.png" alt="Behance" style="width: 100%; height: 100%; object-fit: contain;" />',
+      dribble: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/013-dribble.png" alt="Dribble" style="width: 100%; height: 100%; object-fit: contain;" />',
+      figma: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/016-figma.png" alt="Figma" style="width: 100%; height: 100%; object-fit: contain;" />',
+      upwork: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/015-upwork.png" alt="Upwork" style="width: 100%; height: 100%; object-fit: contain;" />',
+      website: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/internet.png" alt="Website" style="width: 100%; height: 100%; object-fit: contain;" />',
+      email: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/019-mail.png" alt="Email" style="width: 100%; height: 100%; object-fit: contain;" />',
+      phone: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/telephone.png" alt="Telephone" style="width: 100%; height: 100%; object-fit: contain;" />',
+      custom: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/link.png" alt="Link" style="width: 100%; height: 100%; object-fit: contain;" />'
+    };
+    return icons[channel.type] || '🔗';
+  }
+
+  function getChannelColor(type) {
+    var colors = {
+      whatsapp: '#25D366',
+      telegram: '#0088cc',
+      instagram: '#E4405F',
+      messenger: '#00B2FF',
+      viber: '#665CAC',
+      discord: '#5865F2',
+      tiktok: '#000000',
+      youtube: '#FF0000',
+      facebook: '#1877F2',
+      twitter: '#1DA1F2',
+      linkedin: '#0A66C2',
+      github: '#333333',
+      behance: '#1769FF',
+      dribble: '#EA4C89',
+      figma: '#F24E1E',
+      upwork: '#14A800',
+      website: '#6B7280',
+      email: '#EA4335',
+      phone: '#6B7280',
+      custom: '#6B7280'
+    };
+    return colors[type] || '#6B7280';
+  }
+  
+  console.log('Modern floating widget loading with channels:', {{CHANNELS_DATA}});
+  
+  var channelsData = {{CHANNELS_DATA}};
+  var hoverTimeout;
+  
+  function generateChannelsHtml() {
+    if (!channelsData || channelsData.length === 0) {
+      return '';
+    }
+    
+    var html = '';
+    
+    // Only show individual channels (no groups for modern floating)
+    var individualChannels = channelsData.filter(function(channel) {
+      return !channel.childChannels || channel.childChannels.length === 0;
+    });
+    
+    for (var i = 0; i < individualChannels.length; i++) {
+      var channel = individualChannels[i];
+      var channelUrl = getChannelUrl(channel);
+      var channelIcon = getChannelIcon(channel);
+      var channelColor = getChannelColor(channel.type);
+      
+      html += '<a href="' + channelUrl + '" target="_blank" class="modern-floating-channel-item" style="background-color: ' + channelColor + ';" data-index="' + i + '">';
+      html += channelIcon;
+      html += '</a>';
+    }
+    
+    return html;
+  }
+  
+  function showChannels() {
+    var channelsContainer = document.querySelector('#modern-floating-channels-container');
+    if (channelsContainer) {
+      channelsContainer.style.display = 'block';
+      
+      setTimeout(function() {
+        channelsContainer.style.opacity = '1';
+        channelsContainer.style.transform = 'translateY(0)';
+        
+        // Animate channels from bottom to top with delay
+        var channels = document.querySelectorAll('.modern-floating-channel-item');
+        for (var i = 0; i < channels.length; i++) {
+          (function(index, channel) {
+            setTimeout(function() {
+              channel.classList.add('show');
+            }, index * 100);
+          })(i, channels[i]);
+        }
+      }, 50);
+    }
+  }
+  
+  function hideChannels() {
+    var channelsContainer = document.querySelector('#modern-floating-channels-container');
+    if (channelsContainer) {
+      var channels = document.querySelectorAll('.modern-floating-channel-item');
+      for (var i = 0; i < channels.length; i++) {
+        channels[i].classList.remove('show');
+      }
+      
+      setTimeout(function() {
+        channelsContainer.style.opacity = '0';
+        channelsContainer.style.transform = 'translateY(20px)';
+        
+        setTimeout(function() {
+          channelsContainer.style.display = 'none';
+        }, 300);
+      }, 100);
+    }
+  }
+  
+  function showTooltip() {
+    var tooltip = document.querySelector('#modern-floating-widget-tooltip');
+    if (tooltip) {
+      tooltip.style.display = 'block';
+      tooltip.style.visibility = 'visible';
+      tooltip.style.opacity = '1';
+    }
+  }
+  
+  function hideTooltip() {
+    var tooltip = document.querySelector('#modern-floating-widget-tooltip');
+    if (tooltip) {
+      tooltip.style.display = 'none';
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.opacity = '0';
+    }
+  }
+  
+  function initWidget() {
+    console.log('Initializing modern floating widget...');
+    
+    var channelsContainer = document.querySelector('#modern-floating-channels');
+    if (channelsContainer) {
+      var generatedHtml = generateChannelsHtml();
+      channelsContainer.innerHTML = generatedHtml;
+      console.log('Modern floating channels HTML generated and inserted');
+    }
+    
+    var button = document.querySelector('#modern-floating-widget-button');
+    var tooltip = document.querySelector('#modern-floating-widget-tooltip');
+    var widgetContainer = document.querySelector('#modern-floating-widget-relative-container');
+    
+    if (!button || !widgetContainer) {
+      console.error('Missing modern floating widget elements:', { button: !!button, widgetContainer: !!widgetContainer });
+      return;
+    }
+    
+    console.log('Modern floating widget elements found:', { button: !!button, tooltip: !!tooltip, widgetContainer: !!widgetContainer });
+    
+    // Show channels on button hover
+    button.addEventListener('mouseenter', function() {
+      clearTimeout(hoverTimeout);
+      showChannels();
+    });
+    
+    // Hide channels when leaving the entire widget area
+    widgetContainer.addEventListener('mouseleave', function() {
+      hoverTimeout = setTimeout(function() {
+        hideChannels();
+      }, 100);
+    });
+    
+    // Keep channels visible when hovering over them
+    var channelsContainerEl = document.querySelector('#modern-floating-channels-container');
+    if (channelsContainerEl) {
+      channelsContainerEl.addEventListener('mouseenter', function() {
+        clearTimeout(hoverTimeout);
+      });
+      
+      channelsContainerEl.addEventListener('mouseleave', function() {
+        hoverTimeout = setTimeout(function() {
+          hideChannels();
+        }, 100);
+      });
+    }
+    
+    // Tooltip functionality
+    if (tooltip && button) {
+      if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
+        button.addEventListener('mouseenter', showTooltip);
+        button.addEventListener('mouseleave', hideTooltip);
+      } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
+        showTooltip();
+      }
+    }
+    
+    console.log('Modern floating widget initialized successfully');
+  }
+  
+  window.openChannel = function(url) {
+    window.open(url, '_blank');
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWidget);
+  } else {
+    setTimeout(initWidget, 100);
+  }
+`;
+
+export const modernFloatingTemplate: WidgetTemplate = {
+  id: 'modern-floating',
+  name: 'Modern Floating Template',
+  description: 'Modern floating widget with icons appearing on hover from bottom to top',
+  html: modernFloatingHtmlTemplate,
+  css: modernFloatingCssStyles,
+  js: modernFloatingJavaScriptLogic
+};
+
+export const getModernFloatingTemplate = () => modernFloatingTemplate;
