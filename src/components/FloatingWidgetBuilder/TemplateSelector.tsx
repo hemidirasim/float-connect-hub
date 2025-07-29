@@ -2,15 +2,23 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Palette } from 'lucide-react';
 
-// Yalnız default template-i göstəririk
-const DEFAULT_TEMPLATE = {
-  id: 'default',
-  name: 'Standart Dizayn',
-  description: 'Klassik və asan istifadə edilən dizayn',
-  is_default: true
-};
+const AVAILABLE_TEMPLATES = [
+  {
+    id: 'default',
+    name: 'Standart Dizayn',
+    description: 'Klassik və asan istifadə edilən dizayn',
+    is_default: true
+  },
+  {
+    id: 'modern-floating',
+    name: 'Modern Floating',
+    description: 'Hover edəndə aşağıdan yuxarıya açılan modern dizayn',
+    is_default: false
+  }
+];
 
 interface TemplateSelectorProps {
   selectedTemplateId: string;
@@ -21,9 +29,9 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   selectedTemplateId,
   onTemplateChange
 }) => {
-  // Auto-select default template
+  // Auto-select default template if none selected
   React.useEffect(() => {
-    if (!selectedTemplateId || selectedTemplateId !== 'default') {
+    if (!selectedTemplateId) {
       onTemplateChange('default');
     }
   }, [selectedTemplateId, onTemplateChange]);
@@ -36,26 +44,43 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
           Widget Dizaynı
         </CardTitle>
         <CardDescription>
-          Widget-inizin dizaynı (indiki vaxtda yalnız standart dizayn mövcuddur)
+          Widget-inizin dizaynını seçin
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          <Label htmlFor="template-info">Seçilmiş Template</Label>
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{DEFAULT_TEMPLATE.name}</span>
-              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                Aktiv
-              </span>
-            </div>
-            <div className="mt-1 text-sm text-gray-600">
-              {DEFAULT_TEMPLATE.description}
-            </div>
-          </div>
-          <div className="text-xs text-gray-500 mt-2">
-            * Yeni dizaynlar tezliklə əlavə ediləcək
-          </div>
+        <div className="space-y-4">
+          <Label htmlFor="template-selector">Template seçin</Label>
+          <RadioGroup
+            value={selectedTemplateId}
+            onValueChange={onTemplateChange}
+            className="grid grid-cols-1 gap-4"
+          >
+            {AVAILABLE_TEMPLATES.map((template) => (
+              <div key={template.id} className="flex items-start space-x-3">
+                <RadioGroupItem 
+                  value={template.id} 
+                  id={template.id}
+                  className="mt-1"
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <Label 
+                    htmlFor={template.id}
+                    className="font-medium cursor-pointer flex items-center gap-2"
+                  >
+                    {template.name}
+                    {template.is_default && (
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        Default
+                      </span>
+                    )}
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    {template.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </RadioGroup>
         </div>
       </CardContent>
     </Card>

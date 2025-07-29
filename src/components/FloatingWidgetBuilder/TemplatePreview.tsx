@@ -8,6 +8,7 @@ import { getDarkTemplate } from '../../../supabase/functions/widget-js/templates
 import { getMinimalTemplate } from '../../../supabase/functions/widget-js/templates/minimal-template';
 import { getModernTemplate } from '../../../supabase/functions/widget-js/templates/modern-template';
 import { getElegantTemplate } from '../../../supabase/functions/widget-js/templates/elegant-template';
+import { getModernFloatingTemplate } from '../../../supabase/functions/widget-js/templates/modern-floating-template';
 
 // Import the SAME template renderer as edge functions
 import { WidgetTemplateRenderer } from '../../../supabase/functions/widget-js/template-generator';
@@ -18,7 +19,8 @@ const TEMPLATE_REGISTRY = {
   'dark': getDarkTemplate,
   'minimal': getMinimalTemplate,
   'modern': getModernTemplate,
-  'elegant': getElegantTemplate
+  'elegant': getElegantTemplate,
+  'modern-floating': getModernFloatingTemplate
 } as const;
 
 interface TemplatePreviewProps {
