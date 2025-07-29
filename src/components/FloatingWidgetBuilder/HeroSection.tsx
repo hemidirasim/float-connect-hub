@@ -44,12 +44,7 @@ export const HeroSection: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </a>
             
-            <button className="group flex items-center px-8 py-5 bg-white/80 backdrop-blur-sm text-gray-900 font-semibold text-lg rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-200">
-                <Play className="w-6 h-6 text-white ml-1" />
-              </div>
-              Watch Demo
-            </button>
+            
           </div>
 
           <div className="text-sm text-gray-500">✨ No coding required • 30-second setup • 100 Free credits</div>
