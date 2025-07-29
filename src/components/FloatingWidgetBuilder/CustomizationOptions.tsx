@@ -9,30 +9,18 @@ import { Textarea } from "@/components/ui/textarea";
 interface CustomizationOptionsProps {
   buttonColor: string;
   position: string;
-  tooltip: string;
-  tooltipDisplay: string;
-  tooltipPosition: string;
   greetingMessage: string;
   onButtonColorChange: (color: string) => void;
   onPositionChange: (position: string) => void;
-  onTooltipChange: (tooltip: string) => void;
-  onTooltipDisplayChange: (display: string) => void;
-  onTooltipPositionChange: (position: string) => void;
   onGreetingMessageChange: (message: string) => void;
 }
 
 export const CustomizationOptions: React.FC<CustomizationOptionsProps> = ({
   buttonColor,
   position,
-  tooltip,
-  tooltipDisplay,
-  tooltipPosition,
   greetingMessage,
   onButtonColorChange,
   onPositionChange,
-  onTooltipChange,
-  onTooltipDisplayChange,
-  onTooltipPositionChange,
   onGreetingMessageChange
 }) => {
   return (
@@ -72,68 +60,26 @@ export const CustomizationOptions: React.FC<CustomizationOptionsProps> = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="tooltip">Call-to-Action Message</Label>
-        <Input
-          id="tooltip"
-          placeholder="Get in touch with us!"
-          value={tooltip}
-          onChange={(e) => onTooltipChange(e.target.value)}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Message Display</Label>
-          <Select value={tooltipDisplay} onValueChange={onTooltipDisplayChange}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              <SelectItem value="hover">Show on hover</SelectItem>
-              <SelectItem value="always">Always show</SelectItem>
-              <SelectItem value="never">Never show</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Tooltip Position</Label>
-          <div className="flex gap-2">
-            {['top', 'bottom', 'left', 'right'].map((pos) => (
-              <Button
-                key={pos}
-                type="button"
-                variant={tooltipPosition === pos ? "default" : "outline"}
-                size="sm"
-                onClick={() => onTooltipPositionChange(pos)}
-                className="capitalize"
-              >
-                {pos}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-2">
         <Label htmlFor="greetingMessage">Modal Greeting Message</Label>
         <Textarea
           id="greetingMessage"
           placeholder="Enter your greeting message..."
-          value={greetingMessage || "Hello! How can we help you today?"}
+          value={greetingMessage}
           onChange={(e) => onGreetingMessageChange(e.target.value)}
           rows={3}
           maxLength={150}
         />
         <div className="flex justify-between text-xs text-gray-500">
           <span>
-            {(greetingMessage || "Hello! How can we help you today?").length < 10 ? (
+            {greetingMessage && greetingMessage.length < 10 ? (
               <span className="text-red-500">Minimum 10 characters required</span>
-            ) : (
+            ) : greetingMessage && greetingMessage.length >= 10 ? (
               <span className="text-green-600">✓ Enough</span>
+            ) : (
+              <span className="text-gray-400">Start typing...</span>
             )}
           </span>
-          <span>{(greetingMessage || "Hello! How can we help you today?").length}/150</span>
+          <span>{greetingMessage ? greetingMessage.length : 0}/150</span>
         </div>
       </div>
     </>
