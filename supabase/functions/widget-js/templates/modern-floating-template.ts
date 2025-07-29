@@ -2,15 +2,13 @@ import type { WidgetTemplate } from '../template-types.ts'
 
 const modernFloatingHtmlTemplate = `
 <div id="modern-floating-widget-container" style="position: fixed; {{POSITION_STYLE}} bottom: 20px; z-index: 99999;">
-  <div id="modern-floating-widget-relative-container" style="position: relative;">
-    <div id="modern-floating-widget-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
-    
+  <div id="modern-floating-widget-relative-container" style="position: relative;">    
     <!-- Channels container that appears on hover -->
     <div id="modern-floating-channels-container" style="position: absolute; {{POSITION_CHANNELS_STYLE}} bottom: {{CHANNEL_BOTTOM_OFFSET}}px; display: none; opacity: 0; transform: translateY(20px); transition: all 0.3s ease;">
       <div id="modern-floating-channels"></div>
     </div>
     
-    <button id="modern-floating-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}} {{VIDEO_BUTTON_STYLE}}">
+    <button id="modern-floating-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}}">
       {{BUTTON_ICON}}
     </button>
   </div>
@@ -38,21 +36,6 @@ const modernFloatingCssStyles = `
     transform: scale(1.1);
   }
   
-  #modern-floating-widget-tooltip {
-    position: absolute;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    white-space: nowrap;
-    z-index: 100000;
-    transition: all 0.2s ease;
-    pointer-events: none;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    {{TOOLTIP_POSITION_STYLE}}
-  }
-  
   #modern-floating-channels-container {
     pointer-events: none;
   }
@@ -64,13 +47,13 @@ const modernFloatingCssStyles = `
   #modern-floating-channels {
     display: flex;
     flex-direction: column;
-    gap: {{CHANNEL_GAP}}px;
+    gap: 15px;
     align-items: center;
   }
   
   .modern-floating-channel-item {
-    width: {{CHANNEL_ICON_SIZE}}px;
-    height: {{CHANNEL_ICON_SIZE}}px;
+    width: {{BUTTON_SIZE}}px;
+    height: {{BUTTON_SIZE}}px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -80,7 +63,6 @@ const modernFloatingCssStyles = `
     transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     pointer-events: all;
-    font-size: {{CHANNEL_ICON_FONT_SIZE}}px;
     opacity: 0;
     transform: translateY(20px);
   }
@@ -95,16 +77,68 @@ const modernFloatingCssStyles = `
     transform: translateY(0);
   }
   
+  .modern-floating-channel-item img {
+    width: 60%;
+    height: 60%;
+    object-fit: contain;
+  }
+  
+  .modern-floating-child-channels {
+    position: absolute;
+    left: -{{BUTTON_SIZE}}px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 100001;
+  }
+  
+  .modern-floating-child-channels.show {
+    opacity: 1;
+    visibility: visible;
+    left: calc(-{{BUTTON_SIZE}}px - 15px);
+  }
+  
+  .modern-floating-child-channel-item {
+    width: {{BUTTON_SIZE}}px;
+    height: {{BUTTON_SIZE}}px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  
+  .modern-floating-child-channel-item.show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  
+  .modern-floating-child-channel-item:hover {
+    transform: translateX(-5px) scale(1.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  }
+  
+  .modern-floating-child-channel-item img {
+    width: 60%;
+    height: 60%;
+    object-fit: contain;
+  }
+  
   /* Mobile responsive */
   @media (max-width: 768px) {
     #modern-floating-channels {
-      gap: {{MOBILE_CHANNEL_GAP}}px;
-    }
-    
-    .modern-floating-channel-item {
-      width: {{MOBILE_CHANNEL_ICON_SIZE}}px;
-      height: {{MOBILE_CHANNEL_ICON_SIZE}}px;
-      font-size: {{MOBILE_CHANNEL_ICON_FONT_SIZE}}px;
+      gap: 12px;
     }
   }
 `;
@@ -129,32 +163,32 @@ const modernFloatingJavaScriptLogic = `
   function getChannelIcon(channel) {
     // Check if channel has a custom icon first
     if (channel.customIcon) {
-      return '<img src="' + channel.customIcon + '" alt="' + (channel.label || 'Custom') + '" style="width: 100%; height: 100%; object-fit: contain;" />';
+      return '<img src="' + channel.customIcon + '" alt="' + (channel.label || 'Custom') + '" />';
     }
     
     var icons = {
-      whatsapp: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/007-social.png" alt="Whatsapp" style="width: 100%; height: 100%; object-fit: contain;" />',
-      telegram: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/006-telegram.png" alt="Telegram" style="width: 100%; height: 100%; object-fit: contain;" />',
-      instagram: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/002-instagram.png" alt="Instagram" style="width: 100%; height: 100%; object-fit: contain;" />',
-      messenger: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/018-messenger.png" alt="Messenger" style="width: 100%; height: 100%; object-fit: contain;" />',
-      viber: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/011-viber.png" alt="Viber" style="width: 100%; height: 100%; object-fit: contain;" />',
-      discord: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/017-discord.png" alt="Discord" style="width: 100%; height: 100%; object-fit: contain;" />',
-      tiktok: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/004-tiktok.png" alt="Tiktok" style="width: 100%; height: 100%; object-fit: contain;" />',
-      youtube: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/008-youtube.png" alt="Youtube" style="width: 100%; height: 100%; object-fit: contain;" />',
-      facebook: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/003-facebook.png" alt="Facebook" style="width: 100%; height: 100%; object-fit: contain;" />',
-      twitter: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/twitter.png" alt="X" style="width: 100%; height: 100%; object-fit: contain;" />',
-      linkedin: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/005-linkedin.png" alt="Linkedin" style="width: 100%; height: 100%; object-fit: contain;" />',
-      github: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/012-github.png" alt="Github" style="width: 100%; height: 100%; object-fit: contain;" />',
-      behance: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/014-behance.png" alt="Behance" style="width: 100%; height: 100%; object-fit: contain;" />',
-      dribble: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/013-dribble.png" alt="Dribble" style="width: 100%; height: 100%; object-fit: contain;" />',
-      figma: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/016-figma.png" alt="Figma" style="width: 100%; height: 100%; object-fit: contain;" />',
-      upwork: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/015-upwork.png" alt="Upwork" style="width: 100%; height: 100%; object-fit: contain;" />',
-      website: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/internet.png" alt="Website" style="width: 100%; height: 100%; object-fit: contain;" />',
-      email: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/019-mail.png" alt="Email" style="width: 100%; height: 100%; object-fit: contain;" />',
-      phone: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/telephone.png" alt="Telephone" style="width: 100%; height: 100%; object-fit: contain;" />',
-      custom: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/link.png" alt="Link" style="width: 100%; height: 100%; object-fit: contain;" />'
+      whatsapp: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/007-social.png" alt="Whatsapp" />',
+      telegram: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/006-telegram.png" alt="Telegram" />',
+      instagram: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/002-instagram.png" alt="Instagram" />',
+      messenger: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/018-messenger.png" alt="Messenger" />',
+      viber: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/011-viber.png" alt="Viber" />',
+      discord: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/017-discord.png" alt="Discord" />',
+      tiktok: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/004-tiktok.png" alt="Tiktok" />',
+      youtube: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/008-youtube.png" alt="Youtube" />',
+      facebook: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/003-facebook.png" alt="Facebook" />',
+      twitter: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/twitter.png" alt="X" />',
+      linkedin: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/005-linkedin.png" alt="Linkedin" />',
+      github: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/012-github.png" alt="Github" />',
+      behance: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/014-behance.png" alt="Behance" />',
+      dribble: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/013-dribble.png" alt="Dribble" />',
+      figma: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/016-figma.png" alt="Figma" />',
+      upwork: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/015-upwork.png" alt="Upwork" />',
+      website: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/internet.png" alt="Website" />',
+      email: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/019-mail.png" alt="Email" />',
+      phone: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/telephone.png" alt="Telephone" />',
+      custom: '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/link.png" alt="Link" />'
     };
-    return icons[channel.type] || '🔗';
+    return icons[channel.type] || '<img src="https://ttzioshkresaqmsodhfb.supabase.co/storage/v1/object/public/icons/social-media/link.png" alt="Link" />';
   }
 
   function getChannelColor(type) {
@@ -188,6 +222,27 @@ const modernFloatingJavaScriptLogic = `
   var channelsData = {{CHANNELS_DATA}};
   var hoverTimeout;
   var isHoveringWidget = false;
+  var currentChildChannels = null;
+  
+  function generateChildChannelsHtml(childChannels) {
+    if (!childChannels || childChannels.length === 0) return '';
+    
+    var html = '<div class="modern-floating-child-channels">';
+    
+    for (var i = 0; i < childChannels.length; i++) {
+      var child = childChannels[i];
+      var channelUrl = getChannelUrl(child);
+      var channelIcon = getChannelIcon(child);
+      var channelColor = getChannelColor(child.type);
+      
+      html += '<a href="' + channelUrl + '" target="_blank" class="modern-floating-child-channel-item" style="background-color: ' + channelColor + ';" data-index="' + i + '">';
+      html += channelIcon;
+      html += '</a>';
+    }
+    
+    html += '</div>';
+    return html;
+  }
   
   function generateChannelsHtml() {
     if (!channelsData || channelsData.length === 0) {
@@ -196,23 +251,58 @@ const modernFloatingJavaScriptLogic = `
     
     var html = '';
     
-    // Only show individual channels (no groups for modern floating)
-    var individualChannels = channelsData.filter(function(channel) {
-      return !channel.childChannels || channel.childChannels.length === 0;
-    });
-    
-    for (var i = 0; i < individualChannels.length; i++) {
-      var channel = individualChannels[i];
-      var channelUrl = getChannelUrl(channel);
-      var channelIcon = getChannelIcon(channel);
+    for (var i = 0; i < channelsData.length; i++) {
+      var channel = channelsData[i];
       var channelColor = getChannelColor(channel.type);
+      var channelIcon = getChannelIcon(channel);
       
-      html += '<a href="' + channelUrl + '" target="_blank" class="modern-floating-channel-item" style="background-color: ' + channelColor + ';" data-index="' + i + '">';
-      html += channelIcon;
-      html += '</a>';
+      // If channel has child channels, make it clickable to show child channels
+      if (channel.childChannels && channel.childChannels.length > 0) {
+        html += '<div class="modern-floating-channel-item" style="background-color: ' + channelColor + '; cursor: pointer;" data-index="' + i + '" data-has-children="true">';
+        html += channelIcon;
+        html += generateChildChannelsHtml(channel.childChannels);
+        html += '</div>';
+      } else {
+        var channelUrl = getChannelUrl(channel);
+        html += '<a href="' + channelUrl + '" target="_blank" class="modern-floating-channel-item" style="background-color: ' + channelColor + ';" data-index="' + i + '">';
+        html += channelIcon;
+        html += '</a>';
+      }
     }
     
     return html;
+  }
+  
+  function showChildChannels(channelElement) {
+    var childChannelsContainer = channelElement.querySelector('.modern-floating-child-channels');
+    if (childChannelsContainer) {
+      hideAllChildChannels(); // Hide any other open child channels
+      currentChildChannels = childChannelsContainer;
+      
+      childChannelsContainer.classList.add('show');
+      
+      var childChannels = childChannelsContainer.querySelectorAll('.modern-floating-child-channel-item');
+      for (var i = 0; i < childChannels.length; i++) {
+        (function(index, child) {
+          setTimeout(function() {
+            child.classList.add('show');
+          }, index * 100);
+        })(i, childChannels[i]);
+      }
+    }
+  }
+  
+  function hideAllChildChannels() {
+    var allChildChannels = document.querySelectorAll('.modern-floating-child-channels');
+    for (var i = 0; i < allChildChannels.length; i++) {
+      var container = allChildChannels[i];
+      var children = container.querySelectorAll('.modern-floating-child-channel-item');
+      for (var j = 0; j < children.length; j++) {
+        children[j].classList.remove('show');
+      }
+      container.classList.remove('show');
+    }
+    currentChildChannels = null;
   }
   
   function showChannels() {
@@ -247,6 +337,7 @@ const modernFloatingJavaScriptLogic = `
     var channelsContainer = document.querySelector('#modern-floating-channels-container');
     if (channelsContainer) {
       isHoveringWidget = false;
+      hideAllChildChannels(); // Hide any open child channels
       
       var channels = document.querySelectorAll('.modern-floating-channel-item');
       for (var i = 0; i < channels.length; i++) {
@@ -267,24 +358,6 @@ const modernFloatingJavaScriptLogic = `
     }
   }
   
-  function showTooltip() {
-    var tooltip = document.querySelector('#modern-floating-widget-tooltip');
-    if (tooltip) {
-      tooltip.style.display = 'block';
-      tooltip.style.visibility = 'visible';
-      tooltip.style.opacity = '1';
-    }
-  }
-  
-  function hideTooltip() {
-    var tooltip = document.querySelector('#modern-floating-widget-tooltip');
-    if (tooltip) {
-      tooltip.style.display = 'none';
-      tooltip.style.visibility = 'hidden';
-      tooltip.style.opacity = '0';
-    }
-  }
-  
   function initWidget() {
     console.log('Initializing modern floating widget...');
     
@@ -293,10 +366,20 @@ const modernFloatingJavaScriptLogic = `
       var generatedHtml = generateChannelsHtml();
       channelsContainer.innerHTML = generatedHtml;
       console.log('Modern floating channels HTML generated and inserted');
+      
+      // Add click event listeners to channels with children
+      var channelsWithChildren = channelsContainer.querySelectorAll('[data-has-children="true"]');
+      for (var i = 0; i < channelsWithChildren.length; i++) {
+        channelsWithChildren[i].addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Channel with children clicked');
+          showChildChannels(this);
+        });
+      }
     }
     
     var button = document.querySelector('#modern-floating-widget-button');
-    var tooltip = document.querySelector('#modern-floating-widget-tooltip');
     var widgetContainer = document.querySelector('#modern-floating-widget-relative-container');
     
     if (!button || !widgetContainer) {
@@ -304,7 +387,7 @@ const modernFloatingJavaScriptLogic = `
       return;
     }
     
-    console.log('Modern floating widget elements found:', { button: !!button, tooltip: !!tooltip, widgetContainer: !!widgetContainer });
+    console.log('Modern floating widget elements found:', { button: !!button, widgetContainer: !!widgetContainer });
     
     // Show channels on button hover
     button.addEventListener('mouseenter', function() {
@@ -339,15 +422,12 @@ const modernFloatingJavaScriptLogic = `
       });
     }
     
-    // Tooltip functionality
-    if (tooltip && button) {
-      if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
-        button.addEventListener('mouseenter', showTooltip);
-        button.addEventListener('mouseleave', hideTooltip);
-      } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
-        showTooltip();
+    // Hide child channels when clicking elsewhere
+    document.addEventListener('click', function(e) {
+      if (currentChildChannels && !currentChildChannels.contains(e.target)) {
+        hideAllChildChannels();
       }
-    }
+    });
     
     console.log('Modern floating widget initialized successfully');
   }
