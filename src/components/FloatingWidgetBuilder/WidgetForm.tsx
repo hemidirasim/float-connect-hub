@@ -136,38 +136,37 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             />
           </div>
 
-          {/* Video Upload & Icon Settings - Hide for modern-floating template */}
-          {formData.templateId !== 'modern-floating' && (
-            <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
-              <VideoUpload
-                video={formData.video}
-                videoUrl={formData.videoUrl || editingWidget?.video_url}
-                videoType={formData.videoType}
-                videoLink={formData.videoLink}
-                useVideoPreview={formData.useVideoPreview}
-                videoHeight={formData.videoHeight}
-                videoAlignment={formData.videoAlignment}
-                videoObjectFit={formData.videoObjectFit}
-                customIcon={formData.customIcon}
-                customIconUrl={formData.customIconUrl}
-                buttonSize={formData.buttonSize}
-                previewVideoHeight={formData.previewVideoHeight}
-                uploading={uploading}
-                onVideoUpload={onVideoUpload}
-                onVideoRemove={onVideoRemove}
-                onVideoTypeChange={(type) => onFormDataChange('videoType', type)}
-                onVideoLinkChange={(link) => onFormDataChange('videoLink', link)}
-                onVideoPreviewChange={(checked) => onFormDataChange('useVideoPreview', checked)}
-                onVideoHeightChange={(height) => onFormDataChange('videoHeight', height)}
-                onVideoAlignmentChange={(alignment) => onFormDataChange('videoAlignment', alignment)}
-                onVideoObjectFitChange={(objectFit) => onFormDataChange('videoObjectFit', objectFit)}
-                onCustomIconChange={(icon) => onFormDataChange('customIcon', icon)}
-                onCustomIconUpload={onCustomIconUpload}
-                onButtonSizeChange={(size) => onFormDataChange('buttonSize', size)}
-                onPreviewVideoHeightChange={(height) => onFormDataChange('previewVideoHeight', height)}
-              />
-            </div>
-          )}
+          {/* Video Upload & Icon Settings */}
+          <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
+            <VideoUpload
+              video={formData.video}
+              videoUrl={formData.videoUrl || editingWidget?.video_url}
+              videoType={formData.videoType}
+              videoLink={formData.videoLink}
+              useVideoPreview={formData.useVideoPreview}
+              videoHeight={formData.videoHeight}
+              videoAlignment={formData.videoAlignment}
+              videoObjectFit={formData.videoObjectFit}
+              customIcon={formData.customIcon}
+              customIconUrl={formData.customIconUrl}
+              buttonSize={formData.buttonSize}
+              previewVideoHeight={formData.previewVideoHeight}
+              uploading={uploading}
+              templateId={formData.templateId}
+              onVideoUpload={onVideoUpload}
+              onVideoRemove={onVideoRemove}
+              onVideoTypeChange={(type) => onFormDataChange('videoType', type)}
+              onVideoLinkChange={(link) => onFormDataChange('videoLink', link)}
+              onVideoPreviewChange={(checked) => onFormDataChange('useVideoPreview', checked)}
+              onVideoHeightChange={(height) => onFormDataChange('videoHeight', height)}
+              onVideoAlignmentChange={(alignment) => onFormDataChange('videoAlignment', alignment)}
+              onVideoObjectFitChange={(objectFit) => onFormDataChange('videoObjectFit', objectFit)}
+              onCustomIconChange={(icon) => onFormDataChange('customIcon', icon)}
+              onCustomIconUpload={onCustomIconUpload}
+              onButtonSizeChange={(size) => onFormDataChange('buttonSize', size)}
+              onPreviewVideoHeightChange={(height) => onFormDataChange('previewVideoHeight', height)}
+            />
+          </div>
 
           {/* Customization Options */}
           <div className="bg-white/50 rounded-xl p-6 border border-gray-100">

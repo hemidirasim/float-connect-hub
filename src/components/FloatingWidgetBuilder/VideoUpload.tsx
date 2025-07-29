@@ -25,6 +25,7 @@ interface VideoUploadProps {
   buttonSize: number;
   previewVideoHeight: number;
   uploading?: boolean;
+  templateId?: string;  // Add templateId prop
   onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onVideoRemove: () => void;
   onVideoTypeChange: (type: 'upload' | 'link') => void;
@@ -53,6 +54,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
   buttonSize,
   previewVideoHeight,
   uploading = false,
+  templateId,
   onVideoUpload,
   onVideoRemove,
   onVideoTypeChange,
@@ -247,57 +249,112 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
         </CardContent>
       </Card>
 
-      {/* Video Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Promotional Video</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              Video upload costs 2 credits per view, video links cost 1 credit per view.
-            </AlertDescription>
-          </Alert>
+      {/* Video Settings - Hide for modern-floating template */}
+      {templateId !== 'modern-floating' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Promotional Video</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Video upload costs 2 credits per view, video links cost 1 credit per view.
+              </AlertDescription>
+            </Alert>
 
-          <Tabs value={videoType} onValueChange={(value) => onVideoTypeChange(value as 'upload' | 'link')}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="upload" className="flex items-center gap-2">
-                <Upload className="w-4 h-4" />
-                Upload Video
-              </TabsTrigger>
-              <TabsTrigger value="link" className="flex items-center gap-2">
-                <Link className="w-4 h-4" />
-                Video Link
-              </TabsTrigger>
-            </TabsList>
+            <Tabs value={videoType} onValueChange={(value) => onVideoTypeChange(value as 'upload' | 'link')}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="upload" className="flex items-center gap-2">
+                  <Upload className="w-4 h-4" />
+                  Upload Video
+                </TabsTrigger>
+                <TabsTrigger value="link" className="flex items-center gap-2">
+                  <Link className="w-4 h-4" />
+                  Video Link
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="upload" className="space-y-4">
-              <div className="space-y-2">
-                <Label>Upload Video (max 10MB) - 2 credits per view</Label>
-                <input
-                  type="file"
-                  accept="video/*"
-                  onChange={onVideoUpload}
-                  className="hidden"
-                  id="video-upload"
-                />
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => document.getElementById('video-upload')?.click()}
-                    disabled={uploading}
-                    className="flex-1 min-w-0"
-                  >
-                    <Upload className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <span className="truncate">
-                      {uploading ? 'Uploading...' : (video ? getVideoDisplayName() : 'Choose Video')}
-                    </span>
-                  </Button>
-                  
-                  {video && (
-                    <>
+              <TabsContent value="upload" className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Upload Video (max 10MB) - 2 credits per view</Label>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={onVideoUpload}
+                    className="hidden"
+                    id="video-upload"
+                  />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById('video-upload')?.click()}
+                      disabled={uploading}
+                      className="flex-1 min-w-0"
+                    >
+                      <Upload className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">
+                        {uploading ? 'Uploading...' : (video ? getVideoDisplayName() : 'Choose Video')}
+                      </span>
+                    </Button>
+                    
+                    {video && (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleVideoPreview}
+                          title="Preview Video"
+                        >
+                          <Play className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={onVideoRemove}
+                          title="Remove Video"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="link" className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Video Link - 1 credit per view</Label>
+                  <div className="flex items-center gap-2">
+                    <Youtube className="w-4 h-4 text-red-600" />
+                    <Video className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm text-gray-600">YouTube, Vimeo, Dailymotion, Twitch supported</span>
+                  </div>
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertDescription>
+                      <strong>Note:</strong> Video preview as button feature is only available for uploaded videos, not for video links.
+                    </AlertDescription>
+                  </Alert>
+                  <Input
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    value={videoLink || ''}
+                    onChange={(e) => onVideoLinkChange(e.target.value)}
+                    className="w-full"
+                  />
+                  {videoLink && !validateVideoLink(videoLink) && (
+                    <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertDescription>
+                        Please enter a valid YouTube, Vimeo, Dailymotion, or Twitch URL.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  {videoLink && validateVideoLink(videoLink) && (
+                    <div className="flex gap-2">
                       <Button
                         type="button"
                         variant="outline"
@@ -311,128 +368,75 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={onVideoRemove}
+                        onClick={() => onVideoLinkChange('')}
                         title="Remove Video"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
-                    </>
+                    </div>
                   )}
                 </div>
-              </div>
-            </TabsContent>
+              </TabsContent>
+            </Tabs>
 
-            <TabsContent value="link" className="space-y-4">
-              <div className="space-y-2">
-                <Label>Video Link - 1 credit per view</Label>
-                <div className="flex items-center gap-2">
-                  <Youtube className="w-4 h-4 text-red-600" />
-                  <Video className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm text-gray-600">YouTube, Vimeo, Dailymotion, Twitch supported</span>
-                </div>
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Note:</strong> Video preview as button feature is only available for uploaded videos, not for video links.
-                  </AlertDescription>
-                </Alert>
-                <Input
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  value={videoLink || ''}
-                  onChange={(e) => onVideoLinkChange(e.target.value)}
-                  className="w-full"
+            {hasVideo && (
+              <>
+                <VideoSettings
+                  videoHeight={videoHeight}
+                  videoAlignment={videoAlignment}
+                  videoObjectFit={videoObjectFit}
+                  onVideoHeightChange={onVideoHeightChange}
+                  onVideoAlignmentChange={onVideoAlignmentChange}
+                  onVideoObjectFitChange={onVideoObjectFitChange}
                 />
-                {videoLink && !validateVideoLink(videoLink) && (
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertDescription>
-                      Please enter a valid YouTube, Vimeo, Dailymotion, or Twitch URL.
-                    </AlertDescription>
-                  </Alert>
-                )}
-                {videoLink && validateVideoLink(videoLink) && (
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleVideoPreview}
-                      title="Preview Video"
-                    >
-                      <Play className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onVideoLinkChange('')}
-                      title="Remove Video"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
 
-          {hasVideo && (
-            <>
-              <VideoSettings
-                videoHeight={videoHeight}
-                videoAlignment={videoAlignment}
-                videoObjectFit={videoObjectFit}
-                onVideoHeightChange={onVideoHeightChange}
-                onVideoAlignmentChange={onVideoAlignmentChange}
-                onVideoObjectFitChange={onVideoObjectFitChange}
-              />
-
-              {/* Video Preview Option - Only for uploaded videos */}
-              <div className="space-y-4 p-4 border rounded-lg bg-blue-50">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-base font-medium">Use Video Preview as Button</Label>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Replace the button with a 3-4 second video preview instead of an icon
-                    </p>
-                    {videoType === 'link' && (
-                      <p className="text-xs text-orange-600 mt-1">
-                        ⚠️ This feature is only available for uploaded videos
+                {/* Video Preview Option - Only for uploaded videos */}
+                <div className="space-y-4 p-4 border rounded-lg bg-blue-50">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base font-medium">Use Video Preview as Button</Label>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Replace the button with a 3-4 second video preview instead of an icon
                       </p>
-                    )}
-                  </div>
-                  <Switch
-                    checked={useVideoPreview && videoType === 'upload'}
-                    onCheckedChange={(checked) => {
-                      if (videoType === 'upload') {
-                        onVideoPreviewChange(checked);
-                      }
-                    }}
-                    disabled={videoType === 'link'}
-                  />
-                </div>
-
-                {useVideoPreview && videoType === 'upload' && (
-                  <div className="space-y-2">
-                    <Label>Preview Video Height: {previewVideoHeight}px</Label>
-                    <Input
-                      type="range"
-                      min="80"
-                      max="150"
-                      value={previewVideoHeight}
-                      onChange={(e) => onPreviewVideoHeightChange(Number(e.target.value))}
-                      className="w-full"
+                      {videoType === 'link' && (
+                        <p className="text-xs text-orange-600 mt-1">
+                          ⚠️ This feature is only available for uploaded videos
+                        </p>
+                      )}
+                    </div>
+                    <Switch
+                      checked={useVideoPreview && videoType === 'upload'}
+                      onCheckedChange={(checked) => {
+                        if (videoType === 'upload') {
+                          onVideoPreviewChange(checked);
+                        }
+                      }}
+                      disabled={videoType === 'link'}
                     />
-                    <p className="text-xs text-gray-500">
-                      This will show a looping preview of your video as the floating button
-                    </p>
                   </div>
-                )}
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+
+                  {useVideoPreview && videoType === 'upload' && (
+                    <div className="space-y-2">
+                      <Label>Preview Video Height: {previewVideoHeight}px</Label>
+                      <Input
+                        type="range"
+                        min="80"
+                        max="150"
+                        value={previewVideoHeight}
+                        onChange={(e) => onPreviewVideoHeightChange(Number(e.target.value))}
+                        className="w-full"
+                      />
+                      <p className="text-xs text-gray-500">
+                        This will show a looping preview of your video as the floating button
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Video Preview Modal */}
       <Dialog open={videoModalOpen} onOpenChange={setVideoModalOpen}>
