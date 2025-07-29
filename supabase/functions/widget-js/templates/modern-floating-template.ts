@@ -2,7 +2,7 @@
 import type { WidgetTemplate } from '../template-types.ts'
 
 const modernFloatingHtmlTemplate = `
-<div id="modern-floating-widget-container" class="modern-floating-widget-container" data-position="{{POSITION}}" style="position: fixed; {{POSITION_STYLE}} bottom: 20px; z-index: 99999;">
+<div id="modern-floating-widget-container" class="modern-floating-widget-container" data-position="{{POSITION}}" style="position: fixed; {{POSITION_STYLE}} bottom: 40px; z-index: 99999;">
   <div id="modern-floating-widget-relative-container" style="position: relative;">    
     <!-- Channels container that appears on hover -->
     <div id="modern-floating-channels-container" style="position: absolute; {{POSITION_CHANNELS_STYLE}} bottom: {{CHANNEL_BOTTOM_OFFSET}}px; display: none; opacity: 0; transform: translateY(20px); transition: all 0.3s ease;">
