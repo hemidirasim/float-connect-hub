@@ -56,6 +56,7 @@ export const defaultCssStyles = `
     border-radius: 16px;
     width: {{WIDGET_WIDTH}}px;
     height: {{WIDGET_HEIGHT}}px;
+    min-width: 320px;
     {{MODAL_CONTENT_POSITION}}
     overflow-y: auto;
     position: relative;
@@ -335,6 +336,7 @@ export const defaultCssStyles = `
     #lovable-modal-content {
       max-width: 420px;
       max-height: 650px;
+      min-width: 320px;
     }
   }
 
@@ -345,6 +347,7 @@ export const defaultCssStyles = `
       height: 90%;
       max-width: 380px;
       max-height: 600px;
+      min-width: 280px;
     }
     
     .dropdown {
