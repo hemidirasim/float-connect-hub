@@ -87,14 +87,6 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-8 p-8 relative z-10">
-          {/* Template Selection */}
-          <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
-            <TemplateSelector
-              selectedTemplateId={formData.templateId || 'default'}
-              onTemplateChange={(templateId) => onFormDataChange('templateId', templateId)}
-            />
-          </div>
-
           {/* Website Info */}
           <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -136,6 +128,14 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-8 p-8 relative z-10">
+          {/* Template Selection - Moved here from Setup section */}
+          <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
+            <TemplateSelector
+              selectedTemplateId={formData.templateId || 'default'}
+              onTemplateChange={(templateId) => onFormDataChange('templateId', templateId)}
+            />
+          </div>
+
           {/* Video Upload & Icon Settings */}
           <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
             <VideoUpload

@@ -57,6 +57,10 @@ const modernFloatingCssStyles = `
     pointer-events: none;
   }
   
+  #modern-floating-channels-container.show {
+    pointer-events: all;
+  }
+  
   #modern-floating-channels {
     display: flex;
     flex-direction: column;
@@ -183,6 +187,7 @@ const modernFloatingJavaScriptLogic = `
   
   var channelsData = {{CHANNELS_DATA}};
   var hoverTimeout;
+  var isHoveringWidget = false;
   
   function generateChannelsHtml() {
     if (!channelsData || channelsData.length === 0) {
@@ -213,7 +218,11 @@ const modernFloatingJavaScriptLogic = `
   function showChannels() {
     var channelsContainer = document.querySelector('#modern-floating-channels-container');
     if (channelsContainer) {
+      clearTimeout(hoverTimeout);
+      isHoveringWidget = true;
+      
       channelsContainer.style.display = 'block';
+      channelsContainer.classList.add('show');
       
       setTimeout(function() {
         channelsContainer.style.opacity = '1';
@@ -233,8 +242,12 @@ const modernFloatingJavaScriptLogic = `
   }
   
   function hideChannels() {
+    if (!isHoveringWidget) return;
+    
     var channelsContainer = document.querySelector('#modern-floating-channels-container');
     if (channelsContainer) {
+      isHoveringWidget = false;
+      
       var channels = document.querySelectorAll('.modern-floating-channel-item');
       for (var i = 0; i < channels.length; i++) {
         channels[i].classList.remove('show');
@@ -243,9 +256,12 @@ const modernFloatingJavaScriptLogic = `
       setTimeout(function() {
         channelsContainer.style.opacity = '0';
         channelsContainer.style.transform = 'translateY(20px)';
+        channelsContainer.classList.remove('show');
         
         setTimeout(function() {
-          channelsContainer.style.display = 'none';
+          if (!isHoveringWidget) {
+            channelsContainer.style.display = 'none';
+          }
         }, 300);
       }, 100);
     }
@@ -292,15 +308,20 @@ const modernFloatingJavaScriptLogic = `
     
     // Show channels on button hover
     button.addEventListener('mouseenter', function() {
-      clearTimeout(hoverTimeout);
       showChannels();
     });
     
     // Hide channels when leaving the entire widget area
-    widgetContainer.addEventListener('mouseleave', function() {
+    widgetContainer.addEventListener('mouseleave', function(e) {
+      // Check if we're moving to a child element
+      var channelsContainerEl = document.querySelector('#modern-floating-channels-container');
+      if (channelsContainerEl && channelsContainerEl.contains(e.relatedTarget)) {
+        return; // Don't hide if moving to channels container
+      }
+      
       hoverTimeout = setTimeout(function() {
         hideChannels();
-      }, 100);
+      }, 200);
     });
     
     // Keep channels visible when hovering over them
@@ -308,12 +329,13 @@ const modernFloatingJavaScriptLogic = `
     if (channelsContainerEl) {
       channelsContainerEl.addEventListener('mouseenter', function() {
         clearTimeout(hoverTimeout);
+        isHoveringWidget = true;
       });
       
       channelsContainerEl.addEventListener('mouseleave', function() {
         hoverTimeout = setTimeout(function() {
           hideChannels();
-        }, 100);
+        }, 200);
       });
     }
     
