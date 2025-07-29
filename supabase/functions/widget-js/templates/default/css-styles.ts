@@ -1,7 +1,7 @@
 export const defaultCssStyles = `
   #lovable-widget-button {
     border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+    background: {{BUTTON_COLOR}};
     border: none;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);

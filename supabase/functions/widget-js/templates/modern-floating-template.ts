@@ -19,7 +19,7 @@ const modernFloatingHtmlTemplate = `
 const modernFloatingCssStyles = `
   #modern-floating-widget-button {
     border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+    background: {{BUTTON_COLOR}};
     border: none;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -34,7 +34,6 @@ const modernFloatingCssStyles = `
   
   #modern-floating-widget-button:hover {
     box-shadow: 0 12px 35px rgba(59, 130, 246, 0.5);
-    background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%);
     transform: scale(1.1);
   }
   
