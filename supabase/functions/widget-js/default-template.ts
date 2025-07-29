@@ -64,6 +64,7 @@ const defaultJavaScriptLogic = `
   console.log('Widget loading with channels:', {{CHANNELS_DATA}});
   
   var channelsData = {{CHANNELS_DATA}};
+  var isModalOpen = false;
   
   function openChannel(url) {
     window.open(url, '_blank');
@@ -245,6 +246,24 @@ const defaultJavaScriptLogic = `
     }
   }
   
+  function showTooltip() {
+    var tooltip = document.querySelector('#lovable-widget-tooltip');
+    if (tooltip && !isModalOpen) {
+      tooltip.style.display = 'block';
+      tooltip.style.visibility = 'visible';
+      tooltip.style.opacity = '1';
+    }
+  }
+  
+  function hideTooltip() {
+    var tooltip = document.querySelector('#lovable-widget-tooltip');
+    if (tooltip) {
+      tooltip.style.display = 'none';
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.opacity = '0';
+    }
+  }
+  
   function initWidget() {
     console.log('Initializing widget...');
     
@@ -272,6 +291,8 @@ const defaultJavaScriptLogic = `
       e.preventDefault();
       e.stopPropagation();
       console.log('Button clicked, showing modal');
+      isModalOpen = true;
+      hideTooltip(); // Hide tooltip when modal opens
       modal.style.display = 'flex';
       modal.style.visibility = 'visible';
       modal.style.opacity = '1';
@@ -313,6 +334,8 @@ const defaultJavaScriptLogic = `
     });
     
     function closeModal() {
+      isModalOpen = false;
+      
       // Pause all videos when modal closes and reset YouTube iframes
       try {
         var videos = document.querySelectorAll('.hiclient-video-player');
@@ -355,21 +378,10 @@ const defaultJavaScriptLogic = `
     
     if (tooltip && button) {
       if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
-        button.addEventListener('mouseenter', function() {
-          tooltip.style.display = 'block';
-          tooltip.style.visibility = 'visible';
-          tooltip.style.opacity = '1';
-        });
-        
-        button.addEventListener('mouseleave', function() {
-          tooltip.style.display = 'none';
-          tooltip.style.visibility = 'hidden';
-          tooltip.style.opacity = '0';
-        });
+        button.addEventListener('mouseenter', showTooltip);
+        button.addEventListener('mouseleave', hideTooltip);
       } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
-        tooltip.style.display = 'block';
-        tooltip.style.visibility = 'visible';
-        tooltip.style.opacity = '1';
+        showTooltip();
       }
     }
     
