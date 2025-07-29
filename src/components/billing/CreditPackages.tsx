@@ -28,8 +28,8 @@ export const CreditPackages: React.FC<CreditPackagesProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Credit packages</CardTitle>
-        <CardDescription>Buy credits for widget views</CardDescription>
+        <CardTitle>View packages</CardTitle>
+        <CardDescription>Buy views for your widgets</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -39,8 +39,8 @@ export const CreditPackages: React.FC<CreditPackagesProps> = ({
                 <Badge className="absolute -top-2 left-4 bg-blue-600">Popular</Badge>
               )}
               <CardContent className="p-6 text-center">
-                <div className="text-2xl font-bold text-blue-600 mb-2">{pkg.credits}</div>
-                <div className="text-sm text-gray-600 mb-4">credits</div>
+                <div className="text-2xl font-bold text-blue-600 mb-2">{pkg.credits.toLocaleString()}</div>
+                <div className="text-sm text-gray-600 mb-4">views</div>
                 <div className="text-xl font-semibold mb-4">${pkg.price}</div>
                 <Button 
                   className="w-full" 

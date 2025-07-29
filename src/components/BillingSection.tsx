@@ -18,19 +18,19 @@ interface BillingSectionProps {
 
 const creditPackages = [
   { 
-    credits: 200, 
+    credits: 2500, 
     price: 10, 
     productId: 'pri_01jrmk0bq3y6cfd8w2gsbh9fax',
     popular: false 
   },
   { 
-    credits: 500, 
+    credits: 4300, 
     price: 20, 
     productId: 'pri_01js1kfkamvrte2kdppgch8fyd',
     popular: true 
   },
   { 
-    credits: 800, 
+    credits: 10000, 
     price: 30, 
     productId: 'pri_01js1kg2d3q6cf947hz5v6eqjy',
     popular: false 
