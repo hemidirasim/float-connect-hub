@@ -10,6 +10,9 @@ const modernFloatingHtmlTemplate = `
       <div id="modern-floating-channels"></div>
     </div>
     
+    <!-- Video content for modern floating -->
+    {{VIDEO_CONTENT}}
+    
     <button id="modern-floating-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}} {{VIDEO_BUTTON_STYLE}}">
       {{BUTTON_ICON}}
     </button>
@@ -95,6 +98,35 @@ const modernFloatingCssStyles = `
     transform: translateY(0);
   }
   
+  /* Video styles for modern floating */
+  .hiclient-video {
+    position: absolute;
+    bottom: {{CHANNEL_BOTTOM_OFFSET}}px;
+    {{POSITION_CHANNELS_STYLE}}
+    width: 300px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 16px;
+    display: none;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    z-index: 99998;
+  }
+  
+  .hiclient-video.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .hiclient-video video,
+  .hiclient-video iframe {
+    width: 100%;
+    border-radius: 8px;
+  }
+  
   /* Mobile responsive */
   @media (max-width: 768px) {
     #modern-floating-channels {
@@ -105,6 +137,10 @@ const modernFloatingCssStyles = `
       width: {{MOBILE_CHANNEL_ICON_SIZE}}px;
       height: {{MOBILE_CHANNEL_ICON_SIZE}}px;
       font-size: {{MOBILE_CHANNEL_ICON_FONT_SIZE}}px;
+    }
+    
+    .hiclient-video {
+      width: 280px;
     }
   }
 `;
@@ -195,14 +231,27 @@ const modernFloatingJavaScriptLogic = `
     }
     
     var html = '';
+    var allChannels = [];
     
-    // Only show individual channels (no groups for modern floating)
-    var individualChannels = channelsData.filter(function(channel) {
-      return !channel.childChannels || channel.childChannels.length === 0;
-    });
+    // Collect all individual channels and child channels
+    for (var i = 0; i < channelsData.length; i++) {
+      var channel = channelsData[i];
+      
+      if (channel.childChannels && channel.childChannels.length > 0) {
+        // Add parent channel first
+        allChannels.push(channel);
+        // Add all child channels
+        for (var j = 0; j < channel.childChannels.length; j++) {
+          allChannels.push(channel.childChannels[j]);
+        }
+      } else if (!channel.parentId) {
+        // Add individual channels (not child channels)
+        allChannels.push(channel);
+      }
+    }
     
-    for (var i = 0; i < individualChannels.length; i++) {
-      var channel = individualChannels[i];
+    for (var i = 0; i < allChannels.length; i++) {
+      var channel = allChannels[i];
       var channelUrl = getChannelUrl(channel);
       var channelIcon = getChannelIcon(channel);
       var channelColor = getChannelColor(channel.type);
@@ -267,22 +316,32 @@ const modernFloatingJavaScriptLogic = `
     }
   }
   
-  function showTooltip() {
-    var tooltip = document.querySelector('#modern-floating-widget-tooltip');
-    if (tooltip) {
-      tooltip.style.display = 'block';
-      tooltip.style.visibility = 'visible';
-      tooltip.style.opacity = '1';
+  function showVideo() {
+    var video = document.querySelector('.hiclient-video');
+    if (video) {
+      clearTimeout(hoverTimeout);
+      isHoveringWidget = true;
+      video.classList.add('show');
     }
   }
   
-  function hideTooltip() {
-    var tooltip = document.querySelector('#modern-floating-widget-tooltip');
-    if (tooltip) {
-      tooltip.style.display = 'none';
-      tooltip.style.visibility = 'hidden';
-      tooltip.style.opacity = '0';
+  function hideVideo() {
+    if (!isHoveringWidget) return;
+    
+    var video = document.querySelector('.hiclient-video');
+    if (video) {
+      video.classList.remove('show');
     }
+  }
+  
+  function showTooltip() {
+    // Remove tooltip functionality - user requested to remove "tooltip" text
+    return;
+  }
+  
+  function hideTooltip() {
+    // Remove tooltip functionality - user requested to remove "tooltip" text
+    return;
   }
   
   function initWidget() {
@@ -296,31 +355,36 @@ const modernFloatingJavaScriptLogic = `
     }
     
     var button = document.querySelector('#modern-floating-widget-button');
-    var tooltip = document.querySelector('#modern-floating-widget-tooltip');
     var widgetContainer = document.querySelector('#modern-floating-widget-relative-container');
+    var video = document.querySelector('.hiclient-video');
     
     if (!button || !widgetContainer) {
       console.error('Missing modern floating widget elements:', { button: !!button, widgetContainer: !!widgetContainer });
       return;
     }
     
-    console.log('Modern floating widget elements found:', { button: !!button, tooltip: !!tooltip, widgetContainer: !!widgetContainer });
+    console.log('Modern floating widget elements found:', { button: !!button, widgetContainer: !!widgetContainer, video: !!video });
     
-    // Show channels on button hover
+    // Show channels and video on button hover
     button.addEventListener('mouseenter', function() {
       showChannels();
+      if (video) showVideo();
     });
     
-    // Hide channels when leaving the entire widget area
+    // Hide channels and video when leaving the entire widget area
     widgetContainer.addEventListener('mouseleave', function(e) {
       // Check if we're moving to a child element
       var channelsContainerEl = document.querySelector('#modern-floating-channels-container');
       if (channelsContainerEl && channelsContainerEl.contains(e.relatedTarget)) {
         return; // Don't hide if moving to channels container
       }
+      if (video && video.contains(e.relatedTarget)) {
+        return; // Don't hide if moving to video
+      }
       
       hoverTimeout = setTimeout(function() {
         hideChannels();
+        if (video) hideVideo();
       }, 200);
     });
     
@@ -335,18 +399,24 @@ const modernFloatingJavaScriptLogic = `
       channelsContainerEl.addEventListener('mouseleave', function() {
         hoverTimeout = setTimeout(function() {
           hideChannels();
+          if (video) hideVideo();
         }, 200);
       });
     }
     
-    // Tooltip functionality
-    if (tooltip && button) {
-      if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
-        button.addEventListener('mouseenter', showTooltip);
-        button.addEventListener('mouseleave', hideTooltip);
-      } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
-        showTooltip();
-      }
+    // Keep video visible when hovering over it
+    if (video) {
+      video.addEventListener('mouseenter', function() {
+        clearTimeout(hoverTimeout);
+        isHoveringWidget = true;
+      });
+      
+      video.addEventListener('mouseleave', function() {
+        hoverTimeout = setTimeout(function() {
+          hideChannels();
+          hideVideo();
+        }, 200);
+      });
     }
     
     console.log('Modern floating widget initialized successfully');
