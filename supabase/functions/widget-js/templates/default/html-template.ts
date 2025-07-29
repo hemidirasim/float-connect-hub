@@ -11,7 +11,7 @@ export const defaultHtmlTemplate = `
 
 <div id="lovable-widget-modal" style="display: none; visibility: hidden; opacity: 0;">
   <div id="lovable-modal-content" style="transform: translateY(20px);">
-    <div id="lovable-modal-header">{{GREETING_MESSAGE}}</div>
+    <div id="lovable-modal-header" style="text-align: left;">{{GREETING_MESSAGE}}</div>
     <button id="lovable-widget-close">×</button>
     {{VIDEO_CONTENT}}
     <div id="lovable-widget-channels"></div>

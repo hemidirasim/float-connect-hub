@@ -63,7 +63,7 @@ export const CustomizationOptions: React.FC<CustomizationOptionsProps> = ({
         <Label htmlFor="greetingMessage">Modal Greeting Message</Label>
         <Textarea
           id="greetingMessage"
-          placeholder="Enter your greeting message..."
+          placeholder="Hi 👋 How can we help you today?"
           value={greetingMessage}
           onChange={(e) => onGreetingMessageChange(e.target.value)}
           rows={3}
