@@ -6,7 +6,7 @@ const modernFloatingHtmlTemplate = `
   <div id="modern-floating-widget-relative-container" style="position: relative;">
     
     <!-- Powered by text -->
-    <a href="https://hiclient.co" target="_blank" id="modern-floating-powered-by" style="position: absolute; right: calc(94% + 12px); top: 100%; transform: translateY(-50%); color: rgb(0, 0, 0); padding: 6px 10px; border-radius: 6px; font-size: 10px; white-space: nowrap; opacity: 1; visibility: visible; transition: 0.3s; pointer-events: auto; display: block; text-decoration: none; cursor: pointer;">
+    <a href="https://hiclient.co" target="_blank" id="modern-floating-powered-by" style="position: absolute; right: calc(94% + 12px); top: 100%; transform: translateY(-50%); color: rgb(0, 0, 0); padding: 6px 10px; border-radius: 6px; font-size: 10px; white-space: nowrap; opacity: 0; visibility: hidden; transition: 0.3s; pointer-events: auto; display: none; text-decoration: none; cursor: pointer;">
       powered by hiclient.co
     </a>
     

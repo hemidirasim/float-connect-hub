@@ -96,11 +96,11 @@ export const getModernTemplate = (): WidgetTemplate => ({
   border-radius: 6px;
   font-size: 10px;
   white-space: nowrap;
-  opacity: 1;
-  visibility: visible;
+  opacity: 0;
+  visibility: hidden;
   transition: 0.3s;
   pointer-events: auto;
-  display: block;
+  display: none;
   text-decoration: none;
   cursor: pointer;
 }
@@ -114,6 +114,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
 .hiclient-powered-by.show {
   opacity: 1;
   visibility: visible;
+  display: block;
 }
 
 /* Tooltip */
