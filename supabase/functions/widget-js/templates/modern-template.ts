@@ -60,39 +60,21 @@ export const getModernTemplate = (): WidgetTemplate => ({
 /* Main Button */
 .hiclient-widget-button {
   border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
   border: none;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, {{BUTTON_COLOR}}, #667eea);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
+  transition: all 0.3s ease;
+  color: white;
   position: relative;
 }
 
-.hiclient-widget-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
-  border-radius: 50%;
-  transition: opacity 0.3s ease;
-  opacity: 0;
-}
-
-.hiclient-widget-button:hover::before {
-  opacity: 1;
-}
-
 .hiclient-widget-button:hover {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-  background: linear-gradient(135deg, #764ba2, {{BUTTON_COLOR}});
+  box-shadow: 0 12px 35px rgba(59, 130, 246, 0.5);
+  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%);
 }
 
 .hiclient-button-inner {
