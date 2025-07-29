@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -118,6 +119,7 @@ export const CustomizationOptions: React.FC<CustomizationOptionsProps> = ({
         <Label htmlFor="greetingMessage">Modal Greeting Message</Label>
         <Textarea
           id="greetingMessage"
+          placeholder="Salam! Sizə necə kömək edə bilərik?"
           value={greetingMessage}
           onChange={(e) => onGreetingMessageChange(e.target.value)}
           rows={3}
