@@ -429,6 +429,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
   console.log('Modern template loading...');
   
   const channelsData = {{CHANNELS_DATA}};
+  var isModalOpen = false;
   
   function generateChannelsHtml() {
     if (!channelsData || channelsData.length === 0) {
@@ -449,8 +450,8 @@ export const getModernTemplate = (): WidgetTemplate => ({
           // Create a group with dropdown for channels with children
           const groupId = 'group-' + channel.id;
           
-          html += '<div class="hiclient-channel-group hiclient-channel-item">';
-          html += '<div class="hiclient-group-trigger" onclick="toggleChannelGroup(\\'' + groupId + '\\')">';
+          html += '<div class="hiclient-channel-group hiclient-channel-item" onmouseleave="handleGroupMouseLeave(event)">';
+          html += '<div class="hiclient-group-trigger" onclick="toggleChannelGroup(\'' + groupId + '\')" onmouseenter="handleGroupMouseEnter()">';
           html += '<div class="hiclient-channel-icon" style="background: ' + channelColor + ';">';
           html += channelIcon;
           html += '</div>';
@@ -458,10 +459,10 @@ export const getModernTemplate = (): WidgetTemplate => ({
           html += '<div class="hiclient-group-count">' + (channel.childChannels.length + 1) + '</div>';
           html += '</div>';
           
-          html += '<div class="hiclient-group-dropdown" id="' + groupId + '">';
+          html += '<div class="hiclient-group-dropdown" id="' + groupId + '" onmouseenter="handleGroupMouseEnter()" onmouseleave="handleGroupMouseLeave(event)">';
           
           // Add parent channel as first item
-          html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="hiclient-group-item" onclick="openChannel(\\'' + escapeHtml(channelUrl) + '\\'); return false;">';
+          html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="hiclient-group-item" onclick="openChannel(\'' + escapeHtml(channelUrl) + '\'); return false;" onmouseenter="handleGroupMouseEnter()">';
           html += '<div class="hiclient-group-item-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
           html += '<div class="hiclient-group-item-info">';
           html += '<div class="hiclient-group-item-label">' + escapeHtml(channel.label) + ' (Primary)</div>';
@@ -475,7 +476,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
             const childIcon = getChannelIcon(childChannel);
             const childColor = getChannelColor(childChannel.type);
             
-            html += '<a href="' + escapeHtml(childUrl) + '" target="_blank" class="hiclient-group-item" onclick="openChannel(\\'' + escapeHtml(childUrl) + '\\'); return false;">';
+            html += '<a href="' + escapeHtml(childUrl) + '" target="_blank" class="hiclient-group-item" onclick="openChannel(\'' + escapeHtml(childUrl) + '\'); return false;" onmouseenter="handleGroupMouseEnter()">';
             html += '<div class="hiclient-group-item-icon" style="background: ' + childColor + ';">' + childIcon + '</div>';
             html += '<div class="hiclient-group-item-info">';
             html += '<div class="hiclient-group-item-label">' + escapeHtml(childChannel.label) + '</div>';
@@ -489,7 +490,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
         } else {
           // Regular channel without children
           html += '<div class="hiclient-channel-item">';
-          html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="hiclient-channel-btn" onclick="openChannel(\\'' + escapeHtml(channelUrl) + '\\'); return false;">';
+          html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="hiclient-channel-btn" onclick="openChannel(\'' + escapeHtml(channelUrl) + '\'); return false;">';
           html += '<div class="hiclient-channel-icon" style="background: ' + channelColor + ';">';
           html += channelIcon;
           html += '</div>';
@@ -587,13 +588,15 @@ export const getModernTemplate = (): WidgetTemplate => ({
       
       modal.style.display = 'flex';
       modal.classList.add('show');
+      isModalOpen = true;
       
       console.log('Modern widget modal opened');
     });
     
     function closeModal() {
-      if (modal) {
+      if (modal && isModalOpen) {
         modal.classList.remove('show');
+        isModalOpen = false;
         
         setTimeout(function() {
           modal.style.display = 'none';
@@ -611,6 +614,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
       });
     }
     
+    // Prevent modal from closing when clicking inside modal content
     modal.addEventListener('click', function(e) {
       if (e.target === modal) {
         closeModal();
@@ -655,6 +659,20 @@ export const getModernTemplate = (): WidgetTemplate => ({
     if (dropdown) {
       dropdown.classList.toggle('show');
       console.log('Toggled channel group:', groupId);
+    }
+  };
+  
+  // Handle mouse events for channel groups to prevent modal from closing
+  window.handleGroupMouseEnter = function() {
+    console.log('Mouse entered channel group area');
+    // Don't close modal when hovering over groups or child channels
+  };
+  
+  window.handleGroupMouseLeave = function(event) {
+    // Only allow modal to close if we're not moving to another part of the modal
+    var modal = document.getElementById('hiclient-modal-content');
+    if (modal && !modal.contains(event.relatedTarget)) {
+      console.log('Mouse left channel group area');
     }
   };
   
