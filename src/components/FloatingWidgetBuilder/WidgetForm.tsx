@@ -1,236 +1,336 @@
-
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Palette, Sparkles, Settings } from 'lucide-react';
-import { WebsiteInfoForm } from './WebsiteInfoForm';
-import { ChannelManager } from './ChannelManager';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { VideoUpload } from './VideoUpload';
+import { ChannelManager } from './ChannelManager';
 import { CustomizationOptions } from './CustomizationOptions';
 import { TemplateSelector } from './TemplateSelector';
-import { Channel, FormData } from './types';
-import { TemplatePreview } from './TemplatePreview';
+import { CodePreview } from './CodePreview';
+import { WidgetActions } from './WidgetActions';
+import type { Channel, WidgetConfig } from './types';
+import { templates } from './constants';
 
 interface WidgetFormProps {
-  websiteName: string;
-  websiteUrl: string;
-  channels: Channel[];
-  formData: FormData;
-  editingWidget: any;
-  saving: boolean;
-  uploading?: boolean;
-  onWebsiteNameChange: (value: string) => void;
-  onWebsiteUrlChange: (value: string) => void;
-  onChannelsChange: (channels: Channel[]) => void;
-  onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onVideoRemove: () => void;
-  onFormDataChange: (field: string, value: string | boolean | number) => void;
-  onCreateWidget: () => void;
-  onCustomIconUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  selectedTemplate: string;
+  onTemplateChange: (templateId: string) => void;
 }
 
 export const WidgetForm: React.FC<WidgetFormProps> = ({
-  websiteName,
-  websiteUrl,
-  channels,
-  formData,
-  editingWidget,
-  saving,
-  uploading = false,
-  onWebsiteNameChange,
-  onWebsiteUrlChange,
-  onChannelsChange,
-  onVideoUpload,
-  onVideoRemove,
-  onFormDataChange,
-  onCreateWidget,
-  onCustomIconUpload
+  selectedTemplate,
+  onTemplateChange
 }) => {
-  // Show widget preview if there are channels OR if video is uploaded
-  const shouldShowWidget = channels.length > 0 || Boolean(formData.video) || Boolean(formData.videoUrl) || Boolean(editingWidget?.video_url);
+  const [widgetName, setWidgetName] = useState('');
+  const [greetingMessage, setGreetingMessage] = useState('Salam! Sizə necə kömək edə bilərəm?');
+  const [channels, setChannels] = useState<Channel[]>([]);
+  const [buttonColor, setButtonColor] = useState('#22c55e');
+  const [position, setPosition] = useState<'left' | 'right'>('right');
+  const [tooltipText, setTooltipText] = useState('Bizimlə əlaqə saxlayın');
+  const [tooltipDisplay, setTooltipDisplay] = useState<'hover' | 'always' | 'never'>('hover');
+  const [tooltipPosition, setTooltipPosition] = useState<'top' | 'bottom' | 'left' | 'right'>('left');
+  
+  // Video states - only relevant for supported templates
+  const [video, setVideo] = useState<File | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoType, setVideoType] = useState<'upload' | 'link'>('upload');
+  const [videoLink, setVideoLink] = useState<string>('');
+  const [useVideoPreview, setUseVideoPreview] = useState(false);
+  const [videoHeight, setVideoHeight] = useState(300);
+  const [videoAlignment, setVideoAlignment] = useState('center');
+  const [videoObjectFit, setVideoObjectFit] = useState('cover');
+  const [previewVideoHeight, setPreviewVideoHeight] = useState(120);
+  
+  // UI states
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [customIcon, setCustomIcon] = useState<string>('message');
+  const [customIconUrl, setCustomIconUrl] = useState<string>('');
+  const [buttonSize, setButtonSize] = useState(60);
+
+  // Check if current template supports video
+  const isVideoSupported = selectedTemplate !== 'modern-floating';
+
+  // Clear video data when switching to non-video templates
+  useEffect(() => {
+    if (!isVideoSupported) {
+      setVideo(null);
+      setVideoUrl(null);
+      setVideoLink('');
+      setUseVideoPreview(false);
+    }
+  }, [selectedTemplate, isVideoSupported]);
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !isVideoSupported) return;
+
+    setUploading(true);
+    try {
+      const { data, error } = await supabase.storage
+        .from('videos')
+        .upload(`${widgetName}/${file.name}`, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Video upload error:', error);
+        toast.error('Video yüklənərkən xəta baş verdi');
+        return;
+      }
+
+      const videoUrl = supabase.storage.from('videos').getPublicUrl(data.path).data.publicUrl;
+      setVideoUrl(videoUrl);
+      setVideo(file);
+      toast.success('Video uğurla yükləndi!');
+    } catch (error) {
+      console.error('Unexpected video upload error:', error);
+      toast.error('Gözlənilməyən xəta baş verdi');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleVideoRemove = async () => {
+    if (!isVideoSupported) return;
+    
+    setUploading(true);
+    try {
+      if (videoUrl) {
+        const filePath = videoUrl.replace(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/videos/`, '');
+        const { error } = await supabase.storage
+          .from('videos')
+          .remove([filePath]);
+
+        if (error) {
+          console.error('Video remove error:', error);
+          toast.error('Video silinərkən xəta baş verdi');
+          return;
+        }
+      }
+
+      setVideo(null);
+      setVideoUrl(null);
+      toast.success('Video uğurla silindi!');
+    } catch (error) {
+      console.error('Unexpected video remove error:', error);
+      toast.error('Gözlənilməyən xəta baş verdi');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!widgetName.trim()) {
+      toast.error('Widget adı tələb olunur');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Giriş etməlisiniz');
+        return;
+      }
+
+      const widgetData = {
+        user_id: user.id,
+        name: widgetName,
+        template_id: selectedTemplate,
+        greeting_message: greetingMessage,
+        channels,
+        button_color: buttonColor,
+        position,
+        tooltip_text: tooltipText,
+        tooltip_display: tooltipDisplay,
+        tooltip_position: tooltipPosition,
+        custom_icon: customIcon === 'custom' ? customIconUrl : customIcon,
+        button_size: buttonSize,
+        // Only include video data for supported templates
+        ...(isVideoSupported && {
+          video_enabled: !!(video || videoLink),
+          video_url: videoUrl || videoLink || null,
+          video_height: videoHeight,
+          video_alignment: videoAlignment,
+          video_object_fit: videoObjectFit,
+          use_video_preview: useVideoPreview,
+          preview_video_height: previewVideoHeight
+        })
+      };
+
+      const { error } = await supabase
+        .from('widgets')
+        .insert([widgetData]);
+
+      if (error) throw error;
+
+      toast.success('Widget uğurla yaradıldı!');
+      
+      // Reset form
+      setWidgetName('');
+      setChannels([]);
+      if (isVideoSupported) {
+        setVideo(null);
+        setVideoUrl(null);
+        setVideoLink('');
+        setUseVideoPreview(false);
+      }
+      setCustomIcon('message');
+      setCustomIconUrl('');
+    } catch (error) {
+      console.error('Error saving widget:', error);
+      toast.error('Widget saxlanılarkən xəta baş verdi');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <>
-      {/* Header Section */}
-      <div className="text-center mb-12">
-        <div className="inline-flex items-center px-6 py-3 mb-6 bg-white/70 backdrop-blur-sm rounded-full border border-white/20 shadow-lg">
-          <Sparkles className="w-5 h-5 text-purple-600 mr-2" />
-          <span className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Widget Builder
-          </span>
-        </div>
-        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-          {editingWidget ? 'Edit Your' : 'Customize Your'}
-          <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Widget
-          </span>
-        </h2>
-        <p className="text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
-          {editingWidget ? 'Update your website details and contact channels' : 'Add your website details and contact channels to create an engaging widget'}
-        </p>
-      </div>
-
-      {/* Website Info & Channels */}
-      <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm mb-8 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 to-purple-400/5"></div>
-        <CardHeader className="relative z-10 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-100/50">
-          <CardTitle className="flex items-center gap-3 text-2xl">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-              <MessageCircle className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <span className="text-gray-900">Setup & Configuration</span>
-              <CardDescription className="text-lg mt-1">
-                Configure your website details and communication channels
-              </CardDescription>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-8 p-8 relative z-10">
-          {/* Website Info */}
-          <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Settings className="w-5 h-5 text-blue-600" />
-              Website Information
-            </h3>
-            <WebsiteInfoForm
-              websiteName={websiteName}
-              websiteUrl={websiteUrl}
-              onWebsiteNameChange={onWebsiteNameChange}
-              onWebsiteUrlChange={onWebsiteUrlChange}
-            />
-          </div>
-
-          {/* Channel Manager */}
-          <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
-            <ChannelManager
-              channels={channels}
-              onChannelsChange={onChannelsChange}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Design & Appearance Section */}
-      <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm mb-8 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-400/5 to-pink-400/5"></div>
-        <CardHeader className="relative z-10 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-100/50">
-          <CardTitle className="flex items-center gap-3 text-2xl">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <Palette className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <span className="text-gray-900">Design & Appearance</span>
-              <CardDescription className="text-lg mt-1">
-                Customize the look and feel of your widget
-              </CardDescription>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-8 p-8 relative z-10">
-          {/* Template Selection - Moved here from Setup section */}
-          <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
-            <TemplateSelector
-              selectedTemplateId={formData.templateId || 'default'}
-              onTemplateChange={(templateId) => onFormDataChange('templateId', templateId)}
-            />
-          </div>
-
-          {/* Video Upload & Icon Settings */}
-          <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
-            <VideoUpload
-              video={formData.video}
-              videoUrl={formData.videoUrl || editingWidget?.video_url}
-              videoType={formData.videoType}
-              videoLink={formData.videoLink}
-              useVideoPreview={formData.useVideoPreview}
-              videoHeight={formData.videoHeight}
-              videoAlignment={formData.videoAlignment}
-              videoObjectFit={formData.videoObjectFit}
-              customIcon={formData.customIcon}
-              customIconUrl={formData.customIconUrl}
-              buttonSize={formData.buttonSize}
-              previewVideoHeight={formData.previewVideoHeight}
-              uploading={uploading}
-              onVideoUpload={onVideoUpload}
-              onVideoRemove={onVideoRemove}
-              onVideoTypeChange={(type) => onFormDataChange('videoType', type)}
-              onVideoLinkChange={(link) => onFormDataChange('videoLink', link)}
-              onVideoPreviewChange={(checked) => onFormDataChange('useVideoPreview', checked)}
-              onVideoHeightChange={(height) => onFormDataChange('videoHeight', height)}
-              onVideoAlignmentChange={(alignment) => onFormDataChange('videoAlignment', alignment)}
-              onVideoObjectFitChange={(objectFit) => onFormDataChange('videoObjectFit', objectFit)}
-              onCustomIconChange={(icon) => onFormDataChange('customIcon', icon)}
-              onCustomIconUpload={onCustomIconUpload}
-              onButtonSizeChange={(size) => onFormDataChange('buttonSize', size)}
-              onPreviewVideoHeightChange={(height) => onFormDataChange('previewVideoHeight', height)}
-            />
-          </div>
-
-          {/* Customization Options */}
-          <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Settings className="w-5 h-5 text-purple-600" />
-              Position & Messages
-            </h3>
-            <CustomizationOptions
-              buttonColor={formData.buttonColor}
-              position={formData.position}
-              greetingMessage={formData.greetingMessage || ''}
-              onButtonColorChange={(color) => onFormDataChange('buttonColor', color)}
-              onPositionChange={(position) => onFormDataChange('position', position)}
-              onGreetingMessageChange={(message) => onFormDataChange('greetingMessage', message)}
-            />
-          </div>
-
-          {/* Create Button */}
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8 border border-gray-100 text-center">
-            <Button 
-              onClick={onCreateWidget} 
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-4 text-lg font-semibold rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
-              size="lg"
-              disabled={saving || uploading}
-            >
-              {saving ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Saving...
-                </div>
-              ) : uploading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Uploading...
-                </div>
-              ) : (
-                <>
-                  {editingWidget ? (
-                    <>
-                      <Settings className="w-5 h-5 mr-2" />
-                      Update Widget
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-5 h-5 mr-2" />
-                      Create Widget
-                    </>
-                  )}
-                </>
-              )}
-            </Button>
-            <p className="text-gray-600 mt-4 text-sm">
-              Your widget will be ready in seconds
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Live widget preview directly on the page */}
-      <TemplatePreview
-        showWidget={shouldShowWidget}
-        formData={formData}
-        channels={channels}
-        editingWidget={editingWidget}
+    <div className="space-y-6">
+      <TemplateSelector
+        selectedTemplate={selectedTemplate}
+        onTemplateChange={onTemplateChange}
+        templates={templates}
       />
-    </>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Widget Settings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="widget-name">Widget Name</Label>
+            <Input
+              id="widget-name"
+              value={widgetName}
+              onChange={(e) => setWidgetName(e.target.value)}
+              placeholder="My Contact Widget"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="greeting">Greeting Message</Label>
+            <Textarea
+              id="greeting"
+              value={greetingMessage}
+              onChange={(e) => setGreetingMessage(e.target.value)}
+              placeholder="Salam! Sizə necə kömək edə bilərəm?"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <VideoUpload
+        video={video}
+        videoUrl={videoUrl}
+        videoType={videoType}
+        videoLink={videoLink}
+        useVideoPreview={useVideoPreview}
+        videoHeight={videoHeight}
+        videoAlignment={videoAlignment}
+        videoObjectFit={videoObjectFit}
+        customIcon={customIcon}
+        customIconUrl={customIconUrl}
+        buttonSize={buttonSize}
+        previewVideoHeight={previewVideoHeight}
+        uploading={uploading}
+        selectedTemplate={selectedTemplate}
+        onVideoUpload={handleVideoUpload}
+        onVideoRemove={handleVideoRemove}
+        onVideoTypeChange={setVideoType}
+        onVideoLinkChange={setVideoLink}
+        onVideoPreviewChange={setUseVideoPreview}
+        onVideoHeightChange={setVideoHeight}
+        onVideoAlignmentChange={setVideoAlignment}
+        onVideoObjectFitChange={setVideoObjectFit}
+        onCustomIconChange={setCustomIcon}
+        onCustomIconUpload={handleCustomIconUpload}
+        onButtonSizeChange={setButtonSize}
+        onPreviewVideoHeightChange={setPreviewVideoHeight}
+      />
+
+      <ChannelManager
+        channels={channels}
+        onChannelsChange={setChannels}
+      />
+
+      <CustomizationOptions
+        buttonColor={buttonColor}
+        position={position}
+        tooltipText={tooltipText}
+        tooltipDisplay={tooltipDisplay}
+        tooltipPosition={tooltipPosition}
+        onButtonColorChange={setButtonColor}
+        onPositionChange={setPosition}
+        onTooltipTextChange={setTooltipText}
+        onTooltipDisplayChange={setTooltipDisplay}
+        onTooltipPositionChange={setTooltipPosition}
+      />
+
+      <CodePreview
+        config={{
+          name: widgetName,
+          template: selectedTemplate,
+          greetingMessage,
+          channels,
+          buttonColor,
+          position,
+          tooltipText,
+          tooltipDisplay,
+          tooltipPosition,
+          customIcon,
+          customIconUrl,
+          buttonSize,
+          ...(isVideoSupported && {
+            videoEnabled: !!(video || videoLink),
+            videoUrl: videoUrl || videoLink || undefined,
+            videoHeight,
+            videoAlignment,
+            videoObjectFit,
+            useVideoPreview,
+            previewVideoHeight
+          })
+        }}
+      />
+
+      <WidgetActions
+        onSave={handleSave}
+        saving={saving}
+        disabled={!widgetName.trim()}
+      />
+    </div>
   );
+
+  async function handleCustomIconUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const { data, error } = await supabase.storage
+        .from('icons')
+        .upload(`custom-icons/${file.name}`, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Custom icon upload error:', error);
+        toast.error('Xüsusi ikon yüklənərkən xəta baş verdi');
+        return;
+      }
+
+      const iconUrl = supabase.storage.from('icons').getPublicUrl(data.path).data.publicUrl;
+      setCustomIconUrl(iconUrl);
+      setCustomIcon('custom');
+      toast.success('Xüsusi ikon uğurla yükləndi!');
+    } catch (error) {
+      console.error('Unexpected custom icon upload error:', error);
+      toast.error('Gözlənilməyən xəta baş verdi');
+    }
+  }
 };
