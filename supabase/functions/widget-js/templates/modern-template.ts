@@ -1,4 +1,3 @@
-
 import type { WidgetTemplate } from '../template-types.ts'
 
 export const getModernTemplate = (): WidgetTemplate => ({
@@ -449,7 +448,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
         const channelColor = getChannelColor(channel.type);
         
         if (channel.childChannels && channel.childChannels.length > 0) {
-          // Create a group with dropdown for channels with children
+          // Create a group with click dropdown for channels with children
           const groupId = 'group-' + channel.id;
           
           html += '<div class="hiclient-channel-group hiclient-channel-item">';
@@ -639,7 +638,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
       }
     });
     
-    // Alt kontakt dropdown-larına keçid edərkən modalı bağlama
+    // Click outside group dropdown to close it
     document.addEventListener('click', function(e) {
       if (isModalOpen && currentOpenGroupId) {
         var modalContent = document.getElementById('hiclient-modal-content');
@@ -648,12 +647,12 @@ export const getModernTemplate = (): WidgetTemplate => ({
         var clickedOnDropdown = e.target.closest('.hiclient-group-dropdown');
         var clickedOnGroupItem = e.target.closest('.hiclient-group-item');
         
-        // Alt kontaktlara və dropdown sahəsinə klik edərkən modalı bağlama
+        // Don't close modal when clicking on sub-channels or dropdown
         if (clickedOnDropdown || clickedOnGroupItem) {
-          return; // Modal açıq qalsın
+          return;
         }
         
-        // Yalnız başqa group trigger-ə klik edəndə və ya modal xaricində klik edəndə dropdown-ı bağla
+        // Close dropdown when clicking outside or on another trigger
         if (!clickedInsideModal || (clickedOnTrigger && !clickedOnTrigger.onclick.toString().includes(currentOpenGroupId))) {
           var dropdown = document.getElementById(currentOpenGroupId);
           if (dropdown) {
@@ -664,13 +663,12 @@ export const getModernTemplate = (): WidgetTemplate => ({
       }
     });
     
-    // Tooltip - yalnız click əsaslı, hover funksiyası yoxdur
+    // Tooltip - only if always display is enabled
     if (tooltip && button) {
       if ('{{TOOLTIP_DISPLAY}}' === 'always') {
         tooltip.style.display = 'block';
         tooltip.style.opacity = '1';
       }
-      // hover funksiyası tamamilə silindi
     }
     
     console.log('Modern template initialized with click-only functionality');
