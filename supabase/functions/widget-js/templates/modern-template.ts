@@ -430,6 +430,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
   
   const channelsData = {{CHANNELS_DATA}};
   var isModalOpen = false;
+  var currentOpenGroupId = null;
   
   function generateChannelsHtml() {
     if (!channelsData || channelsData.length === 0) {
@@ -450,8 +451,8 @@ export const getModernTemplate = (): WidgetTemplate => ({
           // Create a group with dropdown for channels with children
           const groupId = 'group-' + channel.id;
           
-          html += '<div class="hiclient-channel-group hiclient-channel-item" onmouseleave="handleGroupMouseLeave(event)">';
-          html += '<div class="hiclient-group-trigger" onclick="toggleChannelGroup(\'' + groupId + '\')" onmouseenter="handleGroupMouseEnter()">';
+          html += '<div class="hiclient-channel-group hiclient-channel-item">';
+          html += '<div class="hiclient-group-trigger" onclick="toggleChannelGroup(\'' + groupId + '\')">';
           html += '<div class="hiclient-channel-icon" style="background: ' + channelColor + ';">';
           html += channelIcon;
           html += '</div>';
@@ -459,10 +460,10 @@ export const getModernTemplate = (): WidgetTemplate => ({
           html += '<div class="hiclient-group-count">' + (channel.childChannels.length + 1) + '</div>';
           html += '</div>';
           
-          html += '<div class="hiclient-group-dropdown" id="' + groupId + '" onmouseenter="handleGroupMouseEnter()" onmouseleave="handleGroupMouseLeave(event)">';
+          html += '<div class="hiclient-group-dropdown" id="' + groupId + '">';
           
           // Add parent channel as first item
-          html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="hiclient-group-item" onclick="openChannel(\'' + escapeHtml(channelUrl) + '\'); return false;" onmouseenter="handleGroupMouseEnter()">';
+          html += '<a href="' + escapeHtml(channelUrl) + '" target="_blank" class="hiclient-group-item" onclick="openChannel(\'' + escapeHtml(channelUrl) + '\'); return false;">';
           html += '<div class="hiclient-group-item-icon" style="background: ' + channelColor + ';">' + channelIcon + '</div>';
           html += '<div class="hiclient-group-item-info">';
           html += '<div class="hiclient-group-item-label">' + escapeHtml(channel.label) + ' (Primary)</div>';
@@ -476,7 +477,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
             const childIcon = getChannelIcon(childChannel);
             const childColor = getChannelColor(childChannel.type);
             
-            html += '<a href="' + escapeHtml(childUrl) + '" target="_blank" class="hiclient-group-item" onclick="openChannel(\'' + escapeHtml(childUrl) + '\'); return false;" onmouseenter="handleGroupMouseEnter()">';
+            html += '<a href="' + escapeHtml(childUrl) + '" target="_blank" class="hiclient-group-item" onclick="openChannel(\'' + escapeHtml(childUrl) + '\'); return false;">';
             html += '<div class="hiclient-group-item-icon" style="background: ' + childColor + ';">' + childIcon + '</div>';
             html += '<div class="hiclient-group-item-info">';
             html += '<div class="hiclient-group-item-label">' + escapeHtml(childChannel.label) + '</div>';
@@ -598,6 +599,15 @@ export const getModernTemplate = (): WidgetTemplate => ({
         modal.classList.remove('show');
         isModalOpen = false;
         
+        // Close any open dropdowns when modal closes
+        if (currentOpenGroupId) {
+          var dropdown = document.getElementById(currentOpenGroupId);
+          if (dropdown) {
+            dropdown.classList.remove('show');
+          }
+          currentOpenGroupId = null;
+        }
+        
         setTimeout(function() {
           modal.style.display = 'none';
         }, 300);
@@ -624,6 +634,25 @@ export const getModernTemplate = (): WidgetTemplate => ({
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && modal.classList.contains('show')) {
         closeModal();
+      }
+    });
+    
+    // Close dropdowns when clicking outside of modal content but keep modal open
+    document.addEventListener('click', function(e) {
+      if (isModalOpen && currentOpenGroupId) {
+        var modalContent = document.getElementById('hiclient-modal-content');
+        var clickedInsideModal = modalContent && modalContent.contains(e.target);
+        var clickedOnTrigger = e.target.closest('.hiclient-group-trigger');
+        var clickedOnDropdown = e.target.closest('.hiclient-group-dropdown');
+        
+        // Only close dropdown if clicked outside modal content or on a different group trigger
+        if (!clickedInsideModal || (clickedOnTrigger && !clickedOnTrigger.onclick.toString().includes(currentOpenGroupId))) {
+          var dropdown = document.getElementById(currentOpenGroupId);
+          if (dropdown) {
+            dropdown.classList.remove('show');
+          }
+          currentOpenGroupId = null;
+        }
       }
     });
     
@@ -657,22 +686,25 @@ export const getModernTemplate = (): WidgetTemplate => ({
   window.toggleChannelGroup = function(groupId) {
     const dropdown = document.getElementById(groupId);
     if (dropdown) {
-      dropdown.classList.toggle('show');
-      console.log('Toggled channel group:', groupId);
-    }
-  };
-  
-  // Handle mouse events for channel groups to prevent modal from closing
-  window.handleGroupMouseEnter = function() {
-    console.log('Mouse entered channel group area');
-    // Don't close modal when hovering over groups or child channels
-  };
-  
-  window.handleGroupMouseLeave = function(event) {
-    // Only allow modal to close if we're not moving to another part of the modal
-    var modal = document.getElementById('hiclient-modal-content');
-    if (modal && !modal.contains(event.relatedTarget)) {
-      console.log('Mouse left channel group area');
+      // If this group is already open, close it
+      if (currentOpenGroupId === groupId) {
+        dropdown.classList.remove('show');
+        currentOpenGroupId = null;
+        console.log('Closed channel group:', groupId);
+      } else {
+        // Close any other open dropdown first
+        if (currentOpenGroupId) {
+          const otherDropdown = document.getElementById(currentOpenGroupId);
+          if (otherDropdown) {
+            otherDropdown.classList.remove('show');
+          }
+        }
+        
+        // Open this dropdown
+        dropdown.classList.add('show');
+        currentOpenGroupId = groupId;
+        console.log('Opened channel group:', groupId);
+      }
     }
   };
   
