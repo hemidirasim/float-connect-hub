@@ -68,6 +68,61 @@ const modernFloatingCssStyles = `
     transform: translateY(20px);
     position: relative;
   }
+
+  .modern-floating-channel-item .modern-floating-main-channel-tooltip {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 100002;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Position main channel tooltips based on widget position */
+  .modern-floating-widget-container[data-position="left"] .modern-floating-main-channel-tooltip {
+    left: calc({{BUTTON_SIZE}}px + 15px);
+  }
+
+  .modern-floating-widget-container[data-position="left"] .modern-floating-main-channel-tooltip:before {
+    content: '';
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-right-color: rgba(0, 0, 0, 0.9);
+  }
+
+  .modern-floating-widget-container[data-position="right"] .modern-floating-main-channel-tooltip,
+  .modern-floating-widget-container[data-position="center"] .modern-floating-main-channel-tooltip {
+    right: calc({{BUTTON_SIZE}}px + 15px);
+  }
+  
+  .modern-floating-widget-container[data-position="right"] .modern-floating-main-channel-tooltip:before,
+  .modern-floating-widget-container[data-position="center"] .modern-floating-main-channel-tooltip:before {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-left-color: rgba(0, 0, 0, 0.9);
+  }
+
+  .modern-floating-channel-item:hover .modern-floating-main-channel-tooltip {
+    opacity: 1;
+    visibility: visible;
+  }
   
   .modern-floating-channel-item:hover {
     transform: translateY(-5px) scale(1.1);
@@ -242,6 +297,15 @@ const modernFloatingCssStyles = `
     .modern-floating-widget-container[data-position="center"] .modern-floating-child-channel-tooltip {
       right: calc({{BUTTON_SIZE}}px + 10px);
     }
+    
+    .modern-floating-widget-container[data-position="left"] .modern-floating-main-channel-tooltip {
+      left: calc({{BUTTON_SIZE}}px + 10px);
+    }
+    
+    .modern-floating-widget-container[data-position="right"] .modern-floating-main-channel-tooltip,
+    .modern-floating-widget-container[data-position="center"] .modern-floating-main-channel-tooltip {
+      right: calc({{BUTTON_SIZE}}px + 10px);
+    }
   }
 `;
 
@@ -382,6 +446,7 @@ const modernFloatingJavaScriptLogic = `
         var channelUrl = getChannelUrl(channel);
         html += '<a href="' + channelUrl + '" target="_blank" class="modern-floating-channel-item" style="background-color: ' + channelColor + ';" data-index="' + i + '">';
         html += channelIcon;
+        html += '<div class="modern-floating-main-channel-tooltip">' + (channel.label || channel.type) + '</div>';
         html += '</a>';
       }
     }
