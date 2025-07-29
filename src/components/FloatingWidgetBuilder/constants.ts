@@ -26,3 +26,18 @@ export const platformOptions = [
   { value: 'phone', label: 'Phone', icon: Phone, color: '#22c55e' },
   { value: 'custom', label: 'Custom Link', icon: Link, color: '#6b7280' }
 ];
+
+export const templates = [
+  {
+    id: 'default',
+    name: 'Standart Dizayn',
+    description: 'Klassik və asan istifadə edilən dizayn',
+    is_default: true
+  },
+  {
+    id: 'modern-floating',
+    name: 'Modern Floating',
+    description: 'Hover edəndə aşağıdan yuxarıya açılan modern dizayn',
+    is_default: false
+  }
+];

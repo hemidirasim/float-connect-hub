@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,22 +12,50 @@ import { ChannelManager } from './ChannelManager';
 import { CustomizationOptions } from './CustomizationOptions';
 import { TemplateSelector } from './TemplateSelector';
 import { CodePreview } from './CodePreview';
-import { WidgetActions } from './WidgetActions';
 import type { Channel, WidgetConfig } from './types';
 import { templates } from './constants';
 
 interface WidgetFormProps {
   selectedTemplate: string;
   onTemplateChange: (templateId: string) => void;
+  websiteName: string;
+  websiteUrl: string;
+  channels: Channel[];
+  formData: any;
+  editingWidget: any;
+  saving: boolean;
+  uploading: boolean;
+  onWebsiteNameChange: (name: string) => void;
+  onWebsiteUrlChange: (url: string) => void;
+  onChannelsChange: (channels: Channel[]) => void;
+  onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onVideoRemove: () => void;
+  onFormDataChange: (field: string, value: any) => void;
+  onCreateWidget: () => void;
+  onCustomIconUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const WidgetForm: React.FC<WidgetFormProps> = ({
   selectedTemplate,
-  onTemplateChange
+  onTemplateChange,
+  websiteName,
+  websiteUrl,
+  channels,
+  formData,
+  editingWidget,
+  saving,
+  uploading,
+  onWebsiteNameChange,
+  onWebsiteUrlChange,
+  onChannelsChange,
+  onVideoUpload,
+  onVideoRemove,
+  onFormDataChange,
+  onCreateWidget,
+  onCustomIconUpload
 }) => {
   const [widgetName, setWidgetName] = useState('');
   const [greetingMessage, setGreetingMessage] = useState('Salam! Sizə necə kömək edə bilərəm?');
-  const [channels, setChannels] = useState<Channel[]>([]);
   const [buttonColor, setButtonColor] = useState('#22c55e');
   const [position, setPosition] = useState<'left' | 'right'>('right');
   const [tooltipText, setTooltipText] = useState('Bizimlə əlaqə saxlayın');
@@ -45,8 +74,6 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
   const [previewVideoHeight, setPreviewVideoHeight] = useState(120);
   
   // UI states
-  const [uploading, setUploading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [customIcon, setCustomIcon] = useState<string>('message');
   const [customIconUrl, setCustomIconUrl] = useState<string>('');
   const [buttonSize, setButtonSize] = useState(60);
@@ -68,7 +95,6 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
     const file = e.target.files?.[0];
     if (!file || !isVideoSupported) return;
 
-    setUploading(true);
     try {
       const { data, error } = await supabase.storage
         .from('videos')
@@ -90,15 +116,12 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
     } catch (error) {
       console.error('Unexpected video upload error:', error);
       toast.error('Gözlənilməyən xəta baş verdi');
-    } finally {
-      setUploading(false);
     }
   };
 
   const handleVideoRemove = async () => {
     if (!isVideoSupported) return;
     
-    setUploading(true);
     try {
       if (videoUrl) {
         const filePath = videoUrl.replace(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/videos/`, '');
@@ -119,8 +142,6 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
     } catch (error) {
       console.error('Unexpected video remove error:', error);
       toast.error('Gözlənilməyən xəta baş verdi');
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -130,7 +151,6 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
       return;
     }
 
-    setSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -173,7 +193,7 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
       
       // Reset form
       setWidgetName('');
-      setChannels([]);
+      onChannelsChange([]);
       if (isVideoSupported) {
         setVideo(null);
         setVideoUrl(null);
@@ -185,17 +205,14 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
     } catch (error) {
       console.error('Error saving widget:', error);
       toast.error('Widget saxlanılarkən xəta baş verdi');
-    } finally {
-      setSaving(false);
     }
   };
 
   return (
     <div className="space-y-6">
       <TemplateSelector
-        selectedTemplate={selectedTemplate}
+        selectedTemplateId={selectedTemplate}
         onTemplateChange={onTemplateChange}
-        templates={templates}
       />
 
       <Card>
@@ -225,38 +242,40 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
         </CardContent>
       </Card>
 
-      <VideoUpload
-        video={video}
-        videoUrl={videoUrl}
-        videoType={videoType}
-        videoLink={videoLink}
-        useVideoPreview={useVideoPreview}
-        videoHeight={videoHeight}
-        videoAlignment={videoAlignment}
-        videoObjectFit={videoObjectFit}
-        customIcon={customIcon}
-        customIconUrl={customIconUrl}
-        buttonSize={buttonSize}
-        previewVideoHeight={previewVideoHeight}
-        uploading={uploading}
-        selectedTemplate={selectedTemplate}
-        onVideoUpload={handleVideoUpload}
-        onVideoRemove={handleVideoRemove}
-        onVideoTypeChange={setVideoType}
-        onVideoLinkChange={setVideoLink}
-        onVideoPreviewChange={setUseVideoPreview}
-        onVideoHeightChange={setVideoHeight}
-        onVideoAlignmentChange={setVideoAlignment}
-        onVideoObjectFitChange={setVideoObjectFit}
-        onCustomIconChange={setCustomIcon}
-        onCustomIconUpload={handleCustomIconUpload}
-        onButtonSizeChange={setButtonSize}
-        onPreviewVideoHeightChange={setPreviewVideoHeight}
-      />
+      {isVideoSupported && (
+        <VideoUpload
+          video={video}
+          videoUrl={videoUrl}
+          videoType={videoType}
+          videoLink={videoLink}
+          useVideoPreview={useVideoPreview}
+          videoHeight={videoHeight}
+          videoAlignment={videoAlignment}
+          videoObjectFit={videoObjectFit}
+          customIcon={customIcon}
+          customIconUrl={customIconUrl}
+          buttonSize={buttonSize}
+          previewVideoHeight={previewVideoHeight}
+          uploading={uploading}
+          selectedTemplate={selectedTemplate}
+          onVideoUpload={handleVideoUpload}
+          onVideoRemove={handleVideoRemove}
+          onVideoTypeChange={setVideoType}
+          onVideoLinkChange={setVideoLink}
+          onVideoPreviewChange={setUseVideoPreview}
+          onVideoHeightChange={setVideoHeight}
+          onVideoAlignmentChange={setVideoAlignment}
+          onVideoObjectFitChange={setVideoObjectFit}
+          onCustomIconChange={setCustomIcon}
+          onCustomIconUpload={onCustomIconUpload}
+          onButtonSizeChange={setButtonSize}
+          onPreviewVideoHeightChange={setPreviewVideoHeight}
+        />
+      )}
 
       <ChannelManager
         channels={channels}
-        onChannelsChange={setChannels}
+        onChannelsChange={onChannelsChange}
       />
 
       <CustomizationOptions
@@ -266,71 +285,19 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
         tooltipDisplay={tooltipDisplay}
         tooltipPosition={tooltipPosition}
         onButtonColorChange={setButtonColor}
-        onPositionChange={setPosition}
+        onPositionChange={(pos) => setPosition(pos as 'left' | 'right')}
         onTooltipTextChange={setTooltipText}
         onTooltipDisplayChange={setTooltipDisplay}
         onTooltipPositionChange={setTooltipPosition}
       />
 
-      <CodePreview
-        config={{
-          name: widgetName,
-          template: selectedTemplate,
-          greetingMessage,
-          channels,
-          buttonColor,
-          position,
-          tooltipText,
-          tooltipDisplay,
-          tooltipPosition,
-          customIcon,
-          customIconUrl,
-          buttonSize,
-          ...(isVideoSupported && {
-            videoEnabled: !!(video || videoLink),
-            videoUrl: videoUrl || videoLink || undefined,
-            videoHeight,
-            videoAlignment,
-            videoObjectFit,
-            useVideoPreview,
-            previewVideoHeight
-          })
-        }}
-      />
-
-      <WidgetActions
-        onSave={handleSave}
-        saving={saving}
+      <Button
+        onClick={handleSave}
         disabled={!widgetName.trim()}
-      />
+        className="w-full"
+      >
+        {saving ? 'Saxlanılır...' : 'Widget Yarat'}
+      </Button>
     </div>
   );
-
-  async function handleCustomIconUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const { data, error } = await supabase.storage
-        .from('icons')
-        .upload(`custom-icons/${file.name}`, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (error) {
-        console.error('Custom icon upload error:', error);
-        toast.error('Xüsusi ikon yüklənərkən xəta baş verdi');
-        return;
-      }
-
-      const iconUrl = supabase.storage.from('icons').getPublicUrl(data.path).data.publicUrl;
-      setCustomIconUrl(iconUrl);
-      setCustomIcon('custom');
-      toast.success('Xüsusi ikon uğurla yükləndi!');
-    } catch (error) {
-      console.error('Unexpected custom icon upload error:', error);
-      toast.error('Gözlənilməyən xəta baş verdi');
-    }
-  }
 };

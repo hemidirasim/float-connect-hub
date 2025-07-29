@@ -16,6 +16,28 @@ export interface Channel {
   parentId?: string; // Reference to parent channel
 }
 
+export interface WidgetConfig {
+  name: string;
+  template: string;
+  greetingMessage: string;
+  channels: Channel[];
+  buttonColor: string;
+  position: string;
+  tooltipText: string;
+  tooltipDisplay: string;
+  tooltipPosition: string;
+  customIcon: string;
+  customIconUrl: string;
+  buttonSize: number;
+  videoEnabled?: boolean;
+  videoUrl?: string;
+  videoHeight?: number;
+  videoAlignment?: string;
+  videoObjectFit?: string;
+  useVideoPreview?: boolean;
+  previewVideoHeight?: number;
+}
+
 export interface FormData {
   buttonColor: string;
   position: string;
