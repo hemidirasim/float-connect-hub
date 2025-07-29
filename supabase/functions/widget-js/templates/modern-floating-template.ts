@@ -85,6 +85,24 @@ const modernFloatingCssStyles = `
     object-fit: contain;
   }
   
+  .modern-floating-channel-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #ef4444;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  
   .modern-floating-child-channels {
     position: absolute;
     right: calc({{BUTTON_SIZE}}px + 15px);
@@ -267,6 +285,7 @@ const modernFloatingJavaScriptLogic = `
       if (channel.childChannels && channel.childChannels.length > 0) {
         html += '<div class="modern-floating-channel-item" style="background-color: ' + channelColor + '; cursor: pointer;" data-index="' + i + '" data-has-children="true">';
         html += channelIcon;
+        html += '<div class="modern-floating-channel-count">' + channel.childChannels.length + '</div>';
         html += generateChildChannelsHtml(channel.childChannels);
         html += '</div>';
       } else {
