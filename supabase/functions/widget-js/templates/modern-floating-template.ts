@@ -3,18 +3,14 @@ import type { WidgetTemplate } from '../template-types.ts'
 const modernFloatingHtmlTemplate = `
 <div id="modern-floating-widget-container" style="position: fixed; {{POSITION_STYLE}} bottom: 20px; z-index: 99999;">
   <div id="modern-floating-widget-relative-container" style="position: relative;">
+    <div id="modern-floating-widget-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
     
     <!-- Channels container that appears on hover -->
     <div id="modern-floating-channels-container" style="position: absolute; {{POSITION_CHANNELS_STYLE}} bottom: {{CHANNEL_BOTTOM_OFFSET}}px; display: none; opacity: 0; transform: translateY(20px); transition: all 0.3s ease;">
       <div id="modern-floating-channels"></div>
     </div>
     
-    <!-- Child channels container that appears on parent click -->
-    <div id="modern-floating-child-channels-container" style="position: absolute; left: {{CHILD_CHANNELS_LEFT_OFFSET}}px; bottom: {{CHANNEL_BOTTOM_OFFSET}}px; display: none; opacity: 0; transform: translateX(-20px); transition: all 0.3s ease;">
-      <div id="modern-floating-child-channels"></div>
-    </div>
-    
-    <button id="modern-floating-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}}">
+    <button id="modern-floating-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}} {{VIDEO_BUTTON_STYLE}}">
       {{BUTTON_ICON}}
     </button>
   </div>
@@ -42,6 +38,21 @@ const modernFloatingCssStyles = `
     transform: scale(1.1);
   }
   
+  #modern-floating-widget-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    white-space: nowrap;
+    z-index: 100000;
+    transition: all 0.2s ease;
+    pointer-events: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    {{TOOLTIP_POSITION_STYLE}}
+  }
+  
   #modern-floating-channels-container {
     pointer-events: none;
   }
@@ -51,22 +62,6 @@ const modernFloatingCssStyles = `
   }
   
   #modern-floating-channels {
-    display: flex;
-    flex-direction: column;
-    gap: {{CHANNEL_GAP}}px;
-    align-items: center;
-  }
-  
-  /* Child channels container styles */
-  #modern-floating-child-channels-container {
-    pointer-events: none;
-  }
-  
-  #modern-floating-child-channels-container.show {
-    pointer-events: all;
-  }
-  
-  #modern-floating-child-channels {
     display: flex;
     flex-direction: column;
     gap: {{CHANNEL_GAP}}px;
@@ -88,8 +83,6 @@ const modernFloatingCssStyles = `
     font-size: {{CHANNEL_ICON_FONT_SIZE}}px;
     opacity: 0;
     transform: translateY(20px);
-    cursor: pointer;
-    position: relative;
   }
   
   .modern-floating-channel-item:hover {
@@ -102,64 +95,13 @@ const modernFloatingCssStyles = `
     transform: translateY(0);
   }
   
-  .modern-floating-channel-item.has-children::after {
-    content: '+';
-    position: absolute;
-    bottom: -2px;
-    right: -2px;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-  }
-  
-  /* Child channel item styles */
-  .modern-floating-child-channel-item {
-    width: {{CHANNEL_ICON_SIZE}}px;
-    height: {{CHANNEL_ICON_SIZE}}px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    pointer-events: all;
-    font-size: {{CHANNEL_ICON_FONT_SIZE}}px;
-    opacity: 0;
-    transform: translateX(-20px);
-    cursor: pointer;
-  }
-  
-  .modern-floating-child-channel-item:hover {
-    transform: translateX(5px) scale(1.1);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
-  }
-  
-  .modern-floating-child-channel-item.show {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  
   /* Mobile responsive */
   @media (max-width: 768px) {
     #modern-floating-channels {
       gap: {{MOBILE_CHANNEL_GAP}}px;
     }
     
-    #modern-floating-child-channels {
-      gap: {{MOBILE_CHANNEL_GAP}}px;
-    }
-    
-    .modern-floating-channel-item,
-    .modern-floating-child-channel-item {
+    .modern-floating-channel-item {
       width: {{MOBILE_CHANNEL_ICON_SIZE}}px;
       height: {{MOBILE_CHANNEL_ICON_SIZE}}px;
       font-size: {{MOBILE_CHANNEL_ICON_FONT_SIZE}}px;
@@ -246,8 +188,6 @@ const modernFloatingJavaScriptLogic = `
   var channelsData = {{CHANNELS_DATA}};
   var hoverTimeout;
   var isHoveringWidget = false;
-  var currentParentChannelId = null;
-  var childChannelsVisible = false;
   
   function generateChannelsHtml() {
     if (!channelsData || channelsData.length === 0) {
@@ -255,72 +195,19 @@ const modernFloatingJavaScriptLogic = `
     }
     
     var html = '';
-    var parentChannels = [];
     
-    // Only collect parent channels (channels with childChannels or individual channels without parentId)
-    for (var i = 0; i < channelsData.length; i++) {
-      var channel = channelsData[i];
-      
-      if (channel.childChannels && channel.childChannels.length > 0) {
-        // This is a parent channel with children
-        parentChannels.push(channel);
-      } else if (!channel.parentId) {
-        // This is an individual channel (not a child channel)
-        parentChannels.push(channel);
-      }
-    }
+    // Only show individual channels (no groups for modern floating)
+    var individualChannels = channelsData.filter(function(channel) {
+      return !channel.childChannels || channel.childChannels.length === 0;
+    });
     
-    for (var i = 0; i < parentChannels.length; i++) {
-      var channel = parentChannels[i];
-      var hasChildren = channel.childChannels && channel.childChannels.length > 0;
+    for (var i = 0; i < individualChannels.length; i++) {
+      var channel = individualChannels[i];
       var channelUrl = getChannelUrl(channel);
       var channelIcon = getChannelIcon(channel);
       var channelColor = getChannelColor(channel.type);
-      var additionalClass = hasChildren ? ' has-children' : '';
       
-      html += '<div class="modern-floating-channel-item' + additionalClass + '" ';
-      html += 'style="background-color: ' + channelColor + ';" ';
-      html += 'data-index="' + i + '" ';
-      html += 'data-channel-id="' + channel.id + '" ';
-      html += 'data-has-children="' + (hasChildren ? 'true' : 'false') + '" ';
-      if (!hasChildren) {
-        html += 'data-url="' + channelUrl + '"';
-      }
-      html += '>';
-      html += channelIcon;
-      html += '</div>';
-    }
-    
-    return html;
-  }
-  
-  function generateChildChannelsHtml(parentChannelId) {
-    if (!channelsData || channelsData.length === 0) {
-      return '';
-    }
-    
-    var parentChannel = null;
-    for (var i = 0; i < channelsData.length; i++) {
-      if (channelsData[i].id === parentChannelId) {
-        parentChannel = channelsData[i];
-        break;
-      }
-    }
-    
-    if (!parentChannel || !parentChannel.childChannels || parentChannel.childChannels.length === 0) {
-      return '';
-    }
-    
-    var html = '';
-    for (var i = 0; i < parentChannel.childChannels.length; i++) {
-      var childChannel = parentChannel.childChannels[i];
-      var channelUrl = getChannelUrl(childChannel);
-      var channelIcon = getChannelIcon(childChannel);
-      var channelColor = getChannelColor(childChannel.type);
-      
-      html += '<a href="' + channelUrl + '" target="_blank" class="modern-floating-child-channel-item" ';
-      html += 'style="background-color: ' + channelColor + ';" ';
-      html += 'data-index="' + i + '">';
+      html += '<a href="' + channelUrl + '" target="_blank" class="modern-floating-channel-item" style="background-color: ' + channelColor + ';" data-index="' + i + '">';
       html += channelIcon;
       html += '</a>';
     }
@@ -380,62 +267,21 @@ const modernFloatingJavaScriptLogic = `
     }
   }
   
-  function showChildChannels(parentChannelId) {
-    var childChannelsContainer = document.querySelector('#modern-floating-child-channels-container');
-    var childChannelsDiv = document.querySelector('#modern-floating-child-channels');
-    
-    if (childChannelsContainer && childChannelsDiv) {
-      // Hide any existing child channels first
-      hideChildChannels();
-      
-      setTimeout(function() {
-        // Generate new child channels HTML
-        var childHtml = generateChildChannelsHtml(parentChannelId);
-        childChannelsDiv.innerHTML = childHtml;
-        
-        currentParentChannelId = parentChannelId;
-        childChannelsVisible = true;
-        
-        childChannelsContainer.style.display = 'block';
-        childChannelsContainer.classList.add('show');
-        
-        setTimeout(function() {
-          childChannelsContainer.style.opacity = '1';
-          childChannelsContainer.style.transform = 'translateX(0)';
-          
-          // Animate child channels from left to right with delay
-          var childChannels = document.querySelectorAll('.modern-floating-child-channel-item');
-          for (var i = 0; i < childChannels.length; i++) {
-            (function(index, channel) {
-              setTimeout(function() {
-                channel.classList.add('show');
-              }, index * 100);
-            })(i, childChannels[i]);
-          }
-        }, 50);
-      }, childChannelsVisible ? 300 : 0);
+  function showTooltip() {
+    var tooltip = document.querySelector('#modern-floating-widget-tooltip');
+    if (tooltip) {
+      tooltip.style.display = 'block';
+      tooltip.style.visibility = 'visible';
+      tooltip.style.opacity = '1';
     }
   }
   
-  function hideChildChannels() {
-    var childChannelsContainer = document.querySelector('#modern-floating-child-channels-container');
-    if (childChannelsContainer && childChannelsVisible) {
-      var childChannels = document.querySelectorAll('.modern-floating-child-channel-item');
-      for (var i = 0; i < childChannels.length; i++) {
-        childChannels[i].classList.remove('show');
-      }
-      
-      setTimeout(function() {
-        childChannelsContainer.style.opacity = '0';
-        childChannelsContainer.style.transform = 'translateX(-20px)';
-        childChannelsContainer.classList.remove('show');
-        
-        setTimeout(function() {
-          childChannelsContainer.style.display = 'none';
-          currentParentChannelId = null;
-          childChannelsVisible = false;
-        }, 300);
-      }, 100);
+  function hideTooltip() {
+    var tooltip = document.querySelector('#modern-floating-widget-tooltip');
+    if (tooltip) {
+      tooltip.style.display = 'none';
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.opacity = '0';
     }
   }
   
@@ -450,6 +296,7 @@ const modernFloatingJavaScriptLogic = `
     }
     
     var button = document.querySelector('#modern-floating-widget-button');
+    var tooltip = document.querySelector('#modern-floating-widget-tooltip');
     var widgetContainer = document.querySelector('#modern-floating-widget-relative-container');
     
     if (!button || !widgetContainer) {
@@ -457,7 +304,7 @@ const modernFloatingJavaScriptLogic = `
       return;
     }
     
-    console.log('Modern floating widget elements found:', { button: !!button, widgetContainer: !!widgetContainer });
+    console.log('Modern floating widget elements found:', { button: !!button, tooltip: !!tooltip, widgetContainer: !!widgetContainer });
     
     // Show channels on button hover
     button.addEventListener('mouseenter', function() {
@@ -468,18 +315,12 @@ const modernFloatingJavaScriptLogic = `
     widgetContainer.addEventListener('mouseleave', function(e) {
       // Check if we're moving to a child element
       var channelsContainerEl = document.querySelector('#modern-floating-channels-container');
-      var childChannelsContainerEl = document.querySelector('#modern-floating-child-channels-container');
-      
       if (channelsContainerEl && channelsContainerEl.contains(e.relatedTarget)) {
         return; // Don't hide if moving to channels container
-      }
-      if (childChannelsContainerEl && childChannelsContainerEl.contains(e.relatedTarget)) {
-        return; // Don't hide if moving to child channels container
       }
       
       hoverTimeout = setTimeout(function() {
         hideChannels();
-        hideChildChannels();
       }, 200);
     });
     
@@ -494,45 +335,18 @@ const modernFloatingJavaScriptLogic = `
       channelsContainerEl.addEventListener('mouseleave', function() {
         hoverTimeout = setTimeout(function() {
           hideChannels();
-          hideChildChannels();
         }, 200);
-      });
-      
-      // Handle clicks on channel items
-      channelsContainerEl.addEventListener('click', function(e) {
-        var channelItem = e.target.closest('.modern-floating-channel-item');
-        if (channelItem) {
-          var hasChildren = channelItem.getAttribute('data-has-children') === 'true';
-          var channelId = channelItem.getAttribute('data-channel-id');
-          var url = channelItem.getAttribute('data-url');
-          
-          if (hasChildren && channelId) {
-            // Show child channels
-            e.preventDefault();
-            e.stopPropagation();
-            showChildChannels(channelId);
-          } else if (url) {
-            // Open URL for individual channels
-            window.open(url, '_blank');
-          }
-        }
       });
     }
     
-    // Keep child channels visible when hovering over them
-    var childChannelsContainerEl = document.querySelector('#modern-floating-child-channels-container');
-    if (childChannelsContainerEl) {
-      childChannelsContainerEl.addEventListener('mouseenter', function() {
-        clearTimeout(hoverTimeout);
-        isHoveringWidget = true;
-      });
-      
-      childChannelsContainerEl.addEventListener('mouseleave', function() {
-        hoverTimeout = setTimeout(function() {
-          hideChannels();
-          hideChildChannels();
-        }, 200);
-      });
+    // Tooltip functionality
+    if (tooltip && button) {
+      if ('{{TOOLTIP_DISPLAY}}' === 'hover') {
+        button.addEventListener('mouseenter', showTooltip);
+        button.addEventListener('mouseleave', hideTooltip);
+      } else if ('{{TOOLTIP_DISPLAY}}' === 'always') {
+        showTooltip();
+      }
     }
     
     console.log('Modern floating widget initialized successfully');
@@ -552,7 +366,7 @@ const modernFloatingJavaScriptLogic = `
 export const modernFloatingTemplate: WidgetTemplate = {
   id: 'modern-floating',
   name: 'Modern Floating Template',
-  description: 'Modern floating widget with icons appearing on hover from bottom to top, child channels slide from left',
+  description: 'Modern floating widget with icons appearing on hover from bottom to top',
   html: modernFloatingHtmlTemplate,
   css: modernFloatingCssStyles,
   js: modernFloatingJavaScriptLogic

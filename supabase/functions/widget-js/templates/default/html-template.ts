@@ -1,25 +1,25 @@
 
 export const defaultHtmlTemplate = `
 <div id="lovable-widget-container" style="position: fixed; {{POSITION_STYLE}} bottom: 20px; z-index: 99999;">
-  <div id="lovable-widget-tooltip" style="{{TOOLTIP_STYLE}}">{{TOOLTIP_TEXT}}</div>
-  <button id="lovable-widget-button" style="{{BUTTON_STYLE}}">
-    {{BUTTON_ICON}}
-  </button>
+  <div id="lovable-widget-relative-container" style="position: relative;">
+    <div id="lovable-widget-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
+    <button id="lovable-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}} {{VIDEO_BUTTON_STYLE}}">
+      {{BUTTON_ICON}}
+    </button>
+  </div>
 </div>
 
-<div id="lovable-widget-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 100000; display: none; opacity: 0; visibility: hidden; transition: all 0.3s ease; backdrop-filter: blur(3px); align-items: center; justify-content: center;">
-  <div id="lovable-modal-content" style="background: white; padding: 28px; border-radius: 16px; max-width: 420px; width: 90%; max-height: 85vh; overflow-y: auto; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); position: relative;">
-    <div style="margin: 0 0 24px 0; font-size: 20px; font-weight: 600; color: #111827; text-align: center; line-height: 1.3; padding-right: 40px;">
-      <h3>{{GREETING_MESSAGE}}</h3>
-    </div>
-    <div id="lovable-widget-close" style="position: absolute; top: 16px; right: 20px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; color: #9ca3af; border-radius: 50%; transition: all 0.2s ease; font-weight: 300;">×</div>
+<div id="lovable-widget-modal" style="display: none; visibility: hidden; opacity: 0;">
+  <div id="lovable-modal-content" style="transform: translateY(20px);">
+    <div id="lovable-modal-header" style="text-align: left;">{{GREETING_MESSAGE}}</div>
+    <button id="lovable-widget-close">×</button>
     {{VIDEO_CONTENT}}
-    <div id="lovable-widget-channels" style="max-height: 320px; overflow-y: auto; display: grid; grid-template-columns: 1fr; gap: 10px;">
-    </div>
-    <div class="lovable-empty-state" style="text-align: center; padding: 48px 24px; color: #6b7280; display: none;">
-      <div style="width: 36px; height: 36px; margin: 0 auto 16px; opacity: 0.6; color: #9ca3af;">📱</div>
-      <p>Heç bir kanal əlavə edilməyib</p>
+    <div id="lovable-widget-channels"></div>
+    <div id="lovable-powered-by" style="text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #e0e0e0;">
+      <a href="https://hiclient.co" target="_blank" style="color: #888; font-size: 11px; text-decoration: none; opacity: 0.7; transition: opacity 0.3s;">
+        Powered by HiClient.co
+      </a>
     </div>
   </div>
 </div>
-`
+`;
