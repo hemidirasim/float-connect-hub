@@ -10,14 +10,11 @@ const modernFloatingHtmlTemplate = `
     </div>
     
     <!-- Child channels container that appears on parent click -->
-    <div id="modern-floating-child-channels-container" style="position: absolute; right: {{CHILD_CHANNELS_RIGHT_OFFSET}}px; bottom: {{CHANNEL_BOTTOM_OFFSET}}px; display: none; opacity: 0; transform: translateX(20px); transition: all 0.3s ease;">
+    <div id="modern-floating-child-channels-container" style="position: absolute; left: {{CHILD_CHANNELS_LEFT_OFFSET}}px; bottom: {{CHANNEL_BOTTOM_OFFSET}}px; display: none; opacity: 0; transform: translateX(-20px); transition: all 0.3s ease;">
       <div id="modern-floating-child-channels"></div>
     </div>
     
-    <!-- Video content for modern floating -->
-    {{VIDEO_CONTENT}}
-    
-    <button id="modern-floating-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}} {{VIDEO_BUTTON_STYLE}}">
+    <button id="modern-floating-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}}">
       {{BUTTON_ICON}}
     </button>
   </div>
@@ -137,47 +134,18 @@ const modernFloatingCssStyles = `
     pointer-events: all;
     font-size: {{CHANNEL_ICON_FONT_SIZE}}px;
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateX(-20px);
     cursor: pointer;
   }
   
   .modern-floating-child-channel-item:hover {
-    transform: translateX(-5px) scale(1.1);
+    transform: translateX(5px) scale(1.1);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
   }
   
   .modern-floating-child-channel-item.show {
     opacity: 1;
     transform: translateX(0);
-  }
-  
-  /* Video styles for modern floating */
-  .hiclient-video {
-    position: absolute;
-    bottom: {{CHANNEL_BOTTOM_OFFSET}}px;
-    {{POSITION_CHANNELS_STYLE}}
-    width: 300px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    padding: 16px;
-    display: none;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.3s ease;
-    z-index: 99998;
-  }
-  
-  .hiclient-video.show {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  .hiclient-video video,
-  .hiclient-video iframe {
-    width: 100%;
-    border-radius: 8px;
   }
   
   /* Mobile responsive */
@@ -195,10 +163,6 @@ const modernFloatingCssStyles = `
       width: {{MOBILE_CHANNEL_ICON_SIZE}}px;
       height: {{MOBILE_CHANNEL_ICON_SIZE}}px;
       font-size: {{MOBILE_CHANNEL_ICON_FONT_SIZE}}px;
-    }
-    
-    .hiclient-video {
-      width: 280px;
     }
   }
 `;
@@ -439,7 +403,7 @@ const modernFloatingJavaScriptLogic = `
           childChannelsContainer.style.opacity = '1';
           childChannelsContainer.style.transform = 'translateX(0)';
           
-          // Animate child channels from right to left with delay
+          // Animate child channels from left to right with delay
           var childChannels = document.querySelectorAll('.modern-floating-child-channel-item');
           for (var i = 0; i < childChannels.length; i++) {
             (function(index, channel) {
@@ -463,7 +427,7 @@ const modernFloatingJavaScriptLogic = `
       
       setTimeout(function() {
         childChannelsContainer.style.opacity = '0';
-        childChannelsContainer.style.transform = 'translateX(20px)';
+        childChannelsContainer.style.transform = 'translateX(-20px)';
         childChannelsContainer.classList.remove('show');
         
         setTimeout(function() {
@@ -472,24 +436,6 @@ const modernFloatingJavaScriptLogic = `
           childChannelsVisible = false;
         }, 300);
       }, 100);
-    }
-  }
-  
-  function showVideo() {
-    var video = document.querySelector('.hiclient-video');
-    if (video) {
-      clearTimeout(hoverTimeout);
-      isHoveringWidget = true;
-      video.classList.add('show');
-    }
-  }
-  
-  function hideVideo() {
-    if (!isHoveringWidget) return;
-    
-    var video = document.querySelector('.hiclient-video');
-    if (video) {
-      video.classList.remove('show');
     }
   }
   
@@ -505,22 +451,20 @@ const modernFloatingJavaScriptLogic = `
     
     var button = document.querySelector('#modern-floating-widget-button');
     var widgetContainer = document.querySelector('#modern-floating-widget-relative-container');
-    var video = document.querySelector('.hiclient-video');
     
     if (!button || !widgetContainer) {
       console.error('Missing modern floating widget elements:', { button: !!button, widgetContainer: !!widgetContainer });
       return;
     }
     
-    console.log('Modern floating widget elements found:', { button: !!button, widgetContainer: !!widgetContainer, video: !!video });
+    console.log('Modern floating widget elements found:', { button: !!button, widgetContainer: !!widgetContainer });
     
-    // Show channels and video on button hover
+    // Show channels on button hover
     button.addEventListener('mouseenter', function() {
       showChannels();
-      if (video) showVideo();
     });
     
-    // Hide channels and video when leaving the entire widget area
+    // Hide channels when leaving the entire widget area
     widgetContainer.addEventListener('mouseleave', function(e) {
       // Check if we're moving to a child element
       var channelsContainerEl = document.querySelector('#modern-floating-channels-container');
@@ -532,14 +476,10 @@ const modernFloatingJavaScriptLogic = `
       if (childChannelsContainerEl && childChannelsContainerEl.contains(e.relatedTarget)) {
         return; // Don't hide if moving to child channels container
       }
-      if (video && video.contains(e.relatedTarget)) {
-        return; // Don't hide if moving to video
-      }
       
       hoverTimeout = setTimeout(function() {
         hideChannels();
         hideChildChannels();
-        if (video) hideVideo();
       }, 200);
     });
     
@@ -555,7 +495,6 @@ const modernFloatingJavaScriptLogic = `
         hoverTimeout = setTimeout(function() {
           hideChannels();
           hideChildChannels();
-          if (video) hideVideo();
         }, 200);
       });
       
@@ -592,23 +531,6 @@ const modernFloatingJavaScriptLogic = `
         hoverTimeout = setTimeout(function() {
           hideChannels();
           hideChildChannels();
-          if (video) hideVideo();
-        }, 200);
-      });
-    }
-    
-    // Keep video visible when hovering over it
-    if (video) {
-      video.addEventListener('mouseenter', function() {
-        clearTimeout(hoverTimeout);
-        isHoveringWidget = true;
-      });
-      
-      video.addEventListener('mouseleave', function() {
-        hoverTimeout = setTimeout(function() {
-          hideChannels();
-          hideChildChannels();
-          hideVideo();
         }, 200);
       });
     }
@@ -630,7 +552,7 @@ const modernFloatingJavaScriptLogic = `
 export const modernFloatingTemplate: WidgetTemplate = {
   id: 'modern-floating',
   name: 'Modern Floating Template',
-  description: 'Modern floating widget with icons appearing on hover from bottom to top, child channels slide from right',
+  description: 'Modern floating widget with icons appearing on hover from bottom to top, child channels slide from left',
   html: modernFloatingHtmlTemplate,
   css: modernFloatingCssStyles,
   js: modernFloatingJavaScriptLogic
