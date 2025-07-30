@@ -17,7 +17,8 @@ export const getModernTemplate = (): WidgetTemplate => ({
   
   <!-- Main Button -->
   <div class="hiclient-widget-button" id="hiclient-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px;">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white;"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+    <svg id="hiclient-chat-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white;"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+    <svg id="hiclient-close-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white; display: none;"><path d="m18 6-12 12M6 6l12 12"/></svg>
   </div>
   
   <!-- Tooltip -->
@@ -615,8 +616,21 @@ export const getModernTemplate = (): WidgetTemplate => ({
       e.preventDefault();
       e.stopPropagation();
       
+      if (isModalOpen) {
+        closeModal();
+        return;
+      }
+      
       isModalOpen = true;
       modal.classList.add('show');
+      
+      // Toggle button icons
+      const chatIcon = document.getElementById('hiclient-chat-icon');
+      const closeIcon = document.getElementById('hiclient-close-icon');
+      if (chatIcon && closeIcon) {
+        chatIcon.style.display = 'none';
+        closeIcon.style.display = 'block';
+      }
       
       // Show powered by text
       const poweredBy = document.getElementById('hiclient-powered-by');
@@ -634,6 +648,14 @@ export const getModernTemplate = (): WidgetTemplate => ({
     function closeModal() {
       isModalOpen = false;
       modal.classList.remove('show');
+      
+      // Toggle button icons back
+      const chatIcon = document.getElementById('hiclient-chat-icon');
+      const closeIcon = document.getElementById('hiclient-close-icon');
+      if (chatIcon && closeIcon) {
+        chatIcon.style.display = 'block';
+        closeIcon.style.display = 'none';
+      }
       
       // Hide powered by text
       const poweredBy = document.getElementById('hiclient-powered-by');
