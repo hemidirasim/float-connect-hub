@@ -617,6 +617,7 @@ export const getModernTemplate = (): WidgetTemplate => ({
       e.stopPropagation();
       
       if (isModalOpen) {
+        console.log('Modal already open, closing...');
         closeModal();
         return;
       }
