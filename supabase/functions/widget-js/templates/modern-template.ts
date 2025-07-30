@@ -76,6 +76,27 @@ export const getModernTemplate = (): WidgetTemplate => ({
   position: relative;
 }
 
+/* Button icons animation */
+#hiclient-chat-icon, #hiclient-close-icon {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: absolute;
+}
+
+#hiclient-close-icon {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.8);
+}
+
+.hiclient-widget-button.modal-open #hiclient-chat-icon {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.8);
+}
+
+.hiclient-widget-button.modal-open #hiclient-close-icon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
 .hiclient-widget-button:hover {
   box-shadow: 0 12px 35px rgba(59, 130, 246, 0.5);
 }
@@ -625,13 +646,8 @@ export const getModernTemplate = (): WidgetTemplate => ({
       isModalOpen = true;
       modal.classList.add('show');
       
-      // Toggle button icons
-      const chatIcon = document.getElementById('hiclient-chat-icon');
-      const closeIcon = document.getElementById('hiclient-close-icon');
-      if (chatIcon && closeIcon) {
-        chatIcon.style.display = 'none';
-        closeIcon.style.display = 'block';
-      }
+      // Toggle button icons with animation
+      button.classList.add('modal-open');
       
       // Show powered by text
       const poweredBy = document.getElementById('hiclient-powered-by');
@@ -650,12 +666,10 @@ export const getModernTemplate = (): WidgetTemplate => ({
       isModalOpen = false;
       modal.classList.remove('show');
       
-      // Toggle button icons back
-      const chatIcon = document.getElementById('hiclient-chat-icon');
-      const closeIcon = document.getElementById('hiclient-close-icon');
-      if (chatIcon && closeIcon) {
-        chatIcon.style.display = 'block';
-        closeIcon.style.display = 'none';
+      // Toggle button icons back with animation
+      const button = document.getElementById('hiclient-widget-button');
+      if (button) {
+        button.classList.remove('modal-open');
       }
       
       // Hide powered by text
