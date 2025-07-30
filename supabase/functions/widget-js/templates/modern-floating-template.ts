@@ -17,7 +17,6 @@ const modernFloatingHtmlTemplate = `
     
     <button id="modern-floating-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}}">
       <svg id="modern-floating-chat-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
-      <svg id="modern-floating-close-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: absolute; opacity: 0; transform: rotate(-90deg) scale(0.8);"><path d="m18 6-12 12M6 6l12 12"/></svg>
     </button>
   </div>
 </div>
@@ -44,28 +43,14 @@ const modernFloatingCssStyles = `
     transform: scale(1.1);
   }
   
-  /* Button icons animation */
+  /* Button icon rotation animation */
   #modern-floating-chat-icon {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    opacity: 1;
-    transform: rotate(0deg) scale(1);
-  }
-  
-  #modern-floating-close-icon {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: absolute;
-    opacity: 0;
-    transform: rotate(-90deg) scale(0.8);
+    transform: rotate(0deg);
   }
   
   #modern-floating-widget-button.channels-open #modern-floating-chat-icon {
-    opacity: 0;
-    transform: rotate(90deg) scale(0.8);
-  }
-
-  #modern-floating-widget-button.channels-open #modern-floating-close-icon {
-    opacity: 1;
-    transform: rotate(0deg) scale(1);
+    transform: rotate(90deg);
   }
   
   #modern-floating-channels-container {
