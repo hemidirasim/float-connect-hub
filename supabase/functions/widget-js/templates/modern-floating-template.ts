@@ -16,7 +16,8 @@ const modernFloatingHtmlTemplate = `
     </div>
     
     <button id="modern-floating-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}}">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white;"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+      <svg id="modern-floating-chat-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+      <svg id="modern-floating-close-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: absolute; opacity: 0; transform: rotate(-90deg) scale(0.8);"><path d="m18 6-12 12M6 6l12 12"/></svg>
     </button>
   </div>
 </div>
@@ -41,6 +42,17 @@ const modernFloatingCssStyles = `
   #modern-floating-widget-button:hover {
     box-shadow: 0 12px 35px rgba(59, 130, 246, 0.5);
     transform: scale(1.1);
+  }
+  
+  /* Button icons animation */
+  #modern-floating-widget-button.channels-open #modern-floating-chat-icon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.8);
+  }
+
+  #modern-floating-widget-button.channels-open #modern-floating-close-icon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
   }
   
   #modern-floating-channels-container {
@@ -597,6 +609,9 @@ const modernFloatingJavaScriptLogic = `
         
         if (isVisible) {
           hideChannels();
+          // Toggle button icons back
+          button.classList.remove('channels-open');
+          
           // Hide powered by text
           if (poweredByText) {
             poweredByText.style.display = 'none';
@@ -605,6 +620,9 @@ const modernFloatingJavaScriptLogic = `
           }
         } else {
           showChannels();
+          // Toggle button icons with animation
+          button.classList.add('channels-open');
+          
           // Show powered by text
           if (poweredByText) {
             poweredByText.style.display = 'block';
@@ -625,6 +643,12 @@ const modernFloatingJavaScriptLogic = `
           !widgetContainer.contains(e.target) && 
           !channelsContainer.contains(e.target)) {
         hideChannels();
+        // Toggle button icons back
+        var button = document.querySelector('#modern-floating-widget-button');
+        if (button) {
+          button.classList.remove('channels-open');
+        }
+        
         // Hide powered by text
         if (poweredByText) {
           poweredByText.style.display = 'none';
