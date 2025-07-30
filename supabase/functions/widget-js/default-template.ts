@@ -290,9 +290,25 @@ const defaultJavaScriptLogic = `
     button.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
+      
+      if (isModalOpen) {
+        console.log('Modal already open, closing...');
+        closeModal();
+        return;
+      }
+      
       console.log('Button clicked, showing modal');
       isModalOpen = true;
       hideTooltip(); // Hide tooltip when modal opens
+      
+      // Toggle button icons
+      var chatIcon = document.getElementById('lovable-chat-icon');
+      var closeIcon = document.getElementById('lovable-close-icon');
+      if (chatIcon && closeIcon) {
+        chatIcon.style.display = 'none';
+        closeIcon.style.display = 'block';
+      }
+      
       modal.style.display = 'flex';
       modal.style.visibility = 'visible';
       modal.style.opacity = '1';
@@ -335,6 +351,14 @@ const defaultJavaScriptLogic = `
     
     function closeModal() {
       isModalOpen = false;
+      
+      // Toggle button icons back
+      var chatIcon = document.getElementById('lovable-chat-icon');
+      var closeIcon = document.getElementById('lovable-close-icon');
+      if (chatIcon && closeIcon) {
+        chatIcon.style.display = 'block';
+        closeIcon.style.display = 'none';
+      }
       
       // Pause all videos when modal closes and reset YouTube iframes
       try {
