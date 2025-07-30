@@ -45,6 +45,19 @@ const modernFloatingCssStyles = `
   }
   
   /* Button icons animation */
+  #modern-floating-chat-icon {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+  
+  #modern-floating-close-icon {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: absolute;
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.8);
+  }
+  
   #modern-floating-widget-button.channels-open #modern-floating-chat-icon {
     opacity: 0;
     transform: rotate(90deg) scale(0.8);
