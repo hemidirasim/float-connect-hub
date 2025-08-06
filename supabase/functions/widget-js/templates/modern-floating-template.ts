@@ -381,7 +381,7 @@ const modernFloatingJavaScriptLogic = `
       messenger: '#00B2FF',
       viber: '#665CAC',
       discord: '#5865F2',
-      tiktok: '#000000',
+      tiktok: '#e9e7e7ff',
       youtube: '#FF0000',
       facebook: '#1877F2',
       twitter: '#1DA1F2',
