@@ -140,14 +140,14 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
 
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.size <= 10 * 1024 * 1024) {
+    if (file && file.size <= 30 * 1024 * 1024) {
       setFormData(prev => ({
         ...prev,
         video: file
       }));
       toast.success("Video yükləndi!");
     } else if (file) {
-      toast.error("Video fayl 10MB-dan az olmalıdır");
+      toast.error("Video fayl 30MB-dan az olmalıdır");
     }
   };
 
@@ -410,7 +410,7 @@ export const WidgetCreator: React.FC<WidgetCreatorProps> = ({ widget, onSave, on
             <div className="flex items-center justify-between">
               <div>
                 <Label className="text-base">Video yükləmə (PRO)</Label>
-                <p className="text-sm text-gray-600">Promosyon videosu əlavə edin (max 10MB)</p>
+                <p className="text-sm text-gray-600">Promosyon videosu əlavə edin (max 30MB)</p>
               </div>
               <Switch
                 checked={formData.video_enabled}

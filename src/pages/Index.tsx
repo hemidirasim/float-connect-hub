@@ -88,8 +88,8 @@ const Index = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('Video file must be smaller than 10MB', {
+    if (file.size > 30 * 1024 * 1024) {
+      toast.error('Video file must be smaller than 30MB', {
         description: 'Please select a smaller file'
       });
       return;

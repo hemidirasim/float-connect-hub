@@ -287,7 +287,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
 
               <TabsContent value="upload" className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Upload Video (max 10MB) - 2 credits per view</Label>
+                  <Label>Upload Video (max 30MB) - 2 credits per view</Label>
                   <input
                     type="file"
                     accept="video/*"
