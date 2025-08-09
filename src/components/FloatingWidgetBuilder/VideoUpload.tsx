@@ -295,7 +295,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                     className="hidden"
                     id="video-upload"
                   />
-                  <div className="flex items-center gap-2">
+                   <div className="flex items-center gap-2">
                     <Button
                       type="button"
                       variant="outline"
@@ -305,11 +305,11 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
                     >
                       <Upload className="w-4 h-4 mr-2 flex-shrink-0" />
                       <span className="truncate">
-                        {uploading ? 'Uploading...' : (video ? getVideoDisplayName() : 'Choose Video')}
+                        {uploading ? 'Uploading...' : (video ? getVideoDisplayName() : videoUrl ? 'Previously Uploaded Video' : 'Choose Video')}
                       </span>
                     </Button>
                     
-                    {video && (
+                    {(video || videoUrl) && (
                       <>
                         <Button
                           type="button"
