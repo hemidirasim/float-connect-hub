@@ -16,7 +16,9 @@ const modernFloatingHtmlTemplate = `
     </div>
     
     <button id="modern-floating-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}}">
-      <svg id="modern-floating-chat-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+      <div id="modern-floating-button-content" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+        {{BUTTON_ICON}}
+      </div>
     </button>
   </div>
 </div>
@@ -43,13 +45,14 @@ const modernFloatingCssStyles = `
     transform: scale(1.1);
   }
   
-  /* Button icon rotation animation */
-  #modern-floating-chat-icon {
+  /* Button content rotation animation */
+  #modern-floating-button-content {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     transform: rotate(0deg);
   }
   
-  #modern-floating-widget-button.channels-open #modern-floating-chat-icon {
+  /* When channels are open, rotate the button content */
+  #modern-floating-widget-button.channels-open #modern-floating-button-content {
     transform: rotate(90deg);
   }
   
