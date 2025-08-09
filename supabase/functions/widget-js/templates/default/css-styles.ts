@@ -51,6 +51,10 @@ export const defaultCssStyles = `
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
   
+  .hiclient-video-container {
+    margin-bottom: 20px;
+  }
+  
   .hiclient-video-player {
     width: 100%;
     border-radius: 8px;
