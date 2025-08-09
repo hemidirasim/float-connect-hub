@@ -177,8 +177,8 @@ const modernFloatingCssStyles = `
   
   /* Video preview button icons should be normal size */
   #modern-floating-button-content.video-preview img {
-    width: 60%;
-    height: 60%;
+    width: 24px !important;
+    height: 24px !important;
     object-fit: contain;
   }
   
