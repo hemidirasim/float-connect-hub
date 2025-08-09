@@ -608,29 +608,20 @@ const modernFloatingJavaScriptLogic = `
   function initWidget() {
     console.log('Modern floating widget initializing...');
     
-    // Check if button has video preview and mark it
-    var buttonContent = document.getElementById('modern-floating-button-content');
-    if (buttonContent) {
-      var hasVideo = buttonContent.querySelector('video');
-      if (hasVideo) {
-        buttonContent.classList.add('video-preview');
-        console.log('Video preview button detected');
-      }
-    }
+    // Video functionality disabled for modern template
+    // var buttonContent = document.getElementById('modern-floating-button-content');
+    // if (buttonContent) {
+    //   var hasVideo = buttonContent.querySelector('video');
+    //   if (hasVideo) {
+    //     buttonContent.classList.add('video-preview');
+    //     console.log('Video preview button detected');
+    //   }
+    // }
     
-    // Function to handle video sound when channels open
+    // Function to handle video sound when channels open - DISABLED
     function handleVideoSound(enable) {
-      var videoElement = buttonContent ? buttonContent.querySelector('video') : null;
-      if (videoElement) {
-        if (enable) {
-          videoElement.muted = false;
-          videoElement.volume = 0.7; // Set to 70% volume
-          console.log('Video sound enabled');
-        } else {
-          videoElement.muted = true;
-          console.log('Video sound disabled');
-        }
-      }
+      // Video functionality disabled
+      return;
     }
     
     var channelsContainer = document.querySelector('#modern-floating-channels');
