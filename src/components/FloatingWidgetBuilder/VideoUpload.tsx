@@ -249,10 +249,19 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
         </CardContent>
       </Card>
 
-      {/* Video Settings - Now available for all templates */}
+      {/* Video Settings - Only available for default template */}
       <div className="relative">
+        {templateId !== 'default' && (
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+            <div className="text-center p-4">
+              <Info className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+              <p className="text-sm font-medium text-gray-600">Video functionality is only available in Default Template</p>
+              <p className="text-xs text-gray-500 mt-1">Switch to Default Template to use promotional videos</p>
+            </div>
+          </div>
+        )}
         
-        <Card>
+        <Card className={templateId !== 'default' ? 'pointer-events-none' : ''}>
           <CardHeader>
             <CardTitle>Promotional Video</CardTitle>
           </CardHeader>
