@@ -136,37 +136,59 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             />
           </div>
 
-          {/* Video Upload & Icon Settings */}
-          <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
-            <VideoUpload
-              video={formData.video}
-              videoUrl={formData.videoUrl || editingWidget?.video_url}
-              videoType={formData.videoType}
-              videoLink={formData.videoLink}
-              useVideoPreview={formData.useVideoPreview}
-              videoHeight={formData.videoHeight}
-              videoAlignment={formData.videoAlignment}
-              videoObjectFit={formData.videoObjectFit}
-              customIcon={formData.customIcon}
-              customIconUrl={formData.customIconUrl}
-              buttonSize={formData.buttonSize}
-              previewVideoHeight={formData.previewVideoHeight}
-              uploading={uploading}
-              templateId={formData.templateId}
-              onVideoUpload={onVideoUpload}
-              onVideoRemove={onVideoRemove}
-              onVideoTypeChange={(type) => onFormDataChange('videoType', type)}
-              onVideoLinkChange={(link) => onFormDataChange('videoLink', link)}
-              onVideoPreviewChange={(checked) => onFormDataChange('useVideoPreview', checked)}
-              onVideoHeightChange={(height) => onFormDataChange('videoHeight', height)}
-              onVideoAlignmentChange={(alignment) => onFormDataChange('videoAlignment', alignment)}
-              onVideoObjectFitChange={(objectFit) => onFormDataChange('videoObjectFit', objectFit)}
-              onCustomIconChange={(icon) => onFormDataChange('customIcon', icon)}
-              onCustomIconUpload={onCustomIconUpload}
-              onButtonSizeChange={(size) => onFormDataChange('buttonSize', size)}
-              onPreviewVideoHeightChange={(height) => onFormDataChange('previewVideoHeight', height)}
-            />
-          </div>
+          {/* Video Upload & Icon Settings - Only for Standard Template */}
+          {(formData.templateId === 'default' || formData.templateId === 'standard' || !formData.templateId) && (
+            <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
+              <VideoUpload
+                video={formData.video}
+                videoUrl={formData.videoUrl || editingWidget?.video_url}
+                videoType={formData.videoType}
+                videoLink={formData.videoLink}
+                useVideoPreview={formData.useVideoPreview}
+                videoHeight={formData.videoHeight}
+                videoAlignment={formData.videoAlignment}
+                videoObjectFit={formData.videoObjectFit}
+                customIcon={formData.customIcon}
+                customIconUrl={formData.customIconUrl}
+                buttonSize={formData.buttonSize}
+                previewVideoHeight={formData.previewVideoHeight}
+                uploading={uploading}
+                templateId={formData.templateId}
+                onVideoUpload={onVideoUpload}
+                onVideoRemove={onVideoRemove}
+                onVideoTypeChange={(type) => onFormDataChange('videoType', type)}
+                onVideoLinkChange={(link) => onFormDataChange('videoLink', link)}
+                onVideoPreviewChange={(checked) => onFormDataChange('useVideoPreview', checked)}
+                onVideoHeightChange={(height) => onFormDataChange('videoHeight', height)}
+                onVideoAlignmentChange={(alignment) => onFormDataChange('videoAlignment', alignment)}
+                onVideoObjectFitChange={(objectFit) => onFormDataChange('videoObjectFit', objectFit)}
+                onCustomIconChange={(icon) => onFormDataChange('customIcon', icon)}
+                onCustomIconUpload={onCustomIconUpload}
+                onButtonSizeChange={(size) => onFormDataChange('buttonSize', size)}
+                onPreviewVideoHeightChange={(height) => onFormDataChange('previewVideoHeight', height)}
+              />
+            </div>
+          )}
+
+          {/* Template Limitation Notice for Video Feature */}
+          {formData.templateId && formData.templateId !== 'default' && formData.templateId !== 'standard' && (
+            <div className="bg-yellow-50 rounded-xl p-6 border border-yellow-200">
+              <div className="flex items-start gap-3">
+                <div className="w-5 h-5 text-yellow-600 mt-0.5">
+                  <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="text-yellow-800 font-medium mb-1">Video özelliği məhdudlaşdırıldı</h4>
+                  <p className="text-yellow-700 text-sm">
+                    Promotional Video funksiyası yalnız <strong>Standard Template</strong>-də mövcuddur. 
+                    Video istifadə etmək üçün Standard Template seçin.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Customization Options */}
           <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
