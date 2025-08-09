@@ -249,27 +249,10 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
         </CardContent>
       </Card>
 
-      {/* Video Settings - Show disabled overlay for modern-floating template */}
+      {/* Video Settings - Now available for all templates */}
       <div className="relative">
-        {templateId === 'modern-floating' && (
-          <div className="absolute inset-0 bg-gray-100/80 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
-            <div className="text-center p-6">
-              <div className="inline-flex items-center px-4 py-2 bg-orange-100 text-orange-800 rounded-full text-sm font-medium mb-3">
-                <Info className="w-4 h-4 mr-2" />
-                Feature Disabled
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Video Feature Not Available</h3>
-              <p className="text-gray-600">
-                Video functionality is only available for the <strong>Standard Template</strong>
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                Please select the Standard Template to use video features
-              </p>
-            </div>
-          </div>
-        )}
         
-        <Card className={templateId === 'modern-floating' ? 'opacity-50' : ''}>
+        <Card>
           <CardHeader>
             <CardTitle>Promotional Video</CardTitle>
           </CardHeader>
