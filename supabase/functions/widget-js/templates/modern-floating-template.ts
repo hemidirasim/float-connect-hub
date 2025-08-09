@@ -62,14 +62,19 @@ const modernFloatingCssStyles = `
     transform: rotate(90deg);
   }
   
-  /* When channels are open, scale the video preview button */
+  /* When channels are open, expand video preview button to 300px width */
   #modern-floating-widget-button.channels-open #modern-floating-button-content.video-preview {
     transform: scale(1.1);
+    width: 300px !important;
+    border-radius: 12px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
-  /* Video elements should unmute when channels are open */
+  /* Ensure video inside expands with container */
   #modern-floating-widget-button.channels-open #modern-floating-button-content.video-preview video {
-    /* This will be handled by JavaScript */
+    width: 100% !important;
+    height: auto !important;
+    border-radius: 12px;
   }
   
   #modern-floating-channels-container {
