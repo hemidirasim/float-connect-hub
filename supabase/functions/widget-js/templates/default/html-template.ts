@@ -4,8 +4,10 @@ export const defaultHtmlTemplate = `
   <div id="lovable-widget-relative-container" style="position: relative;">
     <div id="lovable-widget-tooltip" style="{{TOOLTIP_POSITION_STYLE}} display: none;">{{TOOLTIP_TEXT}}</div>
     <button id="lovable-widget-button" style="width: {{BUTTON_SIZE}}px; height: {{BUTTON_SIZE}}px; background-color: {{BUTTON_COLOR}}; {{BUTTON_OFFSET_STYLE}} {{VIDEO_BUTTON_STYLE}}">
-      <svg id="lovable-chat-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white;"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
-      <svg id="lovable-close-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white; display: none;"><path d="m18 6-12 12M6 6l12 12"/></svg>
+      <div id="lovable-button-content" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+        {{BUTTON_ICON}}
+      </div>
+      <svg id="lovable-close-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white; display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"><path d="m18 6-12 12M6 6l12 12"/></svg>
     </button>
   </div>
 </div>

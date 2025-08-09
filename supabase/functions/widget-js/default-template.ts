@@ -304,8 +304,11 @@ const defaultJavaScriptLogic = `
       // Toggle button icons
       var chatIcon = document.getElementById('lovable-chat-icon');
       var closeIcon = document.getElementById('lovable-close-icon');
+      var buttonContent = document.getElementById('lovable-button-content');
       if (chatIcon && closeIcon) {
-        chatIcon.style.display = 'none';
+        if (buttonContent) {
+          buttonContent.style.display = 'none';
+        }
         closeIcon.style.display = 'block';
       }
       
@@ -355,8 +358,11 @@ const defaultJavaScriptLogic = `
       // Toggle button icons back
       var chatIcon = document.getElementById('lovable-chat-icon');
       var closeIcon = document.getElementById('lovable-close-icon');
+      var buttonContent = document.getElementById('lovable-button-content');
       if (chatIcon && closeIcon) {
-        chatIcon.style.display = 'block';
+        if (buttonContent) {
+          buttonContent.style.display = 'flex';
+        }
         closeIcon.style.display = 'none';
       }
       

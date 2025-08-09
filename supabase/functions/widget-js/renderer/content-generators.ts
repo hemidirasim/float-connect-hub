@@ -196,7 +196,7 @@ export function generateButtonIcon(customIconUrl: string, useVideoPreview: boole
 
   console.log('Using default message icon with size:', iconSize);
   return `
-    <svg width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg id="lovable-chat-icon" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white;">
       <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
     </svg>
   `;
