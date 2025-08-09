@@ -2,9 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { MessageCircle, Palette, Sparkles, Settings, Upload, Trash2 } from 'lucide-react';
+import { MessageCircle, Palette, Sparkles, Settings } from 'lucide-react';
 import { WebsiteInfoForm } from './WebsiteInfoForm';
 import { ChannelManager } from './ChannelManager';
 import { VideoUpload } from './VideoUpload';
@@ -138,172 +136,37 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             />
           </div>
 
-          {/* Icon Settings - Always visible */}
+          {/* Video Upload & Icon Settings */}
           <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="w-5 h-5 text-purple-600" />
-                  Button Icon & Size
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Icon Type Selection */}
-                <div className="space-y-2">
-                  <Label>Button Icon</Label>
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        id="icon-message"
-                        name="icon-type"
-                        checked={formData.customIcon === 'message'}
-                        onChange={() => onFormDataChange('customIcon', 'message')}
-                        className="w-4 h-4"
-                      />
-                      <Label htmlFor="icon-message" className="cursor-pointer">Default Message Icon</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        id="icon-custom"
-                        name="icon-type"
-                        checked={formData.customIcon === 'custom'}
-                        onChange={() => onFormDataChange('customIcon', 'custom')}
-                        className="w-4 h-4"
-                      />
-                      <Label htmlFor="icon-custom" className="cursor-pointer">Custom Icon</Label>
-                    </div>
-                    
-                    {formData.customIcon === 'custom' && (
-                      <div className="space-y-3 ml-6">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={onCustomIconUpload}
-                          className="hidden"
-                          id="custom-icon-upload"
-                        />
-                        <div className="flex items-center gap-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => document.getElementById('custom-icon-upload')?.click()}
-                            className="flex-1"
-                          >
-                            <Upload className="w-4 h-4 mr-2" />
-                            Upload Custom Icon
-                          </Button>
-                          {formData.customIconUrl && (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                onFormDataChange('customIcon', 'message');
-                                onFormDataChange('customIconUrl', '');
-                              }}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          )}
-                        </div>
-                        {formData.customIconUrl && (
-                          <div 
-                            className="border rounded flex items-center justify-center bg-gray-50"
-                            style={{ 
-                              width: `${formData.buttonSize || 60}px`, 
-                              height: `${formData.buttonSize || 60}px` 
-                            }}
-                          >
-                            <img 
-                              src={formData.customIconUrl} 
-                              alt="Custom icon" 
-                              className="object-contain"
-                              style={{ 
-                                width: `${Math.max(24, Math.min(48, (formData.buttonSize || 60) * 0.6))}px`, 
-                                height: `${Math.max(24, Math.min(48, (formData.buttonSize || 60) * 0.6))}px` 
-                              }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Button Size */}
-                <div className="space-y-2">
-                  <Label>Button Size: {formData.buttonSize || 60}px</Label>
-                  <Input
-                    type="range"
-                    min="50"
-                    max="80"
-                    value={formData.buttonSize || 60}
-                    onChange={(e) => onFormDataChange('buttonSize', Number(e.target.value))}
-                    className="w-full"
-                  />
-                  <div className="text-sm text-gray-500">
-                    Icon size: {Math.max(24, Math.min(48, (formData.buttonSize || 60) * 0.6))}px (avtomatik uyğunlaşır)
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <VideoUpload
+              video={formData.video}
+              videoUrl={formData.videoUrl || editingWidget?.video_url}
+              videoType={formData.videoType}
+              videoLink={formData.videoLink}
+              useVideoPreview={formData.useVideoPreview}
+              videoHeight={formData.videoHeight}
+              videoAlignment={formData.videoAlignment}
+              videoObjectFit={formData.videoObjectFit}
+              customIcon={formData.customIcon}
+              customIconUrl={formData.customIconUrl}
+              buttonSize={formData.buttonSize}
+              previewVideoHeight={formData.previewVideoHeight}
+              uploading={uploading}
+              templateId={formData.templateId}
+              onVideoUpload={onVideoUpload}
+              onVideoRemove={onVideoRemove}
+              onVideoTypeChange={(type) => onFormDataChange('videoType', type)}
+              onVideoLinkChange={(link) => onFormDataChange('videoLink', link)}
+              onVideoPreviewChange={(checked) => onFormDataChange('useVideoPreview', checked)}
+              onVideoHeightChange={(height) => onFormDataChange('videoHeight', height)}
+              onVideoAlignmentChange={(alignment) => onFormDataChange('videoAlignment', alignment)}
+              onVideoObjectFitChange={(objectFit) => onFormDataChange('videoObjectFit', objectFit)}
+              onCustomIconChange={(icon) => onFormDataChange('customIcon', icon)}
+              onCustomIconUpload={onCustomIconUpload}
+              onButtonSizeChange={(size) => onFormDataChange('buttonSize', size)}
+              onPreviewVideoHeightChange={(height) => onFormDataChange('previewVideoHeight', height)}
+            />
           </div>
-
-          {/* Video Settings - Only for Standard Template */}
-          {(formData.templateId === 'default' || formData.templateId === 'standard' || !formData.templateId) && (
-            <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
-              <VideoUpload
-                video={formData.video}
-                videoUrl={formData.videoUrl || editingWidget?.video_url}
-                videoType={formData.videoType}
-                videoLink={formData.videoLink}
-                useVideoPreview={formData.useVideoPreview}
-                videoHeight={formData.videoHeight}
-                videoAlignment={formData.videoAlignment}
-                videoObjectFit={formData.videoObjectFit}
-                customIcon={formData.customIcon}
-                customIconUrl={formData.customIconUrl}
-                buttonSize={formData.buttonSize}
-                previewVideoHeight={formData.previewVideoHeight}
-                uploading={uploading}
-                templateId={formData.templateId}
-                onVideoUpload={onVideoUpload}
-                onVideoRemove={onVideoRemove}
-                onVideoTypeChange={(type) => onFormDataChange('videoType', type)}
-                onVideoLinkChange={(link) => onFormDataChange('videoLink', link)}
-                onVideoPreviewChange={(checked) => onFormDataChange('useVideoPreview', checked)}
-                onVideoHeightChange={(height) => onFormDataChange('videoHeight', height)}
-                onVideoAlignmentChange={(alignment) => onFormDataChange('videoAlignment', alignment)}
-                onVideoObjectFitChange={(objectFit) => onFormDataChange('videoObjectFit', objectFit)}
-                onCustomIconChange={(icon) => onFormDataChange('customIcon', icon)}
-                onCustomIconUpload={onCustomIconUpload}
-                onButtonSizeChange={(size) => onFormDataChange('buttonSize', size)}
-                onPreviewVideoHeightChange={(height) => onFormDataChange('previewVideoHeight', height)}
-              />
-            </div>
-          )}
-
-          {/* Template Limitation Notice for Video Feature */}
-          {formData.templateId && formData.templateId !== 'default' && formData.templateId !== 'standard' && (
-            <div className="bg-yellow-50 rounded-xl p-6 border border-yellow-200">
-              <div className="flex items-start gap-3">
-                <div className="w-5 h-5 text-yellow-600 mt-0.5">
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="text-yellow-800 font-medium mb-1">Video funksiyası məhdudlaşdırıldı</h4>
-                  <p className="text-yellow-700 text-sm">
-                    Promotional Video funksiyası yalnız <strong>Standard Template</strong>-də istifadə edilə bilər. 
-                    Video əlavə etmək üçün Standard Template seçin.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Customization Options */}
           <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
