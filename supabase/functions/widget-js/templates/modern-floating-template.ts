@@ -747,7 +747,8 @@ export const modernFloatingTemplate: WidgetTemplate = {
   description: 'Modern floating widget with icons appearing on hover from bottom to top',
   html: modernFloatingHtmlTemplate,
   css: modernFloatingCssStyles,
-  js: modernFloatingJavaScriptLogic
+  js: modernFloatingJavaScriptLogic,
+  supportsVideo: false // Disable video support for this template
 };
 
 export const getModernFloatingTemplate = () => modernFloatingTemplate;
