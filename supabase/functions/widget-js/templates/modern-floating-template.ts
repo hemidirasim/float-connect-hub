@@ -67,9 +67,12 @@ const modernFloatingCssStyles = `
     transform: scale(1.1);
   }
   
-  /* Video elements should unmute when channels are open */
+  /* Video elements should have 300px width when channels are open */
   #modern-floating-widget-button.channels-open #modern-floating-button-content.video-preview video {
-    /* This will be handled by JavaScript */
+    width: 300px !important;
+    height: auto !important;
+    border-radius: 12px;
+    transition: all 0.4s ease;
   }
   
   #modern-floating-channels-container {
