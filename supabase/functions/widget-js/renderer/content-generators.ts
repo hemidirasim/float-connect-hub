@@ -179,11 +179,12 @@ export function generateButtonIcon(customIconUrl: string, useVideoPreview: boole
     return `
       <video 
         src="${videoUrl}" 
-        style="width: 100%; height: ${videoHeight}px; border-radius: 8px; object-fit: cover;" 
+        style="width: 100%; height: ${videoHeight}px; border-radius: 8px; object-fit: cover; border: none;" 
         autoplay 
         muted 
         loop 
-        playsinline>
+        playsinline
+        preload="auto">
       </video>
     `;
   }
