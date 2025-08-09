@@ -249,7 +249,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
         </CardContent>
       </Card>
 
-      {/* Video Settings - Now available for all templates */}
+      {/* Video Settings - Only video functionality */}
       <div className="relative">
         
         <Card>
@@ -260,7 +260,7 @@ export const VideoUpload: React.FC<VideoUploadProps> = ({
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription>
-                Video upload costs 2 credits per view, video links cost 1 credit per view.
+                Video upload ilə 2 kredit, video link ilə 1 kredit xərclənir.
               </AlertDescription>
             </Alert>
 

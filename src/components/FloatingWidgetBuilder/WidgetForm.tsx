@@ -2,7 +2,9 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Palette, Sparkles, Settings } from 'lucide-react';
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { MessageCircle, Palette, Sparkles, Settings, Upload, Trash2 } from 'lucide-react';
 import { WebsiteInfoForm } from './WebsiteInfoForm';
 import { ChannelManager } from './ChannelManager';
 import { VideoUpload } from './VideoUpload';
@@ -136,7 +138,120 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
             />
           </div>
 
-          {/* Video Upload & Icon Settings - Only for Standard Template */}
+          {/* Icon Settings - Always visible */}
+          <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="w-5 h-5 text-purple-600" />
+                  Button Icon & Size
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Icon Type Selection */}
+                <div className="space-y-2">
+                  <Label>Button Icon</Label>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="icon-message"
+                        name="icon-type"
+                        checked={formData.customIcon === 'message'}
+                        onChange={() => onFormDataChange('customIcon', 'message')}
+                        className="w-4 h-4"
+                      />
+                      <Label htmlFor="icon-message" className="cursor-pointer">Default Message Icon</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="icon-custom"
+                        name="icon-type"
+                        checked={formData.customIcon === 'custom'}
+                        onChange={() => onFormDataChange('customIcon', 'custom')}
+                        className="w-4 h-4"
+                      />
+                      <Label htmlFor="icon-custom" className="cursor-pointer">Custom Icon</Label>
+                    </div>
+                    
+                    {formData.customIcon === 'custom' && (
+                      <div className="space-y-3 ml-6">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={onCustomIconUpload}
+                          className="hidden"
+                          id="custom-icon-upload"
+                        />
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => document.getElementById('custom-icon-upload')?.click()}
+                            className="flex-1"
+                          >
+                            <Upload className="w-4 h-4 mr-2" />
+                            Upload Custom Icon
+                          </Button>
+                          {formData.customIconUrl && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                onFormDataChange('customIcon', 'message');
+                                onFormDataChange('customIconUrl', '');
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                        {formData.customIconUrl && (
+                          <div 
+                            className="border rounded flex items-center justify-center bg-gray-50"
+                            style={{ 
+                              width: `${formData.buttonSize || 60}px`, 
+                              height: `${formData.buttonSize || 60}px` 
+                            }}
+                          >
+                            <img 
+                              src={formData.customIconUrl} 
+                              alt="Custom icon" 
+                              className="object-contain"
+                              style={{ 
+                                width: `${Math.max(24, Math.min(48, (formData.buttonSize || 60) * 0.6))}px`, 
+                                height: `${Math.max(24, Math.min(48, (formData.buttonSize || 60) * 0.6))}px` 
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Button Size */}
+                <div className="space-y-2">
+                  <Label>Button Size: {formData.buttonSize || 60}px</Label>
+                  <Input
+                    type="range"
+                    min="50"
+                    max="80"
+                    value={formData.buttonSize || 60}
+                    onChange={(e) => onFormDataChange('buttonSize', Number(e.target.value))}
+                    className="w-full"
+                  />
+                  <div className="text-sm text-gray-500">
+                    Icon size: {Math.max(24, Math.min(48, (formData.buttonSize || 60) * 0.6))}px (avtomatik uyğunlaşır)
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Video Settings - Only for Standard Template */}
           {(formData.templateId === 'default' || formData.templateId === 'standard' || !formData.templateId) && (
             <div className="bg-white/50 rounded-xl p-6 border border-gray-100">
               <VideoUpload
@@ -180,10 +295,10 @@ export const WidgetForm: React.FC<WidgetFormProps> = ({
                   </svg>
                 </div>
                 <div>
-                  <h4 className="text-yellow-800 font-medium mb-1">Video özelliği məhdudlaşdırıldı</h4>
+                  <h4 className="text-yellow-800 font-medium mb-1">Video funksiyası məhdudlaşdırıldı</h4>
                   <p className="text-yellow-700 text-sm">
-                    Promotional Video funksiyası yalnız <strong>Standard Template</strong>-də mövcuddur. 
-                    Video istifadə etmək üçün Standard Template seçin.
+                    Promotional Video funksiyası yalnız <strong>Standard Template</strong>-də istifadə edilə bilər. 
+                    Video əlavə etmək üçün Standard Template seçin.
                   </p>
                 </div>
               </div>
