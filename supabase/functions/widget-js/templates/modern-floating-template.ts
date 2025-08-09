@@ -175,6 +175,20 @@ const modernFloatingCssStyles = `
     object-fit: contain;
   }
   
+  /* Video preview button icons should be normal size */
+  #modern-floating-button-content.video-preview img {
+    width: 60%;
+    height: 60%;
+    object-fit: contain;
+  }
+  
+  #modern-floating-button-content.video-preview video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+  
   .modern-floating-channel-count {
     position: absolute;
     top: -5px;
