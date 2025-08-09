@@ -43,7 +43,7 @@ export const defaultCssStyles = `
     border-radius: 16px;
     width: {{WIDGET_WIDTH}}px;
     height: {{WIDGET_HEIGHT}}px;
-    min-width: 420px;
+    min-width: 380px;
     {{MODAL_CONTENT_POSITION}}
     overflow-y: auto;
     position: relative;
@@ -125,13 +125,13 @@ export const defaultCssStyles = `
   }
   
   .channel-icon {
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    font-size: 18px;
+    font-size: 14px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
     color: white;
@@ -144,14 +144,14 @@ export const defaultCssStyles = `
   
   .channel-label {
     font-weight: 600;
-    font-size: 16px;
+    font-size: 14px;
     color: #1e293b;
     margin: 0 0 4px 0;
     line-height: 1.3;
   }
   
   .channel-value {
-    font-size: 14px;
+    font-size: 12px;
     color: #64748b;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -285,13 +285,13 @@ export const defaultCssStyles = `
   }
   
   .dropdown-icon {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    font-size: 14px;
+    font-size: 12px;
     flex-shrink: 0;
     color: white;
   }
@@ -321,9 +321,9 @@ export const defaultCssStyles = `
   /* Desktop responsive */
   @media (min-width: 769px) {
     #lovable-modal-content {
-      max-width: 420px;
+      max-width: 380px;
       max-height: 650px;
-      min-width: 420px;
+      min-width: 380px;
     }
   }
 
@@ -332,9 +332,9 @@ export const defaultCssStyles = `
     #lovable-modal-content {
       width: 95%;
       height: 90%;
-      max-width: 380px;
+      max-width: 340px;
       max-height: 600px;
-      min-width: 380px;
+      min-width: 340px;
     }
     
     .dropdown {
