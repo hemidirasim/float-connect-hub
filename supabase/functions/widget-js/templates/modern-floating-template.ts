@@ -45,15 +45,31 @@ const modernFloatingCssStyles = `
     transform: scale(1.1);
   }
   
-  /* Button content rotation animation */
-  #modern-floating-button-content {
+  /* Button content rotation animation - only for non-video buttons */
+  #modern-floating-button-content:not(.video-preview) {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     transform: rotate(0deg);
   }
   
-  /* When channels are open, rotate the button content */
-  #modern-floating-widget-button.channels-open #modern-floating-button-content {
+  /* Video button content - no rotation, scale effect instead */
+  #modern-floating-button-content.video-preview {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: scale(1);
+  }
+  
+  /* When channels are open, rotate the button content (only for non-video) */
+  #modern-floating-widget-button.channels-open #modern-floating-button-content:not(.video-preview) {
     transform: rotate(90deg);
+  }
+  
+  /* When channels are open, scale the video preview button */
+  #modern-floating-widget-button.channels-open #modern-floating-button-content.video-preview {
+    transform: scale(1.1);
+  }
+  
+  /* Video elements should unmute when channels are open */
+  #modern-floating-widget-button.channels-open #modern-floating-button-content.video-preview video {
+    /* This will be handled by JavaScript */
   }
   
   #modern-floating-channels-container {
@@ -567,7 +583,32 @@ const modernFloatingJavaScriptLogic = `
   }
   
   function initWidget() {
-    console.log('Initializing modern floating widget...');
+    console.log('Modern floating widget initializing...');
+    
+    // Check if button has video preview and mark it
+    var buttonContent = document.getElementById('modern-floating-button-content');
+    if (buttonContent) {
+      var hasVideo = buttonContent.querySelector('video');
+      if (hasVideo) {
+        buttonContent.classList.add('video-preview');
+        console.log('Video preview button detected');
+      }
+    }
+    
+    // Function to handle video sound when channels open
+    function handleVideoSound(enable) {
+      var videoElement = buttonContent ? buttonContent.querySelector('video') : null;
+      if (videoElement) {
+        if (enable) {
+          videoElement.muted = false;
+          videoElement.volume = 0.7; // Set to 70% volume
+          console.log('Video sound enabled');
+        } else {
+          videoElement.muted = true;
+          console.log('Video sound disabled');
+        }
+      }
+    }
     
     var channelsContainer = document.querySelector('#modern-floating-channels');
     if (channelsContainer) {
@@ -613,6 +654,9 @@ const modernFloatingJavaScriptLogic = `
           // Toggle button icons back
           button.classList.remove('channels-open');
           
+          // Disable video sound when closing
+          handleVideoSound(false);
+          
           // Hide powered by text
           if (poweredByText) {
             poweredByText.style.display = 'none';
@@ -623,6 +667,9 @@ const modernFloatingJavaScriptLogic = `
           showChannels();
           // Toggle button icons with animation
           button.classList.add('channels-open');
+          
+          // Enable video sound when opening (if video preview is used)
+          handleVideoSound(true);
           
           // Show powered by text
           if (poweredByText) {
@@ -649,6 +696,9 @@ const modernFloatingJavaScriptLogic = `
         if (button) {
           button.classList.remove('channels-open');
         }
+        
+        // Disable video sound when closing
+        handleVideoSound(false);
         
         // Hide powered by text
         if (poweredByText) {
