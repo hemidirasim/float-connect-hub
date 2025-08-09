@@ -54,11 +54,22 @@ export class WidgetTemplateRenderer {
     let css = this.template.css
     let js = this.template.js
 
-    // Generate common content (video, button icon) - Pass buttonSize to generateButtonIcon
-    const videoContent = generateVideoContent(this.config)
+    // Check if template supports video before generating video content
+    const templateSupportsVideo = this.template.supportsVideo !== false // Default to true if not specified
+    const shouldGenerateVideo = templateSupportsVideo && this.config.videoEnabled
+    
+    console.log('Template video support check:', {
+      templateId: this.template.id,
+      supportsVideo: templateSupportsVideo,
+      videoEnabled: this.config.videoEnabled,
+      shouldGenerateVideo: shouldGenerateVideo
+    })
+
+    // Generate common content only if template supports video
+    const videoContent = shouldGenerateVideo ? generateVideoContent(this.config) : ''
     const buttonIcon = generateButtonIcon(
       this.config.customIconUrl, 
-      this.config.useVideoPreview, 
+      shouldGenerateVideo && this.config.useVideoPreview, 
       this.config.videoUrl, 
       this.config.previewVideoHeight,
       this.config.buttonSize  // Pass button size for icon scaling
@@ -66,10 +77,10 @@ export class WidgetTemplateRenderer {
 
     console.log('Generated video content for template:', videoContent ? 'YES' : 'NO')
     console.log('Video content length:', videoContent.length)
-    console.log('Using video preview as button:', this.config.useVideoPreview)
+    console.log('Using video preview as button:', shouldGenerateVideo && this.config.useVideoPreview)
 
     // Calculate responsive values
-    const buttonSize = this.config.useVideoPreview ? (this.config.previewVideoHeight || 120) : (this.config.buttonSize || 60)
+    const buttonSize = (shouldGenerateVideo && this.config.useVideoPreview) ? (this.config.previewVideoHeight || 120) : (this.config.buttonSize || 60)
     const iconSize = Math.max(40, Math.min(55, buttonSize * 0.83))
     const channelGap = Math.max(8, Math.min(12, buttonSize * 0.15))
     const channelBottomOffset = buttonSize + 15
