@@ -175,11 +175,19 @@ const modernFloatingCssStyles = `
     object-fit: contain;
   }
   
-  /* Video preview button icons should be normal size */
-  #modern-floating-button-content.video-preview img {
-    width: 24px !important;
-    height: 24px !important;
-    object-fit: contain;
+  /* Video preview button - override all icon sizing */
+  #modern-floating-button-content.video-preview img,
+  #modern-floating-button-content.video-preview svg {
+    width: 20px !important;
+    height: 20px !important;
+    max-width: 20px !important;
+    max-height: 20px !important;
+    object-fit: contain !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 10 !important;
   }
   
   #modern-floating-button-content.video-preview video {
@@ -187,6 +195,7 @@ const modernFloatingCssStyles = `
     height: 100%;
     object-fit: cover;
     border-radius: 50%;
+    position: relative;
   }
   
   .modern-floating-channel-count {
