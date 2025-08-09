@@ -64,7 +64,7 @@ export const defaultCssStyles = `
   
   #lovable-modal-header {
     margin: 0 0 20px 0;
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 600;
     color: #111827;
     text-align: center;
