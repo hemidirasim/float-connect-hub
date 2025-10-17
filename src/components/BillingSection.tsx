@@ -18,6 +18,12 @@ interface BillingSectionProps {
 
 const creditPackages = [
   { 
+    credits: 200, 
+    price: 1, 
+    productId: 'pri_01jygks56v6vpvncqxn5harqae',
+    popular: false 
+  },
+  { 
     credits: 2500, 
     price: 10, 
     productId: 'pri_01jrmk0bq3y6cfd8w2gsbh9fax',
